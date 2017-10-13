@@ -1,12 +1,12 @@
 const path = require('path')
 const merge = require('webpack-merge')
 const webpack = require('webpack')
-const ExtractTextPlugin = require('extract-text-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const ExtractTextPlugin = require("extract-text-webpack-plugin")
 
 const CORE_CONFIG = {
     entry: {
-        semexp: path.join(__dirname, 'src/semexp'),
+        discover: path.join(__dirname, 'src/discover'),
         styles: path.join(__dirname, 'src/styles/styles')
     },
     output: {
@@ -17,16 +17,18 @@ const CORE_CONFIG = {
         publicPath: '/'
     },
     module: {
-        loaders: [
+        rules: [
             { test: /\.(jsx|js)?/, loader: 'babel-loader', exclude: /node_modules/ },
-            { test: /\.css$/, loader: ExtractTextPlugin.extract({ use: 'css-loader', fallback: 'style-loader' }) },
+            { test: /\.css$/, use: ExtractTextPlugin.extract({
+                fallback: "style-loader",
+                use: "css-loader"
+            })},
             { test: /\.(eot|svg|ttf|woff|woff2)$/, loader: 'file-loader?name=fonts/[name].[ext]' }
         ]
     },
     plugins: [
-        new ExtractTextPlugin('styles/semexp.css'),
         new webpack.NamedModulesPlugin(),
-        new CopyWebpackPlugin([{ from: path.join(__dirname, 'src/index.html'), to: path.join(__dirname, 'public/index.html') }])
+        new ExtractTextPlugin("styles/discover.css")
     ],
     resolve: {
         extensions: ['.js', '.jsx']
@@ -60,8 +62,13 @@ const prodConfig = () =>
         CORE_CONFIG,
         {
             devtool: 'source-map',
+            plugins: [
+                new CopyWebpackPlugin([{ from: path.join(__dirname, 'src/index.html'), to: path.join(__dirname, 'public/index.html') }])
+            ]
         }
     ])
 
-module.exports = (env = process.env.NODE_ENV) =>
-    env === 'production' ? prodConfig() : devConfig()
+
+
+module.exports = (env = process.env.NODE_ENV) => 
+    return (env === 'production') ? prodConfig() : devConfig()

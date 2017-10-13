@@ -3,13 +3,17 @@ import React from 'react'
 class App extends React.Component {
     constructor (props) {
         super(props)
+        let viewBox = '0 0 100 100'
+        if (props.display === 'main') viewBox = '0 0 50 100' 
+        if (props.display === 'aside') viewBox = '50 0 50 100' 
         this.state = {
             svg: {
-                width: null,
-                height: null,
-                element: null
+                width: props.width || null,
+                height: props.height || null,
+                viewBox: viewBox ,
+                ref: this.refs.view
             }
-        }
+        } 
         this.resize = this.resize.bind(this)
         window.addEventListener("resize", this.resize)
     }
@@ -21,10 +25,12 @@ class App extends React.Component {
             width: + this.state.svg.width + 'px' 
         }
         return (<div className = "view" style = { divStyle }>
+        <p>test</p>
             <svg
                 ref = "view"
                 width = { this.state.svg.width }
                 height = { this.state.svg.height }
+                viewBox = { this.state.svg.viewBox }
             >
             </svg>
         </div>)
@@ -39,8 +45,8 @@ class App extends React.Component {
     }
     resize () {
         let svg = this.state.svg
-        svg.height = window.innerHeight- 10
-        svg.width = window.innerWidth - 10
+        svg.height = window.innerHeight
+        svg.width = window.innerWidth
         this.setState({ svg })
     }
 }
