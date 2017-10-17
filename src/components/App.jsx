@@ -4,7 +4,8 @@ class App extends React.Component {
     constructor (props) {
         super(props)
         this.state = {
-            display: props.display || 'full',
+            mode: props.mode || 'prod',
+            display: props.display || 'main',
             displayRatio: 1.33,
             width: props.width || null,
             height: props.height || null,
@@ -15,16 +16,16 @@ class App extends React.Component {
         window.addEventListener("resize", this.resize)
     }
     componentDidMount () {
-        console.log('did Mount')
+        // console.log('did Mount')
         this.resize()
        
     }
     componentWillUpdate () {
-        console.log('will update')
+        //console.log('will update')
    
      }
     render () {
-        console.log('render')
+        //console.log('render')
         let divStyle = {
             width: + this.state.width + 'px' 
         }
@@ -33,8 +34,7 @@ class App extends React.Component {
                 ref = "view"
                 width = { this.state.width }
                 height = { this.state.height }
-
-                viewBox = { `${this.state.viewBox.x}, ${this.state.viewBox.y},${this.state.viewBox.width},${this.state.viewBox.height}` }
+                viewBox = { `${this.state.viewBox.x}, ${this.state.viewBox.y}, ${this.state.viewBox.width}, ${this.state.viewBox.height}` }
                 preserveAspectRatio = "xMinYMin meet"
             >
                 <g transform = { `translate(${35 * this.state.displayRatio }, ${ 35 })` }>
@@ -57,17 +57,20 @@ class App extends React.Component {
         this.setState({ error })
     }
     resize () {
-        console.log('resize')
+        //console.log('resize')
         
         let height = window.innerHeight - 5
         let width = window.innerWidth - 5 
         // calculate ratio
         let displayRatio = Math.floor (width / height * 100) / 100
         let viewBox
-        if (this.state.display === 'full') viewBox = { x: (35 * displayRatio), y: 35, width: (70 * displayRatio), height: 30 } 
-        if (this.state.display === 'main') viewBox = { x: (35 * displayRatio), y: 35, width: (30 * displayRatio), height: 30 } 
-        if (this.state.display === 'aside') viewBox =  { x: (70 * displayRatio), y: 35, width: (30 * displayRatio), height: 30 } 
-        if (this.state.display === 'dev') viewBox = { x: 0, y: 0, width: (100 * displayRatio), height: 100 } 
+        if (this.state.mode === 'dev') {
+            viewBox = { x: 0, y: 0, width: Math.floor(100 * displayRatio), height: 100 } 
+        } else {
+            if (this.state.display === 'full') viewBox = { x: Math.floor(35 * displayRatio), y: 35, width: Math.floor(70 * displayRatio), height: 30 } 
+            if (this.state.display === 'aside') viewBox =  { x: Math.floor(70 * displayRatio), y: 35, width: Math.floor(30 * displayRatio), height: 30 } 
+            if (this.state.display === 'main') viewBox = { x: Math.floor(35 * displayRatio), y: 35, width: Math.floor(30 * displayRatio), height: 30 } 
+        }
         this.setState({ height, width, displayRatio, viewBox })
     }
 
