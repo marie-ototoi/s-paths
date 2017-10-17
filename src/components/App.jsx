@@ -1,5 +1,7 @@
 import React from 'react'
 import Main from './Main'
+import Aside from './Aside'
+import Debug from './Debug'
 
 class App extends React.Component {
     constructor (props) {
@@ -27,23 +29,20 @@ class App extends React.Component {
      }
     render () {
         //console.log('render')
-        let divStyle = {
-            width: + this.state.width + 'px' 
-        }
-        return (<div className = "view" style = { divStyle }>
+        return (<div className = "view" style = {{ width: this.state.width + 'px' }}>
             <svg
                 ref = "view"
                 width = { this.state.width }
                 height = { this.state.height }
-                viewBox = { `${this.state.viewBox.x}, ${this.state.viewBox.y}, ${this.state.viewBox.width}, ${this.state.viewBox.height}` }
+                viewBox = { `${ this.state.viewBox.x }, ${ this.state.viewBox.y }, ${ this.state.viewBox.width }, ${ this.state.viewBox.height }` }
                 preserveAspectRatio = "xMinYMin meet"
             >
+                { this.state.mode === "dev" &&
+                    <Debug displayRatio = { this.state.displayRatio } display = { this.state.display } />
+                }
                 <Main displayRatio = { this.state.displayRatio } display = { this.state.display } />
-                <g transform = { `translate(150, 35)` }>
-                    <rect x = {1} y = {1} width = { 10} height = { 24 } fill = '#0F0' />
-                    <rect x = {12} y = {1} width = { 30 } height = { 24 } fill = '#f00' />
-                    <rect x = {1} y = {26} width = { 41 } height = { 6 } fill = '#00f' />
-                </g>
+                <Aside displayRatio = { this.state.displayRatio } display = { this.state.display } />
+                
             </svg>
         </div>)
     }
