@@ -18,7 +18,7 @@ const CORE_CONFIG = {
     },
     module: {
         rules: [
-            { test: /\.(jsx|js)?/, loader: 'babel-loader', exclude: /node_modules/ },
+            { test: /\.(jsx|js)?/, loader: 'babel-loader', exclude: /node_modules/, options: { presets: ['react', 'env']}},
             { test: /\.css$/, use: ExtractTextPlugin.extract({
                 fallback: "style-loader",
                 use: "css-loader"
@@ -63,12 +63,13 @@ const prodConfig = () =>
         {
             devtool: 'source-map',
             plugins: [
-                new CopyWebpackPlugin([{ from: path.join(__dirname, 'src/index.html'), to: path.join(__dirname, 'public/index.html') }])
+                new CopyWebpackPlugin([{ from: path.join(__dirname, 'src/index.html'), to: path.join(__dirname, 'public/index.html') }]),
+                new webpack.DefinePlugin({ 'process.env': { NODE_ENV: '"production"' } }),
+                new webpack.LoaderOptionsPlugin({ minimize: true, debug: false }),
+                new webpack.optimize.UglifyJsPlugin({ sourceMap: true })
             ]
         }
     ])
 
-
-
 module.exports = (env = process.env.NODE_ENV) => 
-    return (env === 'production') ? prodConfig() : devConfig()
+    (env === 'production') ? prodConfig() : devConfig()

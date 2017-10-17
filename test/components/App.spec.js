@@ -17,8 +17,8 @@ describe('<App />', () => {
     })
     it('should render a svg full width and height', () => {
         const wrapper = mount(<App  />)
-        expect(wrapper.find('svg')).to.have.prop('width', window.innerWidth)
-        expect(wrapper.find('svg')).to.have.prop('height', window.innerHeight)
+        expect(wrapper.find('svg')).to.have.prop('width', window.innerWidth - 5 )
+        expect(wrapper.find('svg')).to.have.prop('height', window.innerHeight - 5 )
     })
     it('should render a svg with specified viewbox', () => {
         const wrapper1 = shallow(<App />)
