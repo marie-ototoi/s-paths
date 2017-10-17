@@ -24,10 +24,10 @@ describe('<App />', () => {
         let height = window.innerHeight - 5
         let width = window.innerWidth - 5 
         let displayRatio = Math.floor (width / height * 100) / 100
-        let debugViewBox = `0, 0, ${Math.floor(100 * displayRatio)}, 100`
-        let mainViewBox = `${Math.floor(35 * displayRatio)}, 35, ${Math.floor(30 * displayRatio)}, 30`
-        let asideViewBox = `${Math.floor(70 * displayRatio)}, 35, ${Math.floor(30 * displayRatio)}, 30`
-        let fullViewBox = `${Math.floor(35 * displayRatio)}, 35, ${Math.floor(70 * displayRatio)}, 30`
+        let debugViewBox = `0, 0, ${ Math.floor(100 * displayRatio)}, 100`
+        let mainViewBox = `${ Math.floor(35 * displayRatio) }, 35, ${ Math.floor(30 * displayRatio) }, 30`
+        let asideViewBox = `${ Math.floor(70 * displayRatio) }, 35, ${ Math.floor(30 * displayRatio) }, 30`
+        let fullViewBox = `${ Math.floor(35 * displayRatio) }, 35, ${ Math.floor(70 * displayRatio) }, 30`
         const wrapper1 = mount(<App />)
         const wrapper2 = mount(<App display = "full" />)
         const wrapper3 = mount(<App display = "main" />)

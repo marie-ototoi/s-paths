@@ -1,4 +1,5 @@
 import React from 'react'
+import Main from './Main'
 
 class App extends React.Component {
     constructor (props) {
@@ -37,13 +38,7 @@ class App extends React.Component {
                 viewBox = { `${this.state.viewBox.x}, ${this.state.viewBox.y}, ${this.state.viewBox.width}, ${this.state.viewBox.height}` }
                 preserveAspectRatio = "xMinYMin meet"
             >
-                <g transform = { `translate(${35 * this.state.displayRatio }, ${ 35 })` }>
-                    <rect x = {1} y = {7} width = { 6 } height = { 19 } />
-                    <rect x = {7} y = {1} width = { 35 } height = { 6 } />
-                    <rect x = {7} y = {7} width = { 35 } height = { 19 } />
-                    <rect x = {43} y = {7} width = { 6 } height = { 19 } />
-                    <rect x = {7} y = {26} width = { 35 } height = { 6 } />
-                </g>
+                <Main displayRatio = { this.state.displayRatio } display = { this.state.display } />
                 <g transform = { `translate(150, 35)` }>
                     <rect x = {1} y = {1} width = { 10} height = { 24 } fill = '#0F0' />
                     <rect x = {12} y = {1} width = { 30 } height = { 24 } fill = '#f00' />
