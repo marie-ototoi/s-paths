@@ -3,6 +3,13 @@ import Main from './Main'
 import Aside from './Aside'
 import Debug from './Debug'
 
+
+const grid = {
+    xPoints: [0, 30, 35, 65, 70, 100],
+    yPoints: [0, 30, 35, 65, 70, 100]
+}
+//percentage
+
 class App extends React.Component {
     constructor (props) {
         super(props)
@@ -21,7 +28,6 @@ class App extends React.Component {
     componentDidMount () {
         // console.log('did Mount')
         this.resize()
-       
     }
     componentWillUpdate () {
         //console.log('will update')
@@ -54,9 +60,10 @@ class App extends React.Component {
         //console.log('resize')
         
         let height = window.innerHeight - 5
-        let width = window.innerWidth - 5 
+        let width = window.innerWidth - 5
         // calculate ratio
         let displayRatio = Math.floor (width / height * 100) / 100
+
         let viewBox
         if (this.state.mode === 'dev') {
             viewBox = { x: 0, y: 0, width: Math.floor(100 * displayRatio), height: 100 } 
