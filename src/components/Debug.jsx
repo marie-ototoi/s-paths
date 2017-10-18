@@ -4,12 +4,38 @@ class Debug extends React.Component {
 
     componentDidMount () {
     }
+
     componentWillUpdate () {
     }
+    
     render () {
+        let xLines 
+        let yLines
+        if(this.props.grid){
+            xLines = this.props.grid.xPoints.map(point => {
+                return (<line 
+                    x1 = { point } 
+                    y1 = "0" 
+                    x2 = { point } 
+                    y2 = { this.props.stage.height } 
+                    key = { `x${ point }` } 
+                    className = "gridline" 
+                />)
+            })
+            yLines =  this.props.grid.yPoints.map(point => {
+                return (<line 
+                    y1 = { point } 
+                    x1 = "0" 
+                    y2 = { point } 
+                    x2 = { this.props.stage.width }  
+                    key = { `y${ point }` } 
+                    className = "gridline" 
+                />)
+            })
+        }
         return (<g className = "debug">
-            <line x1 = "30" y1 = "100" x2 = "30" y2 = "20"  style = {{ strokeDasharray: "1, 1", stroke: 'black', strokeWidth: 1 }} />
-            <line x1 = "30" y1 = "100" x2 = "30" y2 = "20"  style = {{ strokeDasharray: "1, 1", stroke: 'black', strokeWidth: 1 }} />
+            {xLines}
+            {yLines}
         </g>)
     }
 }

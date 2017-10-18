@@ -4,8 +4,10 @@ class Main extends React.Component {
 
     componentDidMount () {
     }
+
     componentWillUpdate () {
     }
+    
     render () {
         return (<g className = "main" transform = { `translate(${35 * this.props.displayRatio }, ${ 35 })` }>
             <rect x = {1} y = {7} width = { 6 } height = { 19 } />

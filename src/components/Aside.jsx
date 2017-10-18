@@ -4,8 +4,10 @@ class Aside extends React.Component {
 
     componentDidMount () {
     }
+    
     componentWillUpdate () {
     }
+
     render () {
         return (<g className = "aside" transform = { `translate(150, 35)` }>
             <rect x = {1} y = {1} width = { 10} height = { 24 } fill = '#0F0' />
