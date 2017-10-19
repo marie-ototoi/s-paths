@@ -2,10 +2,10 @@ import React from 'react'
 
 const zonesDef = {
     center: { x: 19, y: 19, width: 60, height: 60 },
-    left: { x: 2, y: 19, width: 15, height: 60 },
-    top: { x: 19, y: 2, width: 60, height: 15 },
-    right: { x: 81, y: 19, width: 15, height: 60 },
-    bottom: { x: 19, y: 81, width: 60, height: 15 }
+    left: { x: 2, y: 19, width: 17, height: 60 },
+    top: { x: 19, y: 2, width: 60, height: 17 },
+    right: { x: 79, y: 19, width: 17, height: 60 },
+    bottom: { x: 19, y: 79, width: 60, height: 17 }
 }
 
 class Main extends React.Component {
@@ -47,14 +47,14 @@ class Main extends React.Component {
                 }
             }
         }
-        console.log(zones)
+        //console.log(zones)
         return zones
     }
     scaleX (xPoint, stage) {
-        return Math.floor(stage.width * xPoint / 100)
+        return Math.floor(stage.width * xPoint / 100) - 1
     }
     scaleY (yPoint, stage) {
-        return Math.floor(stage.height * yPoint / 100)
+        return Math.floor(stage.height * yPoint / 100) - 1
     }
 }
 
