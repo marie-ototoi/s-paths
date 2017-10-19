@@ -26,7 +26,10 @@ class Main extends React.Component {
 
     render () {
         let zones = this.scalesZones({ width: this.props.width, height: this.props.height })
-        return (<g className = "main" transform = { `translate(${ this.props.x }, ${ this.props.y })` }>
+        return (<g 
+            className = "main" 
+            transform = { `translate(${ this.props.x }, ${ this.props.y })` }
+        >
             <rect x = { zones.left.x } y = { zones.left.y } width = { zones.left.width } height = { zones.left.height } />
             <rect x = { zones.right.x } y = { zones.right.y } width = { zones.right.width } height = { zones.right.height } />
             <rect x = { zones.top.x } y = { zones.top.y } width = { zones.top.width } height = { zones.top.height } />
