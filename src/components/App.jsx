@@ -3,6 +3,7 @@ import Main from './Main'
 import Aside from './Aside'
 import Debug from './Debug'
 import svgScale from '../svg/scale'
+import dataLoader from '../model/load'
 
 // definitions as percentage
 const displayDef = {
