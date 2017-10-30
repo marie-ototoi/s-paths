@@ -46,7 +46,6 @@
     "file-loader": "^0.10.1",
     "fuzzaldrin": "^2.1.0",
     "istanbul": "^0.4.5",
-    "jsonld": "^0.4.12",
     "mocha": "^3.3.0",
     "mocha-webpack": "^0.7.0",
     "mock-browser": "^0.92.12",
