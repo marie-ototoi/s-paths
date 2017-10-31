@@ -1,104 +1,119 @@
-const explore = () => {
+const explore = (resourceEnsemble, maxUnique, maxDepth) => {
     return {
-        "head": {
-          "vars": [ "property" , "type" , "language" , "unique" , "maxchar" , "minchar" , "maxval" , "minval" ]
-        } ,
-        "results": {
-            "bindings": [
-                {
-                "property": { "type": "uri" , "value": "http://purl.org/dc/terms/subject" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "42" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://data.nobelprize.org/terms/motivation" } ,
-                "type": { "type": "uri" , "value": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" } ,
-                "language": { "type": "literal" , "value": "sv" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "451" } ,
-                "maxchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "280" } ,
-                "minchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "0" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://purl.org/dc/terms/isPartOf" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "579" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://data.nobelprize.org/terms/year" } ,
-                "type": { "type": "uri" , "value": "http://www.w3.org/2001/XMLSchema#integer" } ,
-                "language": { "type": "literal" , "value": "" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "113" } ,
-                "maxval": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "2016" } ,
-                "minval": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "1901" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://data.nobelprize.org/terms/share" } ,
-                "type": { "type": "uri" , "value": "http://www.w3.org/2001/XMLSchema#string" } ,
-                "language": { "type": "literal" , "value": "" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "4" } ,
-                "maxchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "1" } ,
-                "minchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "1" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://data.nobelprize.org/terms/university" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "315" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://data.nobelprize.org/terms/laureate" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "904" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://www.w3.org/1999/02/22-rdf-syntax-ns#type" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "2" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://data.nobelprize.org/terms/field" } ,
-                "type": { "type": "uri" , "value": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" } ,
-                "language": { "type": "literal" , "value": "en" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "151" } ,
-                "maxchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "41" } ,
-                "minchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "5" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://data.nobelprize.org/terms/awardFile" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "5055" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://data.nobelprize.org/terms/comment" } ,
-                "type": { "type": "uri" , "value": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" } ,
-                "language": { "type": "literal" , "value": "en" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "50" } ,
-                "maxchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "605" } ,
-                "minchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "31" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://data.nobelprize.org/terms/category" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "6" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://data.nobelprize.org/terms/motivation" } ,
-                "type": { "type": "uri" , "value": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" } ,
-                "language": { "type": "literal" , "value": "en" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "565" } ,
-                "maxchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "343" } ,
-                "minchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "24" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://www.w3.org/2000/01/rdf-schema#label" } ,
-                "type": { "type": "uri" , "value": "http://www.w3.org/2001/XMLSchema#string" } ,
-                "language": { "type": "literal" , "value": "" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "911" } ,
-                "maxchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "101" } ,
-                "minchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "21" }
-                } ,
-                {
-                "property": { "type": "uri" , "value": "http://data.nobelprize.org/terms/contribution" } ,
-                "type": { "type": "uri" , "value": "http://www.w3.org/1999/02/22-rdf-syntax-ns#langString" } ,
-                "language": { "type": "literal" , "value": "en" } ,
-                "unique": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "60" } ,
-                "maxchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "463" } ,
-                "minchar": { "datatype": "http://www.w3.org/2001/XMLSchema#integer" , "type": "typed-literal" , "value": "54" }
-                }
-            ]
-        }
+        total_instances: 911,
+        statements: [
+            {
+                path: 'nobel:LaureateAward/nobel:year/*',
+                label: 'year',
+                group: 'datetime',
+                format: 'Y',
+                unique_values: 113,
+                total_values: 911,
+                max_value: 2016,
+                min_value: 1901
+            },
+            {
+                path: 'nobel:LaureateAward/nobel:field/*',
+                label: 'field',
+                group: 'text',
+                language: 'en',
+                unique_values: 151,
+                total_values: 1251
+            },
+            {
+                path: 'nobel:LaureateAward/nobel:category/*',
+                label: 'category',
+                group: 'uri',
+                unique_values: 6,
+                total_values: 911
+            },
+            {
+                path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
+                label: 'gender of Laureate',
+                group: 'text',
+                unique_values: 2,
+                total_values: 885,
+                language: 'en'
+            },
+            {
+                path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpprop:dateOfBirth/*',
+                label: 'date of birth of Laureate',
+                group: 'datetime',
+                format: 'Y-m-d',
+                total_values: 883,
+                unique_values: 868,
+                max_value: 1997,
+                min_value: 1817
+            },
+            {
+                path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:birthday',
+                label: 'date of birth of Laureate',
+                group: 'datetime',
+                format: 'Y-m-d',
+                total_values: 883,
+                unique_values: 868,
+                max_value: 1997,
+                min_value: 1817
+            },
+            {
+                path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpprop:dateOfDeath/*',
+                label: 'date of death of Laureate',
+                group: 'datetime',
+                format: 'Y-m-d',
+                total_values: 600,
+                unique_values: 589,
+                max_value: 2017,
+                min_value: 1903
+            },
+            {
+                path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpedia-owl:birthPlace/dbpedia-owl:City',
+                label: 'place of birth of Laureate (city)',
+                group: 'geo',
+                granularity: 'city',
+                total_values: 884,
+                unique_values: 602
+            },
+            {
+                path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpedia-owl:birthPlace/dbpedia-owl:Country',
+                label: 'place of birth of Laureate (country)',
+                group: 'geo',
+                granularity: 'country',
+                total_values: 885,
+                unique_values: 121
+            },
+            {
+                path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpedia-owl:deathPlace/dbpedia-owl:City',
+                label: 'place of death of Laureate (city)',
+                group: 'geo',
+                granularity: 'city',
+                total_values: 582,
+                unique_values: 293
+            },
+            {
+                path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpedia-owl:deathPlace/dbpedia-owl:Country',
+                label: 'place of death of Laureate (country)',
+                group: 'geo',
+                granularity: 'country',
+                total_values: 588,
+                unique_values: 52
+            },
+            {
+                path: 'nobel:LaureateAward/nobel:university/dbpedia-owl:University/dbpedia-owl:country/dbpedia-owl:Country',
+                label: 'place of university (country)',
+                group: 'geo',
+                granularity: 'country',
+                total_values: 742,
+                unique_values: 29
+            },
+            {
+                path: 'nobel:LaureateAward/nobel:university/dbpedia-owl:University/dbpedia-owl:city/dbpedia-owl:City',
+                label: 'place of university (city)',
+                group: 'geo',
+                granularity: 'city',
+                total_values: 1009,
+                unique_values: 185
+            }
+        ]
     }
 }
 

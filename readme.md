@@ -10,4 +10,4 @@ Temporary fix : after running `npm install`, replace enzyme folder in node_modul
 `npm run build`
 ## tests
 `npm run test`
-(not working properly yet)
+If crashing, replace enzyme folder as explained above
