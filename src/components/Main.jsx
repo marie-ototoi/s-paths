@@ -17,6 +17,7 @@ class Main extends React.Component {
     }
 
     componentDidMount () {
+        
     }
 
     componentWillUpdate () {

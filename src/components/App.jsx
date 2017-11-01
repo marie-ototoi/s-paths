@@ -4,6 +4,8 @@ import Aside from './Aside'
 import Debug from './Debug'
 import svgScale from '../svg/scale'
 import explore from '../model/explore'
+import select from '../model/select'
+import rank from '../model/rank'
 
 // definitions as percentage
 const displayDef = {
@@ -16,6 +18,7 @@ const gridDef = {
     xPoints : [0, 30, 35, 65, 70, 85, 100],
     yPoints : [0, 30, 35, 65, 70, 85, 100]
 }
+const defaultZone = { x: 0, y: 0, width: 10, height: 10 }
 
 class App extends React.Component {
     constructor (props) {
@@ -29,20 +32,49 @@ class App extends React.Component {
             },
             totalWidth: null,
             totalHeight: null,
-            viewBox: { x: 0, y: 0, width: 1, height: 1 },
-            mainZone: { x: 0, y: 0, width: 1, height: 1 },
-            asideZone: { x: 0, y: 0, width: 1, height: 1 },
+            viewBox: defaultZone,
+            mainZone: defaultZone,
+            asideZone: defaultZone,
+            selection: [],
             ref: this.refs.view
-        } 
+        }
         this.resize = this.resize.bind(this)
         window.addEventListener("resize", this.resize)
     }
     
     componentDidMount () {
         // console.log('did Mount')
+        //this.viewSelection()
         this.resize()
     }
 
+    addToSelection () {
+
+    }
+    
+    /*viewSelection () {
+        explore.exploreProperties(this.state.selection)
+        .then(stats => {
+            this.setState({ stats })
+            return rank.rankViews(stats)
+        })
+        .then(views => {
+            this.setState({ views })
+            return select.selectView({ options: 'to_be_defined' })
+        })
+        .then(selectedView => {
+            this.setState({ selectedView })
+            return datapoint.getData(this.state.selection, this.state.selectedView)
+        })
+        .then(selectedView => {
+            this.setState({ selectedView })
+            return datapoint.getData(this.state.selection, this.state.selectedView)
+        })
+        .catch(err => {
+            console.error(err)
+        })
+    }*/
+    
     componentWillUpdate () {
         //console.log('will update')
     }
