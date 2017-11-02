@@ -7,7 +7,7 @@ import data from '../data/nobel'
 
 
 describe('model/jsonld', () => {
-    it('should flatten json-ld', () => {
+    /*it('should flatten json-ld', () => {
         let fullData = data.explore().results.bindings
         let flatData = jsonld.flatten(fullData)
         expect(flatData[0]).to.deep.equal({ 
@@ -21,5 +21,5 @@ describe('model/jsonld', () => {
             type: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#langString',
             unique: '451' 
         })
-    })
+    })*/
 })

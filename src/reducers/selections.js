@@ -1,4 +1,4 @@
-import undoable from 'redux-undo'
+
 
 const selection = (state, action) => {
   switch (action.type) {
@@ -7,16 +7,12 @@ const selection = (state, action) => {
         element: action.element,
         query: action.query
       }
-    case 'REMOVE_SELECTION':
-      if (state.element !== action.element) {
-        return state
-      }
     default:
       return state
   }
 }
 
-const selections = (state = [], action) => {
+const selections = (state = [{ query: '?' }], action ) => {
   switch (action.type) {
     case 'ADD_SELECTION':
       return [
@@ -24,14 +20,12 @@ const selections = (state = [], action) => {
         selection(undefined, action)
       ]
     case 'REMOVE_SELECTION':
-      return state.map(t =>
-        selection(t, action)
+      return state.filter(sel =>
+        sel.element !== action.element
       )
     default:
       return state
   }
 }
 
-const undoableSelections = undoable(selections)
-
-export default undoableSelections
+export default selections

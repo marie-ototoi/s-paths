@@ -1,9 +1,12 @@
 import { combineReducers } from 'redux'
 import selections from './selections'
 import display from './selections'
+import undoable from 'redux-undo'
 
 const discoverApp = combineReducers({
-  selections,
+  selections: undoable(selections, {
+    filter: undoFilter
+  }), 
   display
 })
 

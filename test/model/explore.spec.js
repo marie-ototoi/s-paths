@@ -7,9 +7,9 @@ import data from '../data/nobel'
 
 
 describe('model/explore', () => {
-    it('should load properties', () => {
+    /*it('should load properties', () => {
         let fullData = data.explore()
         //console.log
         
-    })
+    })*/
 })
