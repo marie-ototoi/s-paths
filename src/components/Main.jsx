@@ -26,6 +26,7 @@ class Main extends React.Component {
     }
 
     render () {
+        const { store } = this.context
         let zones = this.scalesZones({ width: this.props.width, height: this.props.height })
         return (<g 
             className = "main" 
@@ -61,5 +62,7 @@ class Main extends React.Component {
         return Math.floor(stage.height * yPoint / 100) - 1
     }
 }
+
+Main.contextTypes = { store: React.PropTypes.object }
 
 export default Main

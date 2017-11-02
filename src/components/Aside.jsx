@@ -9,6 +9,7 @@ class Aside extends React.Component {
     }
 
     render () {
+        const { store } = this.context
         return (<g 
             className = "aside"
             transform = { `translate(${ this.props.x }, ${ this.props.y })` }
@@ -19,5 +20,7 @@ class Aside extends React.Component {
         </g>)
     }
 }
+
+Aside.contextTypes = { store: React.PropTypes.object }
 
 export default Aside

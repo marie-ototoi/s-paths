@@ -1,4 +1,7 @@
 import React from 'react'
+import { Provider } from 'react-redux'
+import { createStore } from 'redux'
+import reducers from '../reducers'
 import Main from './Main'
 import Aside from './Aside'
 import Debug from './Debug'
@@ -6,6 +9,16 @@ import svgScale from '../svg/scale'
 import explore from '../model/explore'
 import select from '../model/select'
 import rank from '../model/rank'
+
+const store = createStore(reducers);
+
+if (module.hot) {
+    // Enable Webpack hot module replacement for reducers
+    module.hot.accept('../reducers', () => {
+      const nextRootReducer = require('../reducers/index')
+      store.replaceReducer(nextRootReducer)
+    })
+}
 
 // definitions as percentage
 const displayDef = {
@@ -80,8 +93,8 @@ class App extends React.Component {
     }
 
     render () {
-        //console.log('render')
         return (<div className = "view" style = {{ width: this.state.screen.width + 'px' }}>
+            <Provider store = { store }>
             <svg
                 ref = "view"
                 width = { this.state.screen.width }
@@ -110,8 +123,8 @@ class App extends React.Component {
                     width = { this.state.asideZone.width } 
                     height = { this.state.asideZone.height } 
                 />
-                
             </svg>
+            </Provider>
         </div>)
     }
 

@@ -9,6 +9,8 @@ class Debug extends React.Component {
     }
     
     render () {
+        const { store } = this.context
+        console.log('state', store.getState())
         let xLines 
         let yLines
         if(this.props.grid){
@@ -39,5 +41,7 @@ class Debug extends React.Component {
         </g>)
     }
 }
+
+Debug.contextTypes = { store: React.PropTypes.object }
 
 export default Debug
