@@ -1,6 +1,4 @@
 const defaultState = {
-    env: 'prod',
-    mode: 'main',
     screen: {
         width: 10,
         height: 10
@@ -16,8 +14,8 @@ const defaultState = {
         height: 10
     },
     grid: {
-        xPoints : [0],
-        yPoints : [0]
+        xPoints : [],
+        yPoints : []
     },
     gridDefPercent: {
         xPoints: [0, 30, 35, 65, 70, 85, 100],
@@ -38,21 +36,16 @@ const defaultState = {
 }
 
 const display = (state = defaultState, action) => {
+    // console.log(action, state)
     switch (action.type) {
-        case 'SET_ENV':
-            return {
-                ...state,
-                env: action.env,
-                mode: action.mode
-            }
         case 'SET_DISPLAY':
             return {
                 ...state,
-                screen: action.screen,
-                viewBox: action.viewBox, 
-                stage: action.stage, 
-                grid: action.grid,
-                zones: action.zones
+                screen: action.screen || state.screen,
+                viewBox: action.viewBox || state.viewBox, 
+                stage: action.stage || state.stage, 
+                grid: action.grid || state.grid,
+                zones: action.zones || state.zones
             }
         default:
             return state

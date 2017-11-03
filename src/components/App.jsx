@@ -9,15 +9,6 @@ import select from '../model/select'
 import rank from '../model/rank'
 
 
-
-// definitions as percentage
-const displayDef = {
-    dev: { x: 0, y: 0, width: 100, height: 100},
-    full: { x: 35, y: 35, width: 40, height: 40},
-    main: { x: 35, y: 35, width: 30, height: 30},
-    aside: { x: 70, y: 35, width: 30, height: 30}
-}
-
 class App extends React.Component {
     constructor (props) {
         super(props)
@@ -28,9 +19,12 @@ class App extends React.Component {
         
     }
     componentDidMount () {
-        console.log('did Mount',)
+        //console.log('did Mount')
         //this.viewSelection()
         this.resize()
+    }
+    componentDidUpdate () {
+    
     }
 
     addToSelection () {
@@ -65,7 +59,7 @@ class App extends React.Component {
     }
 
     render () {
-        const { display } = this.props
+        const { display, env, mode } = this.props
         
         return (<div 
             className = "view" 
@@ -78,7 +72,7 @@ class App extends React.Component {
                 viewBox = { `${ display.viewBox.x }, ${ display.viewBox.y }, ${ display.viewBox.width }, ${ display.viewBox.height }` }
                 preserveAspectRatio = "xMinYMin meet"
             >
-                { this.props.env === "dev" &&
+                { env === "dev" &&
                     <Debug  />
                 }
                 <Main />
@@ -93,13 +87,13 @@ class App extends React.Component {
     }
 
     resize () {
-        const { display } = this.props
+        const { display, env, mode } = this.props
 
         let screen = {}
         screen.height = window.innerHeight - 5
         screen.width = window.innerWidth - 5
-        
-        let viewBoxDef = (this.props.env === 'dev')? display.zonesDefPercent.dev : display.zonesDefPercent[this.props.mode]
+        //console.log(display, this.props.display)
+        let viewBoxDef = (env === 'dev')? display.zonesDefPercent.dev : display.zonesDefPercent[mode||'full']
         let stage = svgScale.scaleStage(viewBoxDef, screen)
         let viewBox = svgScale.scaleViewBox(viewBoxDef, stage)
         let grid = svgScale.getGrid(display.gridDefPercent, stage)
@@ -111,9 +105,7 @@ class App extends React.Component {
         zones.full =  svgScale.scaleViewBox(display.zonesDefPercent.full, stage)
         zones.dev =  svgScale.scaleViewBox(display.zonesDefPercent.dev, stage)
         
-        const { store } = this.context
-        store.dispatch({
-            type: 'SET_DISPLAY',
+        this.props.onResize({
             screen,
             viewBox, 
             stage, 
@@ -121,20 +113,37 @@ class App extends React.Component {
             zones
         })
     }
-
-
 }
-App.contextTypes = { store: React.PropTypes.object }
 
 function mapStateToProps(state) {
     return {
         display: state.display
     }
 }
-function mapDispatchToProps(state) {
+
+function mapDispatchToProps(dispatch) {
     return {
+        initEnv: (env) => {
+            dispatch({
+                type: 'SET_ENV',
+                env
+            })
+        },
+        initMode: (mode) => {
+            dispatch({
+                type: 'SET_MODE',
+                mode
+            })
+        },
+        onResize: (display) => {
+            dispatch({
+                type: 'SET_DISPLAY',
+                ...display
+            })
+        }
     }
 }
+
 const AppConnect = connect(mapStateToProps, mapDispatchToProps)(App)
 
 export default AppConnect
