@@ -12,10 +12,7 @@
         },
         "ecmaVersion": 6
     },
-    "extends": [
-        "eslint:recommended",
-        "standard"
-    ],
+    "extends": "standard",
     "rules": {
         "no-unused-vars": 1,
         "no-console": 1,
