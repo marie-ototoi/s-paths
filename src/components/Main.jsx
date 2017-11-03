@@ -1,4 +1,5 @@
 import React from 'react'
+import { connect } from 'react-redux'
 
 const zonesDef = {
     center: { x: 19, y: 19, width: 60, height: 60 },
@@ -26,11 +27,12 @@ class Main extends React.Component {
     }
 
     render () {
-        const { store } = this.context
-        let zones = this.scalesZones({ width: this.props.width, height: this.props.height })
+        const { display } = this.props
+
+        let zones = this.scalesZones({ width: display.zones.main.width, height: display.zones.main.height })
         return (<g 
             className = "main" 
-            transform = { `translate(${ this.props.x }, ${ this.props.y })` }
+            transform = { `translate(${ display.zones.main.x }, ${ display.zones.main.y })` }
         >
             <rect x = { zones.left.x } y = { zones.left.y } width = { zones.left.width } height = { zones.left.height } />
             <rect x = { zones.right.x } y = { zones.right.y } width = { zones.right.width } height = { zones.right.height } />
@@ -63,6 +65,15 @@ class Main extends React.Component {
     }
 }
 
-Main.contextTypes = { store: React.PropTypes.object }
+function mapStateToProps(state) {
+    return {
+        display: state.display
+    }
+}
+function mapDispatchToProps(state) {
+    return {
+    }
+}
+const MainConnect = connect(mapStateToProps, mapDispatchToProps)(Main)
 
-export default Main
+export default MainConnect

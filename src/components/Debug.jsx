@@ -1,4 +1,5 @@
 import React from 'react'
+import { connect } from 'react-redux'
 
 class Debug extends React.Component {
 
@@ -9,27 +10,26 @@ class Debug extends React.Component {
     }
     
     render () {
-        const { store } = this.context
-        console.log('state', store.getState())
+        const { display } = this.props
         let xLines 
         let yLines
-        if(this.props.grid){
-            xLines = this.props.grid.xPoints.map(point => {
+        if(display.grid){
+            xLines = display.grid.xPoints.map(point => {
                 return (<line 
                     x1 = { point } 
                     y1 = "0" 
                     x2 = { point } 
-                    y2 = { this.props.stage.height } 
+                    y2 = { display.stage.height } 
                     key = { `x${ point }` } 
                     className = "gridline" 
                 />)
             })
-            yLines =  this.props.grid.yPoints.map(point => {
+            yLines =  display.grid.yPoints.map(point => {
                 return (<line 
                     y1 = { point } 
                     x1 = "0" 
                     y2 = { point } 
-                    x2 = { this.props.stage.width }  
+                    x2 = { display.stage.width }  
                     key = { `y${ point }` } 
                     className = "gridline" 
                 />)
@@ -42,6 +42,15 @@ class Debug extends React.Component {
     }
 }
 
-Debug.contextTypes = { store: React.PropTypes.object }
+function mapStateToProps(state) {
+    return {
+        display: state.display
+    }
+}
+function mapDispatchToProps(state) {
+    return {
+    }
+}
+const DebugConnect = connect(mapStateToProps, mapDispatchToProps)(Debug)
 
-export default Debug
+export default DebugConnect
