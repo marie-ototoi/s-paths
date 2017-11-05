@@ -5,8 +5,6 @@ import Aside from './Aside'
 import Debug from './Debug'
 import svgScale from '../svg/scale'
 import explore from '../model/explore'
-import select from '../model/select'
-import rank from '../model/rank'
 
 class App extends React.Component {
     constructor (props) {
@@ -14,21 +12,10 @@ class App extends React.Component {
         this.resize = this.resize.bind(this)
         window.addEventListener("resize", this.resize)
     }
-    componentWillMount () {
-
-    }
     componentDidMount () {
-        //console.log('did Mount')
-        //this.viewSelection()
         this.resize()
     }
-    componentDidUpdate () {
-
-    }
-
-    addToSelection () {
-
-    }
+    
     /*viewSelection () {
         explore.exploreProperties(this.state.selection)
         .then(stats => {
@@ -51,12 +38,22 @@ class App extends React.Component {
             console.error(err)
         })
     }*/   
-    componentWillUpdate () {
-        //console.log('will update')
-    }
-
     render () {
-        const { display, env, mode } = this.props
+        const { display, env, mode, dataset } = this.props
+
+        console.log('render appeleé quand une prop change', dataset)
+        if(dataset.present.status === 'off') {
+            this.props.init()
+        } else if(dataset.present.status === 'fetching_props') {
+            explore.getStats(dataset.endpoint, dataset.entryPoint)
+                .then(stats => {
+                    this.props.setStats(stats)
+                })
+        }else if(dataset.present.status === 'fetching_data') {
+            console.log('Fetch data now ! (to_do) ')
+
+        }
+
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
@@ -76,19 +73,14 @@ class App extends React.Component {
             </svg>
         </div>)
     }
-
-    setError (error) {
-        // console.log('error', error)
-    }
-
     resize () {
-        const { display, env, mode } = this.props
-
+        const { display, env, mode, dataset } = this.props
+        
         let screen = {}
         screen.height = window.innerHeight - 5
         screen.width = window.innerWidth - 5
-        // console.log(display, this.props.display)
-        let viewBoxDef = (env === 'dev')? display.zonesDefPercent.dev : display.zonesDefPercent[mode||'full']
+
+        let viewBoxDef = (env === 'dev') ? display.zonesDefPercent.dev : display.zonesDefPercent[mode||'full']
         let stage = svgScale.scaleStage(viewBoxDef, screen)
         let viewBox = svgScale.scaleViewBox(viewBoxDef, stage)
         let grid = svgScale.getGrid(display.gridDefPercent, stage)
@@ -112,22 +104,22 @@ class App extends React.Component {
 
 function mapStateToProps (state) {
     return {
-        display: state.display
+        display: state.display,
+        dataset: state.dataset
     }
 }
 
 function mapDispatchToProps (dispatch) {
     return {
-        initEnv: (env) => {
+        init: () => {
             dispatch({
-                type: 'SET_ENV',
-                env
+                type: 'INIT'
             })
         },
-        initMode: (mode) => {
+        setStats: (stats) => {
             dispatch({
-                type: 'SET_MODE',
-                mode
+                type: 'SET_STATS',
+                stats
             })
         },
         onResize: (display) => {

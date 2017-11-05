@@ -2,15 +2,14 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 class Timeline extends React.Component {
-
     render () {
-        const { display, env, mode } = this.props       
+        const { display, env, mode } = this.props
         return (<g className = "Timeline">
         </g>)
     }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps (state) {
     return {
         display: state.display,
         env: state.env,
@@ -18,7 +17,7 @@ function mapStateToProps(state) {
     }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps (dispatch) {
     return {
     }
 }

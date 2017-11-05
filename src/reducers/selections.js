@@ -1,4 +1,4 @@
-const defaultState = [{ query: '?' }]
+const defaultState = []
 
 const selection = (state, action) => {
     switch (action.type) {

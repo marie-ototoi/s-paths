@@ -5,7 +5,7 @@ import selections from '../../src/reducers/selections'
 
 chai.use(sinonChai)
 const savedState = [{ query: 'bibo:Book' }]
-const initialState = [{ query: '?' }]
+const initialState = []
 
 describe('reducers/selections', () => {
     it('should handle initial state', () => {
@@ -20,7 +20,6 @@ describe('reducers/selections', () => {
         }
         expect(selections(undefined, addAction))
             .to.deep.equal([
-                { query: '?' },
                 {element: '#topic', query: 'WHERE ?resource dct:subject ?any' }
             ])
         expect(selections(savedState, addAction))
@@ -39,9 +38,7 @@ describe('reducers/selections', () => {
             { element: '#topic', query: 'WHERE ?resource dct:subject ?any' }
         ]
         expect(selections(undefined, removeAction))
-            .to.deep.equal([
-                { query: '?' }
-            ])
+            .to.deep.equal([])
         expect(selections(state, removeAction))
             .to.deep.equal([
                 { query: 'bibo:Book' }
