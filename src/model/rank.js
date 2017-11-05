@@ -1,7 +1,4 @@
 
-// statistical queries
-const rankViews = () => {
+const getRelevantProperties = () => {}
 
-}
-
-exports.rankViews = rankViews
+exports.getRelevantProperties = getRelevantProperties

@@ -18,21 +18,20 @@ class Main extends React.Component {
     }
 
     componentDidMount () {
-        
     }
 
     componentWillUpdate () {
-        //console.log('update ',this.props)
-        //this.setState({ zones })
+        // console.log('update ',this.props)
+        // this.setState({ zones })
     }
 
     render () {
         const { display } = this.props
 
         let zones = this.scalesZones({ width: display.zones.main.width, height: display.zones.main.height })
-        return (<g 
-            className = "main" 
-            transform = { `translate(${ display.zones.main.x }, ${ display.zones.main.y })` }
+        return (<g
+            className = "Main"
+            transform = { `translate(${display.zones.main.x}, ${display.zones.main.y})` }
         >
             <rect x = { zones.left.x } y = { zones.left.y } width = { zones.left.width } height = { zones.left.height } />
             <rect x = { zones.right.x } y = { zones.right.y } width = { zones.right.width } height = { zones.right.height } />
@@ -45,16 +44,16 @@ class Main extends React.Component {
         let zones = {}
         for (let zone in zonesDef) {
             if (zonesDef.hasOwnProperty(zone)) {
-                zones [zone] = { 
-                    name: zonesDef[zone].name, 
-                    x: this.scaleX(zonesDef[zone].x, stage), 
-                    y: this.scaleY(zonesDef[zone].y, stage), 
-                    width: this.scaleX(zonesDef[zone].width, stage), 
+                zones[zone] = {
+                    name: zonesDef[zone].name,
+                    x: this.scaleX(zonesDef[zone].x, stage),
+                    y: this.scaleY(zonesDef[zone].y, stage),
+                    width: this.scaleX(zonesDef[zone].width, stage),
                     height: this.scaleY(zonesDef[zone].height, stage)
                 }
             }
         }
-        //console.log(zones)
+        // console.log(zones)
         return zones
     }
     scaleX (xPoint, stage) {
@@ -65,12 +64,12 @@ class Main extends React.Component {
     }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps (state) {
     return {
         display: state.display
     }
 }
-function mapDispatchToProps(state) {
+function mapDispatchToProps (state) {
     return {
     }
 }

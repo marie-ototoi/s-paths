@@ -11,11 +11,11 @@ import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
 import { default as Main } from '../../src/components/Main'
 
-const store = createStore(reducers);
+const store = createStore(reducers)
 
 describe('<Main />', () => {
-    it('should render a svg group classed main', () => {
-        const wrapper = mount(<Provider store = {store}><Main  /></Provider>)
-        expect(wrapper.find('g.main')).to.have.length(1)
+    it('should render a svg group classed Main', () => {
+        const wrapper = mount(<Provider store = {store}><Main /></Provider>)
+        expect(wrapper.find('g.Main')).to.have.length(1)
     })
 })

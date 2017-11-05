@@ -9,13 +9,13 @@ chai.use(chaiEnzyme())
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
-import { default as Debug } from '../../src/components/Debug'
+import { default as PropList } from '../../src/components/PropList'
 
 const store = createStore(reducers)
 
-describe('<Debug />', () => {
-    it('should render a svg group classed Debug', () => {
-        const wrapper = mount(<Provider store = {store}><Debug /></Provider>)
-        expect(wrapper.find('g.Debug')).to.have.length(1)
+describe('<PropList />', () => {
+    it('should render a svg group classed PropList', () => {
+        const wrapper = mount(<Provider store = {store}><PropList /></Provider>)
+        expect(wrapper.find('g.PropList')).to.have.length(1)
     })
 })

@@ -46,7 +46,7 @@ describe('svg/scale', () => {
         expect(vb4).to.deep.equal({ width: 1050, height: 525, x: 2450, y: 612 })
     })
 
-    it('should return actual values of a point based on the point definition in percentage andthe stage dimensions', () => {
+    it('should return actual values of a point based on the point definition in percentage and the stage dimensions', () => {
         let pointX = svgScale.scaleX(10, stages[1])
         let pointY = svgScale.scaleY(10, stages[1])
         expect(pointX).to.equal(140)

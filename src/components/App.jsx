@@ -8,7 +8,6 @@ import explore from '../model/explore'
 import select from '../model/select'
 import rank from '../model/rank'
 
-
 class App extends React.Component {
     constructor (props) {
         super(props)
@@ -16,7 +15,7 @@ class App extends React.Component {
         window.addEventListener("resize", this.resize)
     }
     componentWillMount () {
-        
+
     }
     componentDidMount () {
         //console.log('did Mount')
@@ -24,13 +23,12 @@ class App extends React.Component {
         this.resize()
     }
     componentDidUpdate () {
-    
+
     }
 
     addToSelection () {
 
     }
-    
     /*viewSelection () {
         explore.exploreProperties(this.state.selection)
         .then(stats => {
@@ -52,28 +50,26 @@ class App extends React.Component {
         .catch(err => {
             console.error(err)
         })
-    }*/
-    
+    }*/   
     componentWillUpdate () {
         //console.log('will update')
     }
 
     render () {
         const { display, env, mode } = this.props
-        
-        return (<div 
-            className = "view" 
+        return (<div
+            className = "view"
             style = {{ width: display.screen.width + 'px' }}
         >
             <svg
                 ref = "view"
                 width = { display.screen.width }
                 height = { display.screen.height }
-                viewBox = { `${ display.viewBox.x }, ${ display.viewBox.y }, ${ display.viewBox.width }, ${ display.viewBox.height }` }
+                viewBox = { `${display.viewBox.x}, ${display.viewBox.y}, ${display.viewBox.width}, ${display.viewBox.height}` }
                 preserveAspectRatio = "xMinYMin meet"
             >
-                { env === "dev" &&
-                    <Debug  />
+                { env === 'dev' &&
+                    <Debug />
                 }
                 <Main />
                 <Aside />
@@ -81,9 +77,8 @@ class App extends React.Component {
         </div>)
     }
 
-    setError(error) {
-        //console.log('error', error)
-      
+    setError (error) {
+        // console.log('error', error)
     }
 
     resize () {
@@ -92,36 +87,36 @@ class App extends React.Component {
         let screen = {}
         screen.height = window.innerHeight - 5
         screen.width = window.innerWidth - 5
-        //console.log(display, this.props.display)
+        // console.log(display, this.props.display)
         let viewBoxDef = (env === 'dev')? display.zonesDefPercent.dev : display.zonesDefPercent[mode||'full']
         let stage = svgScale.scaleStage(viewBoxDef, screen)
         let viewBox = svgScale.scaleViewBox(viewBoxDef, stage)
         let grid = svgScale.getGrid(display.gridDefPercent, stage)
 
         let zones = {}
-        zones.main =  svgScale.scaleViewBox(display.zonesDefPercent.main, stage)
+        zones.main = svgScale.scaleViewBox(display.zonesDefPercent.main, stage)
         zones.aside = svgScale.scaleViewBox(display.zonesDefPercent.aside, stage)
         zones.aside.rotation = 0
-        zones.full =  svgScale.scaleViewBox(display.zonesDefPercent.full, stage)
-        zones.dev =  svgScale.scaleViewBox(display.zonesDefPercent.dev, stage)
-        
+        zones.full = svgScale.scaleViewBox(display.zonesDefPercent.full, stage)
+        zones.dev = svgScale.scaleViewBox(display.zonesDefPercent.dev, stage)
+
         this.props.onResize({
             screen,
-            viewBox, 
-            stage, 
+            viewBox,
+            stage,
             grid,
             zones
         })
     }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps (state) {
     return {
         display: state.display
     }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps (dispatch) {
     return {
         initEnv: (env) => {
             dispatch({
