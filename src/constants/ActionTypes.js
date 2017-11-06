@@ -1,0 +1,6 @@
+export const INIT = 'INIT'
+export const SET_CONFIGS = 'SET_CONFIGS'
+export const SET_DATA = 'SET_DATA'
+export const SET_DISPLAY = 'SET_DISPLAY'
+export const SET_STATS = 'SET_STATS'
+export const SET_STATEMENTS = 'SET_STATEMENTS'

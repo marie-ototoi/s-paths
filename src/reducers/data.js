@@ -9,11 +9,11 @@ const initialState = [
 const datazone = (state = initialZone, action) => {
     switch (action.type) {
     case 'SET_DATA':
-        if (state.id !== action.id) return state
-        return [
+        if (state.zone !== action.zone || !action.statements) return state
+        return {
             ...state,
             statements: action.statements
-        ]
+        }
     case 'ADD_DATAZONE':
         return {
             ...state,

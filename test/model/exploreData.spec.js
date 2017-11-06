@@ -2,7 +2,7 @@ import chai, {expect} from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
-import explore from '../../src/model/explore'
+import exploreData from '../../src/model/exploreData'
 import data from '../data/nobel'
 
 

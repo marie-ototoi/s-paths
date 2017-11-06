@@ -4,7 +4,7 @@ import Main from './Main'
 import Aside from './Aside'
 import Debug from './Debug'
 import svgScale from '../svg/scale'
-import explore from '../model/explore'
+import { loadData, init, setDisplay, setStats } from '../actions'
 
 class App extends React.Component {
     constructor (props) {
@@ -14,45 +14,12 @@ class App extends React.Component {
     }
     componentDidMount () {
         this.resize()
+        this.props.init()
+        const { dataset, views } = this.props
+        this.props.loadData(dataset.present.endpoint, dataset.present.entryPoint, dataset.present.constraints, views)
     }
-    
-    /*viewSelection () {
-        explore.exploreProperties(this.state.selection)
-        .then(stats => {
-            this.setState({ stats })
-            return rank.rankViews(stats)
-        })
-        .then(views => {
-            this.setState({ views })
-            return select.selectView({ options: 'to_be_defined' })
-        })
-        .then(selectedView => {
-            this.setState({ selectedView })
-            return datapoint.getData(this.state.selection, this.state.selectedView)
-        })
-        .then(selectedView => {
-            this.setState({ selectedView })
-            return datapoint.getData(this.state.selection, this.state.selectedView)
-        })
-        .catch(err => {
-            console.error(err)
-        })
-    }*/   
     render () {
-        const { display, env, mode, dataset } = this.props
-
-        console.log('render appeleé quand une prop change', dataset)
-        if(dataset.present.status === 'off') {
-            this.props.init()
-        } else if(dataset.present.status === 'fetching_props') {
-            explore.getStats(dataset.endpoint, dataset.entryPoint)
-                .then(stats => {
-                    this.props.setStats(stats)
-                })
-        }else if(dataset.present.status === 'fetching_data') {
-            console.log('Fetch data now ! (to_do) ')
-
-        }
+        const { display, env, mode } = this.props
 
         return (<div
             className = "view"
@@ -92,7 +59,7 @@ class App extends React.Component {
         zones.full = svgScale.scaleViewBox(display.zonesDefPercent.full, stage)
         zones.dev = svgScale.scaleViewBox(display.zonesDefPercent.dev, stage)
 
-        this.props.onResize({
+        this.props.setDisplay({
             screen,
             viewBox,
             stage,
@@ -109,25 +76,11 @@ function mapStateToProps (state) {
     }
 }
 
-function mapDispatchToProps (dispatch) {
+function mapDispatchToProps (dispatch, getState) {
     return {
-        init: () => {
-            dispatch({
-                type: 'INIT'
-            })
-        },
-        setStats: (stats) => {
-            dispatch({
-                type: 'SET_STATS',
-                stats
-            })
-        },
-        onResize: (display) => {
-            dispatch({
-                type: 'SET_DISPLAY',
-                ...display
-            })
-        }
+        init: init(dispatch, getState),
+        loadData: loadData(dispatch, getState),
+        setDisplay: setDisplay(dispatch, getState)
     }
 }
 

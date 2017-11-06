@@ -1,33 +1,44 @@
+import * as types from '../constants/ActionTypes'
+
 const initialState = {
     endpoint: 'http://data.nobelprize.org/snorql/?query=', // 'http://wilda.lri.fr:3030/dataset.html'
-    entryPoint: '<http://data.nobelprize.org/terms/LaureateAward>',
-    constraint: '',
+    entrypoint: '<http://data.nobelprize.org/terms/LaureateAward>',
+    constraints: '',
     status: 'off',
-    stats: []
+    stats: [],
+    configs: []
 }
+
+const initialConfig = { properties: [], grade: 0 }
 
 const dataset = (state = initialState, action) => {
     switch (action.type) {
-    case 'INIT':
+    case types.INIT:
         return {
             ...state,
             status: 'fetching_props'
         }
-    case 'SET_ENTRYPOINT':
+    case types.SET_ENTRYPOINT:
         return {
             ...state,
             endpoint: action.endpoint,
             entryPoint: action.entryPoint,
-            constraint: action.constraint || '',
+            constraints: action.constraints || '',
             status: 'fetching_props'
         }
-    case 'SET_STATS':
+    case types.SET_STATS:
         return {
             ...state,
-            status: 'fetching_data',
+            status: 'ranking_views',
             stats: action.stats
         }
-    case 'SET_DATA':
+    case types.SET_CONFIGS:
+        return {
+            ...state,
+            configs: action.configs,
+            status: 'fetching_data',
+        }
+    case types.SET_DATA:
         return {
             ...state,
             status: 'ok'

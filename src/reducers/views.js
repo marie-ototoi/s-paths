@@ -1,9 +1,20 @@
-const defaultState = {
-    id: 'fallback',
-    constraints: []
-}
+const defaultState = [
+    { 
+        id: 'Timeline', 
+        constraints: [
+            { group: 'datetime', min_unique: 2 }
+        ]
+    },
+    {
+        id: 'Heatmap', 
+        constraints: [
+            { group: 'datetime', min_unique: 2 },
+            { group: 'text', min_unique: 2, max_unique: 20 }
+        ]
+    }
+]
 
-const view = (state = defaultState, action) => {
+const view = (state = {}, action) => {
     switch (action.type) {
     case 'SELECT_VIEWS':
         // for each prop, check if it fits the constraints
@@ -22,7 +33,7 @@ const view = (state = defaultState, action) => {
     }
 }
 
-const views = (state = [], action) => {
+const views = (state = defaultState, action) => {
     switch (action.type) {
     case 'SELECT_VIEWS':
     case 'DISPLAY_VIEWS':
