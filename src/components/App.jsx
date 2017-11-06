@@ -5,7 +5,8 @@ import Aside from './Aside'
 import Debug from './Debug'
 import resize from '../svg/resize'
 import scale from '../svg/scale'
-import { loadData, init, setDisplay, setStats } from '../actions'
+import { setDisplay } from '../actions/display'
+import { loadData, init, setStats } from '../actions/data'
 
 class App extends React.Component {
     constructor (props) {
