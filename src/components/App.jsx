@@ -3,7 +3,8 @@ import { connect } from 'react-redux'
 import Main from './Main'
 import Aside from './Aside'
 import Debug from './Debug'
-import svgScale from '../svg/scale'
+import resize from '../svg/resize'
+import scale from '../svg/scale'
 import { loadData, init, setDisplay, setStats } from '../actions'
 
 class App extends React.Component {
@@ -41,23 +42,16 @@ class App extends React.Component {
         </div>)
     }
     resize () {
-        const { display, env, mode, dataset } = this.props
+        const { display, env, mode } = this.props
         
-        let screen = {}
-        screen.height = window.innerHeight - 5
-        screen.width = window.innerWidth - 5
+        let screen = resize.getScreen()
 
         let viewBoxDef = (env === 'dev') ? display.zonesDefPercent.dev : display.zonesDefPercent[mode||'full']
-        let stage = svgScale.scaleStage(viewBoxDef, screen)
-        let viewBox = svgScale.scaleViewBox(viewBoxDef, stage)
-        let grid = svgScale.getGrid(display.gridDefPercent, stage)
+        let stage = scale.scaleStage(viewBoxDef, screen)
+        let viewBox = scale.scaleViewBox(viewBoxDef, stage)
+        let grid = scale.getGrid(display.gridDefPercent, stage)
 
-        let zones = {}
-        zones.main = svgScale.scaleViewBox(display.zonesDefPercent.main, stage)
-        zones.aside = svgScale.scaleViewBox(display.zonesDefPercent.aside, stage)
-        zones.aside.rotation = 0
-        zones.full = svgScale.scaleViewBox(display.zonesDefPercent.full, stage)
-        zones.dev = svgScale.scaleViewBox(display.zonesDefPercent.dev, stage)
+        let zones = resize.getZones(display.zonesDefPercent, stage)
 
         this.props.setDisplay({
             screen,
