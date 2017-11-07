@@ -1,5 +1,6 @@
 import * as types from '../constants/ActionTypes'
 import data from '../../test/data/nobel'
+
 // import {SparqlClient, SPARQL} from 'sparql-client-2'
 
 const selectViewConfigs = (availableViews, stats, domainRules = []) => {
@@ -96,7 +97,7 @@ const loadData = (dispatch) => (endpoint, entrypoint, constraints, configs, view
                 getData(endpoint, queryAside)
             ])
                 .then(([dataMain, dataAside]) => {
-                    console.log(dataMain)
+                    // console.log(dataMain)
                     dispatch({
                         type: types.SET_DATA,
                         statements: dataMain,

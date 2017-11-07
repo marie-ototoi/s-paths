@@ -3,19 +3,18 @@ import { connect } from 'react-redux'
 import Main from './Main'
 import Aside from './Aside'
 import Debug from './Debug'
-import resize from '../svg/resize'
 import scale from '../svg/scale'
-import { setDisplay } from '../actions/display'
+import { getScreen, getZones, setDisplay } from '../actions/display'
 import { loadData, init, setStats } from '../actions/data'
 
 class App extends React.Component {
     constructor (props) {
         super(props)
-        this.resize = this.resize.bind(this)
-        window.addEventListener("resize", this.resize)
+        this.onResize = this.onResize.bind(this)
+        window.addEventListener("resize", this.onResize)
     }
     componentDidMount () {
-        this.resize()
+        this.onResize()
         this.props.init()
         const { dataset, views } = this.props
         this.props.loadData(dataset.present.endpoint, dataset.present.entryPoint, dataset.present.constraints, views)
@@ -42,25 +41,25 @@ class App extends React.Component {
             </svg>
         </div>)
     }
-    resize () {
+    onResize () {
         const { display, env, mode } = this.props
         
-        let screen = resize.getScreen()
-
-        let viewBoxDef = (env === 'dev') ? display.zonesDefPercent.dev : display.zonesDefPercent[mode||'full']
-        let stage = scale.scaleStage(viewBoxDef, screen)
-        let viewBox = scale.scaleViewBox(viewBoxDef, stage)
-        let grid = scale.getGrid(display.gridDefPercent, stage)
-
-        let zones = resize.getZones(display.zonesDefPercent, stage)
-
         this.props.setDisplay({
+            env, 
+            mode, 
+            zonesDef: display.zonesDefPercent, 
+            gridDef: display.gridDefPercent, 
+            screen : getScreen()
+
+        })
+
+/*        this.props.setDisplay({
             screen,
             viewBox,
             stage,
             grid,
             zones
-        })
+        })*/
     }
 }
 
@@ -71,11 +70,11 @@ function mapStateToProps (state) {
     }
 }
 
-function mapDispatchToProps (dispatch, getState) {
+function mapDispatchToProps (dispatch) {
     return {
-        init: init(dispatch, getState),
-        loadData: loadData(dispatch, getState),
-        setDisplay: setDisplay(dispatch, getState)
+        init: init(dispatch),
+        loadData: loadData(dispatch),
+        setDisplay: setDisplay(dispatch)
     }
 }
 

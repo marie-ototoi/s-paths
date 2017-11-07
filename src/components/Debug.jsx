@@ -2,12 +2,6 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 class Debug extends React.Component {
-    componentDidMount () {
-    }
-
-    componentWillUpdate () {
-    }
-
     render () {
         const { display } = this.props
         let xLines

@@ -13,6 +13,15 @@ const scaleViewBox = (viewBoxDef, stage) => {
     return { x, y, width, height }
 }
 
+const getZones = (zonesDef, stage) => {
+    return {
+        main: scaleViewBox(zonesDef.main, stage),
+        aside: scaleViewBox(zonesDef.aside, stage),
+        full: scaleViewBox(zonesDef.full, stage),
+        dev: scaleViewBox(zonesDef.dev, stage)
+    }
+}
+
 const scaleX = (xPoint, stage) => {
     return Math.floor(stage.width * xPoint / 100)
 }
@@ -27,8 +36,9 @@ const getGrid = (gridDef, stage) => {
     return { xPoints, yPoints }
 }
 
+exports.getGrid = getGrid
+exports.getZones = getZones
 exports.scaleStage = scaleStage
 exports.scaleViewBox = scaleViewBox
 exports.scaleX = scaleX
 exports.scaleY = scaleY
-exports.getGrid = getGrid
