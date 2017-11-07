@@ -1,5 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import HeatMap from './views/HeatMap'
+import Timeline from './views/Timeline'
 
 const zonesDef = {
     center: { x: 19, y: 19, width: 60, height: 60 },

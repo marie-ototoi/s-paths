@@ -11,11 +11,11 @@ import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
 import { default as HeatMap } from '../../../src/components/views/HeatMap'
 
-const store = createStore(reducers);
+const store = createStore(reducers)
 
 describe('<HeatMap />', () => {
     it('should render a svg group classed HeatMap', () => {
-        const wrapper = mount(<Provider store = {store}><HeatMap /></Provider>)
+        const wrapper = mount(<Provider store = {store}><HeatMap zone = "main" /></Provider>)
         expect(wrapper.find('g.HeatMap')).to.have.length(1)
     })
 })

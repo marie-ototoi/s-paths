@@ -3,7 +3,7 @@ import { createStore } from 'redux'
 import { Provider, connect } from 'react-redux'
 import reducers from '../../src/reducers'
 import { shallow, mount, render } from 'enzyme'
-import chai, {expect} from 'chai'
+import chai, { expect } from 'chai'
 import chaiEnzyme from 'chai-enzyme'
 chai.use(chaiEnzyme())
 import sinon from 'sinon'

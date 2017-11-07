@@ -11,7 +11,7 @@ import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
 import { default as Timeline } from '../../../src/components/views/Timeline'
 
-const store = createStore(reducers);
+const store = createStore(reducers)
 
 describe('<Timeline />', () => {
     it('should render a svg group classed Timeline', () => {

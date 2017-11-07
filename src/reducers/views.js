@@ -1,15 +1,15 @@
 const defaultState = [
-    { 
-        id: 'Timeline', 
+    {
+        id: 'Timeline',
         constraints: [
-            { group: 'datetime', min_unique: 2 }
+            [{ group: 'datetime', unique: { min: 2 } }]
         ]
     },
     {
-        id: 'Heatmap', 
+        id: 'Heatmap',
         constraints: [
-            { group: 'datetime', min_unique: 2 },
-            { group: 'text', min_unique: 2, max_unique: 20 }
+            [{ group: 'datetime', unique: { min: 2 } }],
+            [{ group: 'text', unique: { min: 2, max: 20, optimal: [6, 15] } }]
         ]
     }
 ]

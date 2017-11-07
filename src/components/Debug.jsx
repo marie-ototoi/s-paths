@@ -40,10 +40,12 @@ function mapStateToProps (state) {
         display: state.display
     }
 }
+
 function mapDispatchToProps (state) {
     return {
     }
 }
+
 const DebugConnect = connect(mapStateToProps, mapDispatchToProps)(Debug)
 
 export default DebugConnect

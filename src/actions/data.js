@@ -1,25 +1,8 @@
 import * as types from '../constants/ActionTypes'
 import data from '../../test/data/nobel'
-
+import configViews from '../lib/configViews'
 // import {SparqlClient, SPARQL} from 'sparql-client-2'
 
-const selectViewConfigs = (availableViews, stats, domainRules = []) => {
-    // for each views, checks which properties ou sets of properties could match and evaluate
-    return []
-}
-
-const activateDefaultViewConfigs = (viewConfigs) => {
-    // temporary : select the first 2 ones
-    return viewConfigs.map((vc, index) => {
-        let zone;
-        if (index === 0) zone = 'main'
-        if (index === 1) zone = 'aside'
-        return {
-            ...vc,
-            zone: (index <= 1) ? zone : null
-        }
-    })
-}
 
 const getStats = (endpoint, entrypoint) => {
     return new Promise((resolve, reject) => {
@@ -70,22 +53,20 @@ const setEntrypoint = (dispatch) => (endpoint, entrypoint, constraints = '') => 
     })
 }
 
-const loadData = (dispatch) => (endpoint, entrypoint, constraints, configs, views) => {
+const loadData = (dispatch) => (endpoint, entrypoint, constraints, views) => {
     getStats(endpoint, entrypoint)
         .then(stats => {
             dispatch({
                 type: types.SET_STATS,
                 stats
             })
-            let configs = selectViewConfigs(views, stats)
-            configs = activateDefaultViewConfigs(configs)
+            // for each views, checks which properties ou sets of properties could match and evaluate
+            let configs = configViews.activateDefaultConfigs(configViews.getConfigs(views, stats))
             dispatch({
                 type: types.SET_CONFIGS,
                 configs
-            })
-            return new Promise((resolve) => {
-                resolve(configs)
-            })
+            })    
+            return new Promise((resolve) => resolve(configs))
         })
         .then(configs => {
             let configMain = configs.filter(c => c.zone === 'main')[0]
@@ -114,7 +95,6 @@ const loadData = (dispatch) => (endpoint, entrypoint, constraints, configs, view
             console.error('Error getting data', error)
         })
 }
-
 
 exports.init = init
 exports.loadData = loadData

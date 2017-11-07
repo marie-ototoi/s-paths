@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import Main from './Main'
 import Aside from './Aside'
 import Debug from './Debug'
-import scale from '../svg/scale'
+import scale from '../lib/scale'
 import { getScreen, getZones, setDisplay } from '../actions/display'
 import { loadData, init, setStats } from '../actions/data'
 
@@ -11,7 +11,7 @@ class App extends React.Component {
     constructor (props) {
         super(props)
         this.onResize = this.onResize.bind(this)
-        window.addEventListener("resize", this.onResize)
+        window.addEventListener('resize', this.onResize)
     }
     componentDidMount () {
         this.onResize()
@@ -20,8 +20,9 @@ class App extends React.Component {
         this.props.loadData(dataset.present.endpoint, dataset.present.entryPoint, dataset.present.constraints, views)
     }
     render () {
-        const { display, env, mode } = this.props
-
+        const { configs, display, env, mode } = this.props
+        // let mainComponent = configs. 
+        // let asideComponent = 
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
@@ -52,21 +53,14 @@ class App extends React.Component {
             screen : getScreen()
 
         })
-
-/*        this.props.setDisplay({
-            screen,
-            viewBox,
-            stage,
-            grid,
-            zones
-        })*/
     }
 }
 
 function mapStateToProps (state) {
     return {
         display: state.display,
-        dataset: state.dataset
+        dataset: state.dataset,
+        views: state.views
     }
 }
 
