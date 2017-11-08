@@ -35,7 +35,6 @@ const dataset = (state = initialState, action) => {
     case types.SET_CONFIGS:
         return {
             ...state,
-            configs: action.configs,
             status: 'fetching_data',
         }
     case types.SET_DATA:

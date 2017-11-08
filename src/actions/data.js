@@ -1,6 +1,6 @@
 import * as types from '../constants/ActionTypes'
 import data from '../../test/data/nobel'
-import configViews from '../lib/configViews'
+import configViews from '../lib/config'
 // import {SparqlClient, SPARQL} from 'sparql-client-2'
 
 

@@ -9,7 +9,7 @@ const defaultState = [
         id: 'Heatmap',
         constraints: [
             [{ group: 'datetime', unique: { min: 2 } }],
-            [{ group: 'text', unique: { min: 2, max: 20, optimal: [6, 15] } }]
+            [{ group: 'text', unique: { min: 2, max: 160, optimal: [6, 15] } }]
         ]
     }
 ]

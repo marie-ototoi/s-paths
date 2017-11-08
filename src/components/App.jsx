@@ -17,10 +17,11 @@ class App extends React.Component {
         this.onResize()
         this.props.init()
         const { dataset, views } = this.props
-        this.props.loadData(dataset.present.endpoint, dataset.present.entryPoint, dataset.present.constraints, views)
+        this.props.loadData(dataset.endpoint, dataset.entryPoint, dataset.constraints, views)
     }
     render () {
         const { configs, display, env, mode } = this.props
+        console.log(configs)
         // let mainComponent = configs. 
         // let asideComponent = 
         return (<div
@@ -59,8 +60,9 @@ class App extends React.Component {
 function mapStateToProps (state) {
     return {
         display: state.display,
-        dataset: state.dataset,
-        views: state.views
+        dataset: state.dataset.present,
+        views: state.views,
+        configs: state.configs.present
     }
 }
 

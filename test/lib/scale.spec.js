@@ -24,7 +24,7 @@ const stages = [
     { width: 3500, height : 1750 }
 ]
 
-describe('svg/scale', () => {
+describe('lib/scale', () => {
     it('should return the full dimensions of the stage based on the viewbox definition in percentage and the screen dimensions', () => {
         let stage1 = scale.scaleStage(displayDef.dev, screens[0])
         let stage2 = scale.scaleStage(displayDef.full, screens[0])
