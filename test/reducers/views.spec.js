@@ -5,8 +5,6 @@ import views from '../../src/reducers/views'
 
 chai.use(sinonChai)
 
-
-
 describe('reducers/views', () => {
     let initialState
     beforeEach( () => {
@@ -18,7 +16,7 @@ describe('reducers/views', () => {
         ]
     })
     it('should handle initial state', () => {
-        expect(views(undefined, { })).to.deep.equal([])
+        expect(views(undefined, { })[0].id).to.equal('Timeline')
     })
     it('should handle SELECT_VIEWS', () => {
         /*let action =  { 

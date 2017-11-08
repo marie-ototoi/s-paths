@@ -61,6 +61,7 @@ const gradeMatch = (match) => {
 }
 
 const findAllMatches = (inputList, addList) => {
+    // TO DO : prevent from having several times the same prop
     return  inputList.map(match => {
         // console.log('match', match)
         return addList.map(addElt => {
