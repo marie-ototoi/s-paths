@@ -13,6 +13,14 @@ class App extends React.Component {
         this.onResize = this.onResize.bind(this)
         window.addEventListener('resize', this.onResize)
     }
+    getMainConfig () {
+        const { configs } = this.props
+        return configs.filter(c => c.zone === 'main')[0]
+    }
+    getSideConfig () {
+        const { configs } = this.props
+        return configs.filter(c => c.zone === 'aside')[0]
+    }
     componentDidMount () {
         this.onResize()
         this.props.init()
@@ -21,9 +29,11 @@ class App extends React.Component {
     }
     render () {
         const { configs, display, env, mode } = this.props
-        console.log(configs)
-        // let mainComponent = configs. 
-        // let asideComponent = 
+        // console.log(configs)
+        const main = this.getMainConfig()
+        const MainComponent = main ? main.id : ''
+        const aside = this.getSideConfig()
+        const SideComponent = aside ? aside.id : ''
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
@@ -38,14 +48,17 @@ class App extends React.Component {
                 { env === 'dev' &&
                     <Debug />
                 }
-                <Main />
-                <Aside />
+                { main &&
+                   <MainComponent/>
+                }
+                { aside &&
+                   <SideComponent/>
+                }
             </svg>
         </div>)
     }
     onResize () {
         const { display, env, mode } = this.props
-        
         this.props.setDisplay({
             env, 
             mode, 
@@ -59,6 +72,7 @@ class App extends React.Component {
 
 function mapStateToProps (state) {
     return {
+        data: state.display,
         display: state.display,
         dataset: state.dataset.present,
         views: state.views,

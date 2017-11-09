@@ -139,9 +139,20 @@ const getConfigs = (views, stats) => {
         
         return {
             ...view,
-            matches: gradedMatches
+            matches: gradedMatches.sort((a, b) => {
+                return b.grade - a.grade
+            }).map((match, index) => {
+                return { 
+                    ...match, 
+                    selected: (index === 0)
+                }
+            })
         }
     })
+        .filter(view => view.matches.length > 0)
+        .sort((a, b) => {
+            return b.matches[0].grade - a.matches[0].grade
+        })
 }
 
 const activateDefaultConfigs = (configs) => {

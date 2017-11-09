@@ -5,7 +5,6 @@ import d3HeatMap from '../../d3/d3HeatMap'
 class HeatMap extends React.Component {
     render () {
         const { display } = this.props
-
         return (<g 
             className = "HeatMap { this.props.zone }"
             transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` }

@@ -3,7 +3,6 @@ import data from '../../test/data/nobel'
 import configViews from '../lib/config'
 // import {SparqlClient, SPARQL} from 'sparql-client-2'
 
-
 const getStats = (endpoint, entrypoint) => {
     return new Promise((resolve, reject) => {
         resolve(data.explore())

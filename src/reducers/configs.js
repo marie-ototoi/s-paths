@@ -31,7 +31,14 @@ const configs = (state = [], action) => {
     case types.SELECT_CONFIG:
         return state.map(c => config(c, action))
     case types.SET_CONFIGS:
-        return action.configs
+        return action.configs.map(c => {
+            return {
+                ...c,
+                matches: c.matches.sort((a, b) => {
+                    return b.grade - a.grade
+                })
+            }
+        })
     default:
         return state
     }
