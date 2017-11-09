@@ -15,27 +15,27 @@ describe('reducers/selections', () => {
     it('should handle ADD_SELECTION', () => {
         let addAction =  { 
             type: 'ADD_SELECTION', 
-            element: '#topic', 
+            selector: '#topic', 
             query: 'WHERE ?resource dct:subject ?any' 
         }
         expect(selections(undefined, addAction))
             .to.deep.equal([
-                {element: '#topic', query: 'WHERE ?resource dct:subject ?any' }
+                { selector: '#topic', query: 'WHERE ?resource dct:subject ?any' }
             ])
         expect(selections(savedState, addAction))
             .to.deep.equal([
                 { query: 'bibo:Book' },
-                { element: '#topic', query: 'WHERE ?resource dct:subject ?any' }
+                { selector: '#topic', query: 'WHERE ?resource dct:subject ?any' }
             ])
     })
     it('should handle REMOVE_SELECTION', () => {
         let removeAction =  { 
             type: 'REMOVE_SELECTION',
-            element: '#topic'
+            selector: '#topic'
         }
         let state = [
             { query: 'bibo:Book' },
-            { element: '#topic', query: 'WHERE ?resource dct:subject ?any' }
+            { selector: '#topic', query: 'WHERE ?resource dct:subject ?any' }
         ]
         expect(selections(undefined, removeAction))
             .to.deep.equal([])

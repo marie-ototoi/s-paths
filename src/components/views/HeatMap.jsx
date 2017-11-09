@@ -1,6 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import d3HeatMap from '../../d3/d3HeatMap'
+import { addSelection, removeSelection } from '../../actions/selection'
 
 class HeatMap extends React.Component {
     getData() {
@@ -40,6 +41,8 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
+        addSelection: addSelection(dispatch),
+        removeSelection: removeSelection(dispatch)
     }
 }
 

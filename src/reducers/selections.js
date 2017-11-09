@@ -4,7 +4,7 @@ const selection = (state, action) => {
     switch (action.type) {
     case 'ADD_SELECTION':
         return {
-            element: action.element,
+            selector: action.selector,
             query: action.query
         }
     default:
@@ -21,7 +21,7 @@ const selections = (state = defaultState, action ) => {
         ]
     case 'REMOVE_SELECTION':
         return state.filter(sel =>
-            sel.element !== action.element
+            sel.selector !== action.selector
         )
     default:
         return state
