@@ -5,7 +5,7 @@ const selection = (state, action) => {
     case 'ADD_SELECTION':
         return {
             selector: action.selector,
-            query: action.query
+            props: action.props
         }
     default:
         return state

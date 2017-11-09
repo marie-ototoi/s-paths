@@ -1,10 +1,10 @@
 import * as types from '../constants/ActionTypes'
 
-const addSelection = (dispatch) => (selector, query) => {
+const addSelection = (dispatch) => (selector, props) => {
     return dispatch({ 
         type: 'ADD_SELECTION', 
         selector, 
-        query 
+        props
     })
 }
 
