@@ -1,6 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import Main from './Main'
+import HeatMap from './views/HeatMap'
+import Timeline from './views/Timeline'
 import Aside from './Aside'
 import Debug from './Debug'
 import scale from '../lib/scale'
@@ -29,11 +31,15 @@ class App extends React.Component {
     }
     render () {
         const { configs, display, env, mode } = this.props
-        // console.log(configs)
+        console.log(configs)
+        const componentIds = {
+            'HeatMap': HeatMap,
+            'Timeline': Timeline
+        }
         const main = this.getMainConfig()
-        const MainComponent = main ? main.id : ''
+        const MainComponent = main ? componentIds[main.id] : ''
         const aside = this.getSideConfig()
-        const SideComponent = aside ? aside.id : ''
+        const SideComponent = aside ? componentIds[aside.id] : ''
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
@@ -49,10 +55,10 @@ class App extends React.Component {
                     <Debug />
                 }
                 { main &&
-                   <MainComponent/>
+                   <MainComponent zone = "main"/>
                 }
                 { aside &&
-                   <SideComponent/>
+                   <SideComponent zone = "aside" />
                 }
             </svg>
         </div>)
@@ -65,7 +71,6 @@ class App extends React.Component {
             zonesDef: display.zonesDefPercent, 
             gridDef: display.gridDefPercent, 
             screen : getScreen()
-
         })
     }
 }

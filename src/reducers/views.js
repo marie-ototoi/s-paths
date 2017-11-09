@@ -6,7 +6,7 @@ const defaultState = [
         ]
     },
     {
-        id: 'Heatmap',
+        id: 'HeatMap',
         constraints: [
             [{ group: 'datetime', unique: { min: 2 } }],
             [{ group: 'text', unique: { min: 2, max: 160, optimal: [6, 15] } }]
