@@ -171,3 +171,7 @@ const activateDefaultConfigs = (configs) => {
 exports.activateDefaultConfigs = activateDefaultConfigs
 exports.findAllMatches = findAllMatches
 exports.getConfigs = getConfigs
+exports.getDeviationCost = getDeviationCost
+exports.inRange = inRange
+exports.overRange = overRange
+exports.underRange = underRange
