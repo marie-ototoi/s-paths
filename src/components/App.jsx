@@ -30,9 +30,7 @@ class App extends React.Component {
         this.props.loadData(dataset.endpoint, dataset.entryPoint, dataset.constraints, views)
     }
     areDataLoaded () {
-      console.log("test");
-      if (this.props.dataset.status == "ok") return true
-      return false;
+      return (this.props.dataset.status === "ok")  
     }
     render () {
         const { configs, display, env, mode } = this.props
@@ -65,6 +63,7 @@ class App extends React.Component {
                 { aside && this.areDataLoaded() &&
                    <SideComponent zone = "aside" />
                 }
+                
             </svg>
         </div>)
     }
