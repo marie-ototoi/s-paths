@@ -29,6 +29,11 @@ class App extends React.Component {
         const { dataset, views } = this.props
         this.props.loadData(dataset.endpoint, dataset.entryPoint, dataset.constraints, views)
     }
+    areDataLoaded () {
+      console.log("test");
+      if (this.props.dataset.status == "ok") return true
+      return false;
+    }
     render () {
         const { configs, display, env, mode } = this.props
         console.log(configs)
@@ -54,10 +59,10 @@ class App extends React.Component {
                 { env === 'dev' &&
                     <Debug />
                 }
-                { main &&
+                { main && this.areDataLoaded() &&
                    <MainComponent zone = "main"/>
                 }
-                { aside &&
+                { aside && this.areDataLoaded() &&
                    <SideComponent zone = "aside" />
                 }
             </svg>
@@ -66,10 +71,10 @@ class App extends React.Component {
     onResize () {
         const { display, env, mode } = this.props
         this.props.setDisplay({
-            env, 
-            mode, 
-            zonesDef: display.zonesDefPercent, 
-            gridDef: display.gridDefPercent, 
+            env,
+            mode,
+            zonesDef: display.zonesDefPercent,
+            gridDef: display.gridDefPercent,
             screen : getScreen()
         })
     }
