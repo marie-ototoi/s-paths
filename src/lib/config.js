@@ -81,9 +81,6 @@ const findAllMatches = (inputList, addList) => {
 const getConfigs = (views, stats) => {
     return views.map(view => {
         let propList = []
-        if (view.entrypoint) {
-                
-        }
         // make a list of all possible properties for each constrained prop zone
         view.constraints.forEach(constraintSet => {
             let propSet = []

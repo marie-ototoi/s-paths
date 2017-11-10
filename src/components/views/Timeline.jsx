@@ -5,11 +5,13 @@ import { addSelection, removeSelection } from '../../actions/selection'
 
 class Timeline extends React.Component {
     render () {
-        const { display, env, mode } = this.props
+        //console.log('salut Timeline')
+        const { display } = this.props
         return (<g className = "Timeline">
         </g>)
     }
     componentDidMount () {
+        //console.log(this.props)
         d3Timeline.create(this.refs.HeatMap, this.props)
     }
     componentDidUpdate () {
@@ -22,9 +24,7 @@ class Timeline extends React.Component {
 
 function mapStateToProps (state) {
     return {
-        display: state.display,
-        env: state.env,
-        mode: state.mode
+        display: state.display
     }
 }
 

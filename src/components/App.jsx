@@ -29,8 +29,8 @@ class App extends React.Component {
         const { dataset, views } = this.props
         this.props.loadData(dataset.endpoint, dataset.entryPoint, dataset.constraints, views)
     }
-    areDataLoaded () {
-        return (this.props.dataset.status === "ok")  
+    dataLoaded (zone) {
+        return this.props.data.filter(d => d.zone === zone)[0].statements.results
     }
     render () {
         const { configs, display, env, mode } = this.props
@@ -57,10 +57,10 @@ class App extends React.Component {
                 { env === 'dev' &&
                     <Debug />
                 }
-                { main && this.areDataLoaded() &&
+                { main && this.dataLoaded('main') &&
                     <MainComponent zone = "main"/>
                 }
-                { aside && this.areDataLoaded() && false &&
+                { aside && this.dataLoaded('aside') && false &&
                     <SideComponent zone = "aside" />
                 }
                 
@@ -81,7 +81,7 @@ class App extends React.Component {
 
 function mapStateToProps (state) {
     return {
-        data: state.display,
+        data: state.data,
         display: state.display,
         dataset: state.dataset.present,
         views: state.views,
