@@ -9,16 +9,15 @@ const overRange = (val, range) => {
     return (val > range[1])
 }
 const getDeviationCost = (unique, grade) => {    
-    let gapMin = (unique.min) ? unique.optimal[0] - unique.min : null
-    let gapMax = (unique.max) ? unique.max - unique.optimal[1] : null
-    let maxGap = (gapMin > gapMax) ? gapMin : gapMax
+    const gapMin = (unique.min) ? unique.optimal[0] - unique.min : null
+    const gapMax = (unique.max) ? unique.max - unique.optimal[1] : null
+    const maxGap = (gapMin > gapMax) ? gapMin : gapMax
     return (maxGap) ? (grade / maxGap) : null
 }
-
 const gradeProp = (prop, constraint) => {
     // to do : prendre en compte la representativite de la prop par rapport au dataset
     // et eventuellement si la prop peut avoir plusieurs valeurs pour une meme instance (specifier dans la vue si c'est souhaite)
-    let maxGrade = 0.5
+    const maxGrade = 0.5
     let cost = 0
     switch (prop.group) {
     case 'datetime':
@@ -136,14 +135,13 @@ const getConfigs = (views, stats) => {
             }
         })
         // grade the combinations
-        
         return {
             ...view,
             matches: gradedMatches.sort((a, b) => {
                 return b.grade - a.grade
             }).map((match, index) => {
-                return { 
-                    ...match, 
+                return {
+                    ...match,
                     selected: (index === 0)
                 }
             })
