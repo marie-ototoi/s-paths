@@ -9,6 +9,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
                 format: 'Y',
                 unique_values: 113,
                 total_values: 911,
+                coverage: 100,
                 max_value: 2016,
                 min_value: 1901
             },
@@ -17,6 +18,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
                 label: 'field',
                 group: 'text',
                 language: 'en',
+                coverage: 100,
                 unique_values: 151,
                 total_values: 1251
             },
@@ -24,6 +26,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
                 path: 'nobel:LaureateAward/nobel:category/*',
                 label: 'category',
                 group: 'uri',
+                coverage: 100,
                 unique_values: 6,
                 total_values: 911
             },
@@ -31,6 +34,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
                 path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
                 label: 'gender of Laureate',
                 group: 'text',
+                coverage: 90,
                 unique_values: 2,
                 total_values: 885,
                 language: 'en'
@@ -40,36 +44,35 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
                 label: 'date of birth of Laureate',
                 group: 'datetime',
                 format: 'Y-m-d',
+                coverage: 80,
                 total_values: 883,
-                unique_values: 868,
-                max_value: 1997,
-                min_value: 1817
+                unique_values: 868
             },
             {
                 path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:birthday',
                 label: 'date of birth of Laureate',
                 group: 'datetime',
                 format: 'Y-m-d',
+                coverage: 60,
                 total_values: 883,
-                unique_values: 868,
-                max_value: 1997,
-                min_value: 1817
+                unique_values: 868
             },
             {
                 path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpprop:dateOfDeath/*',
                 label: 'date of death of Laureate',
                 group: 'datetime',
                 format: 'Y-m-d',
+                coverage: 70,
                 total_values: 600,
                 unique_values: 589,
-                max_value: 2017,
-                min_value: 1903
+                
             },
             {
                 path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpedia-owl:birthPlace/dbpedia-owl:City',
                 label: 'place of birth of Laureate (city)',
                 group: 'geo',
                 granularity: 'city',
+                coverage: 78,
                 total_values: 884,
                 unique_values: 602
             },
@@ -78,6 +81,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
                 label: 'place of birth of Laureate (country)',
                 group: 'geo',
                 granularity: 'country',
+                coverage: 76,
                 total_values: 885,
                 unique_values: 121
             },
@@ -86,6 +90,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
                 label: 'place of death of Laureate (city)',
                 group: 'geo',
                 granularity: 'city',
+                coverage: 54,
                 total_values: 582,
                 unique_values: 293
             },
@@ -94,6 +99,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
                 label: 'place of death of Laureate (country)',
                 group: 'geo',
                 granularity: 'country',
+                coverage: 56,
                 total_values: 588,
                 unique_values: 52
             },
@@ -102,6 +108,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
                 label: 'place of university (country)',
                 group: 'geo',
                 granularity: 'country',
+                coverage: 94,
                 total_values: 742,
                 unique_values: 29
             },
@@ -110,6 +117,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
                 label: 'place of university (city)',
                 group: 'geo',
                 granularity: 'city',
+                coverage: 92,
                 total_values: 1009,
                 unique_values: 185
             }

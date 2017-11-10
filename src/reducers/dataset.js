@@ -5,8 +5,7 @@ const initialState = {
     entrypoint: '<http://data.nobelprize.org/terms/LaureateAward>',
     constraints: '',
     status: 'off',
-    stats: [],
-    configs: []
+    stats: []
 }
 
 const initialConfig = { properties: [], grade: 0 }

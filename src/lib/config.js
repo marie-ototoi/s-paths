@@ -8,14 +8,26 @@ const underRange = (val, range) => {
 const overRange = (val, range) => {
     return (val > range[1])
 }
-const getDeviationCost = (unique, grade) => {    
-    const gapMin = (unique.min) ? unique.optimal[0] - unique.min : null
-    const gapMax = (unique.max) ? unique.max - unique.optimal[1] : null
+const getDeviationCost = (min, max, optimal, grade) => {
+    if(!optimal || (!min && !max)) return 0
+    const gapMin = (min) ? optimal[0] - min : null
+    const gapMax = (max) ? max - optimal[1] : null
     const maxGap = (gapMin > gapMax) ? gapMin : gapMax
     return (maxGap) ? (grade / maxGap) : null
 }
+const getCost = (val, min, max, optimal, grade) => {
+    if (optimal && inRange(val, optimal)) return 0
+    const deviationCost = getDeviationCost(min, max, optimal, grade)
+    if (underRange(val, optimal) && min) {
+        return deviationCost * (optimal[0] - val)
+    } else if (overRange(val, optimal) && max) {
+        return deviationCost * (val - optimal[1])
+    } 
+    return grade / 2            
+}
 const gradeProp = (prop, constraint) => {
-    // to do : prendre en compte la representativite de la prop par rapport au dataset
+    if (prop.path === '') return null
+    
     // et eventuellement si la prop peut avoir plusieurs valeurs pour une meme instance (specifier dans la vue si c'est souhaite)
     const maxGrade = 0.5
     let cost = 0
@@ -29,41 +41,36 @@ const gradeProp = (prop, constraint) => {
         break
     case 'text':
         // the closer to the optimal range, the better
-        if (!(constraint.unique.optimal && 
-        inRange(prop.unique_values, constraint.unique.optimal))) {
-            let deviationCost = getDeviationCost(constraint.unique, maxGrade)
-            if (underRange(prop.unique_values, constraint.unique.optimal) &&
-                constraint.unique.min) {
-                cost = deviationCost * (constraint.unique.optimal[0] - prop.unique_values)
-            } else if (overRange(prop.unique_values, constraint.unique.optimal) &&
-            constraint.unique.max) {
-                cost = deviationCost * (prop.unique_values - constraint.unique.optimal[1])
-            } else {
-                cost = maxGrade / 2
-            }            
-        }
+        const { min, max, optimal } = constraint.unique
+        cost = getCost(prop.unique_values, min, max, optimal, maxGrade)
         break
     default:
         //
     }
-    return maxGrade - cost
+    let grade = maxGrade - cost
+    // modulates grade according to the coverage of the dataset by this prop
+    grade *= prop.coverage / 100
+    return grade
 }
 
 const gradeMatch = (match) => {
+    match = match.filter(m => m.grade != null)
     // mean of each property's grade
-    let grade = match.map(m => m.grade).reduce((a, b) => a+b , 0) / match.length
+    let grade = match.map(m => m.grade).reduce((a, b) => a + b , 0) / match.length
     // bonus for each property represented
     grade += 0.3 * match.length
     // domain rules to add values for some properties : TO DO 
-    // console.log('grade', grade)
     return grade        
 }
 
 const findAllMatches = (inputList, addList) => {
-    // TO DO : prevent from having several times the same prop
     return  inputList.map(match => {
         // console.log('match', match)
         return addList.map(addElt => {
+            match.forEach(m => {
+                // prevent from having several times the same prop
+                if(m.path === addElt.path) addElt = { path: '' }
+            })
             return [...match, addElt]
         })
     }).reduce((a, b) => {
@@ -74,18 +81,22 @@ const findAllMatches = (inputList, addList) => {
 const getConfigs = (views, stats) => {
     return views.map(view => {
         let propList = []
-        // makes a list of all possible properties for each constrained prop zone
+        if (view.entrypoint) {
+                
+        }
+        // make a list of all possible properties for each constrained prop zone
         view.constraints.forEach(constraintSet => {
             let propSet = []
             stats.statements.forEach(prop => {
                 constraintSet.forEach(constraint => {
                     // generic conditions
-                    if (prop.group === constraint.group &&
+                    if ((prop.group === constraint.group ||
+                        constraint.group === '*') &&
                     !(
-                        (constraint.unique.min && prop.unique < constraint.unique.min) ||
-                        (constraint.unique.max && prop.unique > constraint.unique.max)
+                        (constraint.unique.min && prop.unique_values < constraint.unique.min) ||
+                        (constraint.unique.max && prop.unique_values > constraint.unique.max)
                     )) {
-                        // conditions specific to a group
+                        // conditions specific to each group
                         switch (prop.group) {
                         case 'datetime':
                             propSet.push({
@@ -120,21 +131,44 @@ const getConfigs = (views, stats) => {
                     }
                 })
             })
-            propList.push(propSet)
+            propList.push(propSet.sort((a, b) => {
+                return b.grade - a.grade
+            }))
         })
-        // finds all possibles combinations
+        // find all possible combinations
         let matches = propList[0].map(prop => [prop])
         for (let i = 1; i < propList.length; i++) {
             matches = findAllMatches(matches, propList[i])
         }
-        // grade different combinations
+        // remove combinations where a mandatory prop is missing
+        matches = matches.filter(match => {
+            let missingProp = false
+            match.forEach((prop, index) => {
+                missingProp = ((prop.path === '') && (!view.constraints[index][0].optional))
+            })
+            return !missingProp
+        })
+        // if the view is supposed to display each entity
+        let entrypointFactor = 1
+        if (view.entrypoint) {
+            const { min, max, optimal } = view.entrypoint
+            let addValue
+            if (! inRange(stats.total_instances, [min, max])) {
+                // will result in each grade being 0, so discard the view
+                entrypointFactor = 0
+            } else {
+                // will higher each grade
+                entrypointFactor += getCost(stats.total_instances, min, max, optimal, 0.3)
+            }
+        }
+        // remove combinations where a mandatory prop is missing
         let gradedMatches = matches.map(match => {
             return {
                 properties: match.map(prop => prop.path), 
-                grade: gradeMatch(match)
+                grade: gradeMatch(match) * entrypointFactor
             }
         })
-        // grade the combinations
+        // sort by grade and return
         return {
             ...view,
             matches: gradedMatches.sort((a, b) => {
