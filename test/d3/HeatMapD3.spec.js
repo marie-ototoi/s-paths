@@ -11,9 +11,9 @@ import { create, destroy, update } from '../../src/d3/d3HeatMap'
 import { load, loadEmpty, loadError } from '../data/nobel'
 
 var el = d3.select('body').append('g').attr('class', 'HeatMap').attr('id', 'heatMap')._groups[0][0]
-var state = {zone: 'main', display: { zones: { main: { width: 500, height: 300} } }, data: [ {zone: 'main', statements: load() } ] }
-var stateEmpty = {zone: 'main', display: { zones: { main: { width: 500, height: 300} } }, data: [ {zone: 'main', statements: loadEmpty() } ] }
-var stateError = {zone: 'main', display: { zones: { main: { width: 500, height: 300} } }, data: [ {zone: 'main', statements: loadError() } ] }
+var state = { zone: 'main', display: { zones: { main: { width: 500, height: 300 } } }, data: [ { zone: 'main', statements: load() } ] }
+var stateEmpty = { zone: 'main', display: { zones: { main: { width: 500, height: 300 } } }, data: [ { zone: 'main', statements: loadEmpty() } ] }
+var stateError = { zone: 'main', display: { zones: { main: { width: 500, height: 300 } } }, data: [ { zone: 'main', statements: loadError() } ] }
 
 describe('d3HeatMap', function () {
     before(function () {
