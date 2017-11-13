@@ -32,7 +32,7 @@ class App extends React.Component {
     }
     render () {
         const { configs, display, env, mode } = this.props
-        console.log(configs)
+        // console.log(configs)
         const componentIds = {
             'HeatMap': HeatMap,
             'Timeline': Timeline
