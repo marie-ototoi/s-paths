@@ -41,7 +41,8 @@ var dataSort = (data) => {
 }
 
 const create = (el, state) => {
-    console.log("CREATE");
+    if(el && state.data.statements) {
+    // console.log("CREATE");
     let data = null;
     state.data.forEach(function(item){
       if ( item.zone == state.zone) data = item;
@@ -99,12 +100,12 @@ const create = (el, state) => {
           .attr("transform", function (d) {
               return "rotate(-65)";
           });
-
+    }
 }
 
 const update = (el, state) => {
-    console.log("UPDATE",el);
-    console.log("UPDATE",state);
+    // console.log("UPDATE",el);
+    // console.log("UPDATE",state);
 }
 
 const destroy = (el) => {
