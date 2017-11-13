@@ -6,6 +6,7 @@ import Timeline from './views/Timeline'
 import Aside from './Aside'
 import Debug from './Debug'
 import scale from '../lib/scale'
+import data from '../lib/data'
 import { getScreen, getZones, setDisplay } from '../actions/display'
 import { loadData, init, setStats } from '../actions/data'
 
@@ -29,14 +30,9 @@ class App extends React.Component {
         const { dataset, views } = this.props
         this.props.loadData(dataset.endpoint, dataset.entryPoint, dataset.constraints, views)
     }
-    areDataLoaded () {
-      console.log("test");
-      if (this.props.dataset.status == "ok") return true
-      return false;
-    }
     render () {
         const { configs, display, env, mode } = this.props
-        console.log(configs)
+        // console.log(configs)
         const componentIds = {
             'HeatMap': HeatMap,
             'Timeline': Timeline
@@ -59,12 +55,13 @@ class App extends React.Component {
                 { env === 'dev' &&
                     <Debug />
                 }
-                { main && this.areDataLoaded() &&
-                   <MainComponent zone = "main"/>
+                { main && data.areLoaded(this.props.data, 'main') &&
+                    <MainComponent zone = "main"/>
                 }
-                { aside && this.areDataLoaded() &&
-                   <SideComponent zone = "aside" />
+                { aside && data.areLoaded(this.props.data, 'aside') &&
+                    <SideComponent zone = "aside" />
                 }
+                
             </svg>
         </div>)
     }
@@ -82,7 +79,7 @@ class App extends React.Component {
 
 function mapStateToProps (state) {
     return {
-        data: state.display,
+        data: state.data,
         display: state.display,
         dataset: state.dataset.present,
         views: state.views,

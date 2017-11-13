@@ -18,7 +18,7 @@ const makeQuery = (entrypoint, constraint) => {
 
 const getData = (endpoint, query) => {
     return new Promise((resolve, reject) => {
-        resolve(data.load())
+        resolve(data.load(query))
     })
     /*const client = new SparqlClient(endpoint)
         .register({
@@ -64,17 +64,17 @@ const loadData = (dispatch) => (endpoint, entrypoint, constraints, views) => {
             dispatch({
                 type: types.SET_CONFIGS,
                 configs
-            })    
+            })
             return new Promise((resolve) => resolve(configs))
         })
         .then(configs => {
-            let configMain = configs.filter(c => c.zone === 'main')[0]
-            let queryMain =  makeQuery(entrypoint, constraints, configMain)
-            let configAside = configs.filter(c => c.zone === 'aside')[0]
-            let queryAside =  makeQuery(entrypoint, constraints, configAside)
+            const configMain = configs.filter(c => c.zone === 'main')[0]
+            // const queryMain =  makeQuery(entrypoint, constraints, configMain)
+            const configAside = configs.filter(c => c.zone === 'aside')[0]
+            // const queryAside =  makeQuery(entrypoint, constraints, configAside)
             return Promise.all([
-                getData(endpoint, queryMain),
-                getData(endpoint, queryAside)
+                getData(endpoint, configMain.id),
+                getData(endpoint, configAside.id)
             ])
                 .then(([dataMain, dataAside]) => {
                     // console.log(dataMain)

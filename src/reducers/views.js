@@ -1,8 +1,11 @@
 const defaultState = [
     {
         id: 'Timeline',
+        entrypoint: { min: 2, max: 1000, optimal: [4, 200] },
         constraints: [
-            [{ group: 'datetime', unique: { min: 2 } }]
+            [{ group: 'datetime', unique: { min: 2 } }],
+            [{ group: 'uri', unique: { min: 2, max: 10, optimal: [4, 6] } }, { group: 'text', unique: { min: 2, max: 10, optimal: [4, 6] } }],
+            [{ group: 'uri', unique: { min: 2, max: 10, optimal: [4, 6] }, optional: true }, { group: 'text', unique: { min: 2, max: 10, optimal: [4, 6] } }]
         ]
     },
     {

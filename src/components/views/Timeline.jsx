@@ -1,24 +1,38 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import d3Timeline from '../../d3/d3Timeline'
+import { addSelection, removeSelection } from '../../actions/selection'
 
 class Timeline extends React.Component {
     render () {
-        const { display, env, mode } = this.props
-        return (<g className = "Timeline">
+        //console.log('salut Timeline')
+        const { display } = this.props
+        return (<g className = "Timeline" ref = "Timeline">
         </g>)
+    }
+    componentDidMount () {
+        //console.log(this.props)
+        d3Timeline.create(this.refs.Timeline, this.props)
+    }
+    componentDidUpdate () {
+        d3Timeline.update(this.refs.Timeline, this.props)
+    }
+    componentWillUnmount () {
+        d3Timeline.destroy(this.refs.Timeline)
     }
 }
 
 function mapStateToProps (state) {
     return {
         display: state.display,
-        env: state.env,
-        mode: state.mode
+        data: state.data
     }
 }
 
 function mapDispatchToProps (dispatch) {
     return {
+        addSelection: addSelection(dispatch),
+        removeSelection: removeSelection(dispatch)
     }
 }
 
