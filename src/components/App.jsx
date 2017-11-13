@@ -6,6 +6,7 @@ import Timeline from './views/Timeline'
 import Aside from './Aside'
 import Debug from './Debug'
 import scale from '../lib/scale'
+import data from '../lib/data'
 import { getScreen, getZones, setDisplay } from '../actions/display'
 import { loadData, init, setStats } from '../actions/data'
 
@@ -28,9 +29,6 @@ class App extends React.Component {
         this.props.init()
         const { dataset, views } = this.props
         this.props.loadData(dataset.endpoint, dataset.entryPoint, dataset.constraints, views)
-    }
-    dataLoaded (zone) {
-        return this.props.data.filter(d => d.zone === zone)[0].statements.results
     }
     render () {
         const { configs, display, env, mode } = this.props
@@ -57,10 +55,10 @@ class App extends React.Component {
                 { env === 'dev' &&
                     <Debug />
                 }
-                { main && this.dataLoaded('main') &&
+                { main && data.areLoaded(this.props.data, 'main') &&
                     <MainComponent zone = "main"/>
                 }
-                { aside && this.dataLoaded('aside') && false &&
+                { aside && data.areLoaded(this.props.data, 'aside') &&
                     <SideComponent zone = "aside" />
                 }
                 

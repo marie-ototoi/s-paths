@@ -4,10 +4,6 @@ import d3HeatMap from '../../d3/d3HeatMap'
 import { addSelection, removeSelection } from '../../actions/selection'
 
 class HeatMap extends React.Component {
-    getData() {
-        const { data } = this.props
-        return data.filter(d => d.zone === this.props.zone)[0].statements
-    }
     render () {
         const { display } = this.props
         // display.zones[this.props.zone].width

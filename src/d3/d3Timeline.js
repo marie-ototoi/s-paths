@@ -1,13 +1,15 @@
 import * as d3 from 'd3'
+import data from '../lib/data'
 
 const formatData = (data) => {
-    //console.log('salut c est moi data')
+    console.log('salut c est moi data', data)
 }
 
 const create = (el, props) => {
     //
-    if(el && props.data.statements) {
-        formatData(props.data.statements)
+    console.log('create', props)
+    if(el && data.dataLoaded(props.data, props.zone)) {
+        const fData = formatData(data.getResults(props.data, props.zone))
     }
 }
 
