@@ -25,7 +25,7 @@ const computeStatisticalInformation = (data) => {
     data.statements.results.bindings.forEach(function (item) {
         let prop1 = item.prop1.value
         let prop2 = item.prop2.value
-        let index1 = (Number(prop1) - Number(prop1) % 10) + ''
+        let index1 = (Number(prop1) - Number(prop1) % 1) + ''
         if (index1 in statistics) {
             if (prop2 in statistics[index1]) {
                 statistics[index1][prop2] = statistics[index1][prop2] + 1
