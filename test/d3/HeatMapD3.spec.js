@@ -23,11 +23,4 @@ describe('d3HeatMap', function () {
     it('A heatMap group should exist', function () {
         expect(d3.select('#heatMap'))
     })
-    before(function () {
-        create(el, stateEmpty)
-    })
-    after(function () {})
-    it('A heatMap group should exist', function () {
-        expect(d3.select('#heatMap'))
-    })
 })
