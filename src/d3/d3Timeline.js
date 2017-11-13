@@ -7,15 +7,15 @@ const formatData = (data) => {
 
 const create = (el, props) => {
     //
-    // console.log('create', props)
-    if(el && data.dataLoaded(props.data, props.zone)) {
+    // console.log('create', data.areLoaded(props.data, props.zone), data.getHeadings(props.data, props.zone))
+    if (el && data.areLoaded(props.data, props.zone)) {
         const fData = formatData(data.getResults(props.data, props.zone))
     }
 }
 
 const update = (el, props) => {
     //
-    if(el && props.data) {
+    if (el && props.data) {
 
     }
 }
