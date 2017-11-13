@@ -70,13 +70,11 @@ const loadData = (dispatch) => (endpoint, entrypoint, constraints, views) => {
         .then(configs => {
             const configMain = configs.filter(c => c.zone === 'main')[0]
             // const queryMain =  makeQuery(entrypoint, constraints, configMain)
-            const queryMain = 'HeatMap'
             const configAside = configs.filter(c => c.zone === 'aside')[0]
             // const queryAside =  makeQuery(entrypoint, constraints, configAside)
-            const queryAside = 'Timeline'
             return Promise.all([
-                getData(endpoint, queryMain),
-                getData(endpoint, queryAside)
+                getData(endpoint, configMain.id),
+                getData(endpoint, configAside.id)
             ])
                 .then(([dataMain, dataAside]) => {
                     // console.log(dataMain)

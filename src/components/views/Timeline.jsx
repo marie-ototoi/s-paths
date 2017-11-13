@@ -7,18 +7,18 @@ class Timeline extends React.Component {
     render () {
         //console.log('salut Timeline')
         const { display } = this.props
-        return (<g className = "Timeline">
+        return (<g className = "Timeline" ref = "Timeline">
         </g>)
     }
     componentDidMount () {
         //console.log(this.props)
-        d3Timeline.create(this.refs.HeatMap, this.props)
+        d3Timeline.create(this.refs.Timeline, this.props)
     }
     componentDidUpdate () {
-        d3Timeline.update(this.refs.HeatMap, this.props)
+        d3Timeline.update(this.refs.Timeline, this.props)
     }
     componentWillUnmount () {
-        d3Timeline.destroy(this.refs.HeatMap)
+        d3Timeline.destroy(this.refs.Timeline)
     }
 }
 

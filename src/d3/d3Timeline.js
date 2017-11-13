@@ -6,8 +6,7 @@ const formatData = (data) => {
 }
 
 const create = (el, props) => {
-    //
-    // console.log('create', data.areLoaded(props.data, props.zone), data.getHeadings(props.data, props.zone))
+    console.log('create', el)
     if (el && data.areLoaded(props.data, props.zone)) {
         const fData = formatData(data.getResults(props.data, props.zone))
     }
