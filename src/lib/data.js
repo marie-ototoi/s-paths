@@ -2,13 +2,13 @@ import * as d3 from 'd3'
 import moment from 'moment'
 
 const getResults = (data, zone) => {
-    return (areLoaded(data, zone)) ?
-        data.filter(d => d.zone === zone)[0].statements.results.bindings : []
+    return (areLoaded(data, zone))
+        ? data.filter(d => d.zone === zone)[0].statements.results.bindings : []
 }
 
 const getHeadings = (data, zone) => {
-    return (areLoaded(data, zone)) ?
-        data.filter(d => d.zone === zone)[0].statements.head.vars : []
+    return (areLoaded(data, zone))
+        ? data.filter(d => d.zone === zone)[0].statements.head.vars : []
 }
 
 const areLoaded = (data, zone) => {
@@ -20,14 +20,14 @@ const areLoaded = (data, zone) => {
 const groupTimeData = (data, propName, format, max) => {
     let dataToNest = data.map(d => {
         let dateProp = moment(d[propName].value, format)
-        if(! dateProp.isValid()) throw 'Cannot use time format'
-        
+        if (! dateProp.isValid()) throw 'Cannot use time format'
+
         return {
             ...d,
             dateProp,
             year: dateProp.format('Y'),
-            decade: Math.floor(Number(dateProp.format('Y'))/10) * 10,
-            century: Math.floor(Number(dateProp.format('Y'))/100) * 100
+            decade: Math.floor(Number(dateProp.format('Y')) / 10) * 10,
+            century: Math.floor(Number(dateProp.format('Y')) / 100) * 100
         }
     })
     let yearNest = d3.nest().key(prop => prop.year).entries(dataToNest)
