@@ -9,13 +9,12 @@ class HeatMap extends React.Component {
         // display.zones[this.props.zone].width
         // display.zones[this.props.zone].height
         // this.getData()
-        
-        return (<g 
+
+        return (<g
             className = "HeatMap { this.props.zone }"
             transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` }
             ref = "HeatMap"
         >
-            <rect x = { 10 } y = { 20 } width = { 100 } height = { 100 } />
         </g>)
     }
     componentDidMount () {

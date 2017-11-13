@@ -1,57 +1,16 @@
 import * as d3 from 'd3'
+import statisticalOperator from '../lib/statisticalOperator'
 
-let colorChooser = (value, min = 0, max = 1) => {
+const colorChooser = (value, min = 0, max = 1) => {
     let ramp = d3.scaleLinear().domain([min, max]).range([135, 0])
     return 'hsl(' + (ramp(value) > 75 ? ramp(value) + 135 : ramp(value)) + ', 100%, 50%)'
-}
-
-let dataSort = (data) => {
-    let statistics = []
-    let total = 0
-    let res = []
-    data.statements.results.bindings.forEach(function (item) {
-        let prop1 = item.prop1.value
-        let prop2 = item.prop2.value
-        let index1 = (Number(prop1) - Number(prop1) % 10) + ''
-        if (index1 in statistics) {
-            if (prop2 in statistics[index1]) {
-                statistics[index1][prop2] = statistics[index1][prop2] + 1
-                total++
-            } else {
-                statistics[index1][prop2] = 1
-                total++
-            }
-        } else {
-            statistics[index1] = []
-            statistics[index1][prop2] = 1
-            total++
-        }
-    })
-    let minValue = 1
-    let maxValue = 0
-    for (let k1 in statistics) {
-        for (let k2 in statistics[k1]) {
-            statistics[k1][k2] = statistics[k1][k2] / total
-            if (statistics[k1][k2] > maxValue) maxValue = statistics[k1][k2]
-            if (statistics[k1][k2] < minValue) minValue = statistics[k1][k2]
-            let newItem = {}
-            newItem.prop1 = k1
-            newItem.prop2 = k2
-            newItem.value = statistics[k1][k2]
-            res.push(newItem)
-        }
-    }
-    return { data: res, min: minValue, max: maxValue }
 }
 
 const create = (el, state) => {
     /* ******************************************************************************************************** */
     /* *****************************    data verification    ************************************************** */
     /* ******************************************************************************************************** */
-    let sortedData = null
-    state.data.forEach(function (item) {
-        if (item.zone === state.zone) sortedData = dataSort(item)
-    })
+    let sortedData = statisticalOperator.computeStatisticalInformation(state.data.filter(d => d.zone === state.zone)[0])
     let xElements = d3.set(sortedData.data.map(item => item.prop1)).values()
     let yElements = d3.set(sortedData.data.map(item => item.prop2)).values()
 
