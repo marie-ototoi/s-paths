@@ -7,7 +7,9 @@ class Timeline extends React.Component {
     render () {
         //console.log('salut Timeline')
         const { display } = this.props
-        return (<g className = "Timeline" ref = "Timeline">
+        return (<g className = "Timeline { this.props.zone }" 
+            transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` }
+            ref = "Timeline">
         </g>)
     }
     componentDidMount () {
@@ -25,7 +27,8 @@ class Timeline extends React.Component {
 function mapStateToProps (state) {
     return {
         display: state.display,
-        data: state.data
+        data: state.data,
+        configs: state.configs.present
     }
 }
 
