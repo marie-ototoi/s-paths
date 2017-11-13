@@ -1,9 +1,9 @@
-const initialZone = { zone: 'new', statements: [] }
+const initialZone = { zone: 'new', statements: {} }
 
 const initialState = [
-    { zone: 'main', statements: [] },
-    { zone: 'aside', statements: [] },
-    { zone: 'main-aside', statements: [] }
+    { zone: 'main', statements: {} },
+    { zone: 'aside', statements: {} },
+    { zone: 'main-aside', statements: {} }
 ]
 
 const datazone = (state = initialZone, action) => {
