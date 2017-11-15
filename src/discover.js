@@ -5,7 +5,7 @@ import { Provider, connect } from 'react-redux'
 import reducers from './reducers'
 import App from './components/App'
 
-const store = createStore(reducers);
+const store = createStore(reducers)
 
 if (module.hot) {
     // Enable Webpack hot module replacement for reducers
@@ -15,10 +15,10 @@ if (module.hot) {
     })
 }
 
-// mode = main ou aside 
+// mode = main ou aside
 // env = dev overwrites mode and shows debug component
 const init = () => {
-    ReactDOM.render(<Provider store = { store }><App mode = "aside" env = "dev"/></Provider>, document.getElementById('discover'))
+    ReactDOM.render(<Provider store = { store }><App mode = "aside" env = ""/></Provider>, document.getElementById('discover'))
 }
 init()
 

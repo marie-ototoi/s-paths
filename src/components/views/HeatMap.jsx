@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import d3HeatMap from '../../d3/d3HeatMap'
 import { addSelection, removeSelection } from '../../actions/selection'
+import statisticalOperator from '../../lib/statisticalOperator'
 
 class HeatMap extends React.Component {
     render () {
@@ -18,7 +19,8 @@ class HeatMap extends React.Component {
         </g>)
     }
     componentDidMount () {
-        d3HeatMap.create(this.refs.HeatMap, this.props)
+        let sortedData = statisticalOperator.computeStatisticalInformation(this.props.data.filter(d => d.zone === this.props.zone)[0])
+        d3HeatMap.create(this.refs.HeatMap, this.props.display, sortedData, this.props.addSelection, this.props.removeSelection)
     }
     componentDidUpdate () {
         d3HeatMap.update(this.refs.HeatMap, this.props)

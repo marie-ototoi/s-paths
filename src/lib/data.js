@@ -18,6 +18,7 @@ const areLoaded = (data, zone) => {
 }
 
 const groupTimeData = (data, propName, format, max) => {
+    console.log(data)
     let dataToNest = data.map(d => {
         let dateProp = moment(d[propName].value, format)
         if (! dateProp.isValid()) throw 'Cannot use time format'
