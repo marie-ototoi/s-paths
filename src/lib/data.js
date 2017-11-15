@@ -17,7 +17,12 @@ const areLoaded = (data, zone) => {
         data.filter(d => d.zone === zone)[0].statements.results.bindings.length > 0
 }
 
+<<<<<<< HEAD
+const groupTimeData = (data, propName, format, max) => {
+    console.log(data)
+=======
 const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
+>>>>>>> 30a804dce7164eec0689f4729993cb2665c7d4e8
     let dataToNest = data.map(d => {
         let dateProp = moment(d[propName].value, format)
         if (! dateProp.isValid()) throw 'Cannot use time format'
