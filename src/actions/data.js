@@ -72,6 +72,7 @@ const loadData = (dispatch) => (endpoint, entrypoint, constraints, views) => {
             // const queryMain =  makeQuery(entrypoint, constraints, configMain)
             const configAside = configs.filter(c => c.zone === 'aside')[0]
             // const queryAside =  makeQuery(entrypoint, constraints, configAside)
+            
             return Promise.all([
                 getData(endpoint, configMain.id),
                 getData(endpoint, configAside.id)
@@ -80,12 +81,26 @@ const loadData = (dispatch) => (endpoint, entrypoint, constraints, views) => {
                     // console.log(dataMain)
                     dispatch({
                         type: types.SET_DATA,
-                        statements: dataMain,
+                        statements: {
+                            ...dataMain,
+                            results: {
+                                bindings: dataMain.results.bindings.sort((a, b) => {
+                                    return a.prop1.value - b.prop1.value
+                                })
+                            }
+                        },
                         zone: 'main'
                     })
                     dispatch({
                         type: types.SET_DATA,
-                        statements: dataAside,
+                        statements: {
+                            ...dataAside,
+                            results: {
+                                bindings: dataAside.results.bindings.sort((a, b) => {
+                                    return a.prop1.value - b.prop1.value
+                                })
+                            }
+                        },
                         zone: 'aside'
                     })
                 })

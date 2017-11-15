@@ -17,8 +17,12 @@ const areLoaded = (data, zone) => {
         data.filter(d => d.zone === zone)[0].statements.results.bindings.length > 0
 }
 
+<<<<<<< HEAD
 const groupTimeData = (data, propName, format, max) => {
     console.log(data)
+=======
+const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
+>>>>>>> 30a804dce7164eec0689f4729993cb2665c7d4e8
     let dataToNest = data.map(d => {
         let dateProp = moment(d[propName].value, format)
         if (! dateProp.isValid()) throw 'Cannot use time format'
@@ -30,18 +34,29 @@ const groupTimeData = (data, propName, format, max) => {
             decade: Math.floor(Number(dateProp.format('Y')) / 10) * 10,
             century: Math.floor(Number(dateProp.format('Y')) / 100) * 100
         }
-    })
+    }).sort((a, b) => a.year - b.year)
     let yearNest = d3.nest().key(prop => prop.year).entries(dataToNest)
     let decadeNest = d3.nest().key(prop => prop.decade).entries(dataToNest)
     let centuryNest = d3.nest().key(prop => prop.century).entries(dataToNest)
-    console.log(yearNest.length)
+    //console.log(yearNest.length)
+    let nest
     if (yearNest.length < max) {
-        return yearNest
+        nest = yearNest
     } else if (decadeNest.length < max) {
-        return decadeNest
+        nest = decadeNest
     } else {
-        return centuryNest
+        nest = centuryNest
     }
+    return nest.map(group => {
+        let groupWithAdd = { ...group }
+        propsToAdd.forEach(prop => {
+            groupWithAdd[prop] = 0
+            group.values.forEach(val => {
+                groupWithAdd[prop] += Number(val[prop]) || 1
+            })
+        })
+        return groupWithAdd
+    })
 }
 
 exports.areLoaded = areLoaded

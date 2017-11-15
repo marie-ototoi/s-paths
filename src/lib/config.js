@@ -1,4 +1,8 @@
 
+const getSelectedConfig = (configs, zone) => {
+    return configs.filter(c => c.zone === zone)[0].matches.filter(m => m.selected === true)[0] || {}
+}
+
 const inRange = (val, range) => {
     return (val >= range[0] && val <= range[1])
 }
@@ -161,7 +165,7 @@ const getConfigs = (views, stats) => {
         // remove combinations where a mandatory prop is missing
         let gradedMatches = matches.map(match => {
             return {
-                properties: match.map(prop => prop.path), 
+                properties: match, 
                 grade: gradeMatch(match) * entrypointFactor
             }
         })
@@ -203,4 +207,5 @@ exports.getConfigs = getConfigs
 exports.getDeviationCost = getDeviationCost
 exports.inRange = inRange
 exports.overRange = overRange
+exports.getSelectedConfig = getSelectedConfig
 exports.underRange = underRange
