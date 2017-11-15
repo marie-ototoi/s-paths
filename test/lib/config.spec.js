@@ -53,5 +53,4 @@ describe('lib/config', () => {
         expect(config.getDeviationCost(3, 160, [5, 10], 0.5)).to.equal(0.5 / (160 - 10))
         expect(config.getDeviationCost(3, 20, [5, 10], 0.5)).to.equal(0.5 / (20 - 10))
     })
-
 })

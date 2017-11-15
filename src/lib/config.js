@@ -3,6 +3,10 @@ const getSelectedConfig = (configs, zone) => {
     return configs.filter(c => c.zone === zone)[0].matches.filter(m => m.selected === true)[0] || {}
 }
 
+const getViewDef = (views, zone) => {
+    return views.filter(c => c.zone === zone)[0] || {}
+}
+
 const inRange = (val, range) => {
     return (val >= range[0] && val <= range[1])
 }
@@ -166,7 +170,8 @@ const getConfigs = (views, stats) => {
         let gradedMatches = matches.map(match => {
             return {
                 properties: match, 
-                grade: gradeMatch(match) * entrypointFactor
+                grade: gradeMatch(match) * entrypointFactor/*,
+                entrypoint: (view.entrypoint !== undefined)*/
             }
         })
         // sort by grade and return
@@ -205,6 +210,7 @@ exports.activateDefaultConfigs = activateDefaultConfigs
 exports.findAllMatches = findAllMatches
 exports.getConfigs = getConfigs
 exports.getDeviationCost = getDeviationCost
+exports.getViewDef = getViewDef
 exports.inRange = inRange
 exports.overRange = overRange
 exports.getSelectedConfig = getSelectedConfig

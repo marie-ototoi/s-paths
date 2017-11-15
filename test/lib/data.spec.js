@@ -49,4 +49,29 @@ describe('lib/data', () => {
         expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 150, ['countprop2', 'countprop3'])[0].countprop2).to.equal(1)
         expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 150, ['countprop2', 'countprop3'])[2].countprop2).to.equal(2)
     })
+    it('should transform a FSL path into SPARQL', () => {
+        expect(data.FSL2SPARQL('nobel:LaureateAward/nobel:year/*', 'prop1', 'entrypoint')).to.equal('?entrypoint nobel:year ?prop1 . ')
+        expect(data.FSL2SPARQL('nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*', 'prop2', 'entrypoint')).to.equal('?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . ')
+    })
+    it('should make a valid SPARQL query with given entrypoint and props', () => {
+        const config = {
+            properties: [
+                { path: "nobel:LaureateAward/nobel:year/*" },
+                { path: "nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*" }
+            ]
+        }
+        const view = {
+            entrypoint: {}
+        }
+        expect(data.makeQuery('nobel:LaureateAward', config, {}))
+            .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) ?prop2 (COUNT(?prop2) as ?countprop2) 
+WHERE { ?entrypoint rdf:type nobel:LaureateAward . 
+?entrypoint nobel:year ?prop1 . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . 
+} GROUP BY ?prop1 ?prop2 ORDER BY ?prop1 ?countprop1 ?prop2 ?countprop2 `)
+        expect(data.makeQuery('nobel:LaureateAward', config, view))
+            .to.equal(`SELECT DISTINCT ?entrypoint ?prop1 ?prop2 
+WHERE { ?entrypoint rdf:type nobel:LaureateAward . 
+?entrypoint nobel:year ?prop1 . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . 
+} GROUP BY ?entrypoint ORDER BY ?prop1 ?prop2 `)
+    })
 })

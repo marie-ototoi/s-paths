@@ -9,7 +9,7 @@ const create = (el, props) => {
         const selectedConfig = config.getSelectedConfig(props.configs, props.zone)
         const selectedData = data.getResults(props.data, props.zone)
         const nestedData = data.groupTimeData(selectedData, 'prop1', selectedConfig.properties[0].format, 150)
-        // console.log(selectedData[0].prop1.value, selectedData[selectedData.length - 1].prop1.value)
+        // console.log(props)
         const xScale = d3.scaleLinear()
             .domain([Number(selectedData[0].prop1.value), Number(selectedData[selectedData.length - 1].prop1.value)])
             .range([0, props.display.zones[props.zone].width])

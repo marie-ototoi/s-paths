@@ -1,33 +1,38 @@
 import * as types from '../constants/ActionTypes'
-import data from '../../test/data/nobel'
+import stats from '../../test/data/nobel'
 import configViews from '../lib/config'
-// import {SparqlClient, SPARQL} from 'sparql-client-2'
+import data from '../lib/data'
+import {SparqlClient, SPARQL} from 'sparql-client-2'
 
 const getStats = (endpoint, entrypoint) => {
     return new Promise((resolve, reject) => {
-        resolve(data.explore())
+        resolve(stats.explore())
     })
-}
-
-const makeQuery = (entrypoint, constraint) => {
-    let query = `SELECT DISTINCT ?entrypoint 
-    WHERE { ?entrypoint type> ${entrypoint} . ${constraint}}`
-    //console.log(query)
-    return query
 }
 
 const getData = (endpoint, query) => {
-    return new Promise((resolve, reject) => {
-        resolve(data.load(query))
+    const client = new SparqlClient(endpoint)
+    .registerCommon('rdf', 'rdfs')
+    .register({
+        nobel: 'http://data.nobelprize.org/terms/',
+        foaf: 'http://xmlns.com/foaf/0.1/',
+        'dbpedia-owl': 'http://dbpedia.org/ontology/',
+        yago: 'http://yago-knowledge.org/resource/',
+        viaf: 'http://viaf.org/viaf/',
+        meta: 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#',
+        dcterms: 'http://purl.org/dc/terms/',
+        d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
+        dbpedia: 'http://dbpedia.org/resource/',
+        owl: 'http://www.w3.org/2002/07/owl#',
+        xsd: 'http://www.w3.org/2001/XMLSchema#',
+        map: 'http://data.nobelprize.org/resource/#',
+        freebase: 'http://rdf.freebase.com/ns/',
+        dbpprop: 'http://dbpedia.org/property/',
+        skos: 'http://www.w3.org/2004/02/skos/core#'
     })
-    /*const client = new SparqlClient(endpoint)
-        .register({
-            rdf: '<http://www.w3.org/1999/02/22-rdf-syntax-ns#'
-        })
     return client
-        .query(query + '&output=json')
+        .query(query)
         .execute()
-    */
 }
 
 const init = (dispatch) => () => {
@@ -52,7 +57,7 @@ const setEntrypoint = (dispatch) => (endpoint, entrypoint, constraints = '') => 
     })
 }
 
-const loadData = (dispatch) => (endpoint, entrypoint, constraints, views) => {
+const loadData = (dispatch) => (endpoint, entrypoint, views) => {
     getStats(endpoint, entrypoint)
         .then(stats => {
             dispatch({
@@ -68,25 +73,24 @@ const loadData = (dispatch) => (endpoint, entrypoint, constraints, views) => {
             return new Promise((resolve) => resolve(configs))
         })
         .then(configs => {
-            const configMain = configs.filter(c => c.zone === 'main')[0]
-            // const queryMain =  makeQuery(entrypoint, constraints, configMain)
-            const configAside = configs.filter(c => c.zone === 'aside')[0]
-            // const queryAside =  makeQuery(entrypoint, constraints, configAside)
+            const configMain = configViews.getSelectedConfig(configs, 'main')
+            const viewMain =  configViews.getViewDef(views, 'main')
+            const queryMain =  data.makeQuery(entrypoint, configMain, viewMain)
+            const configAside = configViews.getSelectedConfig(configs, 'aside')
+            const viewAside =  configViews.getViewDef(views, 'aside')
+            const queryAside =  data.makeQuery(entrypoint, configAside, viewAside)
             
             return Promise.all([
-                getData(endpoint, configMain.id),
-                getData(endpoint, configAside.id)
+                getData(endpoint, queryMain),
+                getData(endpoint, queryAside)
             ])
                 .then(([dataMain, dataAside]) => {
-                    // console.log(dataMain)
                     dispatch({
                         type: types.SET_DATA,
                         statements: {
                             ...dataMain,
                             results: {
-                                bindings: dataMain.results.bindings.sort((a, b) => {
-                                    return a.prop1.value - b.prop1.value
-                                })
+                                bindings: dataMain.results.bindings
                             }
                         },
                         zone: 'main'
@@ -96,9 +100,7 @@ const loadData = (dispatch) => (endpoint, entrypoint, constraints, views) => {
                         statements: {
                             ...dataAside,
                             results: {
-                                bindings: dataAside.results.bindings.sort((a, b) => {
-                                    return a.prop1.value - b.prop1.value
-                                })
+                                bindings: dataAside.results.bindings
                             }
                         },
                         zone: 'aside'

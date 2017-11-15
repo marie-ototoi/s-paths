@@ -1,8 +1,8 @@
 import * as types from '../constants/ActionTypes'
 
 const initialState = {
-    endpoint: 'http://data.nobelprize.org/snorql/?query=', // 'http://wilda.lri.fr:3030/dataset.html'
-    entrypoint: '<http://data.nobelprize.org/terms/LaureateAward>',
+    endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://wilda.lri.fr:3030/dataset.html'
+    entrypoint: 'nobel:LaureateAward',
     constraints: '',
     status: 'off',
     stats: []
