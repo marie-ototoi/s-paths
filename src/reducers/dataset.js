@@ -24,7 +24,7 @@ const initialState = {
     stats: []
 }
 
-const initialConfig = { properties: [], grade: 0 }
+const initialConfig = { properties: [], score: 0 }
 
 const dataset = (state = initialState, action) => {
     switch (action.type) {
