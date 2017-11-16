@@ -33,7 +33,7 @@ const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
     let yearNest = d3.nest().key(prop => prop.year).entries(dataToNest)
     let decadeNest = d3.nest().key(prop => prop.decade).entries(dataToNest)
     let centuryNest = d3.nest().key(prop => prop.century).entries(dataToNest)
-    //console.log(yearNest.length)
+    // console.log(yearNest.length)
     let nest
     if (yearNest.length < max) {
         nest = yearNest
