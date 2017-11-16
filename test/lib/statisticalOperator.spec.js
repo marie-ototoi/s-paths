@@ -10,7 +10,7 @@ chai.use(sinonChai)
 import { create, destroy, update } from '../../src/d3/d3HeatMap'
 import { load, loadEmpty, loadError } from '../data/nobel'
 
-describe('statisticalOperator', function () {
+describe('statLib', function () {
     before(function () {
     })
     after(function () {})

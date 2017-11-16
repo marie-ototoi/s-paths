@@ -6,3 +6,4 @@ public/
 .nyc_output/
 .vscode/
 package-lock.json
+src/discover.js

@@ -9,7 +9,7 @@ import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
 import { create, destroy, update } from '../../src/d3/d3HeatMap'
 import { load, loadEmpty, loadError } from '../data/nobel'
-import statisticalOperator from '../../src/lib/statisticalOperator'
+import statLib from '../../src/lib/statLib'
 
 var el = d3.select('body').append('g').attr('class', 'HeatMap').attr('id', 'heatMap')._groups[0][0]
 var state = { zone: 'main', display: { zones: { main: { width: 500, height: 300 } } }, data: [ { zone: 'main', statements: load() } ] }
@@ -18,7 +18,7 @@ var stateError = { zone: 'main', display: { zones: { main: { width: 500, height:
 
 describe('d3HeatMap', function () {
     before(function () {
-        let sortedData = statisticalOperator.computeStatisticalInformation(state.data.filter(d => d.zone === state.zone)[0])
+        let sortedData = statLib.computeStatisticalInformation(state.data.filter(d => d.zone === state.zone)[0])
         create(el, state.display, sortedData)
     })
     after(function () {})
