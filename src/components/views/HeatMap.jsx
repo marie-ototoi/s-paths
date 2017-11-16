@@ -18,8 +18,11 @@ class HeatMap extends React.Component {
         </g>)
     }
     componentDidMount () {
-        let sortedData = statisticalOperator.computeStatisticalInformation(this.props.data.filter(d => d.zone === this.props.zone)[0])
-        d3HeatMap.create(this.refs.HeatMap, this.props.display, sortedData, this.props.addSelection, this.props.removeSelection)
+        let sortedData = this.props.data.filter(d => d.zone === this.props.zone)[0]
+        if (sortedData.statements.results !== undefined) {
+            sortedData = statisticalOperator.computeStatisticalInformation(sortedData)
+            d3HeatMap.create(this.refs.HeatMap, this.props.display, sortedData, this.props.addSelection, this.props.removeSelection)
+        }
     }
     componentDidUpdate () {
         d3HeatMap.update(this.refs.HeatMap, this.props)
