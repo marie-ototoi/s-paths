@@ -6,17 +6,18 @@ import { addSelection, removeSelection } from '../../actions/selection'
 class Timeline extends React.Component {
     render () {
         //console.log('salut Timeline')
-        const { display } = this.props
+        const { display, zone } = this.props
         return (<g className = "Timeline { this.props.zone }" 
-            transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` }
+            transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
             ref = "Timeline">
         </g>)
     }
     componentDidMount () {
-        //console.log(this.props)
+        // console.log(this.props.data)
         d3Timeline.create(this.refs.Timeline, this.props)
     }
     componentDidUpdate () {
+        //console.log('update')
         d3Timeline.update(this.refs.Timeline, this.props)
     }
     componentWillUnmount () {

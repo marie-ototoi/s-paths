@@ -1,3 +1,5 @@
+import { groupTimeData } from './data'
+
 const findDateRatio = (data) => {
 
 }
@@ -18,14 +20,21 @@ const findBestRatioDoubleProps = (data, processing = 'RAW') => {
 }
 
 const computeStatisticalInformation = (data) => {
+//    console.log(data)
+//    console.log(groupTimeData(data.statements.results.bindings, 'prop1', 'Y', 10))
+    /** ****************************** CHECK PROP1 and PROP2 *************************************/
+
+    /** ****************************** CREATE GROUP FOR EACH PROPS *******************************/
+
+    /** ****************************** COMPUTE RATIO % *******************************************/
+    // getSelected...();
     let statistics = []
     let total = 0
     let res = []
-    // Numbeer of props
     data.statements.results.bindings.forEach(function (item) {
         let prop1 = item.prop1.value
         let prop2 = item.prop2.value
-        let index1 = (Number(prop1) - Number(prop1) % 1) + ''
+        let index1 = (Number(prop1) - Number(prop1) % 10) + ''
         if (index1 in statistics) {
             if (prop2 in statistics[index1]) {
                 statistics[index1][prop2] = statistics[index1][prop2] + 1

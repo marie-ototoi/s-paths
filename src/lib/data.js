@@ -54,7 +54,53 @@ const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
     })
 }
 
+const makeQuery = (entrypoint, config) => {
+    let propList = (config.entrypoint === undefined) ? `` : `?entrypoint `
+    let groupList = (config.entrypoint === undefined) ? `` : `?entrypoint `
+    let defList = ``
+    let orderList = ``
+    config.selectedMatch.properties.forEach((prop, index) => {
+        index ++
+        propList = propList.concat(`?prop${index} `)
+        orderList = orderList.concat(`?prop${index} `)
+        if (config.entrypoint === undefined) {
+            propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
+            orderList = orderList.concat(`?countprop${index} `)
+            groupList = groupList.concat(`?prop${index} `)
+        } else {
+            groupList = groupList.concat(`?prop${index} `)
+        }
+        defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`))
+    })
+    return `SELECT DISTINCT ${propList}
+WHERE { ?entrypoint rdf:type ${entrypoint} . 
+${defList}
+} GROUP BY ${groupList}ORDER BY ${orderList}`
+
+}
+
+const FSL2SPARQL = (FSLpath, propName = 'prop1') => {
+    const entrypointName = 'entrypoint'
+    let pathParts = FSLpath.split('/')
+    let query = ``
+    let levels = Math.floor(pathParts.length / 2)
+    for (let index = 1; index < pathParts.length; index += 2) {
+        let predicate = pathParts[index]
+        let objectType = pathParts[index + 1]
+        let level = Math.ceil(index / 2)
+        let thisSubject = (level === 1) ? entrypointName : `${propName}inter${(level - 1)}`
+        let thisObject = (level === levels) ? propName : `${propName}inter${level}`
+        query = query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
+        if (objectType !== '*') {
+            query = query.concat(`?${thisObject} rdf:type ${objectType} . `)
+        }        
+    }
+    return query
+}
+
 exports.areLoaded = areLoaded
+exports.FSL2SPARQL = FSL2SPARQL
 exports.getHeadings = getHeadings
 exports.getResults = getResults
 exports.groupTimeData = groupTimeData
+exports.makeQuery = makeQuery

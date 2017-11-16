@@ -22,6 +22,15 @@ const getZones = (zonesDef, stage) => {
     }
 }
 
+const getViz = (vizDef, stage) => {
+    return {
+        useful_width: scaleX(vizDef.useful_width, stage),
+        useful_height: scaleY(vizDef.useful_height, stage),
+        horizontal_margin: scaleX(vizDef.horizontal_margin, stage),
+        vertical_margin: scaleY(vizDef.vertical_margin, stage)
+    }
+}
+
 const scaleX = (xPoint, stage) => {
     return Math.floor(stage.width * xPoint / 100)
 }
@@ -37,6 +46,7 @@ const getGrid = (gridDef, stage) => {
 }
 
 exports.getGrid = getGrid
+exports.getViz = getViz
 exports.getZones = getZones
 exports.scaleStage = scaleStage
 exports.scaleViewBox = scaleViewBox
