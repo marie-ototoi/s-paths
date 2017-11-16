@@ -20,8 +20,8 @@ const findBestRatioDoubleProps = (data, processing = 'RAW') => {
 }
 
 const computeStatisticalInformation = (data) => {
-//    console.log(data)
-//    console.log(groupTimeData(data.statements.results.bindings, 'prop1', 'Y', 10))
+    //    console.log(data)
+    //    console.log(groupTimeData(data.statements.results.bindings, 'prop1', 'Y', 10))
     /** ****************************** CHECK PROP1 and PROP2 *************************************/
 
     /** ****************************** CREATE GROUP FOR EACH PROPS *******************************/
