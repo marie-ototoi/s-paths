@@ -40,11 +40,11 @@ describe('lib/data', () => {
         expect(data.getHeadings(dataSet1, 'main')).to.deep.equal(['prop1'])
         expect(data.getHeadings(dataSet1, 'aside')).to.deep.equal([])
     })
-    /*it('should return a nested set of data, optimizing grouping by date', () => {
+    /* it('should return a nested set of data, optimizing grouping by date', () => {
         expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 150).length).to.deep.equal(113)
         expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 100).length).to.deep.equal(12)
         expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 5).length).to.deep.equal(2)
-    })*/
+    }) */
     it('should add values of specified props when grouped', () => {
         expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 150, ['countprop2', 'countprop3'])[0].countprop2).to.equal(1)
         expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 150, ['countprop2', 'countprop3'])[2].countprop2).to.equal(2)

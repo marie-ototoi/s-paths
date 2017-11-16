@@ -6,11 +6,12 @@ import statisticalOperator from '../../lib/statisticalOperator'
 
 class HeatMap extends React.Component {
     render () {
-        const { display } = this.props
+        const { display, selections } = this.props
         // display.zones[this.props.zone].width
         // display.zones[this.props.zone].height
         // this.getData()
-
+        addSelection('#toto', [])
+        console.log(selections)
         return (<g
             className = "HeatMap { this.props.zone }"
             transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` }
@@ -33,7 +34,8 @@ class HeatMap extends React.Component {
 function mapStateToProps (state) {
     return {
         display: state.display,
-        data: state.data
+        data: state.data,
+        selections: state.selections.present
     }
 }
 

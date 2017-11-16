@@ -28,7 +28,7 @@ class App extends React.Component {
         this.onResize()
         this.props.init()
         const { dataset, views } = this.props
-        this.props.loadData(dataset.endpoint, dataset.entrypoint, views)
+        this.props.loadData(dataset, views)
     }
     render () {
         const { configs, display, env, mode, views, dataset, data } = this.props

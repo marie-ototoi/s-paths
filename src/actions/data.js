@@ -10,26 +10,10 @@ const getStats = (endpoint, entrypoint) => {
     })
 }
 
-const getData = (endpoint, query) => {
+const getData = (endpoint, query, prefixes) => {
     const client = new SparqlClient(endpoint)
-    .registerCommon('rdf', 'rdfs')
-    .register({
-        nobel: 'http://data.nobelprize.org/terms/',
-        foaf: 'http://xmlns.com/foaf/0.1/',
-        'dbpedia-owl': 'http://dbpedia.org/ontology/',
-        yago: 'http://yago-knowledge.org/resource/',
-        viaf: 'http://viaf.org/viaf/',
-        meta: 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#',
-        dcterms: 'http://purl.org/dc/terms/',
-        d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
-        dbpedia: 'http://dbpedia.org/resource/',
-        owl: 'http://www.w3.org/2002/07/owl#',
-        xsd: 'http://www.w3.org/2001/XMLSchema#',
-        map: 'http://data.nobelprize.org/resource/#',
-        freebase: 'http://rdf.freebase.com/ns/',
-        dbpprop: 'http://dbpedia.org/property/',
-        skos: 'http://www.w3.org/2004/02/skos/core#'
-    })
+        .registerCommon('rdf', 'rdfs')
+        .register(prefixes)
     return client
         .query(query)
         .execute()
@@ -57,7 +41,8 @@ const setEntrypoint = (dispatch) => (endpoint, entrypoint, constraints = '') => 
     })
 }
 
-const loadData = (dispatch) => (endpoint, entrypoint, views) => {
+const loadData = (dispatch) => (dataset, views) => {
+    const {endpoint, entrypoint, prefixes} = dataset
     getStats(endpoint, entrypoint)
         .then(stats => {
             dispatch({
@@ -79,8 +64,8 @@ const loadData = (dispatch) => (endpoint, entrypoint, views) => {
             const queryAside =  data.makeQuery(entrypoint, configAside)
             
             return Promise.all([
-                getData(endpoint, queryMain),
-                getData(endpoint, queryAside)
+                getData(endpoint, queryMain, prefixes),
+                getData(endpoint, queryAside, prefixes)
             ])
                 .then(([dataMain, dataAside]) => {
                     dispatch({

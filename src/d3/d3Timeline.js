@@ -9,7 +9,7 @@ const create = (el, props) => {
         const selectedData = data.getResults(props.data, props.zone)
         const nestedData = data.groupTimeData(selectedData, 'prop1', selectedConfig.selectedMatch.properties[0].format, 150)
         // console.log(props.display)
-        
+
         // console.log(nestedData)
         const timeUnits = d3.select(el)
             .selectAll('g.time')
@@ -49,22 +49,22 @@ const resize = (el, props) => {
         .each(d => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
-    const bookUnits = timeUnits.selectAll('line')        
+    const bookUnits = timeUnits.selectAll('line')    
     const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
     const unitWidth = Math.floor(display.viz.useful_width / timeUnits.size())
     bookUnits
-        .attr('x1', Math.ceil(unitWidth/2))
-        .attr('x2', Math.ceil(unitWidth/2))
+        .attr('x1', Math.ceil(unitWidth / 2))
+        .attr('x2', Math.ceil(unitWidth / 2))
         .attr('y1', (d, i) => display.viz.useful_height - (i * unitHeight))
         .attr('y2', (d, i) => display.viz.useful_height - (i * unitHeight + unitHeight - 1))
         .attr('stroke', '#000')
         .attr('stroke-width', unitWidth - 1)
-    
+
     d3.select(el).selectAll('.xaxis').remove()
     const xAxis = d3.axisBottom()
         .scale(xScale)
         .tickFormat(d3.format('.0f'))
-        
+    
     d3.select(el).append('g')
         .attr('class', 'xaxis')
         .attr('transform', `translate(0, ${display.viz.useful_height})`)

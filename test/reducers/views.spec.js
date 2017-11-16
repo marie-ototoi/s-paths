@@ -18,8 +18,8 @@ describe('reducers/views', () => {
     it('should handle initial state', () => {
         expect(views(undefined, { })[0].id).to.equal('Timeline')
     })
-    it('should handle SELECT_VIEWS', () => {
-        /*let action =  { 
+    /*lit('should handle SELECT_VIEWS', () => {
+        et action =  { 
             type: 'SELECT_VIEWS',
             stats: []
         }
@@ -29,8 +29,8 @@ describe('reducers/views', () => {
                 { id: 'Timeline', selected: true },
                 { id: 'Chord', selected: true},
                 { id: 'Heatmap', selected: false}
-            ])*/
-    })
+            ])
+    })*/
     it('should handle DISPLAY_VIEWS', () => {
         let action =  { 
             type: 'DISPLAY_VIEWS',

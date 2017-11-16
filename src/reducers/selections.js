@@ -18,7 +18,7 @@ const selection = (state, action) => {
     }
 }
 
-const selections = (state = defaultState, action ) => {
+const selections = (state = defaultState, action) => {
     switch (action.type) {
     case 'ADD_SELECTION':
         return [
