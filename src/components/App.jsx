@@ -5,10 +5,10 @@ import HeatMap from './views/HeatMap'
 import Timeline from './views/Timeline'
 import Aside from './Aside'
 import Debug from './Debug'
-import scale from '../lib/scale'
-import dataLib from '../lib/data'
-import { getScreen, getZones, setDisplay } from '../actions/display'
-import { loadData, init, setStats } from '../actions/data'
+import scale from '../lib/scaleLib'
+import dataLib from '../lib/dataLib'
+import { getScreen, getZones, setDisplay } from '../actions/displayActions'
+import { loadData, init, setStats } from '../actions/dataActions'
 
 class App extends React.Component {
     constructor (props) {

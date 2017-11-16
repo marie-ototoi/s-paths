@@ -1,4 +1,4 @@
-import { groupTimeData } from './data'
+import { groupTimeData } from './dataLib'
 
 const findDateRatio = (data) => {
 

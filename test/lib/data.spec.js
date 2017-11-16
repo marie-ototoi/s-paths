@@ -2,7 +2,7 @@ import chai, {expect} from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
-import data from '../../src/lib/data'
+import data from '../../src/lib/dataLib'
 import testSet from '../data/nobel'
 
 const dataSet1 = [

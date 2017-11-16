@@ -1,7 +1,7 @@
 import * as types from '../constants/ActionTypes'
 import stats from '../../test/data/nobel'
-import configViews from '../lib/config'
-import data from '../lib/data'
+import config from '../lib/configLib'
+import data from '../lib/dataLib'
 import {SparqlClient, SPARQL} from 'sparql-client-2'
 
 const getStats = (endpoint, entrypoint) => {
@@ -50,7 +50,7 @@ const loadData = (dispatch) => (dataset, views) => {
                 stats
             })
             // for each views, checks which properties ou sets of properties could match and evaluate
-            let configs = configViews.activateDefaultConfigs(configViews.getConfigs(views, stats))
+            let configs = config.activateDefaultConfigs(config.getConfigs(views, stats))
             dispatch({
                 type: types.SET_CONFIGS,
                 configs
@@ -58,9 +58,9 @@ const loadData = (dispatch) => (dataset, views) => {
             return new Promise((resolve) => resolve(configs))
         })
         .then(configs => {
-            const configMain = configViews.getSelectedConfig(configs, 'main')
+            const configMain = config.getSelectedConfig(configs, 'main')
             const queryMain =  data.makeQuery(entrypoint, configMain)
-            const configAside = configViews.getSelectedConfig(configs, 'aside')
+            const configAside = config.getSelectedConfig(configs, 'aside')
             const queryAside =  data.makeQuery(entrypoint, configAside)
             
             return Promise.all([
