@@ -74,11 +74,9 @@ const loadData = (dispatch) => (endpoint, entrypoint, views) => {
         })
         .then(configs => {
             const configMain = configViews.getSelectedConfig(configs, 'main')
-            const viewMain =  configViews.getViewDef(views, 'main')
-            const queryMain =  data.makeQuery(entrypoint, configMain, viewMain)
+            const queryMain =  data.makeQuery(entrypoint, configMain)
             const configAside = configViews.getSelectedConfig(configs, 'aside')
-            const viewAside =  configViews.getViewDef(views, 'aside')
-            const queryAside =  data.makeQuery(entrypoint, configAside, viewAside)
+            const queryAside =  data.makeQuery(entrypoint, configAside)
             
             return Promise.all([
                 getData(endpoint, queryMain),

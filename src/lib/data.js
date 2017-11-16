@@ -17,12 +17,7 @@ const areLoaded = (data, zone) => {
         data.filter(d => d.zone === zone)[0].statements.results.bindings.length > 0
 }
 
-<<<<<<< HEAD
-const groupTimeData = (data, propName, format, max) => {
-    console.log(data)
-=======
 const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
->>>>>>> 30a804dce7164eec0689f4729993cb2665c7d4e8
     let dataToNest = data.map(d => {
         let dateProp = moment(d[propName].value, format)
         if (! dateProp.isValid()) throw 'Cannot use time format'
@@ -59,25 +54,24 @@ const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
     })
 }
 
-const makeQuery = (entrypoint, config, view) => {
-    let propList = (view.entrypoint === undefined) ? `` : `?entrypoint `
-    let groupList = ``
+const makeQuery = (entrypoint, config) => {
+    let propList = (config.entrypoint === undefined) ? `` : `?entrypoint `
+    let groupList = (config.entrypoint === undefined) ? `` : `?entrypoint `
     let defList = ``
     let orderList = ``
-    config.properties.forEach((prop, index) => {
+    config.selectedMatch.properties.forEach((prop, index) => {
         index ++
         propList = propList.concat(`?prop${index} `)
         orderList = orderList.concat(`?prop${index} `)
-        if (view.entrypoint === undefined) {
+        if (config.entrypoint === undefined) {
             propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
             orderList = orderList.concat(`?countprop${index} `)
             groupList = groupList.concat(`?prop${index} `)
         } else {
-            groupList = `?entrypoint `
+            groupList = groupList.concat(`?prop${index} `)
         }
         defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`))
     })
-    
     return `SELECT DISTINCT ${propList}
 WHERE { ?entrypoint rdf:type ${entrypoint} . 
 ${defList}
@@ -85,7 +79,8 @@ ${defList}
 
 }
 
-const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint') => {
+const FSL2SPARQL = (FSLpath, propName = 'prop1') => {
+    const entrypointName = 'entrypoint'
     let pathParts = FSLpath.split('/')
     let query = ``
     let levels = Math.floor(pathParts.length / 2)

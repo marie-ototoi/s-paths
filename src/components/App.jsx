@@ -6,7 +6,7 @@ import Timeline from './views/Timeline'
 import Aside from './Aside'
 import Debug from './Debug'
 import scale from '../lib/scale'
-import data from '../lib/data'
+import dataLib from '../lib/data'
 import { getScreen, getZones, setDisplay } from '../actions/display'
 import { loadData, init, setStats } from '../actions/data'
 
@@ -28,11 +28,17 @@ class App extends React.Component {
         this.onResize()
         this.props.init()
         const { dataset, views } = this.props
-        this.props.loadData(dataset.endpoint, dataset.entryPoint, dataset.constraints, views)
+        this.props.loadData(dataset.endpoint, dataset.entrypoint, views)
     }
     render () {
-        const { configs, display, env, mode } = this.props
-        // console.log(configs)
+        const { configs, display, env, mode, views, dataset, data } = this.props
+        // console.log('env', env)
+        // console.log('mode', mode)
+        // console.log('display', display)
+        // console.log('views', views)
+        // console.log('dataset', dataset)
+        // console.log('configs', configs)
+        // console.log('data', data)
         const componentIds = {
             'HeatMap': HeatMap,
             'Timeline': Timeline
@@ -55,10 +61,10 @@ class App extends React.Component {
                 { env === 'dev' &&
                     <Debug />
                 }
-                { main && data.areLoaded(this.props.data, 'main') &&
+                { main && dataLib.areLoaded(this.props.data, 'main') &&
                     <MainComponent zone = "main"/>
                 }
-                { aside && data.areLoaded(this.props.data, 'aside') &&
+                { aside && dataLib.areLoaded(this.props.data, 'aside') &&
                     <SideComponent zone = "aside" />
                 }
                 
@@ -72,7 +78,8 @@ class App extends React.Component {
             mode,
             zonesDef: display.zonesDefPercent,
             gridDef: display.gridDefPercent,
-            screen : getScreen()
+            screen: getScreen(),
+            vizDef: display.vizDefPercent
         })
     }
 }

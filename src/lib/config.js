@@ -1,10 +1,15 @@
 
 const getSelectedConfig = (configs, zone) => {
-    return configs.filter(c => c.zone === zone)[0].matches.filter(m => m.selected === true)[0] || {}
+    let config = configs.filter(c => c.zone === zone)[0]
+    return {
+        ...config,
+        selectedMatch: config.matches.filter(m => m.selected === true)[0]
+    } || {}
 }
 
-const getViewDef = (views, zone) => {
-    return views.filter(c => c.zone === zone)[0] || {}
+const getViewDef = (views, id) => {
+    console.log(views, id)
+    return views.filter(c => c.id === id)[0] || {}
 }
 
 const inRange = (val, range) => {
