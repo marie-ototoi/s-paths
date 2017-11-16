@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
-import config from '../lib/config'
-import data from '../lib/data'
+import config from '../lib/configLib'
+import data from '../lib/dataLib'
 
 const create = (el, props) => {
     // console.log('create', config.getSelectedConfig(props.configs, props.zone))

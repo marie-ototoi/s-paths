@@ -1,5 +1,5 @@
 import * as types from '../constants/ActionTypes'
-import scale from '../lib/scale'
+import scale from '../lib/scaleLib'
 
 const setDisplay = (dispatch) => ({ env, mode, zonesDef, gridDef, screen, vizDef }) => {
     let viewBoxDef = (env === 'dev') ? zonesDef.dev : zonesDef[mode||'full']

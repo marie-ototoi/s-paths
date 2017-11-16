@@ -2,7 +2,7 @@ import chai, {expect} from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
-import scale from '../../src/lib/scale'
+import scale from '../../src/lib/scaleLib'
 
 const displayDef = {
     dev: { x: 0, y: 0, width: 100, height: 100},

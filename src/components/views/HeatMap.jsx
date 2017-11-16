@@ -1,8 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import d3HeatMap from '../../d3/d3HeatMap'
-import { addSelection, removeSelection } from '../../actions/selection'
-import statisticalOperator from '../../lib/statisticalOperator'
+import { addSelection, removeSelection } from '../../actions/selectionActions'
+import statisticalOperator from '../../lib/statLib'
 
 class HeatMap extends React.Component {
     render () {
@@ -10,8 +10,6 @@ class HeatMap extends React.Component {
         // display.zones[this.props.zone].width
         // display.zones[this.props.zone].height
         // this.getData()
-        addSelection('#toto', [])
-        console.log(selections)
         return (<g
             className = "HeatMap { this.props.zone }"
             transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` }

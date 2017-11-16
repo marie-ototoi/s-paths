@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import d3Timeline from '../../d3/d3Timeline'
-import { addSelection, removeSelection } from '../../actions/selection'
+import { addSelection, removeSelection } from '../../actions/selectionActions'
 
 class Timeline extends React.Component {
     render () {

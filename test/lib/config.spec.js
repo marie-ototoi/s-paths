@@ -2,7 +2,7 @@ import chai, {expect} from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
-import config from '../../src/lib/config'
+import config from '../../src/lib/configLib'
 
 describe('lib/config', () => {
     it('should return a combined list of matches', () => {
