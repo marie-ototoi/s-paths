@@ -32,6 +32,18 @@ const defaultState = {
         full: { x: 35, y: 35, width: 40, height: 40 },
         main: { x: 35, y: 35, width: 30, height: 30 },
         aside: { x: 70, y: 35, width: 30, height: 30 }
+    },
+    vizDefPercent: {
+        useful_width: 70,
+        useful_height: 60,
+        vertical_margin: 20,
+        horizontal_margin: 15
+    },
+    viz: {
+        useful_width: 10,
+        useful_height: 10,
+        vertical_margin: 10,
+        horizontal_margin: 10
     }
 }
 
@@ -45,7 +57,8 @@ const display = (state = defaultState, action) => {
             viewBox: action.viewBox || state.viewBox,
             stage: action.stage || state.stage,
             grid: action.grid || state.grid,
-            zones: action.zones || state.zones
+            zones: action.zones || state.zones,
+            viz: action.viz || state.viz
         }
     default:
         return state

@@ -10,7 +10,7 @@ class PropList extends React.Component {
     }
 }
 
-function mapStateToProps(state) {
+function mapStateToProps (state) {
     return {
         display: state.display,
         env: state.env,
@@ -18,7 +18,7 @@ function mapStateToProps(state) {
     }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps (dispatch) {
     return {
     }
 }

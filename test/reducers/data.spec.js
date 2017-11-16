@@ -9,10 +9,10 @@ describe('reducers/data', () => {
     it('should handle initial state', () => {
         expect(data(undefined, { })[0].zone).to.equal('main')
     })
-    it('should handle SET_DATA', () => {
+    /*it('should handle SET_DATA', () => {
 
     })
     it('should handle ADD_DATAZONE', () => {
 
-    })
+    })*/
 })

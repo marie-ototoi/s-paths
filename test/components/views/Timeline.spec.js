@@ -15,7 +15,7 @@ const store = createStore(reducers)
 
 describe('<Timeline />', () => {
     it('should render a svg group classed Timeline', () => {
-        const wrapper = mount(<Provider store = {store}><Timeline /></Provider>)
+        const wrapper = mount(<Provider store = {store}><Timeline zone = "main" /></Provider>)
         expect(wrapper.find('g.Timeline')).to.have.length(1)
     })
 })
