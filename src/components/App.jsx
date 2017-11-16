@@ -58,10 +58,9 @@ class App extends React.Component {
                 { main && data.areLoaded(this.props.data, 'main') &&
                     <MainComponent zone = "main"/>
                 }
-                { aside && data.areLoaded(this.props.data, 'aside') &&
+                { aside && data.areLoaded(this.props.data, 'aside') && 
                     <SideComponent zone = "aside" />
                 }
-                
             </svg>
         </div>)
     }
