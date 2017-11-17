@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
-import { colorChooser } from './d3HeatMap'
+import { colorChooser, addSelectionUsingRange, removeSelectionUsingRange } from './d3HeatMap'
 
-const createColoredBar = (el, id, x, y, width, height, value, addSelection, removeSelection) => {
+const createColoredBar = (el, id, value) => {
     var svgDefs = el.append('defs')
     let mainGradient = svgDefs.append('linearGradient')
         .attr('id', 'gradientBar' + id)
@@ -25,28 +25,20 @@ const createColoredBar = (el, id, x, y, width, height, value, addSelection, remo
         .attr('stop-color', 'lightgrey')
 
     el.append('text')
+        .attr('id', 'textbar' + id)
         .text(id * 25 + '% <')
         .attr('font-family', 'sans-serif')
         .attr('font-size', '12px')
         .attr('text-anchor', 'end')
-        .attr('x', x - 5)
-        .attr('y', y + height)
         .attr('font-weight', 'bold')
     el.append('rect')
-        .attr('x', x)
-        .attr('y', y + 5)
-        .attr('width', width)
-        .attr('height', height)
+        .attr('id', 'shadowbar' + id)
         .attr('fill', 'url(#shadow)')
         .attr('stroke', 'none')
         .attr('rx', 4)
         .attr('ry', 4)
     el.append('rect')
-        .attr('id', 'legendBar' + id)
-        .attr('x', x)
-        .attr('y', y)
-        .attr('width', width)
-        .attr('height', height)
+        .attr('id', 'legendbar' + id)
         .attr('fill', 'url(#gradientBar' + id + ')')
         .attr('stroke', 'black')
         .attr('stroke-width', 0.5)
@@ -59,7 +51,7 @@ const createColoredBar = (el, id, x, y, width, height, value, addSelection, remo
             this.setAttribute('stroke-width', 0.5)
         })
         .on('click', function () {
-            addSelection(id * 25, (id + 1) * 25)
+            addSelectionUsingRange(id * 25, (id + 1) * 25)
             let posY = Number(this.getAttribute('y'))
             let bar = d3.select(this)
             bar.transition()
@@ -73,36 +65,52 @@ const createColoredBar = (el, id, x, y, width, height, value, addSelection, remo
         })
 }
 
-const createHeatMapLegend = (el, display, addSelection, removeSelection) => {
+const create = (el, props) => {
     /** *****************   PLACE LEGEND BAR   ******************************/
-    let titlex = display.width * 0.5
-    let titley = display.height * 0.2
     el.append('text')
+        .attr('id', 'legendtitle')
         .text('Percent of Dy/Dx among data')
         .attr('font-family', 'sans-serif')
         .attr('font-size', '12px')
         .attr('text-anchor', 'middle')
+    for (var i = 0; i < 4; i++) {
+        createColoredBar(el, i, (i * 25))
+    }
+    resize(el, props)
+}
+
+const update = (el, props) => {
+    if (el && props.data) {
+        resize(el, props)
+    }
+}
+
+const resize = (el, props) => {
+    el.attr('transform', 'translate(0,' + (props.display.viz.useful_height + props.display.viz.vertical_margin) + ')')
+    let titlex = props.display.viz.horizontal_margin * 0.5
+    let titley = props.display.viz.vertical_margin * 0.2
+    d3.select('#legendtitle')
         .attr('x', titlex)
         .attr('y', titley)
     for (var i = 0; i < 4; i++) {
-        let barHeight = (display.height * 0.6) * 0.1
-        let x = display.width * 0.4
-        let y = (display.height * 0.3) + ((i * 2) * barHeight)
-        let barWidth = display.width * 0.2
-        createColoredBar(el, i, x, y, barWidth, barHeight, (i * 25), addSelection, removeSelection)
+        let height = (props.display.viz.vertical_margin * 0.6) * 0.1
+        let x = props.display.viz.horizontal_margin * 0.4
+        let y = (props.display.viz.vertical_margin * 0.3) + ((i * 2) * height)
+        let width = props.display.viz.horizontal_margin * 0.2
+        d3.select('#textbar' + i)
+            .attr('x', x - 5)
+            .attr('y', y + height)
+        d3.select('#shadowbar' + i)
+            .attr('x', x)
+            .attr('y', y + 5)
+            .attr('width', width)
+            .attr('height', height)
+        d3.select('#legendbar' + i)
+            .attr('x', x)
+            .attr('y', y)
+            .attr('width', width)
+            .attr('height', height)
     }
-}
-
-const create = (el, display, legendType = 'none', ...fun) => {
-    switch (legendType) {
-    case 'heatMap':
-        createHeatMapLegend(el, display, fun[0], fun[1])
-        break
-    default:
-    }
-}
-
-const update = (el, state) => {
 }
 
 const destroy = (el) => {

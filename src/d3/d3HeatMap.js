@@ -70,43 +70,71 @@ const create = (el, props) => {
     /* ******************************************************************************************************** */
     /* *****************************    Panel Initializtion    ************************************************ */
     /* ******************************************************************************************************** */
-    let width = props.display.zones.main.width
-    let centerWidth = width * 0.5
-    let height = props.display.zones.main.height
-    let centerHeight = height * 0.5
-    let div = d3.select(el).append('g').attr('id', 'heatMapCenterPanel').attr('transform', ('translate(' + (width - centerWidth) / 2 + ',' + (height - centerHeight) / 2 + ')'))
-    let divLegend = d3.select(el).append('g').attr('id', 'legend').attr('transform', ('translate(' + 0 + ',' + (centerHeight + (height - centerHeight) / 2) + ')'))
-    d3Legend.create(divLegend, {width: (width - centerWidth) / 2, height: (height - centerHeight) / 2}, 'heatMap', addSelectionUsingRange, removeSelectionUsingRange)
 
-    /* ******************************************************************************************************** */
-    /* *****************************    data verification    ************************************************** */
-    /* ******************************************************************************************************** */
-    let xElements = d3.set(data.data.map(item => item.prop1)).values()
-    let yElements = d3.set(data.data.map(item => item.prop2)).values()
+    let div = d3.select(el).append('g').attr('id', 'heatMapCenterPanel')
+    let divLegend = d3.select(el).append('g').attr('id', 'heatmapLegend')
 
     /* ******************************************************************************************************** */
     /* *****************************    heatmap creation   **************************************************** */
     /* ******************************************************************************************************** */
 
-    let itemSizeX = centerWidth / xElements.length
-    let itemSizeY = centerHeight / yElements.length
+    div.selectAll('rect')
+        .data(data.data)
+        .enter()
+        .append('rect')
+        .attr('id', d => d.prop1 + d.prop2)
+
+    div.append('g')
+        .attr('id', 'abscisse')
+        .selectAll('text')
+        .attr('font-weight', 'normal')
+
+    div.append('g')
+        .attr('id', 'ordonne')
+        .selectAll('text')
+        .attr('font-weight', 'normal')
+        .style('text-anchor', 'start')
+    resize(el, props)
+
+    d3Legend.create(divLegend, props)
+}
+
+const update = (el, props) => {
+    if (el && props.data) {
+        resize(el, props)
+    }
+}
+
+const destroy = (el) => {
+
+}
+
+const resize = (el, props) => {
+    let data = statisticalOperator.computeStatisticalInformation(props.data.filter(d => d.zone === props.zone)[0])
+    let xElements = d3.set(data.data.map(item => item.prop1)).values()
+    let yElements = d3.set(data.data.map(item => item.prop2)).values()
+
+    let width = props.display.viz.useful_width
+    let height = props.display.viz.useful_height
+
+    d3.select('#heatMapCenterPanel').attr('transform', ('translate(' + props.display.viz.horizontal_margin + ',' + props.display.viz.vertical_margin + ')'))
+
+    let itemSizeX = width / xElements.length
+    let itemSizeY = height / yElements.length
 
     let xScale = d3.scaleBand()
+        .range([0, width])
         .domain(xElements)
-        .range([0, centerWidth])
     let xAxis = d3.axisTop()
         .scale(xScale)
 
     let yScale = d3.scaleBand()
+        .range([0, height])
         .domain(yElements)
-        .range([0, centerHeight])
     let yAxis = d3.axisLeft()
         .scale(yScale)
 
-    let cells = div.selectAll('rect')
-        .data(data.data)
-        .enter().append('g').append('rect')
-        .attr('id', d => d.prop1 + d.prop2)
+    d3.select('#heatMapCenterPanel').selectAll('rect')
         .attr('width', itemSizeX)
         .attr('height', itemSizeY)
         .attr('x', d => xScale(d.prop1))
@@ -123,39 +151,27 @@ const create = (el, props) => {
             }
         })
 
-    div.append('g')
-        .attr('class', 'y axis')
+    d3.select('#ordonne')
         .call(yAxis)
         .selectAll('text')
         .attr('font-weight', 'normal')
 
-    div.append('g')
-        .attr('class', 'x axis')
+    d3.select('#abscisse')
         .call(xAxis)
-        .attr('transform', 'translate(0,' + centerHeight + ')')
+        .attr('transform', 'translate(0,' + height + ')')
         .selectAll('text')
         .attr('font-weight', 'normal')
         .style('text-anchor', 'start')
         .attr('dx', '.8em')
         .attr('dy', '.5em')
         .attr('transform', 'rotate(65)')
-}
 
-const update = (el, props) => {
-    if (el && props.data) {
-        resize(el, props)
-    }
-}
-
-const destroy = (el) => {
-
-}
-
-const resize = (el, props) => {
-    const { display } = props
+    d3Legend.update(d3.select('#heatmapLegend'), props)
 }
 
 exports.create = create
 exports.destroy = destroy
 exports.update = update
 exports.colorChooser = colorChooser
+exports.addSelectionUsingRange = addSelectionUsingRange
+exports.removeSelectionUsingRange = removeSelectionUsingRange
