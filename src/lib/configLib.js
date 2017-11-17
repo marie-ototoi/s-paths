@@ -21,30 +21,30 @@ const underRange = (val, range) => {
 const overRange = (val, range) => {
     return (val > range[1])
 }
-const getDeviationCost = (min, max, optimal, grade) => {
+const getDeviationCost = (min, max, optimal, score) => {
     if(!optimal || (!min && !max)) return 0
     const gapMin = (min) ? optimal[0] - min : null
     const gapMax = (max) ? max - optimal[1] : null
     const maxGap = (gapMin > gapMax) ? gapMin : gapMax
-    return (maxGap) ? (grade / maxGap) : null
+    return (maxGap) ? (score / maxGap) : null
 }
-const getCost = (val, min, max, optimal, grade) => {
+const getCost = (val, min, max, optimal, score) => {
     if (optimal && inRange(val, optimal)) return 0
-    const deviationCost = getDeviationCost(min, max, optimal, grade)
+    const deviationCost = getDeviationCost(min, max, optimal, score)
     if (underRange(val, optimal) && min) {
         return deviationCost * (optimal[0] - val)
     } else if (overRange(val, optimal) && max) {
         return deviationCost * (val - optimal[1])
     } 
-    return grade / 2            
+    return score / 2            
 }
-const gradeProp = (prop, constraint) => {
+const scoreProp = (prop, constraint) => {
     if (prop.path === '') return null
     
     // et eventuellement si la prop peut avoir plusieurs valeurs pour une meme instance (specifier dans la vue si c'est souhaite)
-    const maxGrade = 0.5
+    const maxscore = 0.5
     let cost = 0
-    switch (prop.group) {
+    switch (prop.category) {
     case 'datetime':
         // repartition
         break
@@ -55,25 +55,25 @@ const gradeProp = (prop, constraint) => {
     case 'text':
         // the closer to the optimal range, the better
         const { min, max, optimal } = constraint.unique
-        cost = getCost(prop.unique_values, min, max, optimal, maxGrade)
+        cost = getCost(prop.unique_values, min, max, optimal, maxscore)
         break
     default:
         //
     }
-    let grade = maxGrade - cost
-    // modulates grade according to the coverage of the dataset by this prop
-    grade *= prop.coverage / 100
-    return grade
+    let score = maxscore - cost
+    // modulates score according to the coverage of the dataset by this prop
+    score *= prop.coverage / 100
+    return score
 }
 
-const gradeMatch = (match) => {
-    match = match.filter(m => m.grade != null)
-    // mean of each property's grade
-    let grade = match.map(m => m.grade).reduce((a, b) => a + b , 0) / match.length
+const scoreMatch = (match) => {
+    match = match.filter(m => m.score != null)
+    // mean of each property's score
+    let score = match.map(m => m.score).reduce((a, b) => a + b , 0) / match.length
     // bonus for each property represented
-    grade += 0.3 * match.length
+    score += 0.3 * match.length
     // domain rules to add values for some properties : TO DO 
-    return grade        
+    return score        
 }
 
 const findAllMatches = (inputList, addList) => {
@@ -100,49 +100,49 @@ const getConfigs = (views, stats) => {
             stats.statements.forEach(prop => {
                 constraintSet.forEach(constraint => {
                     // generic conditions
-                    if ((prop.group === constraint.group ||
-                        constraint.group === '*') &&
+                    if ((prop.category === constraint.category ||
+                        constraint.category === '*') &&
                     !(
                         (constraint.unique.min && prop.unique_values < constraint.unique.min) ||
                         (constraint.unique.max && prop.unique_values > constraint.unique.max)
                     )) {
-                        // conditions specific to each group
-                        switch (prop.group) {
+                        // conditions specific to each category
+                        switch (prop.category) {
                         case 'datetime':
                             propSet.push({
                                 ...prop,
-                                grade: gradeProp(prop, constraint)
+                                score: scoreProp(prop, constraint)
                             })
                             break
                         case 'number':
                             propSet.push({
                                 ...prop,
-                                grade: gradeProp(prop, constraint)
+                                score: scoreProp(prop, constraint)
                             })
                             break
                         case 'geo':
                             propSet.push({
                                 ...prop,
-                                grade: gradeProp(prop, constraint)
+                                score: scoreProp(prop, constraint)
                             })
                             break
                         case 'text':
                             propSet.push({
                                 ...prop,
-                                grade: gradeProp(prop, constraint)
+                                score: scoreProp(prop, constraint)
                             })
                             break
                         default:
                             propSet.push({
                                 ...prop,
-                                grade: gradeProp(prop, constraint)
+                                score: scoreProp(prop, constraint)
                             })
                         }
                     }
                 })
             })
             propList.push(propSet.sort((a, b) => {
-                return b.grade - a.grade
+                return b.score - a.score
             }))
         })
         // find all possible combinations
@@ -164,26 +164,26 @@ const getConfigs = (views, stats) => {
             const { min, max, optimal } = view.entrypoint
             let addValue
             if (! inRange(stats.total_instances, [min, max])) {
-                // will result in each grade being 0, so discard the view
+                // will result in each score being 0, so discard the view
                 entrypointFactor = 0
             } else {
-                // will higher each grade
+                // will higher each score
                 entrypointFactor += getCost(stats.total_instances, min, max, optimal, 0.3)
             }
         }
         // remove combinations where a mandatory prop is missing
-        let gradedMatches = matches.map(match => {
+        let scoredMatches = matches.map(match => {
             return {
                 properties: match, 
-                grade: gradeMatch(match) * entrypointFactor/*,
+                score: scoreMatch(match) * entrypointFactor/*,
                 entrypoint: (view.entrypoint !== undefined)*/
             }
         })
-        // sort by grade and return
+        // sort by score and return
         return {
             ...view,
-            matches: gradedMatches.sort((a, b) => {
-                return b.grade - a.grade
+            matches: scoredMatches.sort((a, b) => {
+                return b.score - a.score
             }).map((match, index) => {
                 return {
                     ...match,
@@ -194,7 +194,7 @@ const getConfigs = (views, stats) => {
     })
         .filter(view => view.matches.length > 0)
         .sort((a, b) => {
-            return b.matches[0].grade - a.matches[0].grade
+            return b.matches[0].score - a.matches[0].score
         })
 }
 

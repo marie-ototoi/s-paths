@@ -3,16 +3,16 @@ const defaultState = [
         id: 'Timeline',
         entrypoint: { min: 2, max: 1000, optimal: [4, 200] },
         constraints: [
-            [{ group: 'datetime', unique: { min: 2 } }],
-            [{ group: 'uri', unique: { min: 2, max: 10, optimal: [4, 6] } }, { group: 'text', unique: { min: 2, max: 10, optimal: [4, 6] } }],
-            [{ group: 'uri', unique: { min: 2, max: 10, optimal: [4, 6] }, optional: true }, { group: 'text', unique: { min: 2, max: 10, optimal: [4, 6] } }]
+            [{ category: 'datetime', unique: { min: 2 } }],
+            [{ category: 'uri', unique: { min: 2, max: 10, optimal: [4, 6] } }, { group: 'text', unique: { min: 2, max: 10, optimal: [4, 6] } }],
+            [{ category: 'uri', unique: { min: 2, max: 10, optimal: [4, 6] }, optional: true }, { group: 'text', unique: { min: 2, max: 10, optimal: [4, 6] } }]
         ]
     },
     {
         id: 'HeatMap',
         constraints: [
-            [{ group: 'datetime', unique: { min: 2 } }],
-            [{ group: 'text', unique: { min: 2, max: 160, optimal: [6, 15] } }]
+            [{ category: 'datetime', unique: { min: 2 } }],
+            [{ category: 'text', unique: { min: 2, max: 160, optimal: [6, 15] } }]
         ]
     }
 ]

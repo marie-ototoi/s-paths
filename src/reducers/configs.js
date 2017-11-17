@@ -1,6 +1,6 @@
 import * as types from '../constants/ActionTypes'
 
-const initialConfig = { properties: [], grade: 0, zone: null }
+const initialConfig = { properties: [], score: 0, zone: null }
 
 const config = (state = initialConfig, action) => {
     switch (action.type) {
@@ -8,7 +8,7 @@ const config = (state = initialConfig, action) => {
         return {
             ...state,
             properties: action.properties,
-            grade: action.grade,
+            score: action.score,
             view: action.view
         }
     case types.SELECT_CONFIG:
@@ -35,7 +35,7 @@ const configs = (state = [], action) => {
             return {
                 ...c,
                 matches: c.matches.sort((a, b) => {
-                    return b.grade - a.grade
+                    return b.score - a.score
                 })
             }
         })

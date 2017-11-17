@@ -5,7 +5,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:year/*',
                 label: 'year',
-                group: 'datetime',
+                category: 'datetime',
                 format: 'Y',
                 unique_values: 113,
                 total_values: 911,
@@ -16,7 +16,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:field/*',
                 label: 'field',
-                group: 'text',
+                category: 'text',
                 language: 'en',
                 coverage: 100,
                 unique_values: 151,
@@ -25,7 +25,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:category/*',
                 label: 'category',
-                group: 'uri',
+                category: 'uri',
                 coverage: 100,
                 unique_values: 6,
                 total_values: 911
@@ -33,7 +33,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
                 label: 'gender of Laureate',
-                group: 'text',
+                category: 'text',
                 coverage: 90,
                 unique_values: 2,
                 total_values: 885,
@@ -42,7 +42,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpprop:dateOfBirth/*',
                 label: 'date of birth of Laureate',
-                group: 'datetime',
+                category: 'datetime',
                 format: 'Y-m-d',
                 coverage: 80,
                 total_values: 883,
@@ -51,7 +51,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:birthday',
                 label: 'date of birth of Laureate',
-                group: 'datetime',
+                category: 'datetime',
                 format: 'Y-m-d',
                 coverage: 60,
                 total_values: 883,
@@ -60,7 +60,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpprop:dateOfDeath/*',
                 label: 'date of death of Laureate',
-                group: 'datetime',
+                category: 'datetime',
                 format: 'Y-m-d',
                 coverage: 70,
                 total_values: 600,
@@ -70,7 +70,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpedia-owl:birthPlace/dbpedia-owl:City',
                 label: 'place of birth of Laureate (city)',
-                group: 'geo',
+                category: 'geo',
                 granularity: 'city',
                 coverage: 78,
                 total_values: 884,
@@ -79,7 +79,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpedia-owl:birthPlace/dbpedia-owl:Country',
                 label: 'place of birth of Laureate (country)',
-                group: 'geo',
+                category: 'geo',
                 granularity: 'country',
                 coverage: 76,
                 total_values: 885,
@@ -88,7 +88,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpedia-owl:deathPlace/dbpedia-owl:City',
                 label: 'place of death of Laureate (city)',
-                group: 'geo',
+                category: 'geo',
                 granularity: 'city',
                 coverage: 54,
                 total_values: 582,
@@ -97,7 +97,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/dbpedia-owl:deathPlace/dbpedia-owl:Country',
                 label: 'place of death of Laureate (country)',
-                group: 'geo',
+                category: 'geo',
                 granularity: 'country',
                 coverage: 56,
                 total_values: 588,
@@ -106,7 +106,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:university/dbpedia-owl:University/dbpedia-owl:country/dbpedia-owl:Country',
                 label: 'place of university (country)',
-                group: 'geo',
+                category: 'geo',
                 granularity: 'country',
                 coverage: 94,
                 total_values: 742,
@@ -115,7 +115,7 @@ const explore = (resourceEnsemble, maxUnique, maxDepth) => {
             {
                 path: 'nobel:LaureateAward/nobel:university/dbpedia-owl:University/dbpedia-owl:city/dbpedia-owl:City',
                 label: 'place of university (city)',
-                group: 'geo',
+                category: 'geo',
                 granularity: 'city',
                 coverage: 92,
                 total_values: 1009,
@@ -134,7 +134,7 @@ const load = (query) => {
       ?entrypoint nobel:laureate ?y.
       ?y foaf:gender ?prop2.
     }
-    GROUP BY ?prop1 ?prop2 */
+    category BY ?prop1 ?prop2 */
     return {
         'head': {
             'vars': [ 'prop1', 'countprop1', 'prop2', 'countprop2' ]

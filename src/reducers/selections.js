@@ -1,8 +1,8 @@
 const defaultState = []
 /* const exSelection = {
     selector: '#toto',
-    prop: 'nobelLaureate/nobel:year/*',
-    value: [[0, 12], 2]  // valeur unique ou une liste de range ou de valeur unique (paliers)\
+    path: 'nobelLaureate/nobel:year/*',
+    value: [[0, 12], 2]  // valeur unique ou une liste de range ou de valeurs uniques
 } */
 
 const selection = (state, action) => {
@@ -10,7 +10,7 @@ const selection = (state, action) => {
     case 'ADD_SELECTION':
         return {
             selector: action.selector,
-            prop: action.prop,
+            path: action.path,
             value: action.value
         }
     default:
