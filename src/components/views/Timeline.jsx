@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 import d3Timeline from '../../d3/d3Timeline'
 import Legend from '../elements/Legend'
 import { addSelection, removeSelection } from '../../actions/selectionActions'
+import { getPropPalette } from '../../actions/palettesActions'
 
 class Timeline extends React.Component {
     constructor (props) {
@@ -14,13 +15,19 @@ class Timeline extends React.Component {
     render () {
         // console.log('salut Timeline')
         const { display, zone } = this.props
-        return (<g className = "Timeline { this.props.zone }">
+        return (<g className = "Timeline { zone }">
             <g
                 transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
                 ref = "Timeline">
             </g>
             { this.state.legend &&
-                <Legend type = "plain" info = { this.state.legend } />
+                <Legend 
+                    type = "plain" 
+                    x = { display.zones[zone].x } 
+                    y = { display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin }
+                    info = { this.state.legend } 
+                    zone = { zone } 
+                />
             }
         </g>)
     }
@@ -47,14 +54,16 @@ function mapStateToProps (state) {
     return {
         display: state.display,
         data: state.data,
-        configs: state.configs.present
+        configs: state.configs.present,
+        palettes: state.palettes
     }
 }
 
 function mapDispatchToProps (dispatch) {
     return {
         addSelection: addSelection(dispatch),
-        removeSelection: removeSelection(dispatch)
+        removeSelection: removeSelection(dispatch),
+        getPropPalette: getPropPalette(dispatch)
     }
 }
 

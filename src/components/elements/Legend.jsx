@@ -6,7 +6,10 @@ import { addSelection, removeSelection } from '../../actions/selectionActions'
 class Legend extends React.Component {
     render () {
         const { zone } = this.props
-        return (<g className = "legend" ref = { `legend_${zone}` }>
+        return (<g className = "Legend"
+            transform = { `translate(${this.props.x}, ${this.props.y})` }
+            ref = { `legend_${zone}` }
+        >
         </g>)
     }
     componentDidMount () {

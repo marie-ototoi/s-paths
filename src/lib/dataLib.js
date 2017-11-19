@@ -43,7 +43,10 @@ const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
         nest = centuryNest
     }
     return nest.map(group => {
-        let groupWithAdd = { ...group }
+        let groupWithAdd = { 
+            ...group,
+            values: group.values.sort((a, b) => b.prop2.value.localeCompare(a.prop2.value))
+        }
         propsToAdd.forEach(prop => {
             groupWithAdd[prop] = 0
             group.values.forEach(val => {

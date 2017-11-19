@@ -5,10 +5,8 @@ import selections from '../../src/reducers/selections'
 
 chai.use(sinonChai)
 const savedState = [{
-    props: [{
-        path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
-        value: 'female'
-    }]
+    path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
+    value: 'female'
 }]
 const initialState = []
 
@@ -21,34 +19,27 @@ describe('reducers/selections', () => {
         let addAction = {
             type: 'ADD_SELECTION',
             selector: '#topic',
-            props: [
-                { path: 'nobel:LaureateAward/nobel:year/*', value: '1945' }
-            ]
+            path: 'nobel:LaureateAward/nobel:year/*', 
+            value: '1945'
         }
         expect(selections(undefined, addAction))
             .to.deep.equal([
                 {
                     selector: '#topic',
-                    props: [{
-                        path: 'nobel:LaureateAward/nobel:year/*',
-                        value: '1945'
-                    }]
+                    path: 'nobel:LaureateAward/nobel:year/*',
+                    value: '1945'
                 }
             ])
         expect(selections(savedState, addAction))
             .to.deep.equal([
                 { 
-                    props: [{
-                        path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
-                        value: 'female'
-                    }]
+                    path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
+                    value: 'female'
                 },
                 { 
                     selector: '#topic',
-                    props: [{
-                        path: 'nobel:LaureateAward/nobel:year/*',
-                        value: '1945'
-                    }]
+                    path: 'nobel:LaureateAward/nobel:year/*',
+                    value: '1945'
                 }
             ])
     })
@@ -59,17 +50,13 @@ describe('reducers/selections', () => {
         }
         let state = [
             {
-                props: [{
-                    path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
-                    value: 'female'
-                }]
+                path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
+                value: 'female'
             },
             {
                 selector: '#topic',
-                props: [{
-                    path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
-                    value: 'female'
-                }]
+                path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
+                value: 'female'
             }
         ]
         expect(selections(undefined, removeAction))
@@ -77,10 +64,8 @@ describe('reducers/selections', () => {
         expect(selections(state, removeAction))
             .to.deep.equal([
                 {
-                    props: [{
-                        path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
-                        value: 'female'
-                    }]
+                    path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
+                    value: 'female'
                 }
             ])
     })
