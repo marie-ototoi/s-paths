@@ -12,7 +12,10 @@ const create = (el, props) => {
         const selectedData = data.getResults(props.data, zone)
         const nestedData = data.groupTimeData(selectedData, 'prop1', selectedConfig.selectedMatch.properties[0].format, 150)
         //
-        const prop2Data = d3.nest().key(legend => legend.prop2.value).entries(selectedData)
+        
+        const prop2Data = d3.nest().key(legend => {
+            return (legend.labelprop2.value !== '') ? legend.labelprop2.value : legend.prop2.value
+        }).entries(selectedData)
         const prop2 = selectedConfig.selectedMatch.properties[1].path
         const palette = getPropPalette(palettes, prop2, prop2Data.length)
         const paletteObj = prop2Data.map((p, i) => {
@@ -49,7 +52,7 @@ const draw = (el, nestedData, paletteObj) => {
         .data(d => d.values)
         .enter()
         .append('line')
-        .attr('stroke', d => paletteObj.filter(p => p.key === d.prop2.value)[0].color )
+        .attr('stroke', d => paletteObj.filter(p => (p.key === d.prop2.value || p.key === d.labelprop2.value))[0].color )
 }
 
 const resize = (el, selectedData, display) => {

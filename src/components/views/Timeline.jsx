@@ -25,6 +25,8 @@ class Timeline extends React.Component {
                     type = "plain" 
                     x = { display.zones[zone].x } 
                     y = { display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin }
+                    width = { display.viz.horizontal_margin }
+                    height = { display.viz.vertical_margin }
                     info = { this.state.legend } 
                     zone = { zone } 
                 />

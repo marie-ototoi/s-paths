@@ -2,9 +2,9 @@ import * as d3 from 'd3'
 import data from '../lib/dataLib'
 
 const create = (el, props) => {
-    console.log('create', props)
+    // console.log('create', props)
     if (el && data.areLoaded(props.data, props.zone)) {
-        console.log('salut')
+        // console.log('salut')
         const rectangles = d3.select(el)
             .selectAll('rect')
             .data(props.info)
