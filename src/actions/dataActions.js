@@ -59,10 +59,9 @@ const loadData = (dispatch) => (dataset, views) => {
         })
         .then(configs => {
             const configMain = config.getSelectedConfig(configs, 'main')
-            const queryMain =  data.makeQuery(entrypoint, configMain)
+            const queryMain = data.makeQuery(entrypoint, configMain)
             const configAside = config.getSelectedConfig(configs, 'aside')
-            const queryAside =  data.makeQuery(entrypoint, configAside)
-            
+            const queryAside = data.makeQuery(entrypoint, configAside)
             return Promise.all([
                 getData(endpoint, queryMain, prefixes),
                 getData(endpoint, queryAside, prefixes)

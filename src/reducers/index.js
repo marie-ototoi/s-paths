@@ -18,9 +18,7 @@ const discoverApp = combineReducers({
     }), 
     display,
     palettes,
-    selections: undoable(selections, {
-        filter: 'undoFilter'
-    }), 
+    selections, 
     views    
 })
 

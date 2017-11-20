@@ -1,8 +1,14 @@
 const defaultState = []
 /* const exSelection = {
+    zone: 'main',
     selector: '#toto',
-    path: 'nobelLaureate/nobel:year/*',
-    value: [[0, 12], 2]  // valeur unique ou une liste de range ou de valeurs uniques
+    props: [{
+        path: 'nobelLaureate/nobel:year/*',
+        value: [[0, 12], 2]  // valeur unique ou une liste de range ou de valeurs uniques
+    },
+    {
+        uri: 'http:'
+    }]
 } */
 
 const selection = (state, action) => {
@@ -10,8 +16,8 @@ const selection = (state, action) => {
     case 'ADD_SELECTION':
         return {
             selector: action.selector,
-            path: action.path,
-            value: action.value
+            zone: action.zone,
+            props: action.props
         }
     default:
         return state
@@ -27,7 +33,7 @@ const selections = (state = defaultState, action) => {
         ]
     case 'REMOVE_SELECTION':
         return state.filter(sel =>
-            sel.selector !== action.selector
+            !(sel.selector === action.selector && sel.zone === action.zone)
         )
     default:
         return state
