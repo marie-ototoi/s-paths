@@ -1,15 +1,15 @@
-import { color } from "d3-color";
+import { color } from 'd3-color'
 
 const getNextPaletteIndex = (palettes) => {
-    let index 
+    let index
     let max = 0
     while (index === undefined) {
-        for(let i = palettes.length - 1; i >= 0; i--) {
+        for (let i = palettes.length - 1; i >= 0; i--) {
             if (palettes[i].properties.length === max) {
                 index = i
             }
         }
-        max ++
+        max++
     }
     return index
 }

@@ -2,6 +2,8 @@ import * as d3 from 'd3'
 import d3Legend from './d3Legend'
 import dataLib from '../lib/dataLib'
 import statisticalOperator from '../lib/statLib'
+import palette from '../lib/paletteLib.js'
+import config from '../lib/configLib'
 
 const colorChooser = (value, min = 0, max = 1) => {
     let ramp = d3.scaleLinear().domain([min, max]).range([60, 0])
@@ -67,12 +69,20 @@ const removeSelectionUsingRange = (min, max) => {
 const create = (el, props) => {
     if (!(el && dataLib.areLoaded(props.data, props.zone))) return
     let data = statisticalOperator.computeStatisticalInformation(props.data.filter(d => d.zone === props.zone)[0])
+    const { configs, palettes, zone, getPropPalette, setLegend } = props
+    const selectedConfig = config.getSelectedConfig(configs, zone)
+    const prop2 = selectedConfig.selectedMatch.properties[1].path
+    const palette = getPropPalette(palettes, prop2, 6)
+    const paletteObj = []
+    for (var i = 0; i < 5; i++) {
+        paletteObj.push({ key: '<' + (i + 1) * 20 + '%', color: palette[i] })
+    }
     /* ******************************************************************************************************** */
     /* *****************************    Panel Initializtion    ************************************************ */
     /* ******************************************************************************************************** */
 
     let div = d3.select(el).append('g').attr('id', 'heatMapCenterPanel')
-    let divLegend = d3.select(el).append('g').attr('id', 'heatmapLegend')
+    //    let divLegend = d3.select(el).append('g').attr('id', 'heatmapLegend')
 
     /* ******************************************************************************************************** */
     /* *****************************    heatmap creation   **************************************************** */
@@ -83,6 +93,11 @@ const create = (el, props) => {
         .enter()
         .append('rect')
         .attr('id', d => d.prop1 + d.prop2)
+        .attr('fill', function (d) {
+            let percent = ((d.value - data.min) * 100) / (data.max - data.min)
+            if (percent < 20) percent += 20
+            return paletteObj.filter(p => (p.key === ('<' + (percent - (percent % 20)) + '%')))[0].color
+        })
 
     div.append('g')
         .attr('id', 'abscisse')
@@ -96,7 +111,8 @@ const create = (el, props) => {
         .style('text-anchor', 'start')
     resize(el, props)
 
-    d3Legend.create(divLegend, props)
+    //  d3Legend.create(divLegend, props)
+    setLegend(paletteObj)
 }
 
 const update = (el, props) => {
@@ -139,7 +155,7 @@ const resize = (el, props) => {
         .attr('height', itemSizeY)
         .attr('x', d => xScale(d.prop1))
         .attr('y', d => yScale(d.prop2))
-        .attr('fill', d => colorChooser(d.value, data.min, data.max))
+    //        .attr('fill', d => colorChooser(d.value, data.min, data.max))d => paletteObj.filter(p => (p.key === d.prop2.value || p.key === d.labelprop2.value))[0].color )
         .attr('stroke', 'black')
         .attr('stroke-width', 0.5)
         .attr('isSelected', 0)
@@ -166,7 +182,7 @@ const resize = (el, props) => {
         .attr('dy', '.5em')
         .attr('transform', 'rotate(65)')
 
-    d3Legend.update(d3.select('#heatmapLegend'), props)
+    //  d3Legend.update(d3.select('#heatmapLegend'), props)
 }
 
 exports.create = create
