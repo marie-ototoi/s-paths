@@ -53,7 +53,7 @@ const computeStatisticalInformation = (data) => {
     let maxValue = 0
     for (let k1 in statistics) {
         for (let k2 in statistics[k1]) {
-            statistics[k1][k2] = statistics[k1][k2] / total
+            statistics[k1][k2] = statistics[k1][k2]
             if (statistics[k1][k2] > maxValue) maxValue = statistics[k1][k2]
             if (statistics[k1][k2] < minValue) minValue = statistics[k1][k2]
             let newItem = {}
@@ -63,7 +63,7 @@ const computeStatisticalInformation = (data) => {
             res.push(newItem)
         }
     }
-    return { data: res, min: minValue, max: maxValue }
+    return { data: res, min: minValue, max: maxValue, total: total }
 }
 
 exports.computeStatisticalInformation = computeStatisticalInformation

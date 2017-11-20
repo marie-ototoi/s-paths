@@ -2,7 +2,7 @@ import * as d3 from 'd3'
 import d3Legend from './d3Legend'
 import dataLib from '../lib/dataLib'
 import statisticalOperator from '../lib/statLib'
-import palette from '../lib/paletteLib.js'
+import {getQuantitativeColors, getPatternsPalette, colorPattern} from '../lib/paletteLib.js'
 import config from '../lib/configLib'
 
 const colorChooser = (value, min = 0, max = 1) => {
@@ -27,10 +27,16 @@ const repeat = (cell) => {
         .on('end', function () { repeat(cell) })
 }
 
+/** ************************************************** PATTERN EXAMPLE *****************************************************/
 const selectCell = (cell) => {
-    cell.attr('stroke-width', 4)
-    repeat(cell)
-    cell.attr('isSelected', 1)
+    let rand = Math.random() * (9 - 0) + 0
+    var patterns = getPatternsPalette(10)
+    var url = colorPattern(d3.select('#heatMapCenterPanel'), patterns[Math.trunc(rand)], cell.attr('fill'))
+    cell.attr('fill', url)
+
+//    cell.attr('stroke-width', 4)
+    //    repeat(cell)
+//    cell.attr('isSelected', 1)
 }
 
 const deselectCell = (cell) => {
@@ -69,13 +75,13 @@ const removeSelectionUsingRange = (min, max) => {
 const create = (el, props) => {
     if (!(el && dataLib.areLoaded(props.data, props.zone))) return
     let data = statisticalOperator.computeStatisticalInformation(props.data.filter(d => d.zone === props.zone)[0])
-    const { configs, palettes, zone, getPropPalette, setLegend } = props
-    const selectedConfig = config.getSelectedConfig(configs, zone)
-    const prop2 = selectedConfig.selectedMatch.properties[1].path
-    const palette = getPropPalette(palettes, prop2, 6)
+    const { setLegend } = props
     const paletteObj = []
+    const color = getQuantitativeColors(5)
+    let step = (data.max - data.min) / 5
     for (var i = 0; i < 5; i++) {
-        paletteObj.push({ key: '<' + (i + 1) * 20 + '%', color: palette[i] })
+        let key = 'less than ' + data.min + ((i + 1) * step) + ' items'
+        paletteObj.push({ key: key, color: color[i] })
     }
     /* ******************************************************************************************************** */
     /* *****************************    Panel Initializtion    ************************************************ */
@@ -94,9 +100,9 @@ const create = (el, props) => {
         .append('rect')
         .attr('id', d => d.prop1 + d.prop2)
         .attr('fill', function (d) {
-            let percent = ((d.value - data.min) * 100) / (data.max - data.min)
-            if (percent < 20) percent += 20
-            return paletteObj.filter(p => (p.key === ('<' + (percent - (percent % 20)) + '%')))[0].color
+            for (var i = 0; i < 5; i++) {
+                if (!(data.min + ((i + 1) * step) < d.value)) return paletteObj.filter(p => (p.key === ('less than ' + data.min + ((i + 1) * step) + ' items')))[0].color
+            }
         })
 
     div.append('g')
