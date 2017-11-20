@@ -4,7 +4,6 @@ import config from '../lib/configLib'
 import data from '../lib/dataLib'
 import { addSelection, removeSelection } from '../actions/selectionActions';
 
-
 const create = (el, props) => {
     // console.log('create', config.getSelectedConfig(props.configs, props.zone))
     if (el && data.areLoaded(props.data, props.zone)) {
@@ -55,16 +54,15 @@ const draw = (el, props) => {
         .enter()
         .append('line')
         .attr('stroke', d => paletteObj.filter(p => (p.key === d.prop2.value || p.key === d.labelprop2.value))[0].color )
-    const bookIndex = d3.selectAll('line')
+    const bookIndex = d3.select(el).selectAll('line')
         .attr('id', (d, i) => `book_${i}`)
 }
 
 const assignBehavior = (el, props) => {
     const { selections, zone, isSelected, addSelection, removeSelection } = props
-    const bookIndex = d3.selectAll('line')
+    const bookIndex = d3.select(el).selectAll('line')
         .classed('selected', (d, i) => isSelected(`book_${i}`, zone, selections)) // check id in selection
         .on('click', (d, i) => {
-            console.log(selections)
             isSelected(`book_${i}`, zone, selections) ?
                 removeSelection(zone, `book_${i}`) : addSelection(zone, `book_${i}`, [{ uri: d.entrypoint }])
         })

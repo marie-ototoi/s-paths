@@ -21,6 +21,15 @@ const create = (el, props) => {
     }
 }
 
+const assignBehavior = (el, props) => {
+    const { selections, zone, isSelected, select } = props
+    /*const bookIndex = d3.select(el).selectAll('rect')
+        .on('click', (d, i) => {
+            
+        })*/ // send list of selectors
+}
+
+
 const update = (el, props) => {
     //
     if (el && props.data) {
