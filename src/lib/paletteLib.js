@@ -18,13 +18,13 @@ const getQuantitativeColors = (length) => {
     const colors = [
         '#FDD835', '#FBC02D', '#FF8F00', '#FF6F00', '#E65100', '#BF360C', '#4E342E'
     ]
-    return getColors(colors, length)
+    return selectColorsInPalette(colors, length)
 }
 
 const selectColorsInPalette = (colors, length) => {
     return colors.slice(0, length)
-    const step = Math.floor(colors.length / length)
-    return colors.filter((color, index) => (index % step === 0))
+//    const step = Math.floor(colors.length / length)
+//    return colors.filter((color, index) => (index % step === 0))
 }
 
 exports.getNextPaletteIndex = getNextPaletteIndex
