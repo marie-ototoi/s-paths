@@ -43,7 +43,10 @@ const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
         nest = centuryNest
     }
     return nest.map(group => {
-        let groupWithAdd = { ...group }
+        let groupWithAdd = { 
+            ...group,
+            values: group.values.sort((a, b) => b.prop2.value.localeCompare(a.prop2.value))
+        }
         propsToAdd.forEach(prop => {
             groupWithAdd[prop] = 0
             group.values.forEach(val => {
@@ -61,17 +64,19 @@ const makeQuery = (entrypoint, config) => {
     let orderList = ``
     config.selectedMatch.properties.forEach((prop, index) => {
         index ++
-        propList = propList.concat(`?prop${index} `)
+        propList = propList.concat(`?prop${index} ?labelprop${index} `)
         orderList = orderList.concat(`?prop${index} `)
         if (config.entrypoint === undefined) {
             propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
             orderList = orderList.concat(`?countprop${index} `)
-            groupList = groupList.concat(`?prop${index} `)
-        } else {
-            groupList = groupList.concat(`?prop${index} `)
         }
+        groupList = groupList.concat(`?prop${index} ?labelprop${index} `)
         defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`))
     })
+    /* console.log(`SELECT DISTINCT ${propList}
+    WHERE { ?entrypoint rdf:type ${entrypoint} . 
+    ${defList}
+    } GROUP BY ${groupList}ORDER BY ${orderList}`) */
     return `SELECT DISTINCT ${propList}
 WHERE { ?entrypoint rdf:type ${entrypoint} . 
 ${defList}
@@ -91,6 +96,7 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1') => {
         let thisSubject = (level === 1) ? entrypointName : `${propName}inter${(level - 1)}`
         let thisObject = (level === levels) ? propName : `${propName}inter${level}`
         query = query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
+        if (level === levels) query = query.concat(`OPTIONAL { ?${thisObject} rdfs:label  ?label${propName} } . `)
         if (objectType !== '*') {
             query = query.concat(`?${thisObject} rdf:type ${objectType} . `)
         }        

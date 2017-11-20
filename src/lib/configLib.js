@@ -22,7 +22,7 @@ const overRange = (val, range) => {
     return (val > range[1])
 }
 const getDeviationCost = (min, max, optimal, score) => {
-    if(!optimal || (!min && !max)) return 0
+    if (!optimal || (!min && !max)) return 0
     const gapMin = (min) ? optimal[0] - min : null
     const gapMax = (max) ? max - optimal[1] : null
     const maxGap = (gapMin > gapMax) ? gapMin : gapMax

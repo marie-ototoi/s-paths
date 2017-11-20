@@ -1,34 +1,39 @@
 import * as d3 from 'd3'
+// import color from '../lib/paletteLib'
 import config from '../lib/configLib'
 import data from '../lib/dataLib'
+
 
 const create = (el, props) => {
     // console.log('create', config.getSelectedConfig(props.configs, props.zone))
     if (el && data.areLoaded(props.data, props.zone)) {
-        const selectedConfig = config.getSelectedConfig(props.configs, props.zone)
-        const selectedData = data.getResults(props.data, props.zone)
+        const { configs, display, palettes, zone, getPropPalette, setLegend } = props
+        const selectedConfig = config.getSelectedConfig(configs, zone)
+        const selectedData = data.getResults(props.data, zone)
         const nestedData = data.groupTimeData(selectedData, 'prop1', selectedConfig.selectedMatch.properties[0].format, 150)
-        // console.log(props.display)
-
-        // console.log(nestedData)
-        const timeUnits = d3.select(el)
-            .selectAll('g.time')
-            .data(nestedData)
-            .enter()
-            .append('g')
-            .attr('class', 'time')
-        const bookUnits = timeUnits.selectAll('line')
-            .data(d => d.values)
-            .enter()
-            .append('line')
-        resize(el, props)
+        //
+        
+        const prop2Data = d3.nest().key(legend => {
+            return (legend.labelprop2.value !== '') ? legend.labelprop2.value : legend.prop2.value
+        }).entries(selectedData)
+        const prop2 = selectedConfig.selectedMatch.properties[1].path
+        const palette = getPropPalette(palettes, prop2, prop2Data.length)
+        const paletteObj = prop2Data.map((p, i) => {
+            return { key: p.key, color: palette[i] }
+        })
+        draw(el, nestedData, paletteObj)
+        resize(el, selectedData, display)
+        
+        setLegend(paletteObj)
     }
 }
 
 const update = (el, props) => {
     //
     if (el && props.data) {
-        resize(el, props)
+        const { display } = props
+        const selectedData = data.getResults(props.data, props.zone)
+        resize(el, selectedData, display)
     }
 }
 
@@ -36,9 +41,22 @@ const destroy = (el) => {
     //
 }
 
-const resize = (el, props) => {
-    const { display } = props
-    const selectedData = data.getResults(props.data, props.zone)
+const draw = (el, nestedData, paletteObj) => {
+    const timeUnits = d3.select(el)
+        .selectAll('g.time')
+        .data(nestedData)
+        .enter()
+        .append('g')
+        .attr('class', 'time')
+    const bookUnits = timeUnits.selectAll('line')
+        .data(d => d.values)
+        .enter()
+        .append('line')
+        .attr('stroke', d => paletteObj.filter(p => (p.key === d.prop2.value || p.key === d.labelprop2.value))[0].color )
+}
+
+const resize = (el, selectedData, display) => {
+    
     const xScale = d3.scaleLinear()
         .domain([Number(selectedData[0].prop1.value), Number(selectedData[selectedData.length - 1].prop1.value)])
         .range([0, display.viz.useful_width])
@@ -57,7 +75,6 @@ const resize = (el, props) => {
         .attr('x2', Math.ceil(unitWidth / 2))
         .attr('y1', (d, i) => display.viz.useful_height - (i * unitHeight))
         .attr('y2', (d, i) => display.viz.useful_height - (i * unitHeight + unitHeight - 1))
-        .attr('stroke', '#000')
         .attr('stroke-width', unitWidth - 1)
 
     d3.select(el).selectAll('.xaxis').remove()

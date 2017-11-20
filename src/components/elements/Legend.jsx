@@ -1,23 +1,34 @@
 import React from 'react'
+import { connect } from 'react-redux'
 import d3PlainLegend from '../../d3/d3PlainLegend'
+import { addSelection, removeSelection } from '../../actions/selectionActions'
 
 class Legend extends React.Component {
     render () {
         const { zone } = this.props
-        return (<g className = "legend" ref = { `legend_${zone}` }>
+        return (<g className = "Legend"
+            transform = { `translate(${this.props.x}, ${this.props.y})` }
+            ref = { `legend_${zone}` }
+        >
         </g>)
     }
     componentDidMount () {
-        const { zone } = this.props
-        d3PlainLegend.create(this.refs[`legend_${zone}`], this.props)
+        const { zone, type } = this.props
+        if (type === 'plain') {
+            d3PlainLegend.create(this.refs[`legend_${zone}`], this.props)
+        }
     }
     componentDidUpdate () {
-        const { zone } = this.props
-        d3PlainLegend.update(this.refs[`legend_${zone}`], this.props)
+        const { zone, type } = this.props
+        if (type === 'plain') {
+            d3PlainLegend.update(this.refs[`legend_${zone}`], this.props)
+        }
     }
     componentWillUnmount () {
-        const { zone } = this.props
-        d3PlainLegend.destroy(this.refs[`legend_${zone}`])
+        const { zone, type } = this.props
+        if (type === 'plain') {
+            d3PlainLegend.destroy(this.refs[`legend_${zone}`])
+        }
     }
 }
 

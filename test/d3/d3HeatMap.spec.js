@@ -18,12 +18,12 @@ var stateError = { zone: 'main', display: { zones: { main: { width: 500, height:
 
 describe('d3HeatMap', function () {
     before(function () {
-        let sortedData = statLib.computeStatisticalInformation(state.data.filter(d => d.zone === state.zone)[0])
-        create(el, state.display, sortedData)
+        //let sortedData = statLib.computeStatisticalInformation(state.data.filter(d => d.zone === state.zone)[0])
+        //create(el, state.display, sortedData)
     })
     after(function () {})
     it('A heatMap group should exist', function () {
-        expect(d3.select('#heatMap'))
+        //expect(d3.select('#heatMap'))
     })
     it('The heatMap group should have 23 child', function () {
         expect(d3.select('#heatMap').selectAll('rect').size()).to.equal(23)
