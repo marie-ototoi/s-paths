@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import d3Timeline from '../../d3/d3Timeline'
 import Legend from '../elements/Legend'
-import { addSelection, createSelection, isSelected, removeSelection, select } from '../../actions/selectionActions'
+import { select } from '../../actions/selectionActions'
 import { getPropPalette } from '../../actions/palettesActions'
 
 class Timeline extends React.Component {
@@ -64,10 +64,8 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
-        addSelection: addSelection(dispatch),
         getPropPalette: getPropPalette(dispatch),
-        isSelected: isSelected(dispatch),
-        removeSelection: removeSelection(dispatch),
+        select: select(dispatch)
     }
 }
 

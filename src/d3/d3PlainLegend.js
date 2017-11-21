@@ -5,36 +5,41 @@ const create = (el, props) => {
     // console.log('create', props)
     if (el && data.areLoaded(props.data, props.zone)) {
         // console.log('salut')
-        const rectangles = d3.select(el)
-            .selectAll('rect')
-            .data(props.info)
-            .enter()
-            .append('rect')
-            .attr('fill', d => d.color)
-        const texts = d3.select(el)
-            .selectAll('text')
-            .data(props.info)
-            .enter()
-            .append('text')
-            .text(d => d.key)
+        draw(el, props)
         resize(el, props)
+        assignBehavior(el, props)
     }
+}
+const draw = (el, props) => {
+    const rectangles = d3.select(el)
+        .selectAll('rect')
+        .data(props.info)
+        .enter()
+        .append('rect')
+        .attr('fill', d => d.color)
+    const texts = d3.select(el)
+        .selectAll('text')
+        .data(props.info)
+        .enter()
+        .append('text')
+        .text(d => d.key)
 }
 
 const assignBehavior = (el, props) => {
-    const { selections, zone, isSelected, select } = props
-    /*const bookIndex = d3.select(el).selectAll('rect')
-        .on('click', (d, i) => {
-            
-        })*/ // send list of selectors
+    const { selections, zone, select } = props
+    const legendItems = d3.select(el).selectAll('rect')
+        .on('click', (d) => {
+            select(d.elements, zone, selections)
+        }) // send list of selectors
 }
-
 
 const update = (el, props) => {
     //
     if (el && props.data) {
-        
+        //console.log('///////////',props.selections )
+        assignBehavior(el, props)
         resize(el, props)
+        
     }
 }
 

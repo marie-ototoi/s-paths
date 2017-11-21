@@ -1,17 +1,14 @@
 import * as types from '../constants/ActionTypes'
-
-const removeSelection = (dispatch) => (selector) => {
+import selectionLib from '../lib/selectionLib'
+const removeSelection = (dispatch) => (selector, zone) => {
     return dispatch({
         type: 'REMOVE_SELECTION',
-        selector
+        selector,
+        zone
     })
 }
 
-const isSelected = (dispatch) => (selector, zone, selections) => {
-    return selections.filter(sel => (sel.selector === selector && sel.zone === zone)).length > 0
-}
-
-const addSelection = (dispatch) => (zone, selector, props) => {
+const addSelection = (dispatch) => (selector, zone, props) => {
     // replace by select
     return dispatch({
         type: 'ADD_SELECTION',
@@ -21,6 +18,39 @@ const addSelection = (dispatch) => (zone, selector, props) => {
     })
 }
 
+const select = (dispatch) => (elements, zone, selections) => {
+    if (selectionLib.areSelected(elements, zone, selections)) {
+        return dispatch({
+            type: 'REMOVE_SELECTION',
+            elements,
+            zone
+        })
+    } else {
+        return dispatch({
+            type: 'ADD_SELECTION',
+            elements,
+            zone
+        })
+    }
+    /* elements.forEach(element => {
+        if (selectionLib.areSelected(element.selector, zone, selections)) {
+            return dispatch({
+                type: 'REMOVE_SELECTION',
+                selector: element.selector,
+                zone
+            })
+        } else {
+            return dispatch({
+                type: 'ADD_SELECTION',
+                selector: element.selector,
+                zone,
+                props: element.props
+            })
+        }
+    }) */
+    console.log(selections)
+}
+
 exports.addSelection = addSelection
 exports.removeSelection = removeSelection
-exports.isSelected = isSelected
+exports.select = select

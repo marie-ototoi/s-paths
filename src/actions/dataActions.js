@@ -62,6 +62,10 @@ const loadData = (dispatch) => (dataset, views) => {
             const queryMain = data.makeQuery(entrypoint, configMain)
             const configAside = config.getSelectedConfig(configs, 'aside')
             const queryAside = data.makeQuery(entrypoint, configAside)
+            /* return Promise.all([
+                new Promise((resolve) => resolve(stats.load('Timeline'))),
+                new Promise((resolve) => resolve(stats.load('HeatMap')))
+            ]) */
             return Promise.all([
                 getData(endpoint, queryMain, prefixes),
                 getData(endpoint, queryAside, prefixes)
@@ -72,7 +76,7 @@ const loadData = (dispatch) => (dataset, views) => {
                         statements: {
                             ...dataMain,
                             results: {
-                                bindings: dataMain.results.bindings
+                                bindings: dataMain.results.bindings /* .sort((a, b) => a.prop1.value - b.prop1.value) */
                             }
                         },
                         zone: 'main'
@@ -82,7 +86,7 @@ const loadData = (dispatch) => (dataset, views) => {
                         statements: {
                             ...dataAside,
                             results: {
-                                bindings: dataAside.results.bindings
+                                bindings: dataAside.results.bindings /* .sort((a, b) => a.prop1.value - b.prop1.value) */
                             }
                         },
                         zone: 'aside'
