@@ -55,6 +55,7 @@
     "mocha": "^3.5.3",
     "mock-browser": "^0.92.12",
     "moment": "^2.18.1",
+    "nyc": "^11.3.0",
     "react": "^15.6.1",
     "react-addons-test-utils": "^15.4.2",
     "react-bootstrap": "^0.31.1",
