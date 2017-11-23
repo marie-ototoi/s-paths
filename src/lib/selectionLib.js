@@ -1,20 +1,19 @@
-const isSelected = (selector, zone, selections) => {
+const isSelected = (el, zone, selections) => {
     //console.log(selections)
     let listSelections = selections.filter(s => s.zone === zone).map(s => s.selector)
-    return listSelections.includes(selector)
+    return listSelections.includes(el.selector)
 }
 const areSelected = (elements, zone, selections) => {
     let listSelections = selections.filter(s => s.zone === zone).map(s => s.selector)
-    let allSelected = true
-    for (let i = 0; i < elements.length; i++) {
-        let el = elements[i]
+    // console.log('list', elements, listSelections)
+    let allSelected = 0
+    elements.forEach(el => {
         // console.log(el.selector, listSelections.includes(el.selector), selections, listSelections)
-        if (!listSelections.includes(el.selector)) {
-            allSelected = false
+        if (listSelections.includes(el.selector)) {
+            allSelected ++
         }
-        break
-    }
-    return allSelected
+    })
+    return allSelected === elements.length
 }
 
 exports.areSelected = areSelected

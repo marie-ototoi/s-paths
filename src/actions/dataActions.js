@@ -76,7 +76,7 @@ const loadData = (dispatch) => (dataset, views) => {
                         statements: {
                             ...dataMain,
                             results: {
-                                bindings: dataMain.results.bindings /* .sort((a, b) => a.prop1.value - b.prop1.value) */
+                                bindings: dataMain.results.bindings /* .sort((a, b) => a.prop1.value - b.prop1.value) */ 
                             }
                         },
                         zone: 'main'

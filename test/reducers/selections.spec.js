@@ -4,69 +4,94 @@ import sinonChai from 'sinon-chai'
 import selections from '../../src/reducers/selections'
 
 chai.use(sinonChai)
-const savedState = [{
-    path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
-    value: 'female'
+const newState = [{
+    selector: '#toto',
+    props: [{
+        path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
+        value: 'female'
+    }],
+    zone: 'main'
 }]
 const initialState = []
 
 describe('reducers/selections', () => {
     it('should handle initial state', () => {
         expect(selections(undefined, { })).to.deep.equal(initialState)
-        expect(selections(savedState, { })).to.deep.equal(savedState)
+        expect(selections(newState, { })).to.deep.equal(newState)
     })
     it('should handle ADD_SELECTION', () => {
         let addAction = {
             type: 'ADD_SELECTION',
-            selector: '#topic',
-            path: 'nobel:LaureateAward/nobel:year/*', 
-            value: '1945'
+            elements: [
+                {
+                    selector: '#topic',
+                    props: [{
+                        path: 'nobel:LaureateAward/nobel:year/*', 
+                        value: '1945'
+                    }],
+                    zone: 'main'
+                }
+            ],
+            zone: 'main'
         }
         expect(selections(undefined, addAction))
             .to.deep.equal([
                 {
                     selector: '#topic',
-                    path: 'nobel:LaureateAward/nobel:year/*',
-                    value: '1945'
+                    props: [{
+                        path: 'nobel:LaureateAward/nobel:year/*', 
+                        value: '1945'
+                    }],
+                    zone: 'main'
                 }
             ])
-        expect(selections(savedState, addAction))
+        expect(selections(newState, addAction))
             .to.deep.equal([
-                { 
-                    path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
-                    value: 'female'
+                {
+                    selector: '#toto',
+                    props: [{
+                        path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
+                        value: 'female'
+                    }],
+                    zone: 'main'
                 },
-                { 
+                {
                     selector: '#topic',
-                    path: 'nobel:LaureateAward/nobel:year/*',
-                    value: '1945'
+                    props: [{
+                        path: 'nobel:LaureateAward/nobel:year/*', 
+                        value: '1945'
+                    }],
+                    zone: 'main'
                 }
             ])
     })
     it('should handle REMOVE_SELECTION', () => {
         let removeAction = {
             type: 'REMOVE_SELECTION',
-            selector: '#topic'
+            elements: [{ selector: '#topic' }, { selector: '#toto' }],
+            zone: 'main'
         }
         let state = [
-            {
-                path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
-                value: 'female'
+            { 
+                selector: '#toto',
+                props: [{
+                    path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
+                    value: 'female'
+                }],
+                zone: 'main'
             },
             {
                 selector: '#topic',
-                path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
-                value: 'female'
+                props: [{
+                    path: 'nobel:LaureateAward/nobel:year/*',
+                    value: '1945'
+                }],
+                zone: 'main'
             }
         ]
         expect(selections(undefined, removeAction))
             .to.deep.equal([])
         expect(selections(state, removeAction))
-            .to.deep.equal([
-                {
-                    path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
-                    value: 'female'
-                }
-            ])
+            .to.deep.equal([])
     })
 })

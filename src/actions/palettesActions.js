@@ -13,6 +13,8 @@ const getPropPalette = (dispatch) => (palettes, propPath, length) => {
             index
         })
         palette = palettes[index]
+    } else {
+        palette = palette[0]
     }
     return paletteLib.selectColorsInPalette(palette.colors, length)
 }

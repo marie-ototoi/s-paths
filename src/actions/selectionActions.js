@@ -1,5 +1,6 @@
 import * as types from '../constants/ActionTypes'
 import selectionLib from '../lib/selectionLib'
+import { selection } from 'd3-selection';
 const removeSelection = (dispatch) => (selector, zone) => {
     return dispatch({
         type: 'REMOVE_SELECTION',
@@ -19,6 +20,7 @@ const addSelection = (dispatch) => (selector, zone, props) => {
 }
 
 const select = (dispatch) => (elements, zone, selections) => {
+    // console.log(elements, selections, selectionLib.areSelected(elements, zone, selections))
     if (selectionLib.areSelected(elements, zone, selections)) {
         return dispatch({
             type: 'REMOVE_SELECTION',
@@ -32,23 +34,7 @@ const select = (dispatch) => (elements, zone, selections) => {
             zone
         })
     }
-    /* elements.forEach(element => {
-        if (selectionLib.areSelected(element.selector, zone, selections)) {
-            return dispatch({
-                type: 'REMOVE_SELECTION',
-                selector: element.selector,
-                zone
-            })
-        } else {
-            return dispatch({
-                type: 'ADD_SELECTION',
-                selector: element.selector,
-                zone,
-                props: element.props
-            })
-        }
-    }) */
-    console.log(selections)
+    // console.log(selections)
 }
 
 exports.addSelection = addSelection

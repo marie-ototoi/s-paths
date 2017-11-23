@@ -26,10 +26,10 @@ const draw = (el, props) => {
 }
 
 const assignBehavior = (el, props) => {
-    const { selections, zone, select } = props
+    const { selections, zone, select, selectElements } = props
     const legendItems = d3.select(el).selectAll('rect')
         .on('click', (d) => {
-            select(d.elements, zone, selections)
+            selectElements(d.elements)
         }) // send list of selectors
 }
 
@@ -37,7 +37,6 @@ const update = (el, props) => {
     //
     if (el && props.data) {
         //console.log('///////////',props.selections )
-        assignBehavior(el, props)
         resize(el, props)
         
     }

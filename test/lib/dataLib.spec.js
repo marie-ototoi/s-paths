@@ -46,8 +46,8 @@ describe('lib/data', () => {
         expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 5).length).to.deep.equal(2)
     }) */
     it('should add values of specified props when grouped', () => {
-        expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 150, ['countprop2', 'countprop3'])[0].countprop2).to.equal(1)
-        expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 150, ['countprop2', 'countprop3'])[2].countprop2).to.equal(2)
+        expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 150, ['countprop2', 'countprop3'])[0].countprop2).to.equal(6)
+        expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 150, ['countprop2', 'countprop3'])[2].countprop2).to.equal(7)
     })
     it('should transform a FSL path into SPARQL', () => {
         expect(data.FSL2SPARQL('nobel:LaureateAward/nobel:year/*', 'prop1', 'entrypoint')).to.equal('?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label  ?labelprop1 } . ')
