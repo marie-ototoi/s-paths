@@ -28,28 +28,136 @@ const selectColorsInPalette = (colors, length) => {
 //    return colors.filter((color, index) => (index % step === 0))
 }
 
+// create a patern equivalent to the string parameter (ex:lines) with the specified color,
+// add it to the element 'el' and then return the url (ex: attr('fill', url))
 const colorPattern = (el, pattern, color) => {
     const stringify = require('virtual-dom-stringify')
-    const resultPattern = pattern({
-        background: color
-    })
+    let resultPattern
+    switch (pattern) {
+    case 'lines':
+        const lines = require('svg-patterns/p/lines')
+        resultPattern = lines({
+            background: color,
+            strokeWidth: 2.5,
+            size: 20
+        })
+        break
+    case 'circles':
+        const circles = require('svg-patterns/p/circles')
+        resultPattern = circles({
+            background: color,
+            radius: 5,
+            size: 30,
+            fill: 'black'
+        })
+        break
+    case 'rhombic':
+        const rhombic = require('svg-patterns/p/rhombic')
+        resultPattern = rhombic({
+            background: color,
+            strokeWidth: 2,
+            size: 40,
+            stroke: 'black'
+        })
+        break
+    case 'crosses':
+        const crosses = require('svg-patterns/p/crosses')
+        resultPattern = crosses({
+            background: color,
+            strokeWidth: 1.2,
+            size: 20,
+            stroke: 'black'
+        })
+        break
+    case 'hexagons':
+        const hexagons = require('svg-patterns/p/hexagons')
+        resultPattern = hexagons({
+            background: color,
+            strokeWidth: 1.8,
+            size: 22,
+            stroke: 'black'
+        })
+        break
+    case 'nylon':
+        const nylon = require('svg-patterns/p/nylon')
+        resultPattern = nylon({
+            background: color,
+            strokeWidth: 5,
+            size: 60,
+            stroke: 'black'
+        })
+        break
+    case 'squares':
+        const squares = require('svg-patterns/p/squares')
+        resultPattern = squares({
+            background: color,
+            strokeWidth: 2,
+            size: 20,
+            stroke: 'black'
+        })
+        break
+    case 'waves':
+        const waves = require('svg-patterns/p/waves')
+        resultPattern = waves({
+            background: color,
+            strokeWidth: 2,
+            size: 20,
+            stroke: 'black'
+        })
+        break
+    case 'woven':
+        const woven = require('svg-patterns/p/woven')
+        resultPattern = woven({
+            background: color,
+            strokeWidth: 2,
+            size: 20,
+            stroke: 'black'
+        })
+        break
+    case 'lines2':
+        const lines2 = require('svg-patterns/p/lines')
+        resultPattern = lines2({
+            background: color,
+            strokeWidth: 2.5,
+            size: 20,
+            orientations: [-45]
+        })
+        break
+    case 'circles2':
+        const circles2 = require('svg-patterns/p/circles')
+        resultPattern = circles2({
+            background: color,
+            radius: 5,
+            size: 30,
+            fill: 'none',
+            strokeWidth: 2,
+            stroke: 'black'
+        })
+        break
+    case 'rhombic3d':
+        const rhombic3d = require('svg-patterns/p/rhombic3d')
+        resultPattern = rhombic3d({
+            background: color,
+            strokeWidth: 2,
+            size: 40,
+            stroke: 'black'
+        })
+        break
+    default:
+        const def = require('svg-patterns/p/lines')
+        resultPattern = def({
+            background: color,
+            strokeWidth: 2.5,
+            size: 20
+        })
+    }
     el.append('defs').html(stringify(resultPattern))
     return resultPattern.url()
 }
 
+// return list of string that are used for pattern
 const getPatternsPalette = (length) => {
-    const lines = require('svg-patterns/p/lines')
-    const caps = require('svg-patterns/p/caps')
-    const circles = require('svg-patterns/p/circles')
-    const crosses = require('svg-patterns/p/crosses')
-    const hexagons = require('svg-patterns/p/hexagons')
-    const nylon = require('svg-patterns/p/nylon')
-    const rhombic = require('svg-patterns/p/rhombic')
-    const squares = require('svg-patterns/p/squares')
-    const waves = require('svg-patterns/p/waves')
-    const woven = require('svg-patterns/p/woven')
-    const rhombic3d = require('svg-patterns/p/rhombic3d')
-    const patterns = [lines, caps, circles, crosses, hexagons, nylon, rhombic, squares, waves, woven, rhombic3d]
+    const patterns = ['lines', 'circles', 'rhombic', 'crosses', 'hexagons', 'nylon', 'rhombic', 'squares', 'waves', 'woven', 'lines2', 'circles2', 'rhombic3d']
     return patterns.slice(0, length)
 }
 
