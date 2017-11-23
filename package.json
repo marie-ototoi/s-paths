@@ -21,9 +21,7 @@
   "bugs": {
     "url": ""
   },
-  "dependencies": {
-    "svg-patterns": "^0.1.3"
-  },
+  "dependencies": {},
   "homepage": "https://github.com/marie-ototoi/planning#readme",
   "devDependencies": {
     "babel-cli": "^6.26.0",

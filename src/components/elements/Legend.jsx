@@ -1,7 +1,7 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import d3PlainLegend from '../../d3/d3PlainLegend'
-import { addSelection, removeSelection } from '../../actions/selectionActions'
+import { select } from '../../actions/selectionActions'
 
 class Legend extends React.Component {
     render () {
@@ -36,14 +36,13 @@ function mapStateToProps (state) {
     return {
         display: state.display,
         data: state.data,
-        selections: state.selections.present
+        selections: state.selections
     }
 }
 
 function mapDispatchToProps (dispatch) {
     return {
-        addSelection: addSelection(dispatch),
-        removeSelection: removeSelection(dispatch)
+        select: select(dispatch)
     }
 }
 

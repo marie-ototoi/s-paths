@@ -1,8 +1,14 @@
 const defaultState = []
 /* const exSelection = {
+    zone: 'main',
     selector: '#toto',
-    path: 'nobelLaureate/nobel:year/*',
-    value: [[0, 12], 2]  // valeur unique ou une liste de range ou de valeurs uniques
+    props: [{
+        path: 'nobelLaureate/nobel:year/*',
+        value: [[0, 12], 2]  // valeur unique ou une liste de range ou de valeurs uniques
+    },
+    {
+        uri: 'http:'
+    }]
 } */
 
 const selection = (state, action) => {
@@ -10,8 +16,8 @@ const selection = (state, action) => {
     case 'ADD_SELECTION':
         return {
             selector: action.selector,
-            path: action.path,
-            value: action.value
+            zone: action.zone,
+            props: action.props
         }
     default:
         return state
@@ -21,14 +27,23 @@ const selection = (state, action) => {
 const selections = (state = defaultState, action) => {
     switch (action.type) {
     case 'ADD_SELECTION':
+        const elements2Add = action.elements.filter(el => {
+            return state.filter(sel =>
+                (sel.selector === el.selector && sel.zone === action.zone)
+            ).length === 0
+        })
+        const elementsAdded = elements2Add.map(el => {
+            return selection(undefined, { ...action, props: el.props, selector: el.selector })
+        })
         return [
             ...state,
-            selection(undefined, action)
+            ...elementsAdded
         ]
     case 'REMOVE_SELECTION':
-        return state.filter(sel =>
-            sel.selector !== action.selector
-        )
+        const elements2Remove = action.elements.map(s => s.selector)
+        return state.filter(sel => {
+            return !(elements2Remove.includes(sel.selector) && sel.zone === action.zone)
+        })
     default:
         return state
     }
