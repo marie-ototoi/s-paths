@@ -6,9 +6,11 @@
   "main": "app.js",
   "scripts": {
     "build": "webpack --env production --progress --hide-modules",
-    "dev": "webpack-dev-server --env development --port 3000",
+    "dev": "npm run server | npm run devserver",
     "test": "NODE_ENV=test mocha --require test/setup.js --compilers js:babel-core/register --recursive",
-    "coverage": "nyc npm test"
+    "coverage": "nyc npm test",
+    "server": "npm run",
+    "devserver": "webpack-dev-server --env development --port 3000"
   },
   "engines": {
     "node": "7.4.0"

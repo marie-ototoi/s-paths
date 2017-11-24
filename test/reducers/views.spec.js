@@ -7,18 +7,18 @@ chai.use(sinonChai)
 
 describe('reducers/views', () => {
     let initialState
-    beforeEach( () => {
+    beforeEach(() => {
         initialState = [
             { id: 'Barchart_A' },
             { id: 'Timeline' },
-            { id: 'Chord'},
-            { id: 'Heatmap'}
+            { id: 'Chord' },
+            { id: 'Heatmap' }
         ]
     })
     it('should handle initial state', () => {
         expect(views(undefined, { })[0].id).to.equal('Timeline')
     })
-    /*lit('should handle SELECT_VIEWS', () => {
+    /* lit('should handle SELECT_VIEWS', () => {
         et action =  { 
             type: 'SELECT_VIEWS',
             stats: []
@@ -30,9 +30,9 @@ describe('reducers/views', () => {
                 { id: 'Chord', selected: true},
                 { id: 'Heatmap', selected: false}
             ])
-    })*/
+    }) */
     it('should handle DISPLAY_VIEWS', () => {
-        let action =  { 
+        let action =  {
             type: 'DISPLAY_VIEWS',
             ids: ['Timeline']
         }
@@ -40,8 +40,8 @@ describe('reducers/views', () => {
             .to.deep.equal([
                 { id: 'Barchart_A', displayed: false },
                 { id: 'Timeline', displayed: true },
-                { id: 'Chord', displayed: false},
-                { id: 'Heatmap', displayed: false}
+                { id: 'Chord', displayed: false },
+                { id: 'Heatmap', displayed: false }
             ])
     })
 })
