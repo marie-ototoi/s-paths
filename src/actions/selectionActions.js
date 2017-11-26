@@ -1,6 +1,6 @@
 import * as types from '../constants/ActionTypes'
 import selectionLib from '../lib/selectionLib'
-import { selection } from 'd3-selection';
+
 const removeSelection = (dispatch) => (selector, zone) => {
     return dispatch({
         type: 'REMOVE_SELECTION',

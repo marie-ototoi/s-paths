@@ -24,8 +24,8 @@ const getQuantitativeColors = (length) => {
 
 const selectColorsInPalette = (colors, length) => {
     return colors.slice(0, length)
-//    const step = Math.floor(colors.length / length)
-//    return colors.filter((color, index) => (index % step === 0))
+    // const step = Math.floor(colors.length / length)
+    // return colors.filter((color, index) => (index % step === 0))
 }
 
 // create a patern equivalent to the string parameter (ex:lines) with the specified color,

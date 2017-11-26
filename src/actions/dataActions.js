@@ -2,6 +2,7 @@ import * as types from '../constants/ActionTypes'
 import stats from '../../test/data/nobel'
 import config from '../lib/configLib'
 import data from '../lib/dataLib'
+import queryLib from '../lib/queryLib'
 import {SparqlClient, SPARQL} from 'sparql-client-2'
 
 const getStats = (endpoint, entrypoint) => {
@@ -59,9 +60,9 @@ const loadData = (dispatch) => (dataset, views) => {
         })
         .then(configs => {
             const configMain = config.getSelectedConfig(configs, 'main')
-            const queryMain = data.makeQuery(entrypoint, configMain)
+            const queryMain = queryLib.makeQuery(entrypoint, configMain)
             const configAside = config.getSelectedConfig(configs, 'aside')
-            const queryAside = data.makeQuery(entrypoint, configAside)
+            const queryAside = queryLib.makeQuery(entrypoint, configAside)
             /* return Promise.all([
                 new Promise((resolve) => resolve(stats.load('Timeline'))),
                 new Promise((resolve) => resolve(stats.load('HeatMap')))

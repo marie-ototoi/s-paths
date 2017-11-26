@@ -6,11 +6,12 @@
   "main": "app.js",
   "scripts": {
     "build": "webpack --env production --progress --hide-modules",
+    "buildserver": "babel-cli app -d index",
     "dev": "npm run server | npm run devserver",
+    "devserver": "webpack-dev-server --env development --port 3000",
     "test": "NODE_ENV=test mocha --require test/setup.js --compilers js:babel-core/register --recursive",
     "coverage": "nyc npm test",
-    "server": "npm run",
-    "devserver": "webpack-dev-server --env development --port 3000"
+    "server": "babel-node app --presets env"
   },
   "engines": {
     "node": "7.4.0"
@@ -23,7 +24,9 @@
   "bugs": {
     "url": ""
   },
-  "dependencies": {},
+  "dependencies": {
+    "express": "^4.16.2"
+  },
   "homepage": "https://github.com/marie-ototoi/planning#readme",
   "devDependencies": {
     "babel-cli": "^6.26.0",

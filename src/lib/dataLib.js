@@ -21,7 +21,6 @@ const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
     let dataToNest = data.map(d => {
         let dateProp = moment(d[propName].value, format)
         if (! dateProp.isValid()) throw 'Cannot use time format'
-
         return {
             ...d,
             dateProp,
@@ -43,7 +42,7 @@ const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
         nest = centuryNest
     }
     return nest.map(group => {
-        let groupWithAdd = { 
+        let groupWithAdd = {
             ...group,
             values: group.values.sort((a, b) => b.prop2.value.localeCompare(a.prop2.value))
         }
@@ -57,56 +56,7 @@ const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
     })
 }
 
-const makeQuery = (entrypoint, config) => {
-    let propList = (config.entrypoint === undefined) ? `` : `?entrypoint `
-    let groupList = (config.entrypoint === undefined) ? `` : `?entrypoint `
-    let defList = ``
-    let orderList = ``
-    config.selectedMatch.properties.forEach((prop, index) => {
-        index ++
-        propList = propList.concat(`?prop${index} ?labelprop${index} `)
-        orderList = orderList.concat(`?prop${index} `)
-        if (config.entrypoint === undefined) {
-            propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
-            orderList = orderList.concat(`?countprop${index} `)
-        }
-        groupList = groupList.concat(`?prop${index} ?labelprop${index} `)
-        defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`))
-    })
-    /* console.log(`SELECT DISTINCT ${propList}
-    WHERE { ?entrypoint rdf:type ${entrypoint} . 
-    ${defList}
-    } GROUP BY ${groupList}ORDER BY ${orderList}`) */
-    return `SELECT DISTINCT ${propList}
-WHERE { ?entrypoint rdf:type ${entrypoint} . 
-${defList}
-} GROUP BY ${groupList}ORDER BY ${orderList}`
-
-}
-
-const FSL2SPARQL = (FSLpath, propName = 'prop1') => {
-    const entrypointName = 'entrypoint'
-    let pathParts = FSLpath.split('/')
-    let query = ``
-    let levels = Math.floor(pathParts.length / 2)
-    for (let index = 1; index < pathParts.length; index += 2) {
-        let predicate = pathParts[index]
-        let objectType = pathParts[index + 1]
-        let level = Math.ceil(index / 2)
-        let thisSubject = (level === 1) ? entrypointName : `${propName}inter${(level - 1)}`
-        let thisObject = (level === levels) ? propName : `${propName}inter${level}`
-        query = query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
-        if (level === levels) query = query.concat(`OPTIONAL { ?${thisObject} rdfs:label  ?label${propName} } . `)
-        if (objectType !== '*') {
-            query = query.concat(`?${thisObject} rdf:type ${objectType} . `)
-        }        
-    }
-    return query
-}
-
 exports.areLoaded = areLoaded
-exports.FSL2SPARQL = FSL2SPARQL
 exports.getHeadings = getHeadings
 exports.getResults = getResults
 exports.groupTimeData = groupTimeData
-exports.makeQuery = makeQuery
