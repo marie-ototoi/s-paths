@@ -1,11 +1,15 @@
 import express from 'express'
-import { SparqlClient, SPARQL } from 'sparql-client-2'
-
+import queryLib from '../src/lib/queryLib'
 const router = express.Router()
+const endpoint = 'http://wilda.lri.fr:3030/nobel/sparql'
 
-router.get('/:class', function getStats (req, res) {
+router.get('/:class', (req, res) => {
     console.log("c'est parti")
     res.send("c'est parti")
+    queryLib.getData(endpoint, queryLib.makePropsQuery(req.params.class, '', 1), [])
+        .then(res => {
+            console.log(res)
+        })
     /* Promise.all([
         Day.getFirstDay(),
         Day.getLastDay(),
@@ -25,11 +29,11 @@ router.get('/:class', function getStats (req, res) {
         res.render('config', {title: 'Planning CIFRE - Configuration'})
     }) */
 })
-router.post('/:class', function getStats (req, res) {
+router.post('/:class', (req, res) => {
     console.log("c'est parti")
 })
 
-router.post('/:class/:constraint', function setStats (req, res) {
+router.post('/:class/:constraint', (req, res) => {
     // for later, store preprocessing in the data base
 })
 

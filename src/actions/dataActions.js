@@ -3,21 +3,11 @@ import stats from '../../test/data/nobel'
 import config from '../lib/configLib'
 import data from '../lib/dataLib'
 import queryLib from '../lib/queryLib'
-import {SparqlClient, SPARQL} from 'sparql-client-2'
 
 const getStats = (endpoint, entrypoint) => {
     return new Promise((resolve, reject) => {
         resolve(stats.explore())
     })
-}
-
-const getData = (endpoint, query, prefixes) => {
-    const client = new SparqlClient(endpoint)
-        .registerCommon('rdf', 'rdfs')
-        .register(prefixes)
-    return client
-        .query(query)
-        .execute()
 }
 
 const init = (dispatch) => () => {
@@ -68,8 +58,8 @@ const loadData = (dispatch) => (dataset, views) => {
                 new Promise((resolve) => resolve(stats.load('HeatMap')))
             ]) */
             return Promise.all([
-                getData(endpoint, queryMain, prefixes),
-                getData(endpoint, queryAside, prefixes)
+                queryLib.getData(endpoint, queryMain, prefixes),
+                queryLib.getData(endpoint, queryAside, prefixes)
             ])
                 .then(([dataMain, dataAside]) => {
                     dispatch({

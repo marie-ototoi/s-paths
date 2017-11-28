@@ -1,10 +1,11 @@
 import * as d3 from 'd3'
 import moment from 'moment'
+import {SparqlClient, SPARQL} from 'sparql-client-2'
 
 const ignoreList = ['']
 
 const getDirectProps = (entitiesClass, constraints) => {
-    
+    Promise.all(stats.map(stat => defineGroup(stat)).filter(stat => stat.group))
 }
 
 const getStatsProp = (path) => {
@@ -14,6 +15,14 @@ ${FSL2SPARQL(path, 'object')}
 }`
 }
 
+const getData = (endpoint, query, prefixes) => {
+    const client = new SparqlClient(endpoint)
+        .registerCommon('rdf', 'rdfs')
+        .register(prefixes)
+    return client
+        .query(query)
+        .execute()
+}
 const makePropsQuery = (entitiesClass, constraints, level) => {
     // this is valid only for first level
     return `SELECT DISTINCT ?property ?datatype ?type ?language WHERE {
@@ -29,8 +38,19 @@ const makePropsQuery = (entitiesClass, constraints, level) => {
     } */
 }
 
+const defineGroups = (stats) => {
+    return Promise.all(stats.map(stat => defineGroup(stat)).filter(stat => stat.group))
+}
 const defineGroup = (prop) => {
     const { path, datatype, type, language } = prop
+    let category
+    if (datatype === 'datetime') {
+        category = 'datetime'
+    }
+    return {
+        ...prop,
+        category
+    }
 }
 
 const exploreDataSet = (entitiesClass, constraints, options) => {
@@ -85,7 +105,9 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
     return query
 }
 
+exports.getData = getData
 exports.getDirectProps = getDirectProps
 exports.getStatsProp = getStatsProp
 exports.FSL2SPARQL = FSL2SPARQL
 exports.makeQuery = makeQuery
+exports.makePropsQuery = makePropsQuery
