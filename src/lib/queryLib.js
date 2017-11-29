@@ -4,11 +4,7 @@ import {SparqlClient, SPARQL} from 'sparql-client-2'
 
 const ignoreList = ['']
 
-const getDirectProps = (entitiesClass, constraints) => {
-    Promise.all(stats.map(stat => defineGroup(stat)).filter(stat => stat.group))
-}
-
-const getStatsProp = (path) => {
+const makePropQuery = (path) => {
     return `SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(DISTINCT ?entrypoint) AS ?coverage) 
 WHERE {
 ${FSL2SPARQL(path, 'object')} 
@@ -23,13 +19,14 @@ const getData = (endpoint, query, prefixes) => {
         .query(query)
         .execute()
 }
+
 const makePropsQuery = (entitiesClass, constraints, level) => {
     // this is valid only for first level
     return `SELECT DISTINCT ?property ?datatype ?type ?language WHERE {
-        ?subject rdf:type ${entitiesClass} .
-        ${constraints} .
+        ?subject rdf:type ${entitiesClass} . ${constraints}
         ?subject ?property ?object .
-        ?object rdf:type ?type .
+        OPTIONAL { ?object rdf:type ?type } .
+        OPTIONAL { ?property rdfs:label ?propertylabel } .
         BIND(DATATYPE(?object) AS ?datatype) .
         BIND(LANG(?object) AS ?language) .
     } GROUP BY ?property ?type ?datatype ?language`
@@ -38,10 +35,7 @@ const makePropsQuery = (entitiesClass, constraints, level) => {
     } */
 }
 
-const defineGroups = (stats) => {
-    return Promise.all(stats.map(stat => defineGroup(stat)).filter(stat => stat.group))
-}
-const defineGroup = (prop) => {
+const defineGroup = (prop, previousPath, level) => {
     const { path, datatype, type, language } = prop
     let category
     if (datatype === 'datetime') {
@@ -95,7 +89,6 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
         let level = Math.ceil(index / 2)
         let thisSubject = (level === 1) ? entrypointName : `${propName}inter${(level - 1)}`
         let thisObject = (level === levels) ? propName : `${propName}inter${level}`
-        
         query = query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
         if (level === levels) query = query.concat(`OPTIONAL { ?${thisObject} rdfs:label  ?label${propName} } . `)
         if (objectType !== '*') {
@@ -105,9 +98,9 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
     return query
 }
 
+exports.defineGroup = defineGroup
 exports.getData = getData
-exports.getDirectProps = getDirectProps
-exports.getStatsProp = getStatsProp
 exports.FSL2SPARQL = FSL2SPARQL
 exports.makeQuery = makeQuery
+exports.makePropQuery = makePropQuery
 exports.makePropsQuery = makePropsQuery

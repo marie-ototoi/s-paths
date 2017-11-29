@@ -4,7 +4,11 @@ import stats from './stats'
 let router = express.Router()
 
 // middleware to use for all requests
-router.use('/', function (req, res, next) {
+router.use('/', (req, res, next) => {
+    if (req.path === '/favicon.ico') {
+        res.writeHead(200, { 'Content-Type': 'image/x-icon' })
+        res.end()
+    } 
     next()
 })
 

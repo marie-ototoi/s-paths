@@ -17,10 +17,10 @@ WHERE {
     })
     it('should make a valid SPARQL query with given entrypoint and props', () => {
         const config1 = {
-            selectedMatch:{
+            selectedMatch: {
                 properties: [
-                    { path: "nobel:LaureateAward/nobel:year/*" },
-                    { path: "nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*" }
+                    { path: 'nobel:LaureateAward/nobel:year/*' },
+                    { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
                 ]
             }
         }
@@ -38,5 +38,16 @@ WHERE {
 WHERE {
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label  ?labelprop1 } . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label  ?labelprop2 } . 
 } GROUP BY ?entrypoint ?prop1 ?labelprop1 ?prop2 ?labelprop2 ORDER BY ?prop1 ?prop2 `)
+    })
+    it('should make a valid SPARQL to get stats for a prop', () => {
+        expect(queryLib.makePropsQuery('nobel:LaureateAward', '', 1))
+            .to.equal(`SELECT DISTINCT ?property ?datatype ?type ?language WHERE {
+        ?subject rdf:type nobel:LaureateAward . 
+        ?subject ?property ?object .
+        OPTIONAL { ?object rdf:type ?type } .
+        OPTIONAL { ?property rdfs:label ?propertylabel } .
+        BIND(DATATYPE(?object) AS ?datatype) .
+        BIND(LANG(?object) AS ?language) .
+    } GROUP BY ?property ?type ?datatype ?language`)
     })
 })

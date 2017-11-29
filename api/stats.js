@@ -4,12 +4,22 @@ const router = express.Router()
 const endpoint = 'http://wilda.lri.fr:3030/nobel/sparql'
 
 router.get('/:class', (req, res) => {
-    console.log("c'est parti")
+    console.log("c'est parti", req.params)
     res.send("c'est parti")
-    queryLib.getData(endpoint, queryLib.makePropsQuery(req.params.class, '', 1), [])
-        .then(res => {
-            console.log(res)
+    const constraints = ''
+    const entrypoint = req.params.class
+    queryLib.getData(endpoint, queryLib.makePropsQuery(entrypoint, constraints, 1), { nobel: 'http://data.nobelprize.org/terms/' })
+        .then(props => {
+            console.log(props.results.bindings[0])
+            const groupedProps = props.results.bindings.map(prop => {
+                return queryLib.defineGroup(prop, entrypoint, 1)
+            }).filter(prop => prop.group)
+            // return Promise.all(groupedProps.map(prop => queryLib.makePropsQuery(prop), constraints))
         })
+        .then(props => {
+            // console.log(props[0])
+        })
+
     /* Promise.all([
         Day.getFirstDay(),
         Day.getLastDay(),
