@@ -6,7 +6,7 @@ import queryLib from '../../src/lib/queryLib'
 
 describe('lib/queryLib', () => {
     it('should write query to get stats', () => {
-        expect(queryLib.getStatsProp('nobel:LaureateAward/nobel:year/*')).to.equal(`SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(DISTINCT ?entrypoint) AS ?coverage) 
+        expect(queryLib.makePropQuery('nobel:LaureateAward/nobel:year/*')).to.equal(`SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(DISTINCT ?entrypoint) AS ?coverage) 
 WHERE {
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object . OPTIONAL { ?object rdfs:label  ?labelobject } .  
 }`)
@@ -41,13 +41,41 @@ WHERE {
     })
     it('should make a valid SPARQL to get stats for a prop', () => {
         expect(queryLib.makePropsQuery('nobel:LaureateAward', '', 1))
-            .to.equal(`SELECT DISTINCT ?property ?datatype ?type ?language WHERE {
+            .to.equal(`SELECT DISTINCT ?property ?datatype ?language ?type ?isiri WHERE {
         ?subject rdf:type nobel:LaureateAward . 
         ?subject ?property ?object .
         OPTIONAL { ?object rdf:type ?type } .
         OPTIONAL { ?property rdfs:label ?propertylabel } .
         BIND(DATATYPE(?object) AS ?datatype) .
+        BIND(ISIRI(?object) AS ?isiri) .
         BIND(LANG(?object) AS ?language) .
-    } GROUP BY ?property ?type ?datatype ?language`)
+    } GROUP BY ?property ?datatype ?language ?type ?isiri`)
+    })
+    it('should affect a prop to the right group', () => {
+        const prefixes = {
+            dct: 'http://purl.org/dc/terms/'
+        }
+        const stat = {
+            property: { type: 'uri', value: 'http://purl.org/dc/terms/isPartOf' },
+            type: { type: 'uri', value: 'http://dbpedia.org/ontology/Award' },
+            isiri: {
+                type: 'literal',
+                datatype: 'http://www.w3.org/2001/XMLSchema#boolean',
+                value: 'true'
+            }
+        }
+        expect(queryLib.defineGroup(stat, 'nobel:LaureateAward', 1, prefixes))
+            .to.deep.equal({
+                ...stat,
+                category: 'uri',
+                path: 'nobel:LaureateAward/dct:isPartOf/*'
+            })
+    })
+    it('should replace the beginning of a url with a prefix', () => {
+        const prefixes = {
+            dct: 'http://purl.org/dc/terms/'
+        }
+        expect(queryLib.usePrefix('http://purl.org/dc/terms/isPartOf', prefixes))
+            .to.equal('dct:isPartOf')
     })
 })

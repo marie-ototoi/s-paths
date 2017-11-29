@@ -8,16 +8,17 @@ router.get('/:class', (req, res) => {
     res.send("c'est parti")
     const constraints = ''
     const entrypoint = req.params.class
-    queryLib.getData(endpoint, queryLib.makePropsQuery(entrypoint, constraints, 1), { nobel: 'http://data.nobelprize.org/terms/' })
+    const prefixes = { nobel: 'http://data.nobelprize.org/terms/' }
+    queryLib.getData(endpoint, queryLib.makePropsQuery(entrypoint, constraints, 1), prefixes)
         .then(props => {
             console.log(props.results.bindings[0])
             const groupedProps = props.results.bindings.map(prop => {
-                return queryLib.defineGroup(prop, entrypoint, 1)
-            }).filter(prop => prop.group)
-            // return Promise.all(groupedProps.map(prop => queryLib.makePropsQuery(prop), constraints))
+                return queryLib.defineGroup(prop, entrypoint, 1, prefixes)
+            }).filter(prop => (prop.group !== 'ignore'))
+            return Promise.all(groupedProps.map(prop => queryLib.makePropQuery(prop.path, constraints)))
         })
         .then(props => {
-            // console.log(props[0])
+            console.log(props[0])
         })
 
     /* Promise.all([
