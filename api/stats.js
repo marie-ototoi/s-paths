@@ -1,11 +1,26 @@
 import express from 'express'
-import { SparqlClient, SPARQL } from 'sparql-client-2'
-
+import queryLib from '../src/lib/queryLib'
 const router = express.Router()
+const endpoint = 'http://wilda.lri.fr:3030/nobel/sparql'
 
-router.get('/:class', function getStats (req, res) {
-    console.log("c'est parti")
+router.get('/:class', (req, res) => {
+    console.log("c'est parti", req.params)
     res.send("c'est parti")
+    const constraints = ''
+    const entrypoint = req.params.class
+    const prefixes = { nobel: 'http://data.nobelprize.org/terms/' }
+    queryLib.getData(endpoint, queryLib.makePropsQuery(entrypoint, constraints, 1), prefixes)
+        .then(props => {
+            console.log(props.results.bindings[0])
+            const groupedProps = props.results.bindings.map(prop => {
+                return queryLib.defineGroup(prop, entrypoint, 1, prefixes)
+            }).filter(prop => (prop.group !== 'ignore'))
+            return Promise.all(groupedProps.map(prop => queryLib.makePropQuery(prop.path, constraints)))
+        })
+        .then(props => {
+            console.log(props[0])
+        })
+
     /* Promise.all([
         Day.getFirstDay(),
         Day.getLastDay(),
@@ -25,11 +40,11 @@ router.get('/:class', function getStats (req, res) {
         res.render('config', {title: 'Planning CIFRE - Configuration'})
     }) */
 })
-router.post('/:class', function getStats (req, res) {
+router.post('/:class', (req, res) => {
     console.log("c'est parti")
 })
 
-router.post('/:class/:constraint', function setStats (req, res) {
+router.post('/:class/:constraint', (req, res) => {
     // for later, store preprocessing in the data base
 })
 

@@ -28,10 +28,11 @@ describe('reducers/palettes', () => {
         }
         expect(palettes(savedState, addAction))
             .to.deep.equal([
-                { 
+                {
                     properties: [],
                     colors: ['#e8bcbd', '#e39d9d', '#e17d7f', '#c65454']
-                },{
+                },
+                {
                     properties: ['nobel:LaureateAward/nobel:year/*'],
                     colors: ['#f58ea9', '#e35168']
                 }

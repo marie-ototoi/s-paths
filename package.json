@@ -6,7 +6,6 @@
   "main": "app.js",
   "scripts": {
     "build": "webpack --env production --progress --hide-modules",
-    "buildserver": "babel-cli app -d index",
     "dev": "npm run server | npm run devserver",
     "devserver": "webpack-dev-server --env development --port 3000",
     "test": "NODE_ENV=test mocha --require test/setup.js --compilers js:babel-core/register --recursive",

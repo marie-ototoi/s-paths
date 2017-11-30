@@ -4,14 +4,14 @@ const defaultState = [
         entrypoint: { min: 2, max: 1000, optimal: [4, 200] },
         constraints: [
             [
-                { 
-                    category: 'datetime', 
-                    unique: { min: 2 } 
+                {
+                    category: 'datetime',
+                    unique: { min: 2 }
                 }
             ],
             [
-                { 
-                    category: 'uri', 
+                {
+                    category: 'uri',
                     unique: { min: 2, max: 10, optimal: [4, 6] }
                 },
                 {
