@@ -109,7 +109,7 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
         let thisSubject = (level === 1) ? entrypointName : `${propName}inter${(level - 1)}`
         let thisObject = (level === levels) ? propName : `${propName}inter${level}`
         query = query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
-        if (level === levels) query = query.concat(`OPTIONAL { ?${thisObject} rdfs:label  ?label${propName} } . `)
+        if (level === levels) query = query.concat(`OPTIONAL { ?${thisObject} rdfs:label ?label${propName} } . `)
         if (objectType !== '*') {
             query = query.concat(`?${thisObject} rdf:type ${objectType} . `)
         }
