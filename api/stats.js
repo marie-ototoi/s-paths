@@ -25,43 +25,76 @@ router.get('/:class', (req, res) => {
         dbpprop: 'http://dbpedia.org/property/',
         skos: 'http://www.w3.org/2004/02/skos/core#',
         rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-        rdfs: 'http://www.w3.org/2000/01/rdf-schema#'
+        rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
+        'dbpedia-owl': 'http://dbpedia.org/ontology/'
     }
-    const mainQuery = queryLib.makePropsQuery(entrypoint, constraints, 1)
-    queryLib.getData(endpoint, mainQuery, prefixes)
-        .then(props => {
-            console.log(props.results.bindings[0])
-            const groupedProps = props.results.bindings.map(prop => {
-                return queryLib.defineGroup(prop, entrypoint, 1, prefixes)
-            }).filter(prop => (prop.group !== 'ignore'))
-            return Promise.all(groupedProps.map(prop => {
-                let propQuery = queryLib.makePropQuery(prop.path, constraints)
-                return queryLib.getData(endpoint, propQuery, prefixes)
-            }))
+    const totalQuery = queryLib.makeTotalQuery(entrypoint, constraints)
+    const options = {
+        entrypoint,
+        constraints,
+        endpoint,
+        prefixes,
+        maxLevel: 3,
+        maxUnique: 100
+    }
+    let total
+    queryLib.getData(endpoint, totalQuery, prefixes)
+        .then(totalcount => {
+            total = Number(totalcount.results.bindings[0].total.value)
+            return getStatsLevel([{ path: entrypoint, previousPath: entrypoint, level: 0, category: 'entrypoint' }], 1, total, options)
         })
         .then(props => {
-            console.log(props[0].results.bindings)
+            console.log('toto', props)
         })
-
-    /* Promise.all([
-        Day.getFirstDay(),
-        Day.getLastDay(),
-        CalendarStream.getCalendars()
-    ])
-    .then(([dateStart, dateEnd, calendars]) => {
-        res.render('config', {
-            title: 'Planning CIFRE - Configuration',
-            dateStart: dateStart[0]._id,
-            dateEnd: dateEnd[0]._id,
-            calendarUrls: JSON.stringify(calendars.map(calendar => calendar.url))
+        .catch((err) => {
+            console.log('Error retrieving stats', err)
         })
-        res.end()
-    })
-    .catch((err) => {
-        req.flash('error', 'Error while getting the data ' + err)
-        res.render('config', {title: 'Planning CIFRE - Configuration'})
-    }) */
 })
+const getStatsLevel = (categorizedProps, level, total, options) => {
+    const { entrypoint, constraints, endpoint, prefixes, maxLevel, maxUnique } = options
+    let newCategorizedProps = []
+    const queriedProps = categorizedProps.filter(prop => {
+        return (prop.level === level - 1 && 
+            (prop.category === 'entrypoint' || 
+            (prop.category === 'uri' && prop.unique > maxUnique)))
+    })
+    const checkExistingProps = categorizedProps.map(p => p.path)
+    return Promise.all(
+        queriedProps.map(prop => {
+            // console.log(level, prop.path, queryLib.makePropsQuery(prop.path, constraints, level))
+            return queryLib.getData(endpoint, queryLib.makePropsQuery(prop.path, constraints, level), prefixes)
+        })
+    )
+        .then(propsLists => {
+            propsLists.forEach((props, index) => {
+                let filteredCategorizedProps = props.results.bindings.map(prop => {
+                    // console.log(prop, queriedProps[index].previousPath)
+                    return queryLib.defineGroup(prop, queriedProps[index].path, level, prefixes)
+                }).filter(prop => (prop.category !== 'ignore') && !checkExistingProps.includes(prop.path))
+                newCategorizedProps.push(...filteredCategorizedProps)
+            })
+            // console.log('easy', newCategorizedProps)
+            return queryLib.getStats(newCategorizedProps, endpoint, constraints, prefixes)
+        })
+        .then(stats => {
+            // console.log(stats)
+            // console.log('salut', level, maxLevel)
+            const returnProps = [
+                ...categorizedProps,
+                ...queryLib.mergeStatsWithProps(newCategorizedProps, stats, total)
+            ]
+            console.log(returnProps)
+            if (level < maxLevel) {
+                return getStatsLevel(returnProps, level + 1, total, options) 
+            } else {
+                return new Promise(resolve => resolve(returnProps))
+            }
+            // console.log(categorizedProps)
+        })
+        .catch((err) => {
+            console.log('Error retrieving stats', err)
+        })
+}
 router.post('/:class', (req, res) => {
     console.log("c'est parti")
 })

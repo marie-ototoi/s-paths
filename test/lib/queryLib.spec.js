@@ -11,9 +11,16 @@ WHERE {
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object . OPTIONAL { ?object rdfs:label ?labelobject } .  
 }`)
     })
+    it('should write query to get total number of entities', () => {
+        expect(queryLib.makeTotalQuery('nobel:LaureateAward', '')).to.equal(`SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) 
+WHERE {
+?entrypoint rdf:type nobel:LaureateAward . 
+}`)
+    })
     it('should transform a FSL path into SPARQL', () => {
         expect(queryLib.FSL2SPARQL('nobel:LaureateAward/nobel:year/*', 'prop1', 'entrypoint')).to.equal('?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . ')
         expect(queryLib.FSL2SPARQL('nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*', 'prop2', 'entrypoint')).to.equal('?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label ?labelprop2 } . ')
+        expect(queryLib.FSL2SPARQL('nobel:LaureateAward', 'object', 'entrypoint')).to.equal('?entrypoint rdf:type nobel:LaureateAward . ')
     })
     it('should make a valid SPARQL query with given entrypoint and props', () => {
         const config1 = {
@@ -50,6 +57,16 @@ WHERE {
         BIND(ISIRI(?object) AS ?isiri) .
         BIND(LANG(?object) AS ?language) .
     } GROUP BY ?property ?datatype ?language ?type ?isiri`)
+        expect(queryLib.makePropsQuery('nobel:LaureateAward/nobel:university/*', '', 2))
+            .to.equal(`SELECT DISTINCT ?property ?datatype ?language ?type ?isiri WHERE {
+        ?subject rdf:type nobel:LaureateAward . ?subject nobel:university ?interobject . OPTIONAL { ?interobject rdfs:label ?labelinterobject } . 
+        ?interobject ?property ?object .
+        OPTIONAL { ?object rdf:type ?type } .
+        OPTIONAL { ?property rdfs:label ?propertylabel } .
+        BIND(DATATYPE(?object) AS ?datatype) .
+        BIND(ISIRI(?object) AS ?isiri) .
+        BIND(LANG(?object) AS ?language) .
+    } GROUP BY ?property ?datatype ?language ?type ?isiri`)
     })
     it('should affect a prop to the right group', () => {
         const prefixes = {
@@ -66,7 +83,7 @@ WHERE {
         }
         expect(queryLib.defineGroup(stat, 'nobel:LaureateAward', 1, prefixes))
             .to.deep.equal({
-                ...stat,
+                property: stat.property.value,
                 category: 'uri',
                 path: 'nobel:LaureateAward/dct:isPartOf/*'
             })

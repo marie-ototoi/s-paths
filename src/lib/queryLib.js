@@ -11,6 +11,13 @@ ${FSL2SPARQL(path, 'object')}
 }`
 }
 
+const makeTotalQuery = (entitiesClass, constraints) => {
+    return `SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) 
+WHERE {
+?entrypoint rdf:type ${entitiesClass} . ${constraints}
+}`
+}
+
 const getData = (endpoint, query, prefixes) => {
     const client = new SparqlClient(endpoint)
         .registerCommon('rdf', 'rdfs')
@@ -18,6 +25,14 @@ const getData = (endpoint, query, prefixes) => {
     return client
         .query(query)
         .execute()
+}
+
+const getStats = (categorizedProps, endpoint, constraints, prefixes) => {
+    return Promise.all(categorizedProps.map(prop => {
+        let propQuery = makePropQuery(prop.path, constraints)
+        // console.log(prop.path, propQuery)
+        return getData(endpoint, propQuery, prefixes)
+    }))
 }
 
 const usePrefix = (uri, prefixes) => {
@@ -32,9 +47,11 @@ const usePrefix = (uri, prefixes) => {
 
 const makePropsQuery = (entitiesClass, constraints, level) => {
     // this is valid only for first level
+    const pathQuery = FSL2SPARQL(entitiesClass, 'interobject', 'subject')
+    const subject = (level === 1) ? '?subject' : '?interobject'
     return `SELECT DISTINCT ?property ?datatype ?language ?type ?isiri WHERE {
-        ?subject rdf:type ${entitiesClass} . ${constraints}
-        ?subject ?property ?object .
+        ${pathQuery}${constraints}
+        ${subject} ?property ?object .
         OPTIONAL { ?object rdf:type ?type } .
         OPTIONAL { ?property rdfs:label ?propertylabel } .
         BIND(DATATYPE(?object) AS ?datatype) .
@@ -45,9 +62,17 @@ const makePropsQuery = (entitiesClass, constraints, level) => {
         let subject
     } */
 }
-
+const mergeStatsWithProps = (props, stats, total) => {
+    return props.map((prop, index) => {
+        return {
+            ...prop,
+            unique: Number(stats[index].results.bindings[0].unique.value),
+            coverage: Number(stats[index].results.bindings[0].coverage.value) * 100 / total
+        }
+    })
+}
 const defineGroup = (prop, previousPath, level, prefixes) => {
-    const { property, datatype, type, language, isiri } = prop
+    const { property, datatype, isiri } = prop
     const path = `${previousPath}/${usePrefix(property.value, prefixes)}/*`
     let category
     if (datatype === 'datetime') {
@@ -60,8 +85,9 @@ const defineGroup = (prop, previousPath, level, prefixes) => {
         category = 'ignore'
     }
     return {
-        ...prop,
+        property: property.value,
         path,
+        level,
         category
     }
 }
@@ -100,7 +126,7 @@ ${defList}
 
 const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', entrypointType = true) => {
     let pathParts = FSLpath.split('/')
-    let query = (entrypointType) ? `?entrypoint rdf:type ${pathParts[0]} . ` : ``
+    let query = (entrypointType) ? `?${entrypointName} rdf:type ${pathParts[0]} . ` : ``
     let levels = Math.floor(pathParts.length / 2)
     for (let index = 1; index < pathParts.length; index += 2) {
         let predicate = pathParts[index]
@@ -119,8 +145,11 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
 
 exports.defineGroup = defineGroup
 exports.getData = getData
+exports.getStats = getStats
 exports.FSL2SPARQL = FSL2SPARQL
 exports.makeQuery = makeQuery
 exports.makePropQuery = makePropQuery
 exports.makePropsQuery = makePropsQuery
+exports.makeTotalQuery = makeTotalQuery
+exports.mergeStatsWithProps = mergeStatsWithProps
 exports.usePrefix = usePrefix

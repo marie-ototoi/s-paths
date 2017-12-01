@@ -8,7 +8,7 @@ const getSelectedConfig = (configs, zone) => {
 }
 
 const getViewDef = (views, id) => {
-    console.log(views, id)
+    // console.log(views, id)
     return views.filter(c => c.id === id)[0] || {}
 }
 
@@ -36,7 +36,7 @@ const getCost = (val, min, max, optimal, score) => {
     } else if (overRange(val, optimal) && max) {
         return deviationCost * (val - optimal[1])
     } 
-    return score / 2            
+    return score / 2
 }
 const scoreProp = (prop, constraint) => {
     if (prop.path === '') return null
