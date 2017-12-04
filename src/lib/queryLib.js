@@ -2,17 +2,21 @@ import * as d3 from 'd3'
 import moment from 'moment'
 import {SparqlClient, SPARQL} from 'sparql-client-2'
 
-const ignoreList = ['']
-
-const makePropQuery = (path, constraints) => {
-    return `SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(DISTINCT ?entrypoint) AS ?coverage) 
+const makePropQuery = (prop, constraints, defaultGraph) => {
+    const { path } = prop
+    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    const avgchar = (prop.category === 'text') ? `(AVG(?charlength) as ?avgcharlength) ` : ``
+    const char = (prop.category === 'text') ? `BIND(STRLEN(?object) AS ?charlength)` : ``
+    return `SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) ${avgchar}(COUNT(DISTINCT ?entrypoint) AS ?coverage) ${graph}
 WHERE {
 ${FSL2SPARQL(path, 'object')} 
+${char}
 }`
 }
 
-const makeTotalQuery = (entitiesClass, constraints) => {
-    return `SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) 
+const makeTotalQuery = (entitiesClass, constraints, defaultGraph) => {
+    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    return `SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) ${graph}
 WHERE {
 ?entrypoint rdf:type ${entitiesClass} . ${constraints}
 }`
@@ -27,13 +31,14 @@ const getData = (endpoint, query, prefixes) => {
         .execute()
 }
 
-const getStats = (categorizedProps, endpoint, constraints, prefixes) => {
+/*const getStats = (categorizedProps, options) => {
+    const { endpoint, constraints, prefixes, defaultGraph } = options
     return Promise.all(categorizedProps.map(prop => {
-        let propQuery = makePropQuery(prop.path, constraints)
-        // console.log(prop.path, propQuery)
+        let propQuery = makePropQuery(prop, constraints, defaultGraph)
+        console.log(prop.path, propQuery)
         return getData(endpoint, propQuery, prefixes)
     }))
-}
+}*/
 
 const usePrefix = (uri, prefixes) => {
     return uri.replace(uri, (match, offset, string) => {
@@ -45,60 +50,74 @@ const usePrefix = (uri, prefixes) => {
     })
 }
 
-const makePropsQuery = (entitiesClass, constraints, level) => {
+const makePropsQuery = (entitiesClass, constraints, level, defaultGraph) => {
     // this is valid only for first level
     const pathQuery = FSL2SPARQL(entitiesClass, 'interobject', 'subject')
+    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     const subject = (level === 1) ? '?subject' : '?interobject'
-    return `SELECT DISTINCT ?property ?datatype ?language ?type ?isiri WHERE {
+    return `SELECT DISTINCT ?property ?datatype ?language ?isiri ?isliteral ${graph}WHERE {
         ${pathQuery}${constraints}
         ${subject} ?property ?object .
-        OPTIONAL { ?object rdf:type ?type } .
         OPTIONAL { ?property rdfs:label ?propertylabel } .
         BIND(DATATYPE(?object) AS ?datatype) .
         BIND(ISIRI(?object) AS ?isiri) .
+        BIND(ISLITERAL(?object) AS ?isliteral) .
         BIND(LANG(?object) AS ?language) .
-    } GROUP BY ?property ?datatype ?language ?type ?isiri`
+    } GROUP BY ?property ?datatype ?language ?isiri ?isliteral`
     /* for (let index = 1; index <= levels; index ++) {
         let subject
     } */
 }
-const mergeStatsWithProps = (props, stats, total) => {
+
+const mergeStatsWithProps = (props, stats, totalEntities) => {
     return props.map((prop, index) => {
+        let returnprops = { ...prop }
+        if (prop.category === 'text' && stats[index].results.bindings[0].avgcharlength) returnprops.avgcharlength = Math.floor(Number(stats[index].results.bindings[0].avgcharlength.value))
         return {
-            ...prop,
+            ...returnprops,
+            total: Number(stats[index].results.bindings[0].total.value),
             unique: Number(stats[index].results.bindings[0].unique.value),
-            coverage: Number(stats[index].results.bindings[0].coverage.value) * 100 / total
+            coverage: Number(stats[index].results.bindings[0].coverage.value) * 100 / totalEntities
         }
     })
 }
-const defineGroup = (prop, previousPath, level, prefixes) => {
-    const { property, datatype, isiri } = prop
+
+const defineGroup = (prop, previousPath, level, options) => {
+    const { property, datatype, isiri, isliteral, language } = prop
+    const { ignoreList, prefixes } = options
     const path = `${previousPath}/${usePrefix(property.value, prefixes)}/*`
-    let category
-    if (datatype === 'datetime') {
-        category = 'datetime'
-    } else if (ignoreList.includes(property.value)) {
-        category = 'ignore'
-    } else if (isiri) {
-        category = 'uri'
+    let returnprops = {}
+    // console.log(datatype)
+    if (ignoreList.includes(property.value)) {
+        returnprops.category = 'ignore'
+    } /*else if (isliteral.value === '1' || isliteral.value === 'true') {
+        if (datatype && datatype.value === 'datetime') {
+            returnprops.category = 'datetime'
+        } else if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#integer') {
+            returnprops.category = 'number'
+        } else {
+            returnprops.category = 'text'
+        } */
+    else if (datatype && datatype.value === 'datetime') {
+        returnprops.category = 'datetime'
+    } else if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#integer') {
+        returnprops.category = 'number'
+    } else if (isiri.value === '1' || isiri.value === 'true') {
+        returnprops.category = 'uri'
     } else {
-        category = 'ignore'
+        returnprops.category = 'ovni'
     }
+    if (language && language.value) returnprops.language = language.value
     return {
+        ...returnprops,
         property: property.value,
         path,
-        level,
-        category
+        level
     }
 }
 
-const exploreDataSet = (entitiesClass, constraints, options) => {
-    const { maxLevels, maxUnique, maxChars } = options
-    const directProps = getDirectProps(entitiesClass, constraints)
-    return //
-}
-
-const makeQuery = (entrypoint, config) => {
+const makeQuery = (entrypoint, config, defaultGraph) => {
+    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     let propList = (config.entrypoint === undefined) ? `` : `?entrypoint `
     let groupList = (config.entrypoint === undefined) ? `` : `?entrypoint `
     let defList = ``
@@ -118,7 +137,7 @@ const makeQuery = (entrypoint, config) => {
     WHERE { ?entrypoint rdf:type ${entrypoint} .
     ${defList}
     } GROUP BY ${groupList}ORDER BY ${orderList}`) */
-    return `SELECT DISTINCT ${propList}
+    return `SELECT DISTINCT ${propList}${graph}
 WHERE {
 ${defList}
 } GROUP BY ${groupList}ORDER BY ${orderList}`
@@ -145,7 +164,6 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
 
 exports.defineGroup = defineGroup
 exports.getData = getData
-exports.getStats = getStats
 exports.FSL2SPARQL = FSL2SPARQL
 exports.makeQuery = makeQuery
 exports.makePropQuery = makePropQuery

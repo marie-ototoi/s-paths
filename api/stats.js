@@ -1,13 +1,13 @@
 import express from 'express'
 import queryLib from '../src/lib/queryLib'
 const router = express.Router()
-const endpoint = 'http://wilda.lri.fr:3030/nobel/sparql'
+const endpoint = 'http://localhost:8890/sparql' // 'http://wilda.lri.fr:3030/nobel/sparql'
 
 router.get('/:class', (req, res) => {
     console.log("c'est parti", req.params)
-    res.send("c'est parti")
     const constraints = ''
     const entrypoint = req.params.class
+    const defaultGraph = 'http://localhost:8890/nobel'
     const prefixes = {
         nobel: 'http://data.nobelprize.org/terms/',
         foaf: 'http://xmlns.com/foaf/0.1/',
@@ -28,68 +28,87 @@ router.get('/:class', (req, res) => {
         rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
         'dbpedia-owl': 'http://dbpedia.org/ontology/'
     }
-    const totalQuery = queryLib.makeTotalQuery(entrypoint, constraints)
+    const ignoreList = ['https://www.w3.org/1999/02/22-rdf-syntax-ns#type']
+    const totalQuery = queryLib.makeTotalQuery(entrypoint, constraints, defaultGraph)
     const options = {
         entrypoint,
+        defaultGraph,
         constraints,
         endpoint,
         prefixes,
-        maxLevel: 3,
-        maxUnique: 100
+        ignoreList,
+        maxLevel: 4,
+        maxUnique: 100,
+        maxChar: 55
     }
     let total
     queryLib.getData(endpoint, totalQuery, prefixes)
         .then(totalcount => {
             total = Number(totalcount.results.bindings[0].total.value)
-            return getStatsLevel([{ path: entrypoint, previousPath: entrypoint, level: 0, category: 'entrypoint' }], 1, total, options)
+            const entryProp = [{ path: entrypoint, previousPath: entrypoint, level: 0, category: 'entrypoint' }]
+            return getStatsLevel(entryProp, 1, total, options)
         })
         .then(props => {
-            console.log('toto', props)
+            console.log('bravo toto !!!!!!!!!!!!!!!!!!!!!!!!!', props)
+            res.json(props)
         })
         .catch((err) => {
             console.log('Error retrieving stats', err)
         })
 })
 const getStatsLevel = (categorizedProps, level, total, options) => {
-    const { entrypoint, constraints, endpoint, prefixes, maxLevel, maxUnique } = options
+    const { entrypoint, constraints, endpoint, prefixes, maxLevel, maxUnique, maxChar, defaultGraph } = options
     let newCategorizedProps = []
     const queriedProps = categorizedProps.filter(prop => {
         return (prop.level === level - 1 && 
             (prop.category === 'entrypoint' || 
             (prop.category === 'uri' && prop.unique > maxUnique)))
     })
-    const checkExistingProps = categorizedProps.map(p => p.path)
+    const checkExistingProps = categorizedProps.map(p => p.property)
     return Promise.all(
         queriedProps.map(prop => {
-            // console.log(level, prop.path, queryLib.makePropsQuery(prop.path, constraints, level))
-            return queryLib.getData(endpoint, queryLib.makePropsQuery(prop.path, constraints, level), prefixes)
+            let propsQuery = queryLib.makePropsQuery(prop.path, constraints, level, defaultGraph)
+            // console.log('////////', propsQuery)
+            return queryLib.getData(endpoint, propsQuery, prefixes)
         })
     )
         .then(propsLists => {
+            //console.log('||||||||||||||||', level, propsLists.map(prop => prop.results.bindings))
             propsLists.forEach((props, index) => {
+               
                 let filteredCategorizedProps = props.results.bindings.map(prop => {
-                    // console.log(prop, queriedProps[index].previousPath)
-                    return queryLib.defineGroup(prop, queriedProps[index].path, level, prefixes)
-                }).filter(prop => (prop.category !== 'ignore') && !checkExistingProps.includes(prop.path))
+                    console.log('??????', level, { ...prop })
+                    return queryLib.defineGroup(prop, queriedProps[index].path, level, options)
+                }).filter(prop => {
+                    return (prop.category !== 'ignore') &&
+                    !checkExistingProps.includes(prop.property) &&
+                    !(prop.avgcharlength > maxChar)
+                })
                 newCategorizedProps.push(...filteredCategorizedProps)
             })
-            // console.log('easy', newCategorizedProps)
-            return queryLib.getStats(newCategorizedProps, endpoint, constraints, prefixes)
+            // console.log('[[[[[[[[[[[[[[', newCategorizedProps.length, newCategorizedProps)
+            if (newCategorizedProps.length > 0) {
+                return Promise.all(newCategorizedProps.map(prop => {
+                    let propQuery = queryLib.makePropQuery(prop, constraints, defaultGraph)
+                    // console.log('[[[[[[[[[[[[[[', propQuery)
+                    return queryLib.getData(endpoint, propQuery, prefixes)
+                }))
+            } else {
+                return new Promise(resolve => resolve([]))
+            }
         })
         .then(stats => {
-            // console.log(stats)
-            // console.log('salut', level, maxLevel)
+            // console.log('@@@@@@@@@@@@@', level, stats)
             const returnProps = [
                 ...categorizedProps,
                 ...queryLib.mergeStatsWithProps(newCategorizedProps, stats, total)
             ]
-            console.log(returnProps)
+            // console.log(returnProps)
             if (level < maxLevel) {
                 return getStatsLevel(returnProps, level + 1, total, options) 
             } else {
                 return new Promise(resolve => resolve(returnProps))
             }
-            // console.log(categorizedProps)
         })
         .catch((err) => {
             console.log('Error retrieving stats', err)
