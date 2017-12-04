@@ -4,10 +4,10 @@ import config from '../lib/configLib'
 import data from '../lib/dataLib'
 import queryLib from '../lib/queryLib'
 import rp from 'request-promise'
+import fetch from 'node-fetch'
 
 const getStats = (endpoint, entrypoint) => {
-    let request = new Request('http://localhost:5000/stats/' + entrypoint)
-    return fetch(request, { mode: 'no-cors' })
+    return fetch('http://localhost:5000/stats/' + entrypoint, { mode: 'no-cors' })
         .then((resp) =>  { console.log(resp) 
             return resp.json() }) 
     // return rp('http://localhost:5000/stats/' + entrypoint)
