@@ -9,6 +9,7 @@ import selectionLib from '../../lib/selectionLib'
 import { select } from '../../actions/selectionActions'
 import { getPropPalette } from '../../actions/palettesActions'
 
+
 class Timeline extends React.Component {
     constructor (props) {
         super(props)

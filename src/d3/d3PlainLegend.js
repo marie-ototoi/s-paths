@@ -4,7 +4,6 @@ import data from '../lib/dataLib'
 const create = (el, props) => {
     // console.log('create', props)
     if (el && data.areLoaded(props.data, props.zone)) {
-        // console.log('salut')
         draw(el, props)
         resize(el, props)
         assignBehavior(el, props)
