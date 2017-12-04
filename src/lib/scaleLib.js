@@ -1,7 +1,7 @@
 
 const scaleStage = (viewBoxDef, screen) => {
-    let width = Math.floor(screen.width * 100/ viewBoxDef.width)
-    let height = Math.floor(screen.height * 100/ viewBoxDef.height)
+    let width = Math.floor(screen.width * 100 / viewBoxDef.width)
+    let height = Math.floor(screen.height * 100 / viewBoxDef.height)
     return { width, height }
 }
 

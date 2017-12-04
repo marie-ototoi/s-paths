@@ -31,15 +31,6 @@ const getData = (endpoint, query, prefixes) => {
         .execute()
 }
 
-/*const getStats = (categorizedProps, options) => {
-    const { endpoint, constraints, prefixes, defaultGraph } = options
-    return Promise.all(categorizedProps.map(prop => {
-        let propQuery = makePropQuery(prop, constraints, defaultGraph)
-        console.log(prop.path, propQuery)
-        return getData(endpoint, propQuery, prefixes)
-    }))
-}*/
-
 const usePrefix = (uri, prefixes) => {
     return uri.replace(uri, (match, offset, string) => {
         for (var pref in prefixes) {
@@ -90,18 +81,14 @@ const defineGroup = (prop, previousPath, level, options) => {
     // console.log(datatype)
     if (ignoreList.includes(property.value)) {
         returnprops.category = 'ignore'
-    } /*else if (isliteral.value === '1' || isliteral.value === 'true') {
-        if (datatype && datatype.value === 'datetime') {
+    } else if (isliteral.value === '1' || isliteral.value === 'true') {
+        if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#date') {
             returnprops.category = 'datetime'
         } else if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#integer') {
             returnprops.category = 'number'
         } else {
             returnprops.category = 'text'
-        } */
-    else if (datatype && datatype.value === 'datetime') {
-        returnprops.category = 'datetime'
-    } else if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#integer') {
-        returnprops.category = 'number'
+        }
     } else if (isiri.value === '1' || isiri.value === 'true') {
         returnprops.category = 'uri'
     } else {
