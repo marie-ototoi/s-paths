@@ -3,11 +3,14 @@ import stats from '../../test/data/nobel'
 import config from '../lib/configLib'
 import data from '../lib/dataLib'
 import queryLib from '../lib/queryLib'
+import rp from 'request-promise'
+import fetch from 'node-fetch'
 
 const getStats = (endpoint, entrypoint) => {
-    return new Promise((resolve, reject) => {
-        resolve(stats.explore())
-    })
+    return fetch('http://localhost:5000/stats/' + entrypoint, { mode: 'no-cors' })
+        .then((resp) =>  { console.log(resp) 
+            return resp.json() }) 
+    // return rp('http://localhost:5000/stats/' + entrypoint)
 }
 
 const init = (dispatch) => () => {
@@ -27,7 +30,7 @@ const setEntrypoint = (dispatch) => (endpoint, entrypoint, constraints = '') => 
     return dispatch({
         type: types.SET_ENTRYPOINT,
         endpoint,
-        entryPoint,
+        entrypoint,
         constraints
     })
 }

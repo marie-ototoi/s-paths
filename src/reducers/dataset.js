@@ -18,7 +18,8 @@ const initialState = {
         map: 'http://data.nobelprize.org/resource/#',
         freebase: 'http://rdf.freebase.com/ns/',
         dbpprop: 'http://dbpedia.org/property/',
-        skos: 'http://www.w3.org/2004/02/skos/core#'
+        skos: 'http://www.w3.org/2004/02/skos/core#',
+        'dbpedia-owl': 'http://dbpedia.org/ontology/'
     },
     status: 'off',
     stats: []

@@ -36,7 +36,7 @@ class App extends React.Component {
         // console.log('mode', mode)
         // console.log('display', display)
         // console.log('views', views)
-        // console.log('dataset', dataset)
+         console.log('dataset', dataset)
         // console.log('configs', configs)
         // console.log('data', data)
         const componentIds = {

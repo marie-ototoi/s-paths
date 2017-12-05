@@ -1,4 +1,3 @@
-
 const getSelectedConfig = (configs, zone) => {
     let config = configs.filter(c => c.zone === zone)[0]
     return {
@@ -8,7 +7,7 @@ const getSelectedConfig = (configs, zone) => {
 }
 
 const getViewDef = (views, id) => {
-    console.log(views, id)
+    // console.log(views, id)
     return views.filter(c => c.id === id)[0] || {}
 }
 
@@ -36,7 +35,7 @@ const getCost = (val, min, max, optimal, score) => {
     } else if (overRange(val, optimal) && max) {
         return deviationCost * (val - optimal[1])
     } 
-    return score / 2            
+    return score / 2
 }
 const scoreProp = (prop, constraint) => {
     if (prop.path === '') return null
@@ -73,16 +72,16 @@ const scoreMatch = (match) => {
     // bonus for each property represented
     score += 0.3 * match.length
     // domain rules to add values for some properties : TO DO 
-    return score        
+    return score
 }
 
 const findAllMatches = (inputList, addList) => {
-    return  inputList.map(match => {
+    return inputList.map(match => {
         // console.log('match', match)
         return addList.map(addElt => {
             match.forEach(m => {
                 // prevent from having several times the same prop
-                if(m.path === addElt.path) addElt = { path: '' }
+                if (m.path === addElt.path) addElt = { path: '' }
             })
             return [...match, addElt]
         })
@@ -163,7 +162,7 @@ const getConfigs = (views, stats) => {
         if (view.entrypoint) {
             const { min, max, optimal } = view.entrypoint
             let addValue
-            if (! inRange(stats.total_instances, [min, max])) {
+            if (!inRange(stats.total_instances, [min, max])) {
                 // will result in each score being 0, so discard the view
                 entrypointFactor = 0
             } else {
@@ -174,8 +173,8 @@ const getConfigs = (views, stats) => {
         // remove combinations where a mandatory prop is missing
         let scoredMatches = matches.map(match => {
             return {
-                properties: match, 
-                score: scoreMatch(match) * entrypointFactor/*,
+                properties: match,
+                score: scoreMatch(match) * entrypointFactor /*,
                 entrypoint: (view.entrypoint !== undefined)*/
             }
         })

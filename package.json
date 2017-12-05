@@ -24,7 +24,12 @@
     "url": ""
   },
   "dependencies": {
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "fetch": "^1.1.0",
+    "mongoose": "^4.13.5",
+    "node-fetch": "^1.7.3",
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2"
   },
   "homepage": "https://github.com/marie-ototoi/planning#readme",
   "devDependencies": {
