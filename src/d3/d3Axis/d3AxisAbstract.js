@@ -8,8 +8,8 @@ export class d3AxisAbstract {
             .attr('y1', positions.y1)
             .attr('x2', positions.x2)
             .attr('y2', positions.y2)
-            .attr('stroke-width', 2)
-            .attr('stroke', 'black')
+            .attr('stroke-width', 1.5)
+            .attr('stroke', '#666')
     }
 
     addTitles (titles) {
@@ -19,16 +19,20 @@ export class d3AxisAbstract {
     addKeys (keys) {
         throw new Error('You have to implement the method addKeys!')
     }
-    /*
-    create (ref, title, labels, positions, orientation) {
 
-        default:
-        }
+    assignBehaviors (behaviors) {
+        var that = this
+        Object.keys(behaviors).map(function (objectItem, index1) {
+            Object.keys(behaviors[objectItem]).map(function (objectKey, index2) {
+                that.assignBehavior(objectItem, objectKey, behaviors[objectItem][objectKey])
+            })
+        })
+        return this
     }
-*/
+
     assignBehavior (items, type, fun) {
         switch (items) {
-        case 'keys':
+        case 'key':
             this.ticks.on(type, fun)
             break
         default:
@@ -43,7 +47,7 @@ export class d3AxisAbstract {
     destroy () {
     }
 
-    resize (position) {
+    resize () {
 
     }
 }

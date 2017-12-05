@@ -1,0 +1,49 @@
+import React from 'react'
+import { connect } from 'react-redux'
+import d3PlainLegend from '../../d3/d3Axis/d3Axis'
+import { select } from '../../actions/selectionActions'
+import d3Axis from '../../d3/d3Axis/d3Axis'
+
+class Axis extends React.Component {
+    constructor (props) {
+        super(props)
+        this.state = {}
+    }
+
+    render () {
+        return (<g className = "Axis" ref = {this.props.type} ></g>)
+    }
+    componentDidMount () {
+        d3Axis.create(this.refs[this.props.type], this.props)
+    }
+    componentDidUpdate () {
+        d3Axis.update(this.refs[this.props.type], this.props)
+    }
+    componentWillUnmount () {
+        /*
+        const { zone, type } = this.props
+        if (type === 'plain') {
+            d3PlainLegend.destroy(this.refs[`legend_${zone}`])
+        }
+        */
+    }
+}
+
+function mapStateToProps (state) {
+    return {
+        /*        display: state.display,
+        data: state.data,
+        selections: state.selections
+        */
+    }
+}
+
+function mapDispatchToProps (dispatch) {
+    return {
+    //    select: select(dispatch)
+    }
+}
+
+const AxisConnect = connect(mapStateToProps, mapDispatchToProps)(Axis)
+
+export default AxisConnect

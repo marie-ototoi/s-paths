@@ -4,26 +4,31 @@ import { connect } from 'react-redux'
 import d3HeatMap from '../../d3/d3HeatMap'
 import { addSelection, removeSelection } from '../../actions/selectionActions'
 import Legend from '../elements/Legend'
+import Axis from '../elements/Axis'
 import { getPropPalette } from '../../actions/palettesActions'
 import statisticalOperator from '../../lib/statLib'
-import d3Axis from '../../d3/d3Axis/d3Axis'
+
+import config from '../../lib/configLib'
+import dataLib from '../../lib/dataLib'
 
 class HeatMap extends React.Component {
     constructor (props) {
         super(props)
         this.setLegend = this.setLegend.bind(this)
         this.addCallbackToProps = this.addCallbackToProps.bind(this)
-        this.state = {}
+
+        const { data, configs, zone } = this.props
+        const selectedConfig = config.getSelectedConfig(configs, zone)
+        const dataZone = dataLib.getResults(data, zone)
+
+        this.state = { dataStat: statisticalOperator.computeStatisticalInformation(dataZone, selectedConfig) }
     }
 
     render () {
         const { display, zone } = this.props
+        const { dataStat } = this.state
         return (
             <g id = "Panel" transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` }>
-                <g id = "AxisTop" className = "AxisTop" ref = "AxisTop"></g>
-                <g id = "AxisRight" className = "AxisRight" ref = "AxisRight"></g>
-                <g id = "AxisBottom" className = "AxisBottom" ref = "AxisBottom"></g>
-                <g id = "AxisLeft" className = "AxisLeft" ref = "AxisLeft"></g>
                 <g className = "HeatMap { this.props.zone }" ref = "HeatMap" > </g>
                 { this.state.legend &&
                     <Legend
@@ -36,6 +41,22 @@ class HeatMap extends React.Component {
                         zone = { zone }
                     />
                 }
+                { dataStat &&
+                    <Axis display = {display}
+                        type = "left"
+                        keys = {d3.set(dataStat.data.map(item => item.prop2)).values()}
+                        titles = {['Gender', 'TEST']}
+                        behaviors = {d3HeatMap.heatMapAxisBehaviors()}
+                    />
+                }
+                { dataStat &&
+                    <Axis display = {display}
+                        type = "bottom"
+                        keys = {d3.set(dataStat.data.map(item => item.prop1)).values()}
+                        titles = {['Date', 'TEST']}
+                        behaviors = {d3HeatMap.heatMapAxisBehaviors()}
+                    />
+                }
             </g>
         )
     }
@@ -46,12 +67,11 @@ class HeatMap extends React.Component {
         return {
             ...this.props,
             setLegend: this.setLegend,
-            dataStat: statisticalOperator.computeStatisticalInformation(this.props.data.filter(d => d.zone === this.props.zone)[0])
+            dataStat: this.state.dataStat
         }
     }
 
     componentDidMount () {
-        this.initAxisBottom()
         d3HeatMap.create(this.refs.HeatMap, this.addCallbackToProps())
     }
     componentDidUpdate () {
@@ -60,9 +80,8 @@ class HeatMap extends React.Component {
     componentWillUnmount () {
         d3HeatMap.destroy(this.refs.HeatMap)
     }
-
+/*
     initAxisBottom () {
-        let data = statisticalOperator.computeStatisticalInformation(this.props.data.filter(d => d.zone === this.props.zone)[0])
         let xElements = d3.set(data.data.map(item => item.prop1)).values()
         let yElements = d3.set(data.data.map(item => item.prop2)).values()
 
@@ -92,11 +111,12 @@ class HeatMap extends React.Component {
         /*        d3Axis.top(this.refs.AxisTop, this.props)
         d3Axis.left(this.refs.AxisLeft, this.props)
         d3Axis.right(this.refs.AxisRight, this.props)
-        */
+
         // let ordoAxis = new d3Axis(this.refs.AxisBottom, titles, xElements, positionAbscisse, 'horizontal')
         // ordoAxis.assignBehavior('keys', 'mouseover', interactionsA.key.mouseover)
         // ordoAxis.assignBehavior('keys', 'mouseleave', interactionsA.key.mouseleave)
     }
+    */
 }
 
 function mapStateToProps (state) {
