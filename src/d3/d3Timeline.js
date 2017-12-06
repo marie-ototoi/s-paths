@@ -57,25 +57,25 @@ const draw = (el, props) => {
         .enter()
         .append('g')
         .attr('class', 'time')
-    const bookUnits = timeUnits.selectAll('line')
+    const elementUnits = timeUnits.selectAll('line')
         .data(d => d.values)
         .enter()
         .append('g')
         .attr('class', 'elements')
-    bookUnits
+    elementUnits
         .append('line')
         .attr('class', 'element')
         .attr('stroke', d => d.color)
     // console.log(selectedConfig)
-    bookUnits
+    elementUnits
         .append('line')
         .attr('class', 'selection')
-    const bookIndex = d3.select(el).selectAll('.element')
-        .attr('id', (d, i) => `book_${i}`)
+    const elementIndex = d3.select(el).selectAll('.element')
+        .attr('id', (d, i) => `timeline_element_${i}`)
         .each((d, i) => {
             d.color = palette.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
             d.selection = {
-                selector: `book_${i}`,
+                selector: `timeline_element_${i}`,
                 props: [
                     { path: selectedConfig.selectedMatch.properties[0].path, value: d.prop1 },
                     { path: selectedConfig.selectedMatch.properties[1].path, value: d.prop2 },
@@ -83,13 +83,13 @@ const draw = (el, props) => {
                 ]
             }
         })
-    bookUnits
+    elementUnits
         .attr('stroke', d => d.color)
 }
 
 const assignBehavior = (el, props) => {
     const { selectElements } = props
-    const bookIndex = d3.select(el).selectAll('.elements')
+    const elementIndex = d3.select(el).selectAll('.elements')
         .on('click', (d, i) => {
             selectElements([d.selection])
         })
@@ -99,7 +99,7 @@ const assignBehavior = (el, props) => {
 const redraw = (el, props) => {
     // change color or class when component is rerendered
     const { selections, zone, selectElements } = props
-    const bookIndex = d3.select(el).selectAll('.elements')
+    const elementIndex = d3.select(el).selectAll('.elements')
         .each((d, i) => {
             // console.log(d.selection)
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
@@ -119,12 +119,12 @@ const resize = (el, props) => {
         .each(d => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
-    const bookUnits = timeUnits.selectAll('.elements')
+    const elementUnits = timeUnits.selectAll('.elements')
     const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
     const unitWidth = Math.floor(display.viz.useful_width / timeUnits.size())
-    bookUnits
+    elementUnits
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
-    const bookElements = bookUnits.selectAll('.element')
+    const elements = elementUnits.selectAll('.element')
         .attr('x1', Math.ceil(unitWidth / 2))
         .attr('x2', Math.ceil(unitWidth / 2))
         .attr('y1', 0)
