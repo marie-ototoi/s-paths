@@ -41,7 +41,7 @@ const scoreProp = (prop, constraint) => {
     if (prop.path === '') return null
     
     // et eventuellement si la prop peut avoir plusieurs valeurs pour une meme instance (specifier dans la vue si c'est souhaite)
-    const maxscore = 0.5
+    const maxscore = 1
     let cost = 0
     switch (prop.category) {
     case 'datetime':
@@ -54,19 +54,22 @@ const scoreProp = (prop, constraint) => {
     case 'text':
         // the closer to the optimal range, the better
         const { min, max, optimal } = constraint.unique
-        cost = getCost(prop.unique_values, min, max, optimal, maxscore)
+        cost = getCost(prop.unique, min, max, optimal, maxscore)
         break
     default:
         //
     }
+    // console.log(cost, prop.level, (cost + prop.level), prop)
+    cost += prop.level * 0.3
     let score = maxscore - cost
     // modulates score according to the coverage of the dataset by this prop
     score *= prop.coverage / 100
-    return score
+
+    return (score > 0) ? score : 0
 }
 
 const scoreMatch = (match) => {
-    match = match.filter(m => m.score != null)
+    match = match.filter(m => m.score >= 0)
     // mean of each property's score
     let score = match.map(m => m.score).reduce((a, b) => a + b , 0) / match.length
     // bonus for each property represented
@@ -102,8 +105,8 @@ const getConfigs = (views, stats) => {
                     if ((prop.category === constraint.category ||
                         constraint.category === '*') &&
                     !(
-                        (constraint.unique.min && prop.unique_values < constraint.unique.min) ||
-                        (constraint.unique.max && prop.unique_values > constraint.unique.max)
+                        (constraint.unique.min && prop.unique < constraint.unique.min) ||
+                        (constraint.unique.max && prop.unique > constraint.unique.max)
                     )) {
                         // conditions specific to each category
                         switch (prop.category) {

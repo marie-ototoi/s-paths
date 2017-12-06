@@ -25,7 +25,7 @@ class Timeline extends React.Component {
         if (dataLib.areLoaded(data, zone)) {
             const selectedConfig = config.getSelectedConfig(configs, zone)
             const dataZone = dataLib.getResults(data, zone)
-            const nestedData = dataLib.groupTimeData(dataZone, 'prop1', selectedConfig.selectedMatch.properties[0].format, 150)
+            const nestedData = dataLib.groupTimeData(dataZone, 'prop1', selectedConfig.selectedMatch.properties[0].format || 'YYYY-MM-DD', 150)
             //
             const prop2Data = d3.nest().key(legend => {
                 return (legend.labelprop2 && legend.labelprop2.value !== '') ? legend.labelprop2.value : legend.prop2.value

@@ -1,8 +1,10 @@
+import cors from 'cors'
 import express from 'express'
 import index from './api/index'
 
 const app = express()
 const router = express.Router()
+app.use(cors())
 
 app.use('/', router)
 

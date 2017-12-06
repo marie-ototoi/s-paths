@@ -7,9 +7,8 @@ import rp from 'request-promise'
 import fetch from 'node-fetch'
 
 const getStats = (endpoint, entrypoint) => {
-    return fetch('http://localhost:5000/stats/' + entrypoint, { mode: 'no-cors' })
-        .then((resp) =>  { console.log(resp) 
-            return resp.json() }) 
+    return fetch('http://localhost:5000/stats/' + entrypoint)
+        .then((resp) => resp.json()) 
     // return rp('http://localhost:5000/stats/' + entrypoint)
 }
 

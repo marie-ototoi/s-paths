@@ -85,7 +85,6 @@ const draw = (el, props) => {
         })
     bookUnits
         .attr('stroke', d => d.color)
-
 }
 
 const assignBehavior = (el, props) => {
@@ -102,16 +101,16 @@ const redraw = (el, props) => {
     const { selections, zone, selectElements } = props
     const bookIndex = d3.select(el).selectAll('.elements')
         .each((d, i) => {
-            //console.log(d.selection)
+            // console.log(d.selection)
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
         })
         .classed('selected', d => d.selected)
 }
 
 const resize = (el, props) => {
-    const { dataZone, display } = props
+    const { dataZone, nestedData, display } = props
     const xScale = d3.scaleLinear()
-        .domain([Number(dataZone[0].prop1.value), Number(dataZone[dataZone.length - 1].prop1.value)])
+        .domain([Number(nestedData[0].key), Number(nestedData[nestedData.length - 1].key)])
         .range([0, display.viz.useful_width])
     let maxUnitsPerYear = 1
     const timeUnits = d3.select(el)
@@ -129,7 +128,7 @@ const resize = (el, props) => {
         .attr('x1', Math.ceil(unitWidth / 2))
         .attr('x2', Math.ceil(unitWidth / 2))
         .attr('y1', 0)
-        .attr('y2',  - unitHeight + 1)
+        .attr('y2', -unitHeight + 1)
         .attr('stroke-width', d => d.selected ? 4 : unitWidth - 1)
 
     d3.select(el).selectAll('.xaxis').remove()
