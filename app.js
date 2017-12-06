@@ -1,10 +1,13 @@
 import cors from 'cors'
 import express from 'express'
+import bodyParser from 'body-parser'
 import index from './api/index'
 
 const app = express()
 const router = express.Router()
 app.use(cors())
+app.use(bodyParser.json())
+router.use(bodyParser.urlencoded({ extended: true }))
 
 app.use('/', router)
 

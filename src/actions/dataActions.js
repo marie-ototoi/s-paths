@@ -1,14 +1,20 @@
+import fetch from 'node-fetch'
+import rp from 'request-promise'
 import * as types from '../constants/ActionTypes'
 import stats from '../../test/data/nobel'
 import config from '../lib/configLib'
 import data from '../lib/dataLib'
 import queryLib from '../lib/queryLib'
-import rp from 'request-promise'
-import fetch from 'node-fetch'
 
-const getStats = (endpoint, entrypoint) => {
-    return fetch('http://localhost:5000/stats/' + entrypoint)
-        .then((resp) => resp.json()) 
+const getStats = (options) => {
+    console.log(JSON.stringify(options))
+    return fetch(('http://localhost:5000/stats/' + options.entrypoint),
+        {
+            method: 'POST',
+            body: JSON.stringify(options),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then((resp) => resp.json())
     // return rp('http://localhost:5000/stats/' + entrypoint)
 }
 
@@ -36,7 +42,7 @@ const setEntrypoint = (dispatch) => (endpoint, entrypoint, constraints = '') => 
 
 const loadData = (dispatch) => (dataset, views) => {
     const {endpoint, entrypoint, prefixes} = dataset
-    getStats(endpoint, entrypoint)
+    getStats(dataset)
         .then(stats => {
             dispatch({
                 type: types.SET_STATS,
