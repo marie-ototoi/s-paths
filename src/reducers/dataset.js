@@ -19,7 +19,8 @@ const initialState = {
         freebase: 'http://rdf.freebase.com/ns/',
         dbpprop: 'http://dbpedia.org/property/',
         skos: 'http://www.w3.org/2004/02/skos/core#',
-        'dbpedia-owl': 'http://dbpedia.org/ontology/'
+        rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+        rdfs: 'http://www.w3.org/2000/01/rdf-schema#'
     },
     status: 'off',
     stats: []

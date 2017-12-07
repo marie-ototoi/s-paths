@@ -18,11 +18,11 @@ const CORE_CONFIG = {
     },
     module: {
         rules: [
-            { test: /\.(jsx|js)?/, loader: 'babel-loader', exclude: /node_modules/, options: { presets: ['react', 'env']}},
-            { test: /\.css$/, use: ExtractTextPlugin.extract({
-                fallback: "style-loader",
-                use: "css-loader"
-            })},
+            { test: /\.(jsx|js)?/, loader: 'babel-loader', exclude: /node_modules/, options: { presets: ['react', 'env'] } },
+            {
+                test: /\.css$/,
+                use: ExtractTextPlugin.extract({ fallback: "style-loader", use: "css-loader" })
+            },
             { test: /\.(eot|svg|ttf|woff|woff2)$/, loader: 'file-loader?name=fonts/[name].[ext]' }
         ]
     },

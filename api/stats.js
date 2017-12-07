@@ -3,9 +3,11 @@ import queryLib from '../src/lib/queryLib'
 const router = express.Router()
 
 router.get('/:class', (req, res) => {
+    //req.params.class
+    
     getStats({ entrypoint: req.params.class })
         .then(props => {
-            console.log('bravo toto !!!!!!!!!!!!!!!!!!!!!!!!!', props)
+            console.log('bravo toto GET !!!!!!!!!!!!!!!!!!!!!!!!!', req.params.options, props)
             res.json(props)
         })
         .catch((err) => {
@@ -13,9 +15,10 @@ router.get('/:class', (req, res) => {
         })
 })
 router.post('/:class', (req, res) => {
-    getStats({ entrypoint: req.params.class })
+    console.log(req.body)
+    getStats({ entrypoint: req.params.class, ...req.body })
         .then(props => {
-            console.log('bravo toto !!!!!!!!!!!!!!!!!!!!!!!!!', props)
+            console.log('bravo toto POST !!!!!!!!!!!!!!!!!!!!!!!!!', props)
             res.json(props)
         })
         .catch((err) => {
@@ -29,7 +32,7 @@ const getStats = (opt) => {
         constraints: opt.constraints || '',
         defaultGraph: opt.defaultGraph || '',
         endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql'
-        ignoreList: [...ignore, 'https://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
+        ignoreList: [...ignore, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
         maxLevel: opt.maxLevel || 4,
         maxUnique: opt.maxUnique || 100,
         maxChar: opt.maxChar || 55,
@@ -61,7 +64,9 @@ const getStats = (opt) => {
             const entryProp = [{ path: options.entrypoint, previousPath: options.entrypoint, level: 0, category: 'entrypoint' }]
             return getStatsLevel(entryProp, 1, total, options)
         })
-        
+        .then(props => {
+            return new Promise(resolve => resolve({ total_instances: total, statements: props }))
+        })
 }
 const getStatsLevel = (categorizedProps, level, total, options) => {
     const { entrypoint, constraints, endpoint, prefixes, maxLevel, maxUnique, maxChar, defaultGraph } = options
