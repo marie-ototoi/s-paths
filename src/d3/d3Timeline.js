@@ -4,6 +4,7 @@ import config from '../lib/configLib'
 import data from '../lib/dataLib'
 import selectionLib from '../lib/selectionLib'
 import { addSelection, removeSelection } from '../actions/selectionActions';
+import { isString } from 'util';
 
 const create = (el, props) => {
     // console.log('create', config.getSelectedConfig(props.configs, props.zone))
@@ -14,26 +15,27 @@ const create = (el, props) => {
         redraw(el, props)
         resize(el, props)
         assignBehavior(el, props)
-
-        setLegend(makeLegend(el, props))
     }
 }
 
-const makeLegend = (el, props) => {
-    const { palette } = props
-    return palette.map(pal => {
-        // gives the list of elemebts to be selected when legend is clicked
-        let elements = []
-        d3.select(el).selectAll('.elements').each(d => {
-            if ((d.prop2 && pal.key === d.prop2.value) || (d.labelprop2 && pal.key === d.labelprop2.value)) {
-                elements.push(d.selection)
+const getElements = (el, propName, value) => {
+    const isArray = Array.isArray(value)
+    let elements = []
+    d3.select(el).selectAll('.elements').each(d => {
+        if (d[propName]) {
+            if (isArray) {
+                if (d[propName] && d[propName].value >= value[0] && d[propName].value <= value[1]) {
+                    elements.push(d.selection)
+                }
+            } else {
+                if (d[propName] && d[propName].value === value) {
+                    elements.push(d.selection)
+                }
             }
-        })
-        return {
-            ...pal,
-            elements
         }
     })
+    
+    return elements
 }
 
 const update = (el, props) => {
@@ -43,17 +45,15 @@ const update = (el, props) => {
         resize(el, props)
     }
 }
-
 const destroy = (el) => {
     //
 }
-
 const draw = (el, props) => {
-    const { nestedData, palette, selectedConfig } = props
-    // console.log(nestedData)
+    const { nestedProp1, palette, selectedConfig } = props
+    // console.log(nestedProp1)
     const timeUnits = d3.select(el)
         .selectAll('g.time')
-        .data(nestedData)
+        .data(nestedProp1)
         .enter()
         .append('g')
         .attr('class', 'time')
@@ -66,7 +66,7 @@ const draw = (el, props) => {
         .append('line')
         .attr('class', 'element')
         .attr('stroke', d => d.color)
-    // console.log(selectedConfig)
+        // console.log(selectedConfig)
     elementUnits
         .append('line')
         .attr('class', 'selection')
@@ -108,9 +108,9 @@ const redraw = (el, props) => {
 }
 
 const resize = (el, props) => {
-    const { dataZone, nestedData, display } = props
+    const { dataZone, nestedProp1, display } = props
     const xScale = d3.scaleLinear()
-        .domain([Number(nestedData[0].key), Number(nestedData[nestedData.length - 1].key)])
+        .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
         .range([0, display.viz.useful_width])
     let maxUnitsPerYear = 1
     const timeUnits = d3.select(el)
@@ -131,17 +131,19 @@ const resize = (el, props) => {
         .attr('y2', -unitHeight + 1)
         .attr('stroke-width', d => d.selected ? 4 : unitWidth - 1)
 
-    d3.select(el).selectAll('.xaxis').remove()
+    /* d3.select(el).selectAll('.xaxis').remove()
     const xAxis = d3.axisBottom()
         .scale(xScale)
+        .tickValues(nestedProp1.map(p => p.key))
         .tickFormat(d3.format('.0f'))
 
     d3.select(el).append('g')
         .attr('class', 'xaxis')
         .attr('transform', `translate(0, ${display.viz.useful_height})`)
-        .call(xAxis)
+        .call(xAxis) */
 }
 
 exports.create = create
 exports.destroy = destroy
+exports.getElements = getElements
 exports.update = update

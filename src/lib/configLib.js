@@ -5,12 +5,10 @@ const getSelectedConfig = (configs, zone) => {
         selectedMatch: config.matches.filter(m => m.selected === true)[0]
     } || {}
 }
-
 const getViewDef = (views, id) => {
     // console.log(views, id)
     return views.filter(c => c.id === id)[0] || {}
 }
-
 const inRange = (val, range) => {
     return (val >= range[0] && val <= range[1])
 }
@@ -39,7 +37,6 @@ const getCost = (val, min, max, optimal, score) => {
 }
 const scoreProp = (prop, constraint) => {
     if (prop.path === '') return null
-    
     // et eventuellement si la prop peut avoir plusieurs valeurs pour une meme instance (specifier dans la vue si c'est souhaite)
     const maxscore = 1
     let cost = 0
@@ -64,10 +61,8 @@ const scoreProp = (prop, constraint) => {
     let score = maxscore - cost
     // modulates score according to the coverage of the dataset by this prop
     score *= prop.coverage / 100
-
     return (score > 0) ? score : 0
 }
-
 const scoreMatch = (match) => {
     match = match.filter(m => m.score >= 0)
     // mean of each property's score
@@ -77,7 +72,6 @@ const scoreMatch = (match) => {
     // domain rules to add values for some properties : TO DO 
     return score
 }
-
 const findAllMatches = (inputList, addList) => {
     return inputList.map(match => {
         // console.log('match', match)
@@ -92,7 +86,6 @@ const findAllMatches = (inputList, addList) => {
         return a.concat(b)
     }, [])
 }
-
 const getConfigs = (views, stats) => {
     return views.map(view => {
         let propList = []
@@ -178,7 +171,7 @@ const getConfigs = (views, stats) => {
             return {
                 properties: match,
                 score: scoreMatch(match) * entrypointFactor /*,
-                entrypoint: (view.entrypoint !== undefined)*/
+                entrypoint: (view.entrypoint !== undefined) */
             }
         })
         // sort by score and return
@@ -199,7 +192,6 @@ const getConfigs = (views, stats) => {
             return b.matches[0].score - a.matches[0].score
         })
 }
-
 const activateDefaultConfigs = (configs) => {
     // temporary : select the first 2 ones
     return configs.map((vc, index) => {
@@ -212,7 +204,6 @@ const activateDefaultConfigs = (configs) => {
         }
     })
 }
-
 exports.activateDefaultConfigs = activateDefaultConfigs
 exports.findAllMatches = findAllMatches
 exports.getConfigs = getConfigs

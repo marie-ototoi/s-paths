@@ -17,5 +17,5 @@
         "no-unused-vars": 1,
         "no-console": 1,
         "indent": ["error", 4]
-      }
+    }
 }

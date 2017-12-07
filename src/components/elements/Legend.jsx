@@ -42,7 +42,6 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
-        select: select(dispatch)
     }
 }
 

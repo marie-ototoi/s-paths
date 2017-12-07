@@ -25,10 +25,6 @@ describe('d3Timeline', function () {
     it('should draw a group with a line inside for each element', function () {
         // draw
         draw(document.body.innerHTML = '<g class="Timeline" id="Timeline"></g>')
-        /* let timeline = d3.select('#Timeline')
-        draw(timeline, { })
-        nestedData, palette, selectedConfig
-        expect(timeline.selectAll('.elements').size()).to.equal(23)) */
     })
     it('should color the element from the corresponding color in the palette', function () {
         // draw
