@@ -1,24 +1,4 @@
-import dataLib from './dataLib'
 import * as d3 from 'd3'
-
-const findDateRatio = (data) => {
-
-}
-const findTextRatio = (data) => {
-
-}
-const findBestRatioSingleProp = (data) => {
-
-}
-
-const findBestRatioDoubleProps = (data, processing = 'RAW') => {
-    switch (processing) {
-    case 'RAW':
-
-        break
-    default:
-    }
-}
 
 function agregateByDate (data, mode) {
     let statistics = []
@@ -27,7 +7,7 @@ function agregateByDate (data, mode) {
     data.forEach(function (item) {
         let prop1 = item.prop1.value
         let prop2 = item.prop2.value
-        let index1 = (Number(prop1) - Number(prop1) % mode) + ''
+        let index1 = (new Date(prop1).getFullYear() - new Date(prop1).getFullYear() % mode) + ''
         if (index1 in statistics) {
             if (prop2 in statistics[index1]) {
                 statistics[index1][prop2] = statistics[index1][prop2] + 1
@@ -113,13 +93,15 @@ const computeStatisticalInformation = (data, selectedConfig) => {
     let unit = agregateByDate(data, 1)
     let dec = agregateByDate(data, 10)
     let cen = agregateByDate(data, 100)
-
+    return dec
+/*
     let eu = ecartType(unit.data, unit.total)
     let ed = ecartType(dec.data, dec.total)
     let ec = ecartType(cen.data, cen.total)
     if (eu > ed && eu > ec) return unit
     if (ed > ec) return dec
     return cen
+    */
 }
 
 exports.computeStatisticalInformation = computeStatisticalInformation

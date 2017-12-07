@@ -16,11 +16,15 @@ class HeatMap extends React.Component {
         super(props)
         this.setLegend = this.setLegend.bind(this)
         this.addCallbackToProps = this.addCallbackToProps.bind(this)
+        this.state = {}
+    }
+
+    componentWillMount () {
+        if (!dataLib.areLoaded(this.props.data, this.props.zone)) return
 
         const { data, configs, zone } = this.props
         const selectedConfig = config.getSelectedConfig(configs, zone)
         const dataZone = dataLib.getResults(data, zone)
-
         this.state = { dataStat: statisticalOperator.computeStatisticalInformation(dataZone, selectedConfig) }
     }
 
@@ -28,8 +32,7 @@ class HeatMap extends React.Component {
         const { display, zone } = this.props
         const { dataStat } = this.state
         return (
-            <g id = "Panel" transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` }>
-                <g className = "HeatMap { this.props.zone }" ref = "HeatMap" > </g>
+            <g className = "HeatMap { this.props.zone }" ref = "HeatMap" transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` } >
                 { this.state.legend &&
                     <Legend
                         type = "plain"
@@ -44,6 +47,7 @@ class HeatMap extends React.Component {
                 { dataStat &&
                     <Axis display = {display}
                         type = "left"
+                        zone = { zone }
                         keys = {d3.set(dataStat.data.map(item => item.prop2)).values()}
                         titles = {['Gender', 'TEST']}
                         behaviors = {d3HeatMap.heatMapAxisBehaviors()}
@@ -52,6 +56,7 @@ class HeatMap extends React.Component {
                 { dataStat &&
                     <Axis display = {display}
                         type = "bottom"
+                        zone = { zone }
                         keys = {d3.set(dataStat.data.map(item => item.prop1)).values()}
                         titles = {['Date', 'TEST']}
                         behaviors = {d3HeatMap.heatMapAxisBehaviors()}
