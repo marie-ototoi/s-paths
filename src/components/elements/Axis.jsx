@@ -1,6 +1,5 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import d3PlainLegend from '../../d3/d3Axis/d3Axis'
 import { select } from '../../actions/selectionActions'
 import d3Axis from '../../d3/d3Axis/d3Axis'
 
@@ -11,13 +10,13 @@ class Axis extends React.Component {
     }
 
     render () {
-        return (<g className = "Axis" ref = {this.props.type} ></g>)
+        return (<g className = {'Axis-' + this.props.zone + '-' + this.props.type} ref = {this.props.zone + '-' + this.props.type} ></g>)
     }
     componentDidMount () {
-        d3Axis.create(this.refs[this.props.type], this.props)
+        d3Axis.create(this.refs[this.props.zone + '-' + this.props.type], this.props)
     }
     componentDidUpdate () {
-        d3Axis.update(this.refs[this.props.type], this.props)
+        d3Axis.update(this.refs[this.props.zone + '-' + this.props.type], this.props)
     }
     componentWillUnmount () {
         /*

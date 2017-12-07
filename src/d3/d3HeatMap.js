@@ -4,6 +4,7 @@ import dataLib from '../lib/dataLib'
 import statisticalOperator from '../lib/statLib'
 import {getQuantitativeColors, getPatternsPalette, colorPattern} from '../lib/paletteLib.js'
 import config from '../lib/configLib'
+import {dragSelection} from './d3DragSelector'
 
 const selectCell = (cell, up, down, left, right) => {
     cell.attr('color', cell.attr('fill'))
@@ -19,7 +20,7 @@ const selectCell = (cell, up, down, left, right) => {
                 .attr('y1', cell.attr('y'))
                 .attr('x2', Number(cell.attr('x')) + Number(cell.attr('width')))
                 .attr('y2', cell.attr('y'))
-                .attr('stroke', 'black')
+                .attr('stroke', 'blue')
                 .attr('stroke-width', 4.5)
         }
     } else {
@@ -29,7 +30,7 @@ const selectCell = (cell, up, down, left, right) => {
             .attr('y1', cell.attr('y'))
             .attr('x2', Number(cell.attr('x')) + Number(cell.attr('width')))
             .attr('y2', cell.attr('y'))
-            .attr('stroke', 'black')
+            .attr('stroke', 'blue')
             .attr('stroke-width', 4.5)
     }
     if (!down.empty()) {
@@ -43,7 +44,7 @@ const selectCell = (cell, up, down, left, right) => {
                 .attr('y1', Number(cell.attr('y')) + Number(cell.attr('height')))
                 .attr('x2', Number(cell.attr('x')) + Number(cell.attr('width')))
                 .attr('y2', Number(cell.attr('y')) + Number(cell.attr('height')))
-                .attr('stroke', 'black')
+                .attr('stroke', 'blue')
                 .attr('stroke-width', 4.5)
         }
     } else {
@@ -53,7 +54,7 @@ const selectCell = (cell, up, down, left, right) => {
             .attr('y1', Number(cell.attr('y')) + Number(cell.attr('height')))
             .attr('x2', Number(cell.attr('x')) + Number(cell.attr('width')))
             .attr('y2', Number(cell.attr('y')) + Number(cell.attr('height')))
-            .attr('stroke', 'black')
+            .attr('stroke', 'blue')
             .attr('stroke-width', 4.5)
     }
     if (!left.empty()) {
@@ -67,7 +68,7 @@ const selectCell = (cell, up, down, left, right) => {
                 .attr('y1', cell.attr('y'))
                 .attr('x2', cell.attr('x'))
                 .attr('y2', Number(cell.attr('y')) + Number(cell.attr('height')))
-                .attr('stroke', 'black')
+                .attr('stroke', 'blue')
                 .attr('stroke-width', 4.5)
         }
     } else {
@@ -77,7 +78,7 @@ const selectCell = (cell, up, down, left, right) => {
             .attr('y1', cell.attr('y'))
             .attr('x2', cell.attr('x'))
             .attr('y2', Number(cell.attr('y')) + Number(cell.attr('height')))
-            .attr('stroke', 'black')
+            .attr('stroke', 'blue')
             .attr('stroke-width', 4.5)
     }
     if (!right.empty()) {
@@ -91,7 +92,7 @@ const selectCell = (cell, up, down, left, right) => {
                 .attr('y1', cell.attr('y'))
                 .attr('x2', Number(cell.attr('x')) + Number(cell.attr('width')))
                 .attr('y2', Number(cell.attr('y')) + Number(cell.attr('height')))
-                .attr('stroke', 'black')
+                .attr('stroke', 'blue')
                 .attr('stroke-width', 4.5)
         }
     } else {
@@ -101,12 +102,11 @@ const selectCell = (cell, up, down, left, right) => {
             .attr('y1', cell.attr('y'))
             .attr('x2', Number(cell.attr('x')) + Number(cell.attr('width')))
             .attr('y2', Number(cell.attr('y')) + Number(cell.attr('height')))
-            .attr('stroke', 'black')
+            .attr('stroke', 'blue')
             .attr('stroke-width', 4.5)
     }
     cell.attr('isSelected', 1)
 }
-
 const deselectCell = (cell, up, down, left, right) => {
     cell.attr('fill', cell.attr('color'))
     if (!up.empty()) {
@@ -179,6 +179,30 @@ const deselectCell = (cell, up, down, left, right) => {
     }
     cell.attr('isSelected', 0)
 }
+const selectDrag = (el, position) => {
+    position.x1 -= Number(d3.select(el).attr('transform').split(',')[0].split('(')[1])
+    position.x2 -= Number(d3.select(el).attr('transform').split(',')[0].split('(')[1])
+    if (position.x1 > position.x2) { let inter = position.x1; position.x1 = position.x2; position.x2 = inter }
+    position.y1 -= Number(d3.select(el).attr('transform').split(',')[1].split(')')[0])
+    position.y2 -= Number(d3.select(el).attr('transform').split(',')[1].split(')')[0])
+    if (position.y1 > position.y2) { let inter = position.y1; position.y1 = position.y2; position.y2 = inter }
+    d3.select(el).select('#center').selectAll('rect')
+        .each(function () {
+            let maxgauche = Math.max(Number(this.getAttribute('x')), position.x1)
+            let mindroit = Math.min(Number(this.getAttribute('x')) + Number(this.getAttribute('width')), position.x2)
+            let maxbas = Math.max(Number(this.getAttribute('y')), position.y1)
+            let minhaut = Math.min(Number(this.getAttribute('y')) + Number(this.getAttribute('height')), position.y2)
+            if (maxgauche < mindroit && maxbas < minhaut && Number(this.getAttribute('isSelected')) === 0) {
+                let indexProp1 = Number(this.getAttribute('id').split('-')[1])
+                let indexProp2 = Number(this.getAttribute('id').split('-')[2])
+                let left = d3.select('#id-' + (indexProp1 - 1) + '-' + indexProp2 + '-')
+                let right = d3.select('#id-' + (indexProp1 + 1) + '-' + indexProp2 + '-')
+                let down = d3.select('#id-' + indexProp1 + '-' + (indexProp2 + 1) + '-')
+                let up = d3.select('#id-' + indexProp1 + '-' + (indexProp2 - 1) + '-')
+                selectCell(d3.select(this), up, down, left, right)
+            }
+        })
+}
 
 const create = (el, props) => {
     if (!(el && dataLib.areLoaded(props.data, props.zone))) return
@@ -207,7 +231,7 @@ const create = (el, props) => {
         .data(data.data)
         .enter()
         .append('rect')
-        .attr('id', d => '-' + d.prop1 + '-' + d.prop2 + '-')
+        .attr('id', d => 'id-' + xElements.indexOf(d.prop1) + '-' + yElements.indexOf(d.prop2) + '-')
         .attr('stroke', 'transparent')
         .attr('fill', function (d) {
             for (var i = 0; i < colors.length; i++) {
@@ -227,12 +251,12 @@ const create = (el, props) => {
             this.setAttribute('stroke', 'transparent')
         })
         .on('click', function (d) {
-            let indexProp1 = xElements.indexOf(d.prop1)
-            let indexProp2 = yElements.indexOf(d.prop2)
-            let left = d3.select('#id' + xElements[indexProp1 - 1] + yElements[indexProp2])
-            let right = d3.select('#id' + xElements[indexProp1 + 1] + yElements[indexProp2])
-            let down = d3.select('#id' + xElements[indexProp1] + yElements[indexProp2 + 1])
-            let up = d3.select('#id' + xElements[indexProp1] + yElements[indexProp2 - 1])
+            let indexProp1 = Number(this.getAttribute('id').split('-')[1])
+            let indexProp2 = Number(this.getAttribute('id').split('-')[2])
+            let left = d3.select('#id-' + (indexProp1 - 1) + '-' + indexProp2 + '-')
+            let right = d3.select('#id-' + (indexProp1 + 1) + '-' + indexProp2 + '-')
+            let down = d3.select('#id-' + indexProp1 + '-' + (indexProp2 + 1) + '-')
+            let up = d3.select('#id-' + indexProp1 + '-' + (indexProp2 - 1) + '-')
             if (Number(this.getAttribute('isSelected')) === 0) {
                 selectCell(d3.select(this), up, down, left, right)
             } else {
@@ -240,9 +264,13 @@ const create = (el, props) => {
             }
         })
     resize(el, props)
-    //  d3Legend.create(divLegend, props)
     setLegend(paletteObj)
+    div.call(dragSelection(div._groups[0][0], selectDrag, () => {}))
 }
+
+/* ******************************************************************************************************** */
+/* *****************************    SELEC DRAG    ********************************************************* */
+/* ******************************************************************************************************** */
 
 const update = (el, props) => {
     if (el && props.data) {
@@ -273,7 +301,6 @@ const resize = (el, props) => {
         .range([0, height])
         .domain(yElements)
     d3.select('#center').selectAll('rect')
-        .attr('id', d => 'id' + '-' + d.prop1 + '-' + d.prop2 + '-')
         .attr('width', itemSizeX - 1)
         .attr('height', itemSizeY - 1)
         .attr('x', d => xScale(d.prop1) + 0.5)

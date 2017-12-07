@@ -16,6 +16,7 @@ const store = createStore(reducers)
 describe('<HeatMap />', () => {
     it('should render a svg group classed HeatMap', () => {
         const wrapper = mount(<Provider store = {store}><HeatMap zone = "aside" /></Provider>)
+        console.log('test')
         expect(wrapper.find('g.HeatMap')).to.have.length(1)
     })
 })
