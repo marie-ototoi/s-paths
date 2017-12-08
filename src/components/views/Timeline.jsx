@@ -28,33 +28,56 @@ class Timeline extends React.Component {
             const selectedConfig = config.getSelectedConfig(configs, zone)
             const dataZone = dataLib.getResults(data, zone)
             const nestedProp1 = dataLib.groupTimeData(dataZone, 'prop1', selectedConfig.selectedMatch.properties[0].format || 'YYYY-MM-DD', 100)
+            const axisBottom = {
+                info: nestedProp1.map(p => {
+                    let values
+                    const catProp1 = selectedConfig.selectedMatch.properties[0].category
+                    if (catProp1 === 'datetime') {
+                        values = [d3.min(p.values, d => Number(d.year)), d3.max(p.values, d => Number(d.year))]
+                    } else if (catProp1 === 'text' || catProp1 === 'uri') {
+                        values = p.key
+                    } else if (catProp1 === 'number') {
+                        values = [d3.min(p.values, d => Number(d.prop1.value)), d3.max(p.values, d => Number(d.prop1.value))]
+                    }
+                    return {
+                        key: p.key,
+                        propName: 'prop1',
+                        values,
+                        category: catProp1
+                    }
+                }),
+                category: selectedConfig.selectedMatch.properties[0].category
+            }
             //
             const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(dataZone)
             const prop2 = selectedConfig.selectedMatch.properties[1].path
+            const catProp2 = selectedConfig.selectedMatch.properties[1].category
             // console.log(palettes, prop2, prop2Data.length)
             const colors = getPropPalette(palettes, prop2, nestedProp2.length)
             const palette = nestedProp2.map((p, i) => {
-                return { key: p.key, color: colors[i], propName: 'prop2', label: p.values[0].labelprop2.value }
+                return { 
+                    key: p.key, 
+                    color: colors[i], 
+                    propName: 'prop2', 
+                    label: p.values[0].labelprop2.value,
+                    category: catProp2
+                }
             })
-            const axisBottom = nestedProp1.map(p => {
-                return { key: p.key, propName: 'prop1', label: p.values[0].labelprop2.value }
-            })
-            const axisBottomCategory = selectedConfig.selectedMatch.properties[0].category
-            this.setState({ dataZone, selectedConfig, nestedProp1, palette, axisBottom, axisBottomCategory })
+            //
+            this.setState({ dataZone, selectedConfig, nestedProp1, palette, axisBottom })
         }
     }
     render () {
         // console.log('salut Timeline') 
         const { data, display, zone, configs, palettes, getPropPalette } = this.props
         const { nestedProp1 } = this.state
-        const classN = `Timeline_${zone}`
+        const classN = `Timeline Timeline_${zone}`
         return (<g className = { classN } >
             <g
                 transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
                 ref = "Timeline">
             </g>
-           
-            <Legend 
+            <Legend
                 x = { display.zones[zone].x }
                 y = { display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin }
                 type = "plain"
@@ -71,8 +94,9 @@ class Timeline extends React.Component {
                 y = { display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin }
                 width = { display.viz.useful_width }
                 height = { display.viz.vertical_margin }
-                info = { this.state.axisBottom }
-                category = { this.state.axisBottomCategory }
+                info = { this.state.axisBottom.info }
+                category = { this.state.axisBottom.category }
+                label = { this.state.axisBottom.labels }
                 selectElements = { this.selectElements }
             />
         </g>)
@@ -80,8 +104,9 @@ class Timeline extends React.Component {
     setAxis (axis) {
         this.setState({ axis })
     }
-    selectElements (prop, value) {
-        const elements = d3Timeline.getElements(this.refs.Timeline, prop, value)
+    selectElements (prop, value, category) {
+        const elements = d3Timeline.getElements(this.refs.Timeline, prop, value, category)
+        console.log(prop, value, elements)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }

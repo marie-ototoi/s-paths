@@ -1,0 +1,18 @@
+.Axis line{
+    stroke: #bbb;
+}
+.Axis text{
+    fill: #bbb;
+}
+.Axis rect{
+    stroke: #fff;
+}
+.Axis .selectable {
+    cursor: pointer;
+}
+.Axis .selectable:hover text{
+    fill: #888;
+}
+.Axis .selectable:hover line{
+    stroke: #888;
+}

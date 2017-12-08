@@ -3,14 +3,18 @@ import data from '../lib/dataLib'
 
 const assignBehavior = (el, props) => {
     const { selectElements, info } = props
-    const axisItems = d3.select(el).selectAll('.tick text')
-        .each(d => {
-            let data = info.filter(i => i.label === d)
+    const axisItems = d3.select(el).selectAll('.tick')
+        .classed('selectable', d => {
+            let data = info.filter(i => `${i.key}` === `${d}`)
+            return (data.length > 0)
         })
+    axisItems.selectAll('text, line, rect')
         .on('click', (d) => {
-            console.log('salut')
-            selectElements(d.propName, d.key)
-        }) // send list of selectors
+            let data = info.filter(i => `${i.key}` === `${d}`)
+            if (data.length > 0) {
+                selectElements(data[0].propName, data[0].values, data[0].category)
+            }
+        })
 }
 
 const update = (el, props) => {
@@ -18,7 +22,6 @@ const update = (el, props) => {
     if (el && props.data) {
         resize(el, props)
         assignBehavior(el, props)
-        color(el, props)
     }
 }
 
@@ -32,7 +35,7 @@ const resize = (el, props) => {
     const scale = d3.scaleLinear()
         .domain([info[0].key, info[info.length - 1].key])
         .range([0, width])
-    d3.select(el).selectAll('.xaxis').remove()
+    d3.select(el).selectAll(`.axis${type}`).remove()
     const axis = d3[`axis${type}`]()
         .scale(scale)
     if (category === 'text' || category === 'uri') {
@@ -51,15 +54,13 @@ const resize = (el, props) => {
     d3.select(el).append('g')
         .attr('class', `axis${type}`)
         .call(axis)
-}
-
-const color = (el, props) => {
-    d3.select(el).selectAll('.domain')
-        .attr('stroke', '#bbb')
-    d3.select(el).selectAll('.tick line')
-        .attr('stroke', '#bbb')
-    d3.select(el).selectAll('.tick text')
-        .attr('fill', '#bbb')
+    d3.select(el).selectAll('.domain').remove()
+    const ticks = d3.select(el).selectAll('.tick')
+    const tickWidth = Math.floor(width / ticks.size())
+    ticks.append('rect')
+        .classed('reactzone', true)
+        .attr('width', tickWidth)
+        .attr('height', 7)
 }
 
 exports.destroy = destroy

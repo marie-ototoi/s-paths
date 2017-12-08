@@ -12,25 +12,25 @@ const create = (el, props) => {
 
 const draw = (el, props) => {
     const { info } = props
-    const rectangles = d3.select(el)
-        .selectAll('rect')
+    const items = d3.select(el)
+        .selectAll('g.legenditem')
         .data(info)
         .enter()
+        .append('g')
+        .classed('legenditem', true)
+    items
         .append('rect')
         .attr('fill', d => d.color)
-    const texts = d3.select(el)
-        .selectAll('text')
-        .data(info)
-        .enter()
+    items
         .append('text')
         .text(d => d.label)
 }
 
 const assignBehavior = (el, props) => {
     const { selectElements } = props
-    const legendItems = d3.select(el).selectAll('rect')
+    const legendItems = d3.select(el).selectAll('g.legenditem')
         .on('click', (d) => {
-            selectElements(d.propName, d.key)
+            selectElements(d.propName, d.key, d.category)
         }) // send list of selectors
 }
 

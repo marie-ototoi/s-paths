@@ -18,23 +18,28 @@ const create = (el, props) => {
     }
 }
 
-const getElements = (el, propName, value) => {
+const getElements = (el, propName, value, propCategory) => {
     const isArray = Array.isArray(value)
     let elements = []
     d3.select(el).selectAll('.elements').each(d => {
         if (d[propName]) {
+            let propValue
+            if (propCategory === 'datetime') {
+                propValue = Number(d.year)
+            } else if (propCategory === 'text' || propCategory === 'uri') {
+                propValue = d[propName].value
+            } else if (propCategory === 'number') {
+                propValue = Number(d[propName].value)
+            }
             if (isArray) {
-                if (d[propName] && d[propName].value >= value[0] && d[propName].value <= value[1]) {
+                if (propValue >= value[0] && propValue <= value[1]) {
                     elements.push(d.selection)
                 }
-            } else {
-                if (d[propName] && d[propName].value === value) {
-                    elements.push(d.selection)
-                }
+            } else if (propValue === value) {
+                elements.push(d.selection)
             }
         }
     })
-    
     return elements
 }
 
@@ -45,9 +50,11 @@ const update = (el, props) => {
         resize(el, props)
     }
 }
+
 const destroy = (el) => {
     //
 }
+
 const draw = (el, props) => {
     const { nestedProp1, palette, selectedConfig } = props
     // console.log(nestedProp1)
@@ -93,11 +100,10 @@ const assignBehavior = (el, props) => {
         .on('click', (d, i) => {
             selectElements([d.selection])
         })
-        // 
 }
 
 const redraw = (el, props) => {
-    // change color or class when component is rerendered
+    // changes when component is rerendered
     const { selections, zone, selectElements } = props
     const elementIndex = d3.select(el).selectAll('.elements')
         .each((d, i) => {
@@ -105,6 +111,7 @@ const redraw = (el, props) => {
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
         })
         .classed('selected', d => d.selected)
+        .attr('opacity', d => (selections.length > 0.7 && d.selected !== true) ? 0.3 : 0.8)
 }
 
 const resize = (el, props) => {
@@ -121,7 +128,7 @@ const resize = (el, props) => {
         })
     const elementUnits = timeUnits.selectAll('.elements')
     const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
-    const unitWidth = Math.floor(display.viz.useful_width / timeUnits.size())
+    const unitWidth = Math.floor(display.viz.useful_width / timeUnits.size()) - 2
     elementUnits
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
     const elements = elementUnits.selectAll('.element')
@@ -129,18 +136,7 @@ const resize = (el, props) => {
         .attr('x2', Math.ceil(unitWidth / 2))
         .attr('y1', 0)
         .attr('y2', -unitHeight + 1)
-        .attr('stroke-width', d => d.selected ? 4 : unitWidth - 1)
-
-    /* d3.select(el).selectAll('.xaxis').remove()
-    const xAxis = d3.axisBottom()
-        .scale(xScale)
-        .tickValues(nestedProp1.map(p => p.key))
-        .tickFormat(d3.format('.0f'))
-
-    d3.select(el).append('g')
-        .attr('class', 'xaxis')
-        .attr('transform', `translate(0, ${display.viz.useful_height})`)
-        .call(xAxis) */
+        .attr('stroke-width', unitWidth - 1)
 }
 
 exports.create = create
