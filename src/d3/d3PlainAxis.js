@@ -1,6 +1,21 @@
 import * as d3 from 'd3'
 import data from '../lib/dataLib'
 
+const create = (el, props) => {
+    //
+    d3.select(`div.view`).append('div')
+        .classed(props.elementName, true)
+        .style('position', 'absolute')
+        .style('left', `${props.x/3}px`)
+        .style('top', `${props.y/3}px`)
+        .style('width',`300px`)
+        .style('height', `100px`)
+        .style('background-color', 'red')
+    if (el && props.data) {
+        update(el, props)
+    }
+}
+
 const assignBehavior = (el, props) => {
     const { selectElements, info } = props
     const axisItems = d3.select(el).selectAll('.tick')
@@ -25,8 +40,9 @@ const update = (el, props) => {
     }
 }
 
-const destroy = (el) => {
+const destroy = (el, props) => {
     //
+    d3.select(`div.view ${props.elementName}`).remove()
     d3.select(el).remove()
 }
 
@@ -63,5 +79,6 @@ const resize = (el, props) => {
         .attr('height', 7)
 }
 
+exports.create = create
 exports.destroy = destroy
 exports.update = update

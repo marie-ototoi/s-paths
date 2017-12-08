@@ -5,7 +5,7 @@
     fill: #bbb;
 }
 .Axis rect{
-    stroke: #fff;
+    fill: #fff;
 }
 .Axis .selectable {
     cursor: pointer;

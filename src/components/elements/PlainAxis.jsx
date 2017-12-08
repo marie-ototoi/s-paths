@@ -8,25 +8,25 @@ class PlainAxis extends React.Component {
     constructor (props) {
         super(props)
         this.state = {
-            ref: `${this.props.zone}_axis_${this.props.type}`
+            elementName: `${this.props.zone}_axis_${this.props.type}`
         }
     }
 
     render () {
         return (<g className = "Axis"
             transform = { `translate(${this.props.x}, ${this.props.y})` }
-            ref = { this.state.ref }
+            ref = { this.state.elementName }
         >
         </g>)
     }
     componentDidMount () {
-        d3PlainAxis.update(this.refs[this.state.ref], this.props)
+        d3PlainAxis.create(this.refs[this.state.ref], { ...this.props, ...this.state })
     }
     componentDidUpdate () {
-        d3PlainAxis.update(this.refs[this.state.ref], this.props)
+        d3PlainAxis.update(this.refs[this.state.ref], { ...this.props, ...this.state })
     }
     componentWillUnmount () {
-        d3PlainAxis.destroy(this.refs[this.state.ref])
+        d3PlainAxis.destroy(this.refs[this.state.ref], { ...this.props, ...this.state })
     }
 }
 

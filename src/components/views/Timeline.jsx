@@ -10,7 +10,6 @@ import selectionLib from '../../lib/selectionLib'
 import { select } from '../../actions/selectionActions'
 import { getPropPalette } from '../../actions/palettesActions'
 
-
 class Timeline extends React.Component {
     constructor (props) {
         super(props)
@@ -18,7 +17,8 @@ class Timeline extends React.Component {
         this.selectElements = this.selectElements.bind(this)
         this.state = {
             setAxis: this.setAxis,
-            selectElements: this.selectElements
+            selectElements: this.selectElements,
+            elementName: `Timeline_${props.zone}`
         }
     }
     componentWillMount () {
@@ -46,7 +46,8 @@ class Timeline extends React.Component {
                         category: catProp1
                     }
                 }),
-                category: selectedConfig.selectedMatch.properties[0].category
+                category: selectedConfig.selectedMatch.properties[0].category,
+                configs: selectedConfig.matches
             }
             //
             const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(dataZone)
@@ -71,7 +72,7 @@ class Timeline extends React.Component {
         // console.log('salut Timeline') 
         const { data, display, zone, configs, palettes, getPropPalette } = this.props
         const { nestedProp1 } = this.state
-        const classN = `Timeline Timeline_${zone}`
+        const classN = `Timeline ${this.refs.elementName}`
         return (<g className = { classN } >
             <g
                 transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
@@ -82,6 +83,7 @@ class Timeline extends React.Component {
                 y = { display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin }
                 type = "plain"
                 zone = { zone }
+                refsvg = { this.props.refsvg }
                 width = { display.viz.horizontal_margin }
                 height = { display.viz.vertical_margin }
                 info = { this.state.palette }
@@ -94,10 +96,12 @@ class Timeline extends React.Component {
                 y = { display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin }
                 width = { display.viz.useful_width }
                 height = { display.viz.vertical_margin }
+                refsvg = { this.props.refsvg }
                 info = { this.state.axisBottom.info }
                 category = { this.state.axisBottom.category }
                 label = { this.state.axisBottom.labels }
                 selectElements = { this.selectElements }
+                configs = { this.state.axisBottom.configs }
             />
         </g>)
     }
@@ -106,7 +110,7 @@ class Timeline extends React.Component {
     }
     selectElements (prop, value, category) {
         const elements = d3Timeline.getElements(this.refs.Timeline, prop, value, category)
-        console.log(prop, value, elements)
+        // console.log(prop, value, elements)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }
@@ -119,7 +123,7 @@ class Timeline extends React.Component {
         d3Timeline.update(this.refs.Timeline, { ...this.props, ...this.state })
     }
     componentWillUnmount () {
-        d3Timeline.destroy(this.refs.Timeline)
+        d3Timeline.destroy(this.refs.Timeline, { ...this.props, ...this.state })
     }
 }
 
