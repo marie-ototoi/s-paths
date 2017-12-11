@@ -3,8 +3,8 @@ import * as d3 from 'd3'
 import config from '../lib/configLib'
 import data from '../lib/dataLib'
 import selectionLib from '../lib/selectionLib'
-import { addSelection, removeSelection } from '../actions/selectionActions';
-import { isString } from 'util';
+import { addSelection, removeSelection } from '../actions/selectionActions'
+import { isString } from 'util'
 
 const create = (el, props) => {
     // console.log('create', config.getSelectedConfig(props.configs, props.zone))

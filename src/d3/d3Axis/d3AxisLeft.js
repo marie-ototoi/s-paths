@@ -16,9 +16,8 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .enter()
             .append('g')
             .each(function (d, i) { if (i !== 0) this.setAttribute('visibility', 'hidden') })
-            .attr('transform', function (d, i) { return 'translate(' + positions.x2 + ',' + (positions.y2 - 30 + (i * 30)) + ')' })
         dropdown.append('rect')
-            .attr('x', -40)
+            .attr('x', -80)
             .attr('y', 0)
             .attr('width', 80)
             .attr('height', 30)
@@ -40,7 +39,7 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .attr('font-weight', 'normal')
             .style('text-anchor', 'start')
             .style('pointer-events', 'none')
-            .attr('x', -35)
+            .attr('x', -75)
             .attr('y', 20)
         return this
     }
@@ -67,6 +66,7 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .style('pointer-events', 'none')
             .style('visibility', visible ? 'visible' : 'hidden')
             .each(function (d) {
+                if (this.getBBox === undefined) return
                 let bbox = this.getBBox()
                 d3.select(this.parentNode).append('rect')
                     .attr('x', bbox.x)
@@ -109,22 +109,22 @@ export default class d3AxisBottom extends d3AxisAbstract {
             var mod = parseInt(1 + (labels.length / 15))
             return !(i === 0 || i % mod === 0)
         }), 30, false)
-        /*
+
         d3.select('#ticks').append('g').append('line')
             .attr('x1', positions.x1 - 10)
             .attr('y1', positions.y1)
             .attr('x2', positions.x2 + 10)
             .attr('y2', positions.y1)
             .attr('stroke-width', 1.5)
-            .attr('stroke', 'black')
+            .attr('stroke', '#666')
         d3.select('#ticks').append('g').append('line')
             .attr('x1', positions.x1 - 10)
             .attr('y1', positions.y2)
             .attr('x2', positions.x2 + 10)
             .attr('y2', positions.y2)
-            .attr('stroke-width', 2)
-            .attr('stroke', 'black')
-            */
+            .attr('stroke-width', 1.5)
+            .attr('stroke', '#666')
+
         this.ticks = tick
         return this
     }
@@ -137,7 +137,13 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .attr('x2', props.display.viz.horizontal_margin)
             .attr('y1', props.display.viz.vertical_margin + props.display.viz.useful_height)
             .attr('y2', props.display.viz.vertical_margin)
-
+        let positions =
+        {
+            x1: Number(panel.select('line').attr('x1')),
+            y1: Number(panel.select('line').attr('y1')),
+            x2: Number(panel.select('line').attr('x2')),
+            y2: Number(panel.select('line').attr('y2'))
+        }
         let xScale = d3.scaleBand()
             .range([ props.display.viz.vertical_margin, props.display.viz.vertical_margin + props.display.viz.useful_height ])
             .domain(props.keys)
@@ -148,7 +154,7 @@ export default class d3AxisBottom extends d3AxisAbstract {
         })
 
         panel.select('#titles').selectAll('g').attr('transform', function (d, i) {
-            return 'translate(' + (props.display.viz.horizontal_margin) + ',' + ((props.display.viz.vertical_margin) - 30 + (i * 30)) + ')'
+            return 'translate(' + ((props.display.viz.horizontal_margin) / 2) + ',' + ((props.display.viz.vertical_margin + props.display.viz.useful_height / 2) - 30 + (i * 30)) + ') rotate(-90)'
         })
     }
 
