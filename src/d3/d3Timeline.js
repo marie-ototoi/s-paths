@@ -4,6 +4,7 @@ import config from '../lib/configLib'
 import data from '../lib/dataLib'
 import selectionLib from '../lib/selectionLib'
 import { addSelection, removeSelection } from '../actions/selectionActions'
+import { isString } from 'util'
 
 const create = (el, props) => {
     // console.log('create', config.getSelectedConfig(props.configs, props.zone))
@@ -14,26 +15,32 @@ const create = (el, props) => {
         redraw(el, props)
         resize(el, props)
         assignBehavior(el, props)
-
-        setLegend(makeLegend(el, props))
     }
 }
 
-const makeLegend = (el, props) => {
-    const { palette } = props
-    return palette.map(pal => {
-        // gives the list of elemebts to be selected when legend is clicked
-        let elements = []
-        d3.select(el).selectAll('.elements').each(d => {
-            if ((d.prop2 && pal.key === d.prop2.value) || (d.labelprop2 && pal.key === d.labelprop2.value)) {
+const getElements = (el, propName, value, propCategory) => {
+    const isArray = Array.isArray(value)
+    let elements = []
+    d3.select(el).selectAll('.elements').each(d => {
+        if (d[propName]) {
+            let propValue
+            if (propCategory === 'datetime') {
+                propValue = Number(d.year)
+            } else if (propCategory === 'text' || propCategory === 'uri') {
+                propValue = d[propName].value
+            } else if (propCategory === 'number') {
+                propValue = Number(d[propName].value)
+            }
+            if (isArray) {
+                if (propValue >= value[0] && propValue <= value[1]) {
+                    elements.push(d.selection)
+                }
+            } else if (propValue === value) {
                 elements.push(d.selection)
             }
-        })
-        return {
-            ...pal,
-            elements
         }
     })
+    return elements
 }
 
 const update = (el, props) => {
@@ -49,11 +56,11 @@ const destroy = (el) => {
 }
 
 const draw = (el, props) => {
-    const { nestedData, palette, selectedConfig } = props
-    // console.log(nestedData)
+    const { nestedProp1, palette, selectedConfig } = props
+    // console.log(nestedProp1)
     const timeUnits = d3.select(el)
         .selectAll('g.time')
-        .data(nestedData)
+        .data(nestedProp1)
         .enter()
         .append('g')
         .attr('class', 'time')
@@ -66,7 +73,7 @@ const draw = (el, props) => {
         .append('line')
         .attr('class', 'element')
         .attr('stroke', d => d.color)
-    // console.log(selectedConfig)
+        // console.log(selectedConfig)
     elementUnits
         .append('line')
         .attr('class', 'selection')
@@ -93,11 +100,10 @@ const assignBehavior = (el, props) => {
         .on('click', (d, i) => {
             selectElements([d.selection])
         })
-        //
 }
 
 const redraw = (el, props) => {
-    // change color or class when component is rerendered
+    // changes when component is rerendered
     const { selections, zone, selectElements } = props
     const elementIndex = d3.select(el).selectAll('.elements')
         .each((d, i) => {
@@ -105,12 +111,13 @@ const redraw = (el, props) => {
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
         })
         .classed('selected', d => d.selected)
+        .attr('opacity', d => (selections.length > 0.7 && d.selected !== true) ? 0.3 : 0.8)
 }
 
 const resize = (el, props) => {
-    const { dataZone, nestedData, display } = props
+    const { dataZone, nestedProp1, display } = props
     const xScale = d3.scaleLinear()
-        .domain([Number(nestedData[0].key), Number(nestedData[nestedData.length - 1].key)])
+        .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
         .range([0, display.viz.useful_width])
     let maxUnitsPerYear = 1
     const timeUnits = d3.select(el)
@@ -121,7 +128,7 @@ const resize = (el, props) => {
         })
     const elementUnits = timeUnits.selectAll('.elements')
     const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
-    const unitWidth = Math.floor(display.viz.useful_width / timeUnits.size())
+    const unitWidth = Math.floor(display.viz.useful_width / timeUnits.size()) - 2
     elementUnits
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
     const elements = elementUnits.selectAll('.element')
@@ -129,19 +136,10 @@ const resize = (el, props) => {
         .attr('x2', Math.ceil(unitWidth / 2))
         .attr('y1', 0)
         .attr('y2', -unitHeight + 1)
-        .attr('stroke-width', d => d.selected ? 4 : unitWidth - 1)
-
-    d3.select(el).selectAll('.xaxis').remove()
-    const xAxis = d3.axisBottom()
-        .scale(xScale)
-        .tickFormat(d3.format('.0f'))
-
-    d3.select(el).append('g')
-        .attr('class', 'xaxis')
-        .attr('transform', `translate(0, ${display.viz.useful_height})`)
-        .call(xAxis)
+        .attr('stroke-width', unitWidth - 1)
 }
 
 exports.create = create
 exports.destroy = destroy
+exports.getElements = getElements
 exports.update = update

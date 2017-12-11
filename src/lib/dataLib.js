@@ -34,14 +34,19 @@ const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
     let centuryNest = d3.nest().key(prop => prop.century).entries(dataToNest)
     // console.log(yearNest.length, decadeNest.length, centuryNest.length)
     let nest
+    let additionalValue
+    let keyFormat
     if (yearNest.length < max) {
         nest = yearNest
+        additionalValue = Number(yearNest[yearNest.length - 1].key) + 1
     } else if (decadeNest.length < max) {
         nest = decadeNest
+        additionalValue = Number(yearNest[yearNest.length - 1].key) + 10
     } else {
         nest = centuryNest
+        additionalValue = Number(yearNest[yearNest.length - 1].key) + 100
     }
-    return nest.map(group => {
+    return [...nest.map(group => {
         let groupWithAdd = {
             ...group,
             values: group.values.sort((a, b) => b.prop2.value.localeCompare(a.prop2.value))
@@ -53,7 +58,7 @@ const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
             })
         })
         return groupWithAdd
-    })
+    }), { key: additionalValue, values: [] }]
 }
 
 exports.areLoaded = areLoaded

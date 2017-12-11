@@ -3,40 +3,71 @@ import * as types from '../constants/ActionTypes'
 const initialState = [
     {
         properties: [],
-        colors: ['#e0cfe1',  '#ad8cb7', '#896aa6', '#5b4488', 
-        '#54254f', '#e3cbe1', '#b794b4', '#9467a0', '#7d4489', 
-        '#331b3d', '#b7c1cd', '#8eafd0', '#6385b2', '#9099d0', 
-        '#9a97d0', '#404a8f', '#3b3887', '#bda5c5', '#9ac4dc', '#808bc1', 
-        '#7a77ae', '#485297', '#51519b', '#a4cee7', '#538db2',
-        '#507fb5', '#3568a7', '#155094', '#164686', '#173068']
-    },{ 
+        colors: ['#00441b', '#006d2c', '#238b45', '#41ae76', '#66c2a4', '#99d8c9', '#ccece6', '#e5f5f9']
+    },
+    { 
         properties: [],
-        colors: ['#c65454', '#e8bcbd', '#e17d7f', '#e39d9d',  '#b73f3e', 
-          '#ea816e', '#dc4e3a', '#d03d2b','#ecb3a0',
-        '#bd2319', '#ca311f', '#ea8aa6', '#e76d82', '#ed4556',
-        '#e42c34', '#d61d22', '#bd191a', '#981c26', '#78252d', 
-        '#533034']
-    },{
+        colors: ['#4d004b', '#810f7c', '#88419d', '#8c6bb1', '#8c96c6', '#9ebcda', '#bfd3e6', '#e0ecf4']
+    },
+    {
         properties: [],
-        colors: ['#f58ea9', '#e35168', '#e84351', '#dd3544', '#ffd7de', 
-        '#ee90ab', '#ed99b3', '#ee5b77', '#ab2935', '#f7c1cf',
-        '#fba3bb', '#cb5b7f', '#c1475e', '#dd4959', '#af2131', 
-        '#782b31', '#f9e1e1', '#e599a6', '#b23f5e', '#c94463',
-        '#9e1e2b']
-    },{
+        colors: ['#084081', '#0868ac', '#2b8cbe', '#4eb3d3', '#7bccc4', '#a8ddb5', '#ccebc5', '#e0f3db']
+    },
+    {
         properties: [],
-        colors: ['#9dbcbf', '#88bbce', '#61a6c7', '#106d8c', '#075f8d',
-        '#135a8e', '#14406d', '#0b2d48', '#a6cbd1', '#5598a9',
-        '#21819a', '#1d4f70', '#94c0b3', '#568980', '#48919a',
-        '#1b6d78', '#30515a', '#b4beb6', '#8fa193', '#687679',
-        '#39545d', '#435259', '#479683', '#276b5c', '#375a53']
-    },{
+        colors: ['#7f0000', '#b30000', '#d7301f', '#ef6548', '#fc8d59', '#fdbb84', '#fdd49e', '#fee8c8']
+    },
+    {
         properties: [],
-        colors: ['#698143', '#436835', '#455f42', '#deda90','#ded973',
-        '#c5b931', '#85971f', '#7f803a', '#c5b24b','#c0aa45',
-        '#8c7c27', '#625437', '#c3c093', '#9b8f45','#716d47',
-        '#eee3ad', '#bd9e5b', '#aa9345', '#dcca68','#b49521',
-        '#c5992c', '#aa882f', '#7d673e', '#66472a']
+        colors: ['#023858', '#045a8d', '#0570b0', '#3690c0', '#74a9cf', '#a6bddb', '#d0d1e6', '#ece7f2']
+    },
+    {
+        properties: [],
+        colors: ['#014636', '#016c59', '#02818a', '#3690c0', '#67a9cf', '#a6bddb', '#d0d1e6', '#ece2f0']
+    },
+    {
+        properties: [],
+        colors: ['#67001f', '#980043', '#ce1256', '#e7298a', '#df65b0', '#c994c7', '#d4b9da', '#e7e1ef']
+    },
+    {
+        properties: [],
+        colors: ['#49006a', '#7a0177', '#ae017e', '#dd3497', '#f768a1', '#fa9fb5', '#fcc5c0', '#fde0dd']
+    },
+    {
+        properties: [],
+        colors: ['#004529', '#006837', '#238443', '#41ab5d', '#78c679', '#addd8e', '#d9f0a3', '#f7fcb9']
+    },
+    {
+        properties: [],
+        colors: ['#081d58', '#253494', '#225ea8', '#1d91c0', '#41b6c4', '#7fcdbb', '#c7e9b4', '#edf8b1']
+    },
+    {
+        properties: [],
+        colors: ['#662506', '#993404', '#cc4c02', '#ec7014', '#fe9929', '#fec44f', '#fee391', '#fff7bc']
+    },
+    {
+        properties: [],
+        colors: ['#800026', '#bd0026', '#e31a1c', '#fc4e2a', '#fd8d3c', '#feb24c', '#fed976', '#ffeda0']
+    },
+    {
+        properties: [],
+        colors: ['#08306b', '#08519c', '#2171b5', '#4292c6', '#6baed6', '#9ecae1', '#c6dbef', '#deebf7']
+    },
+    {
+        properties: [],
+        colors: ['#00441b', '#006d2c', '#238b45', '#41ab5d', '#74c476', '#a1d99b', '#c7e9c0', '#e5f5e0']
+    },
+    {
+        properties: [],
+        colors: ['#7f2704', '#a63603', '#d94801', '#f16913', '#fd8d3c', '#fdae6b', '#fdd0a2', '#fee6ce']
+    },
+    {
+        properties: [],
+        colors: ['#3f007d', '#54278f', '#6a51a3', '#807dba', '#9e9ac8', '#bcbddc', '#dadaeb', '#efedf5']
+    },
+    {
+        properties: [],
+        colors: ['#67000d', '#a50f15', '#cb181d', '#ef3b2c', '#fb6a4a', '#fc9272', '#fcbba1', '#fee0d2']
     }
 ]
 
@@ -59,7 +90,7 @@ const palettes = (state = initialState, action) => {
     switch (action.type) {
     case types.SET_PROP_PALETTE:
         return state.map((p, i) => {
-            return (i === action.index)? palette(p, action) : p
+            return (i === action.index) ? palette(p, action) : p
         })
     default:
         return state

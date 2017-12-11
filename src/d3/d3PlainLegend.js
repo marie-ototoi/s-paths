@@ -9,35 +9,34 @@ const create = (el, props) => {
         assignBehavior(el, props)
     }
 }
+
 const draw = (el, props) => {
-    const rectangles = d3.select(el)
-        .selectAll('rect')
-        .data(props.info)
+    const { info } = props
+    const items = d3.select(el)
+        .selectAll('g.legenditem')
+        .data(info)
         .enter()
+        .append('g')
+        .classed('legenditem', true)
+    items
         .append('rect')
         .attr('fill', d => d.color)
-    const texts = d3.select(el)
-        .selectAll('text')
-        .data(props.info)
-        .enter()
+    items
         .append('text')
-        .text(d => d.key)
+        .text(d => d.label)
 }
 
 const assignBehavior = (el, props) => {
-    const { selections, zone, select, selectElements } = props
-    const legendItems = d3.select(el).selectAll('rect')
+    const { selectElements } = props
+    const legendItems = d3.select(el).selectAll('g.legenditem')
         .on('click', (d) => {
-            selectElements(d.elements)
+            selectElements(d.propName, d.key, d.category)
         }) // send list of selectors
 }
 
 const update = (el, props) => {
-    //
     if (el && props.data) {
-        //console.log('///////////',props.selections )
         resize(el, props)
-        
     }
 }
 
@@ -46,7 +45,6 @@ const destroy = (el) => {
 }
 
 const resize = (el, props) => {
-    const { display } = props
     const rectangles = d3.select(el)
         .selectAll('rect')
         .attr('width', (d, i) => 25)

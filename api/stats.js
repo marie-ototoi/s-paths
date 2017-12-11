@@ -4,10 +4,9 @@ const router = express.Router()
 
 router.get('/:class', (req, res) => {
     //req.params.class
-    
     getStats({ entrypoint: req.params.class })
         .then(props => {
-            console.log('bravo toto GET !!!!!!!!!!!!!!!!!!!!!!!!!', req.params.options, props)
+            console.log('GET !!!!!!!!!!!!!!!!!!!!!!!!!', req.params.options, props)
             res.json(props)
         })
         .catch((err) => {
@@ -15,10 +14,9 @@ router.get('/:class', (req, res) => {
         })
 })
 router.post('/:class', (req, res) => {
-    console.log(req.body)
     getStats({ entrypoint: req.params.class, ...req.body })
         .then(props => {
-            console.log('bravo toto POST !!!!!!!!!!!!!!!!!!!!!!!!!', props)
+            console.log('POST !!!!!!!!!!!!!!!!!!!!!!!!!', props)
             res.json(props)
         })
         .catch((err) => {

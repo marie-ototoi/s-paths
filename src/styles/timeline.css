@@ -1,0 +1,6 @@
+.Timeline :hover {
+    opacity: 1;
+}
+.Timeline .element {
+    cursor:pointer;
+}
