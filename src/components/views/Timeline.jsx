@@ -47,13 +47,18 @@ class Timeline extends React.Component {
                     }
                 }),
                 category: selectedConfig.selectedMatch.properties[0].category,
-                configs: selectedConfig.matches
+                configs: selectedConfig.matches.map(config => {
+                    return {
+                        path: config.properties[0].path,
+                        selected: config.selected
+                    }
+                })
             }
             //
             const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(dataZone)
             const prop2 = selectedConfig.selectedMatch.properties[1].path
             const catProp2 = selectedConfig.selectedMatch.properties[1].category
-            // console.log(palettes, prop2, prop2Data.length)
+            // 
             const colors = getPropPalette(palettes, prop2, nestedProp2.length)
             const palette = nestedProp2.map((p, i) => {
                 return { 
@@ -64,7 +69,7 @@ class Timeline extends React.Component {
                     category: catProp2
                 }
             })
-            //
+            
             this.setState({ dataZone, selectedConfig, nestedProp1, palette, axisBottom })
         }
     }
@@ -72,7 +77,15 @@ class Timeline extends React.Component {
         // console.log('salut Timeline') 
         const { data, display, zone, configs, palettes, getPropPalette } = this.props
         const { nestedProp1 } = this.state
-        const classN = `Timeline ${this.refs.elementName}`
+        const classN = `Timeline ${this.state.elementName}`
+
+        // display settings 
+        const axisBottom = this.state.axisBottom
+        axisBottom.x = display.zones[zone].x + display.viz.horizontal_margin
+        axisBottom.y = display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin
+        axisBottom.width = display.viz.useful_width
+        axisBottom.height = display.viz.vertical_margin
+
         return (<g className = { classN } >
             <g
                 transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
@@ -83,7 +96,6 @@ class Timeline extends React.Component {
                 y = { display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin }
                 type = "plain"
                 zone = { zone }
-                refsvg = { this.props.refsvg }
                 width = { display.viz.horizontal_margin }
                 height = { display.viz.vertical_margin }
                 info = { this.state.palette }
@@ -92,16 +104,8 @@ class Timeline extends React.Component {
             <PlainAxis
                 type = "Bottom"
                 zone = { zone }
-                x = { display.zones[zone].x + display.viz.horizontal_margin }
-                y = { display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin }
-                width = { display.viz.useful_width }
-                height = { display.viz.vertical_margin }
-                refsvg = { this.props.refsvg }
-                info = { this.state.axisBottom.info }
-                category = { this.state.axisBottom.category }
-                label = { this.state.axisBottom.labels }
+                axis = { axisBottom }
                 selectElements = { this.selectElements }
-                configs = { this.state.axisBottom.configs }
             />
         </g>)
     }

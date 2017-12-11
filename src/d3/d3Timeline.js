@@ -111,7 +111,7 @@ const redraw = (el, props) => {
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
         })
         .classed('selected', d => d.selected)
-        .attr('opacity', d => (selections.length > 0.7 && d.selected !== true) ? 0.3 : 0.8)
+        .attr('opacity', d => (selections.length > 0.7 && d.selected !== true) ? 0.2 : 1)
 }
 
 const resize = (el, props) => {

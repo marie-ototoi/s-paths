@@ -3,29 +3,36 @@ import data from '../lib/dataLib'
 
 const create = (el, props) => {
     //
-    d3.select(`div.view`).append('div')
+    /* d3.select(`div.view`).append('div')
         .classed(props.elementName, true)
         .style('position', 'absolute')
         .style('left', `${props.x/3}px`)
         .style('top', `${props.y/3}px`)
         .style('width',`300px`)
         .style('height', `100px`)
-        .style('background-color', 'red')
-    if (el && props.data) {
+        .style('background-color', 'red') */
+    if (el) {
+        const { axis } = props
+        d3.select(el)
+            .append('foreignObject')
+            .attr('width', axis.width + 200)
+            .attr('height', 50)
+            .append('xhtml:select')
+            .style('margin-left', `${axis.width}px`)
         update(el, props)
     }
 }
 
 const assignBehavior = (el, props) => {
-    const { selectElements, info } = props
+    const { selectElements, axis } = props
     const axisItems = d3.select(el).selectAll('.tick')
         .classed('selectable', d => {
-            let data = info.filter(i => `${i.key}` === `${d}`)
+            let data = axis.info.filter(i => `${i.key}` === `${d}`)
             return (data.length > 0)
         })
     axisItems.selectAll('text, line, rect')
         .on('click', (d) => {
-            let data = info.filter(i => `${i.key}` === `${d}`)
+            let data = axis.info.filter(i => `${i.key}` === `${d}`)
             if (data.length > 0) {
                 selectElements(data[0].propName, data[0].values, data[0].category)
             }
@@ -34,7 +41,18 @@ const assignBehavior = (el, props) => {
 
 const update = (el, props) => {
     //
-    if (el && props.data) {
+    if (el) {
+        const { axis } = props
+        const { configs } = axis
+        d3.select(el)
+            .select('foreignObject select')
+            .selectAll('option')
+            .data(configs)
+            .enter()
+            .append('option')
+            .attr('value', d => d.path)
+            .attr('selected', d => d.selected)
+            .text(d => d.path)
         resize(el, props)
         assignBehavior(el, props)
     }
@@ -47,29 +65,30 @@ const destroy = (el, props) => {
 }
 
 const resize = (el, props) => {
-    const { category, info, width, type } = props
+    const { axis, type } = props
+    const { info, category, width } = axis
     const scale = d3.scaleLinear()
         .domain([info[0].key, info[info.length - 1].key])
         .range([0, width])
     d3.select(el).selectAll(`.axis${type}`).remove()
-    const axis = d3[`axis${type}`]()
+    const axisEl = d3[`axis${type}`]()
         .scale(scale)
     if (category === 'text' || category === 'uri') {
-        axis
+        axisEl
             .tickValues(info.map(v => v.key))
     } else if (category === 'number') {
-        axis
+        axisEl
             .tickFormat(d3.format(','))
             .tickValues(info.map(v => Number(v.key)))
     } else if (category === 'datetime') {
-        axis
+        axisEl
             .tickFormat(d3.format('.0f'))
             .ticks(info.length) // to be fixed : if there's many empty values on the scale 
             // and the length of the info array is closer to a multiple, there might be only one out of two ticks
     }
     d3.select(el).append('g')
         .attr('class', `axis${type}`)
-        .call(axis)
+        .call(axisEl)
     d3.select(el).selectAll('.domain').remove()
     const ticks = d3.select(el).selectAll('.tick')
     const tickWidth = Math.floor(width / ticks.size())

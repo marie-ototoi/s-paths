@@ -13,20 +13,21 @@ class PlainAxis extends React.Component {
     }
 
     render () {
+        const { x, y } = this.props.axis
         return (<g className = "Axis"
-            transform = { `translate(${this.props.x}, ${this.props.y})` }
+            transform = { `translate(${x}, ${y})` }
             ref = { this.state.elementName }
         >
         </g>)
     }
     componentDidMount () {
-        d3PlainAxis.create(this.refs[this.state.ref], { ...this.props, ...this.state })
+        d3PlainAxis.create(this.refs[this.state.elementName], { ...this.props, ...this.state })
     }
     componentDidUpdate () {
-        d3PlainAxis.update(this.refs[this.state.ref], { ...this.props, ...this.state })
+        d3PlainAxis.update(this.refs[this.state.elementName], { ...this.props, ...this.state })
     }
     componentWillUnmount () {
-        d3PlainAxis.destroy(this.refs[this.state.ref], { ...this.props, ...this.state })
+        d3PlainAxis.destroy(this.refs[this.state.elementName], { ...this.props, ...this.state })
     }
 }
 

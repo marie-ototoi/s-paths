@@ -7,6 +7,9 @@
 .Axis rect{
     fill: #fff;
 }
+.Axis select{
+    width: 100px;
+}
 .Axis .selectable {
     cursor: pointer;
 }
