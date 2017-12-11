@@ -10,12 +10,14 @@ class Axis extends React.Component {
     }
 
     render () {
-        return (<g className = {'Axis-' + this.props.zone + '-' + this.props.type} ref = {this.props.zone + '-' + this.props.type} ></g>)
+        return (<g className = "Axis" ref = {this.props.zone + '-' + this.props.type} ></g>)
     }
     componentDidMount () {
+        if (this.props.zone === undefined || this.props.type === undefined) return
         d3Axis.create(this.refs[this.props.zone + '-' + this.props.type], this.props)
     }
     componentDidUpdate () {
+        if (this.props.zone === undefined || this.props.type === undefined) return
         d3Axis.update(this.refs[this.props.zone + '-' + this.props.type], this.props)
     }
     componentWillUnmount () {

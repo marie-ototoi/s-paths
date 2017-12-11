@@ -17,7 +17,7 @@ const getNextPaletteIndex = (palettes) => {
 
 const getQuantitativeColors = (length) => {
     const colors = [
-        '#FDD835', '#FBC02D', '#FF8F00', '#FF6F00', '#E65100', '#BF360C', '#4E342E'
+        '#FDD835', '#FBC02D', '#FF8F00', '#FF6F00', '#E65100', '#BF360C'
     ]
     return selectColorsInPalette(colors, length)
 }

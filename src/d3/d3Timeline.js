@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import config from '../lib/configLib'
 import data from '../lib/dataLib'
 import selectionLib from '../lib/selectionLib'
-import { addSelection, removeSelection } from '../actions/selectionActions';
+import { addSelection, removeSelection } from '../actions/selectionActions'
 
 const create = (el, props) => {
     // console.log('create', config.getSelectedConfig(props.configs, props.zone))
@@ -93,7 +93,7 @@ const assignBehavior = (el, props) => {
         .on('click', (d, i) => {
             selectElements([d.selection])
         })
-        // 
+        //
 }
 
 const redraw = (el, props) => {

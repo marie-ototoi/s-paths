@@ -2,12 +2,12 @@ import React from 'react'
 import * as d3 from 'd3'
 import { connect } from 'react-redux'
 import d3HeatMap from '../../d3/d3HeatMap'
-import { addSelection, removeSelection } from '../../actions/selectionActions'
+import { select, addSelection, removeSelection } from '../../actions/selectionActions'
 import Legend from '../elements/Legend'
 import Axis from '../elements/Axis'
 import { getPropPalette } from '../../actions/palettesActions'
 import statisticalOperator from '../../lib/statLib'
-
+import {getQuantitativeColors} from '../../lib/paletteLib.js'
 import config from '../../lib/configLib'
 import dataLib from '../../lib/dataLib'
 
@@ -15,22 +15,54 @@ class HeatMap extends React.Component {
     constructor (props) {
         super(props)
         this.setLegend = this.setLegend.bind(this)
-        this.addCallbackToProps = this.addCallbackToProps.bind(this)
-        this.state = {}
+        this.selectElements = this.selectElements.bind(this)
+        this.state = {
+            setLegend: this.setLegend,
+            selectElements: this.selectElements
+        }
     }
 
     componentWillMount () {
-        if (!dataLib.areLoaded(this.props.data, this.props.zone)) return
+        const { data, zone } = this.props
+        if (!dataLib.areLoaded(data, zone)) return
 
-        const { data, configs, zone } = this.props
+        const { configs } = this.props
         const selectedConfig = config.getSelectedConfig(configs, zone)
         const dataZone = dataLib.getResults(data, zone)
-        this.state = { dataStat: statisticalOperator.computeStatisticalInformation(dataZone, selectedConfig) }
+        const dataStat = statisticalOperator.computeStatisticalInformation(dataZone, selectedConfig)
+        const paletteObj = []
+        let nbColor = dataStat.max - dataStat.min + 1
+        const colors = getQuantitativeColors(nbColor)
+        //        const colors = getPropPalette(palettes, prop2, prop2Data.length)
+        let step = (dataStat.max - dataStat.min + 1) / colors.length
+        for (var i = 0; i < colors.length; i++) {
+            let key = (dataStat.min + ((i + 1) * step)).toFixed(0)
+            paletteObj.push({ key: key, color: colors[i] })
+        }
+        for (i = 0; i < dataStat.data.length; i++) {
+            for (var j = 0; j < colors.length; j++) {
+                if (!(Number(dataStat.min) + ((j + 1) * step) < dataStat.data[i].value)) {
+                    dataStat.data[i].color = paletteObj.filter(p => (p.key === (dataStat.min + ((j + 1) * step)).toFixed(0)))[0].color
+                    break
+                }
+            }
+        }
+        this.state = { ...this.state,
+            dataStat: dataStat,
+            palette: paletteObj,
+            selectedConfig: selectedConfig
+        }
     }
 
     render () {
         const { display, zone } = this.props
         const { dataStat } = this.state
+        let axisbehavior = d3HeatMap.heatMapAxisBehaviors()
+        for (var item in axisbehavior) {
+            for (var fun in axisbehavior[item]) {
+                axisbehavior[item][fun] = axisbehavior[item][fun].bind(this, this.state.selectElements)
+            }
+        }
         return (
             <g className = "HeatMap { this.props.zone }" ref = "HeatMap" transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` } >
                 { this.state.legend &&
@@ -50,7 +82,7 @@ class HeatMap extends React.Component {
                         zone = { zone }
                         keys = {d3.set(dataStat.data.map(item => item.prop2)).values()}
                         titles = {['Gender', 'TEST']}
-                        behaviors = {d3HeatMap.heatMapAxisBehaviors()}
+                        behaviors = {axisbehavior}
                     />
                 }
                 { dataStat &&
@@ -59,7 +91,7 @@ class HeatMap extends React.Component {
                         zone = { zone }
                         keys = {d3.set(dataStat.data.map(item => item.prop1)).values()}
                         titles = {['Date', 'TEST']}
-                        behaviors = {d3HeatMap.heatMapAxisBehaviors()}
+                        behaviors = {axisbehavior}
                     />
                 }
             </g>
@@ -68,11 +100,14 @@ class HeatMap extends React.Component {
     setLegend (legend) {
         this.setState({ legend })
     }
+    selectElements (elements) {
+        const { select, zone, selections } = this.props
+        select(elements, zone, selections)
+    }
     addCallbackToProps () {
         return {
             ...this.props,
-            setLegend: this.setLegend,
-            dataStat: this.state.dataStat
+            ...this.state
         }
     }
 
@@ -85,43 +120,6 @@ class HeatMap extends React.Component {
     componentWillUnmount () {
         d3HeatMap.destroy(this.refs.HeatMap)
     }
-/*
-    initAxisBottom () {
-        let xElements = d3.set(data.data.map(item => item.prop1)).values()
-        let yElements = d3.set(data.data.map(item => item.prop2)).values()
-
-        let interactionsA = {
-            title: { mouseover: () => {},
-                mouseleave: () => {},
-                click: () => {} },
-            key: {
-                mouseover: (name) => {
-                    d3.select('#center').selectAll('rect').filter(function () {
-                        return this.getAttribute('id').includes(name)
-                    }).attr('fill', 'blue')
-                },
-                mouseleave: (name) => {
-                    d3.select('#center').selectAll('rect').filter(function () {
-                        return this.getAttribute('id').includes(name)
-                    }).attr('fill', function () { return this.getAttribute('savFill') })
-                },
-                click: () => {} }
-        }
-
-        let axis = d3Axis.bottom(this.refs.AxisBottom, this.props)
-        axis.addTitles([ 'Date', 'EX1' ])
-            .addKeys(xElements)
-            .assignBehavior('keys', 'mouseover', interactionsA.key.mouseover)
-            .assignBehavior('keys', 'mouseleave', interactionsA.key.mouseleave)
-        /*        d3Axis.top(this.refs.AxisTop, this.props)
-        d3Axis.left(this.refs.AxisLeft, this.props)
-        d3Axis.right(this.refs.AxisRight, this.props)
-
-        // let ordoAxis = new d3Axis(this.refs.AxisBottom, titles, xElements, positionAbscisse, 'horizontal')
-        // ordoAxis.assignBehavior('keys', 'mouseover', interactionsA.key.mouseover)
-        // ordoAxis.assignBehavior('keys', 'mouseleave', interactionsA.key.mouseleave)
-    }
-    */
 }
 
 function mapStateToProps (state) {
@@ -129,7 +127,7 @@ function mapStateToProps (state) {
         display: state.display,
         data: state.data,
         configs: state.configs.present,
-        selections: state.selections.present,
+        selections: state.selections,
         palettes: state.palettes
     }
 }
@@ -138,7 +136,8 @@ function mapDispatchToProps (dispatch) {
     return {
         addSelection: addSelection(dispatch),
         removeSelection: removeSelection(dispatch),
-        getPropPalette: getPropPalette(dispatch)
+        getPropPalette: getPropPalette(dispatch),
+        select: select(dispatch)
     }
 }
 

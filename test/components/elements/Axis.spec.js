@@ -9,13 +9,13 @@ chai.use(chaiEnzyme())
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
-import { default as HeatMap } from '../../../src/components/views/HeatMap'
+import { default as Axis } from '../../../src/components/elements/Axis'
 
 const store = createStore(reducers)
 
-describe('<HeatMap />', () => {
-    it('should render a svg group classed HeatMap', () => {
-        const wrapper = mount(<Provider store = {store}><HeatMap zone = "aside" /></Provider>)
-        expect(wrapper.find('g.HeatMap')).to.have.length(1)
+describe('<Axis />', () => {
+    it('should render a svg group classed Axis', () => {
+        const wrapper = mount(<Provider store = {store}><Axis /></Provider>)
+        expect(wrapper.find('g.Axis')).to.have.length(1)
     })
 })
