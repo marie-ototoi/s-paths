@@ -44,7 +44,43 @@ export default class d3AxisBottom extends d3AxisAbstract {
         return this
     }
 
-    addTick (group, size, visible) {
+    addTickInterval (group, size, visible) {
+        group.append('line')
+            .attr('id', d => 'id' + d)
+            .attr('y1', -10)
+            .attr('y2', 10)
+            .attr('x1', 0)
+            .attr('x2', 0)
+            .attr('stroke-width', 1)
+        group.append('rect')
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('width', size)
+            .attr('height', 40)
+            .attr('fill', 'transparent')
+            .on('mouseover', function (d) {
+                group.selectAll('#id' + d).attr('fill', 'purple').attr('stroke', 'purple')
+                d3.select('#idText' + d).attr('fill', 'purple')
+            })
+            .on('mouseleave', function (d) {
+                group.selectAll('#id' + d).attr('fill', 'black').attr('stroke', '#666')
+                d3.select('#idText' + d).attr('fill', 'black')
+            })
+        group.append('text')
+            .attr('id', d => 'idText' + d)
+            .text(d => d)
+            .attr('font-size', '12px')
+            .attr('font-family', 'arial')
+            .attr('font-weight', 'normal')
+            .style('text-anchor', 'middle')
+            .style('stroke', 'none')
+            .attr('y', 10 + 20)
+            .attr('x', 0)
+            .style('pointer-events', 'none')
+            .style('visibility', visible ? 'visible' : 'hidden')
+    }
+
+    addTickSimple (group, size, visible) {
         group.append('line')
             .attr('id', d => 'id' + d)
             .attr('y1', -size * 0.5)
@@ -52,11 +88,11 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .attr('x1', 0)
             .attr('x2', 0)
             .attr('stroke-width', 1)
-            .attr('stroke', '#666')
+        group.append('rect')
         group.append('text')
             .attr('id', d => 'idText' + d)
             .text(d => d)
-            .attr('font-size', '16px')
+            .attr('font-size', '12px')
             .attr('font-family', 'arial')
             .attr('font-weight', 'normal')
             .style('text-anchor', 'middle')
@@ -68,7 +104,7 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .each(function (d) {
                 if (this.getBBox === undefined) return
                 let bbox = this.getBBox()
-                d3.select(this.parentNode).append('rect')
+                group.select('rect')
                     .attr('x', bbox.x)
                     .attr('y', bbox.y)
                     .attr('width', bbox.width)
@@ -85,7 +121,7 @@ export default class d3AxisBottom extends d3AxisAbstract {
             })
     }
 
-    addKeys (labels) {
+    addKeys (labels, mode) {
         let el = this.el
         let positions =
          {
@@ -98,37 +134,43 @@ export default class d3AxisBottom extends d3AxisAbstract {
         let xScale = d3.scaleBand()
             .range([positions.x1, positions.x2])
             .domain(labels)
-
-        let step = (positions.x2 - positions.x1) / labels.length
-
         let tick = el.append('g').attr('id', 'ticks').selectAll('g')
             .data(labels)
             .enter()
             .append('g')
-            .attr('transform', function (d, i) { return 'translate(' + (xScale(d) + (step / 2)) + ',' + positions.y2 + ')' })
 
-        this.addTick(tick.filter(function (d, i) {
-            var mod = parseInt(1 + (labels.length / 15))
-            return i === 0 || i % mod === 0
-        }), 30, true)
-        this.addTick(tick.filter(function (d, i) {
-            var mod = parseInt(1 + (labels.length / 15))
-            return !(i === 0 || i % mod === 0)
-        }), 15, false)
-        d3.select('#ticks').append('g').append('line')
-            .attr('x1', positions.x1)
-            .attr('y1', positions.y1 - 10)
-            .attr('x2', positions.x1)
-            .attr('y2', positions.y2 + 10)
-            .attr('stroke-width', 1.5)
-            .attr('stroke', '#666')
-        d3.select('#ticks').append('g').append('line')
-            .attr('x1', positions.x2)
-            .attr('y1', positions.y1 - 10)
-            .attr('x2', positions.x2)
-            .attr('y2', positions.y2 + 10)
-            .attr('stroke-width', 1.5)
-            .attr('stroke', '#666')
+        if (mode === 'simple') {
+            el.select('#ticks').attr('mode', 'simple')
+            let step = (positions.x2 - positions.x1) / labels.length
+            tick.attr('transform', function (d, i) { return 'translate(' + (xScale(d) + (step / 2)) + ',' + positions.y2 + ')' })
+            this.addTickSimple(tick.filter(function (d, i) {
+                var mod = parseInt(1 + (labels.length / 15))
+                return i === 0 || i % mod === 0
+            }), 30, true)
+            this.addTickSimple(tick.filter(function (d, i) {
+                var mod = parseInt(1 + (labels.length / 15))
+                return !(i === 0 || i % mod === 0)
+            }), 15, false)
+            d3.select('#ticks').append('g').append('line')
+                .attr('x1', positions.x1)
+                .attr('y1', positions.y1 - 10)
+                .attr('x2', positions.x1)
+                .attr('y2', positions.y2 + 10)
+                .attr('stroke-width', 1.5)
+                .attr('stroke', '#666')
+            d3.select('#ticks').append('g').append('line')
+                .attr('x1', positions.x2)
+                .attr('y1', positions.y1 - 10)
+                .attr('x2', positions.x2)
+                .attr('y2', positions.y2 + 10)
+                .attr('stroke-width', 1.5)
+                .attr('stroke', '#666')
+        } else if (mode === 'interval') {
+            el.select('#ticks').attr('mode', 'interval')
+            let step = (positions.x2 - positions.x1) / (labels.length - 1)
+            tick.attr('transform', function (d, i) { return 'translate(' + (xScale(d)) + ',' + positions.y2 + ')' })
+            this.addTickInterval(tick, step, true)
+        }
         this.ticks = tick
         return this
     }
@@ -153,10 +195,16 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .range([props.display.viz.horizontal_margin, props.display.viz.horizontal_margin + props.display.viz.useful_width])
             .domain(props.keys)
 
-        let step = (props.display.viz.horizontal_margin - props.display.viz.horizontal_margin + props.display.viz.useful_width) / props.keys.length
-        panel.select('#ticks').selectAll('g').attr('transform', function (d, i) {
-            return 'translate(' + (xScale(d) + (step / 2)) + ',' + (props.display.viz.vertical_margin + props.display.viz.useful_height) + ')'
-        })
+        if (panel.select('#ticks').attr('mode') === 'simple') {
+            let step = (props.display.viz.horizontal_margin - props.display.viz.horizontal_margin + props.display.viz.useful_width) / props.keys.length
+            panel.select('#ticks').selectAll('g').attr('transform', function (d, i) {
+                return 'translate(' + (xScale(d) + (step / 2)) + ',' + (props.display.viz.vertical_margin + props.display.viz.useful_height) + ')'
+            })
+        } else if (panel.select('#ticks').attr('mode') === 'interval') {
+            panel.select('#ticks').selectAll('g').attr('transform', function (d, i) {
+                return 'translate(' + (xScale(d)) + ',' + (props.display.viz.vertical_margin + props.display.viz.useful_height) + ')'
+            })
+        }
 
         panel.select('#titles').selectAll('g').attr('transform', function (d, i) {
             return 'translate(' + (props.display.viz.horizontal_margin / 2 + ((positions.x2 - positions.x1) / 2)) + ',' + (positions.y2 + 60 + (i * 30)) + ')'

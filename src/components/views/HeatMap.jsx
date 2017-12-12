@@ -16,9 +16,12 @@ class HeatMap extends React.Component {
         super(props)
         this.setLegend = this.setLegend.bind(this)
         this.selectElements = this.selectElements.bind(this)
+        this.selectElementsLegend = this.selectElementsLegend.bind(this)
         this.state = {
             setLegend: this.setLegend,
-            selectElements: this.selectElements
+            selectElements: this.selectElements,
+            selectElementsLegend: this.selectElementsLegend,
+            elementName: `HeatMap_${props.zone}`
         }
     }
 
@@ -37,7 +40,12 @@ class HeatMap extends React.Component {
         let step = (dataStat.max - dataStat.min + 1) / colors.length
         for (var i = 0; i < colors.length; i++) {
             let key = (dataStat.min + ((i + 1) * step)).toFixed(0)
-            paletteObj.push({ key: key, color: colors[i] })
+            paletteObj.push({
+                key: key,
+                color: colors[i],
+                label: key,
+                category: colors[i]
+            })
         }
         for (i = 0; i < dataStat.data.length; i++) {
             for (var j = 0; j < colors.length; j++) {
@@ -56,13 +64,15 @@ class HeatMap extends React.Component {
 
     render () {
         const { display, zone } = this.props
-        const { dataStat } = this.state
+        const { dataStat, selectElementsLegend } = this.state
+
         let axisbehavior = d3HeatMap.heatMapAxisBehaviors()
         for (var item in axisbehavior) {
             for (var fun in axisbehavior[item]) {
                 axisbehavior[item][fun] = axisbehavior[item][fun].bind(this, this.state.selectElements)
             }
         }
+        let heatMapLegendBehavior = d3HeatMap.heatMapLegendBehavior()
         return (
             <g className = "HeatMap { this.props.zone }" ref = "HeatMap" transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` } >
                 { this.state.legend &&
@@ -74,6 +84,7 @@ class HeatMap extends React.Component {
                         height = { display.viz.vertical_margin }
                         info = { this.state.legend }
                         zone = { zone }
+                        selectElements = { selectElementsLegend }
                     />
                 }
                 { dataStat &&
@@ -81,6 +92,7 @@ class HeatMap extends React.Component {
                         type = "left"
                         zone = { zone }
                         keys = {d3.set(dataStat.data.map(item => item.prop2)).values()}
+                        keysDisplay = "simple"
                         titles = {['Gender', 'TEST']}
                         behaviors = {axisbehavior}
                     />
@@ -90,6 +102,7 @@ class HeatMap extends React.Component {
                         type = "bottom"
                         zone = { zone }
                         keys = {d3.set(dataStat.data.map(item => item.prop1)).values()}
+                        keysDisplay = "interval"
                         titles = {['Date', 'TEST']}
                         behaviors = {axisbehavior}
                     />
@@ -97,9 +110,17 @@ class HeatMap extends React.Component {
             </g>
         )
     }
+
     setLegend (legend) {
         this.setState({ legend })
     }
+
+    selectElementsLegend (prop, value, category) {
+        const { select, zone, selections } = this.props
+        let elements = d3HeatMap.heatMapLegendBehavior(category)
+        select(elements, zone, selections)
+    }
+
     selectElements (elements) {
         const { select, zone, selections } = this.props
         select(elements, zone, selections)

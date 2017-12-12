@@ -440,7 +440,18 @@ const heatMapAxisBehaviors = (type) => {
     }
 }
 
+const heatMapLegendBehavior = (color) => {
+    let listRect = []
+    d3.select('#center').selectAll('rect').filter(function () {
+        return this.getAttribute('fill').includes(color)
+    }).each(function (d) {
+        listRect.push(d.selection)
+    })
+    return listRect
+}
+
 exports.create = create
 exports.destroy = destroy
 exports.update = update
 exports.heatMapAxisBehaviors = heatMapAxisBehaviors
+exports.heatMapLegendBehavior = heatMapLegendBehavior

@@ -7,13 +7,13 @@ const create = (el, props) => {
     switch (type) {
     case 'bottom':
         bottom(el, props)
-            .addKeys(props.keys)
+            .addKeys(props.keys, props.keysDisplay)
             .addTitles(props.titles)
             .assignBehaviors(props.behaviors)
         break
     case 'left':
         left(el, props)
-            .addKeys(props.keys)
+            .addKeys(props.keys, props.keysDisplay)
             .addTitles(props.titles)
             .assignBehaviors(props.behaviors)
         break
