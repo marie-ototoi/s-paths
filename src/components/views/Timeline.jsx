@@ -56,11 +56,11 @@ class Timeline extends React.Component {
             // console.log(palettes, prop2, prop2Data.length)
             const colors = getPropPalette(palettes, prop2, nestedProp2.length)
             const palette = nestedProp2.map((p, i) => {
-                return { 
-                    key: p.key, 
-                    color: colors[i], 
-                    propName: 'prop2', 
-                    label: p.values[0].labelprop2.value,
+                return {
+                    key: p.key,
+                    color: colors[i],
+                    propName: 'prop2',
+                    label: p.values[0].labelprop3.value,
                     category: catProp2
                 }
             })
@@ -69,7 +69,7 @@ class Timeline extends React.Component {
         }
     }
     render () {
-        // console.log('salut Timeline') 
+        // console.log('salut Timeline')
         const { data, display, zone, configs, palettes, getPropPalette } = this.props
         const { nestedProp1 } = this.state
         const classN = `Timeline ${this.refs.elementName}`
@@ -110,6 +110,7 @@ class Timeline extends React.Component {
     }
     selectElements (prop, value, category) {
         const elements = d3Timeline.getElements(this.refs.Timeline, prop, value, category)
+        console.log(elements)
         // console.log(prop, value, elements)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)

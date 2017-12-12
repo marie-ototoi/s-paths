@@ -53,6 +53,7 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .attr('y2', 0)
             .attr('stroke-width', 1)
             .attr('stroke', '#666')
+        group.append('rect')
         group.append('text')
             .attr('id', d => 'idText' + d)
             .text(d => d)
@@ -68,7 +69,7 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .each(function (d) {
                 if (this.getBBox === undefined) return
                 let bbox = this.getBBox()
-                d3.select(this.parentNode).append('rect')
+                group.select('rect')
                     .attr('x', bbox.x)
                     .attr('y', bbox.y)
                     .attr('width', bbox.width)
