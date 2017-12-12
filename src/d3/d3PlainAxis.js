@@ -37,6 +37,17 @@ const assignBehavior = (el, props) => {
                 selectElements(data[0].propName, data[0].values, data[0].category)
             }
         })
+    const form = d3.select(el).select('select')
+    
+    form.on('change', (d, i) => {
+        //console.log(d, i , 'select changed') essayer de recuperer select.value()
+        form.select('option[selected]').each(d => {
+            //console.log(d)
+        })
+    })
+    form.selectAll('option').on('mouseup', (d, i) => {
+        //console.log(d, i , 'select clicked')
+    })
 }
 
 const update = (el, props) => {
@@ -49,10 +60,13 @@ const update = (el, props) => {
             .selectAll('option')
             .data(configs)
             .enter()
-            .append('option')
+            .append('xhtml:option')
             .attr('value', d => d.path)
-            .attr('selected', d => d.selected)
             .text(d => d.path)
+        d3.select(el)
+            .select('foreignObject select option')
+            .filter(d => d.selected === true)
+            .attr('selected', 'selected')
         resize(el, props)
         assignBehavior(el, props)
     }

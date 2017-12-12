@@ -14,7 +14,6 @@ import statLib from '../../src/lib/statLib'
 describe('d3Timeline', function () {
     it('should trigger select method on click', function () {
         // assignBehavior
-        
     })
     it('should class an element selected when it is in the selections', function () {
         // draw

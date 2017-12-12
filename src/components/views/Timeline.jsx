@@ -52,7 +52,13 @@ class Timeline extends React.Component {
                         path: config.properties[0].path,
                         selected: config.selected
                     }
-                })
+                }).reduce((configAcc, config) => {
+                    const exists = configAcc.filter(c => c.path === config.path).length > 0
+                    if (!exists) {
+                        configAcc.push(config)
+                    }
+                    return configAcc
+                }, [])
             }
             //
             const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(dataZone)
