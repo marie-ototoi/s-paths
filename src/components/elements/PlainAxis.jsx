@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import d3PlainLegend from '../../d3/d3Axis/d3Axis'
 import { select } from '../../actions/selectionActions'
+import { selectProperty } from '../../actions/dataActions'
 import d3PlainAxis from '../../d3/d3PlainAxis'
 
 class PlainAxis extends React.Component {
@@ -35,13 +36,16 @@ function mapStateToProps (state) {
     return {
         display: state.display,
         data: state.data,
-        selections: state.selections
+        selections: state.selections,
+        configs: state.configs.present,
+        dataset: state.dataset.present
     }
 }
 
 function mapDispatchToProps (dispatch) {
     return {
-        select: select(dispatch)
+        select: select(dispatch),
+        selectProperty: selectProperty(dispatch)
     }
 }
 

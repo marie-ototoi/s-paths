@@ -9,7 +9,7 @@ import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
 import { dragSelection } from '../../src/d3/d3DragSelector'
 import { load, loadEmpty, loadError } from '../data/nobel'
-
+/*
 var rewire = require('rewire')
 var app = rewire('../../src/d3/d3DragSelector')
 let dragEnd = app.__get__('dragEnd')
@@ -36,3 +36,4 @@ describe('d3DragSelector', function () {
         expect(cb).to.have.been.calledOnce
     })
 })
+*/

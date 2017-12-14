@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "cors": "^2.8.4",
+    "deep-equal": "^1.0.1",
     "express": "^4.16.2",
     "fetch": "^1.1.0",
     "mongoose": "^4.13.5",

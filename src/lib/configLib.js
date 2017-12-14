@@ -204,7 +204,52 @@ const activateDefaultConfigs = (configs) => {
         }
     })
 }
+const selectProperty = (configs, zone, propIndex, path) => {
+    // temporary : select the first 2 ones
+    return configs.map(config => {
+        if (config.zone === zone) {
+            let selectedMatch = config.matches.filter(match => match.selected === true)[0]
+            let possibleConfigs = config.matches.map((match, index) => {
+                let score
+                if (match.properties[propIndex].path !== path) {
+                    score = null
+                } else {
+                    let indexProp = 0
+                    score = match.properties.reduce((acc, currentProp) => {
+                        if (currentProp.path === selectedMatch.properties[indexProp].path) {
+                            acc += match.properties.length - indexProp
+                        }
+                        indexProp++
+                        return acc
+                    }, 0)
+                }
+                return {
+                    index,
+                    score
+                }
+            }).filter(match => {
+                return match.score !== null
+            }).sort((a, b) => {
+                return b.score - a.score
+            })
+            // console.log(possibleConfigs)
+            let bestConfigIndex = possibleConfigs[0].index
+            return {
+                ...config,
+                matches: config.matches.map((match, index) => {
+                    return {
+                        ...match,
+                        selected: (index === bestConfigIndex)
+                    }                    
+                })
+            }
+        } else {
+            return config
+        }
+    })
+}
 exports.activateDefaultConfigs = activateDefaultConfigs
+exports.selectProperty = selectProperty
 exports.findAllMatches = findAllMatches
 exports.getConfigs = getConfigs
 exports.getDeviationCost = getDeviationCost

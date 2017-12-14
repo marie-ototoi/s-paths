@@ -24,7 +24,7 @@ const create = (el, props) => {
 }
 
 const assignBehavior = (el, props) => {
-    const { selectElements, axis } = props
+    const { selectElements, selectProperty, axis } = props
     const axisItems = d3.select(el).selectAll('.tick')
         .classed('selectable', d => {
             let data = axis.info.filter(i => `${i.key}` === `${d}`)
@@ -38,15 +38,9 @@ const assignBehavior = (el, props) => {
             }
         })
     const form = d3.select(el).select('select')
-    
     form.on('change', (d, i) => {
-        //console.log(d, i , 'select changed') essayer de recuperer select.value()
-        form.select('option[selected]').each(d => {
-            //console.log(d)
-        })
-    })
-    form.selectAll('option').on('mouseup', (d, i) => {
-        //console.log(d, i , 'select clicked')
+        const newPath = form._groups[0][0].selectedOptions[0].value
+        selectProperty(props.configs, props.zone, props.propIndex, newPath, props.dataset)
     })
 }
 

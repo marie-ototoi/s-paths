@@ -9,17 +9,17 @@ import selections from './selections'
 import undoable from 'redux-undo'
 
 const discoverApp = combineReducers({
-    configs: undoable(configs, {
-        filter: 'undoFilter'
-    }), 
+    configs: undoable(configs, { filter: (action, currentState, previousState) => {
+        return currentState !== previousState // only add to history if state changed 
+    }}),
     data,
-    dataset: undoable(dataset, {
-        filter: 'undoFilter'
-    }), 
+    dataset: undoable(dataset, { filter: (action, currentState, previousState) => {
+        return currentState !== previousState
+    }}),
     display,
     palettes,
-    selections, 
-    views    
+    selections,
+    views
 })
 
 export default discoverApp
