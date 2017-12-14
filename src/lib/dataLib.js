@@ -11,6 +11,13 @@ const getHeadings = (data, zone) => {
         ? data.filter(d => d.zone === zone)[0].statements.head.vars : []
 }
 
+const guid = () => {
+    const s4 = () => {
+        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
+}
+
 const areLoaded = (data, zone) => {
     return data.filter(d => d.zone === zone).length > 0 &&
         data.filter(d => d.zone === zone)[0].statements.results !== undefined &&
@@ -65,3 +72,4 @@ exports.areLoaded = areLoaded
 exports.getHeadings = getHeadings
 exports.getResults = getResults
 exports.groupTimeData = groupTimeData
+exports.guid = guid

@@ -28,7 +28,7 @@ class Timeline extends React.Component {
         // console.log('on init component')
         this.prepareData()
     }
-    componentWillUpdate () {
+    shouldComponentUpdate () {
         // recompute data only if the selected config has changed
         const { configs, allConfigs, previousConfigs, zone } = this.props
         const { savedConfigs } = this.customState
@@ -36,8 +36,12 @@ class Timeline extends React.Component {
         const thisConfig = config.getSelectedConfig(configs, zone)
         const thisSavedConfig = config.getSelectedConfig(savedConfigs, zone)
         if (!deepEqual(thisConfig, thisSavedConfig)) {
+            console.log('changed')
             this.customState = { ...this.customState, savedConfigs: configs }
             this.prepareData()
+            return true
+        } else {
+            return false
         }
     }
     prepareData () {
@@ -97,7 +101,7 @@ class Timeline extends React.Component {
         this.customState = { ...this.customState, dataZone, selectedConfig, nestedProp1, palette, axisBottom }
     }
     render () {
-        // console.log('salut Timeline')
+        console.log('salut Timeline')
         const { dataZone, selectedConfig, nestedProp1, palette, axisBottom } = this.customState
         const { data, display, zone, configs, palettes, getPropPalette } = this.props
         const classN = `Timeline ${this.state.elementName}`
