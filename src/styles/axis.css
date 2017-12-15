@@ -16,3 +16,6 @@
 .Axis .selectable:hover line{
     stroke: #888;
 }
+.Axis .offsetRect {
+    cursor: pointer;
+}

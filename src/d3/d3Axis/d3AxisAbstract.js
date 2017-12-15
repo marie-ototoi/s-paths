@@ -22,26 +22,48 @@ export class d3AxisAbstract {
 
     assignBehaviors (behaviors) {
         var that = this
-        Object.keys(behaviors).map(function (objectItem, index1) {
-            Object.keys(behaviors[objectItem]).map(function (objectKey, index2) {
-                that.assignBehavior(objectItem, objectKey, behaviors[objectItem][objectKey])
-            })
-        })
+        var items = ['key', 'titles']
+        var type = ['mouseover', 'mouseleave', 'click']
+        for (var i = 0; i < items.length; i++) {
+            for (var j = 0; j < type.length; j++) {
+                that.assignBehavior(items[i], type[j], behaviors)
+            }
+        }
         return this
     }
 
     assignBehavior (items, type, fun) {
+        var that = this
         switch (items) {
         case 'key':
-            this.ticks.on(type, fun)
+            if (type === 'mouseover') {
+                this.ticksRect.on(type, function (d) {
+                    console.log(this)
+                    that.mouseoverBehaviors(d3.select(this).select('rect').attr('id'))
+                    fun(items, type, d)
+                })
+            } else if (type === 'mouseleave') {
+                this.ticksRect.on(type, function (d) {
+                    that.mouseleaveBehaviors(d3.select(this).select('rect').attr('id'))
+                    fun(items, type, d)
+                })
+            } else {
+                this.ticksRect.on(type, function (d) {
+                    fun(items, type, d)
+                })
+            }
             break
         default:
         }
         return this
     }
 
-    update () {
-        throw new Error('You have to implement the method update!')
+    mouseoverBehaviors (id) {
+        throw new Error('You have to implement the method mouseover!')
+    }
+
+    mouseleaveBehaviors (id) {
+        throw new Error('You have to implement the method mouseleave!')
     }
 
     destroy () {

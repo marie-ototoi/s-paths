@@ -19,6 +19,7 @@ const create = (el, props) => {
         break
     default:
     }
+    update(el, props)
 }
 
 const update = (el, props) => {

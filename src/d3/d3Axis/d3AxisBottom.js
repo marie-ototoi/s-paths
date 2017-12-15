@@ -44,30 +44,34 @@ export default class d3AxisBottom extends d3AxisAbstract {
         return this
     }
 
+    mouseoverBehaviors (d) {
+        let group = this.el
+        let tab = d.split('-')
+        for (var i = 1; i < tab.length; i++) {
+            group.selectAll('#id-' + tab[i]).style('fill', 'black').style('stroke', 'black')
+            group.select('#idText-' + tab[i]).style('fill', 'black')
+        }
+    }
+
+    mouseleaveBehaviors (d) {
+        let group = this.el
+        let tab = d.split('-')
+        for (var i = 1; i < tab.length; i++) {
+            group.selectAll('#id-' + tab[i]).style('fill', '#666').style('stroke', '#666')
+            group.select('#idText-' + tab[i]).style('fill', '#666')
+        }
+    }
+
     addTickInterval (group, size, visible) {
         group.append('line')
-            .attr('id', d => 'id' + d)
+            .attr('id', (d, i) => 'id-' + i)
             .attr('y1', -10)
             .attr('y2', 10)
             .attr('x1', 0)
             .attr('x2', 0)
             .attr('stroke-width', 1)
-        group.append('rect')
-            .attr('x', 0)
-            .attr('y', 0)
-            .attr('width', size)
-            .attr('height', 40)
-            .attr('fill', 'transparent')
-            .on('mouseover', function (d) {
-                group.selectAll('#id' + d).attr('fill', 'purple').attr('stroke', 'purple')
-                d3.select('#idText' + d).attr('fill', 'purple')
-            })
-            .on('mouseleave', function (d) {
-                group.selectAll('#id' + d).attr('fill', 'black').attr('stroke', '#666')
-                d3.select('#idText' + d).attr('fill', 'black')
-            })
         group.append('text')
-            .attr('id', d => 'idText' + d)
+            .attr('id', (d, i) => 'idText-' + i)
             .text(d => d)
             .attr('font-size', '12px')
             .attr('font-family', 'arial')
@@ -80,17 +84,27 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .style('visibility', visible ? 'visible' : 'hidden')
     }
 
+    addRectInterval (group, size, visible) {
+        group.append('rect')
+            .classed('offsetRect', true)
+            .attr('id', (d, i) => 'id-' + i + '-' + (i + 1))
+            .attr('x', 0)
+            .attr('y', 0)
+            .attr('width', size)
+            .attr('height', 40)
+            .style('fill', 'transparent')
+    }
+
     addTickSimple (group, size, visible) {
         group.append('line')
-            .attr('id', d => 'id' + d)
+            .attr('id', (d, i) => 'id-' + i)
             .attr('y1', -size * 0.5)
             .attr('y2', size * 0.5)
             .attr('x1', 0)
             .attr('x2', 0)
             .attr('stroke-width', 1)
-        group.append('rect')
         group.append('text')
-            .attr('id', d => 'idText' + d)
+            .attr('id', (d, i) => 'idText-' + i)
             .text(d => d)
             .attr('font-size', '12px')
             .attr('font-family', 'arial')
@@ -101,24 +115,17 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .attr('x', 0)
             .style('pointer-events', 'none')
             .style('visibility', visible ? 'visible' : 'hidden')
-            .each(function (d) {
-                if (this.getBBox === undefined) return
-                let bbox = this.getBBox()
-                group.select('rect')
-                    .attr('x', bbox.x)
-                    .attr('y', bbox.y)
-                    .attr('width', bbox.width)
-                    .attr('height', bbox.height)
-                    .attr('fill', 'transparent')
-                    .on('mouseover', function (d) {
-                        group.selectAll('#id' + d).attr('fill', 'purple').attr('stroke', 'purple')
-                        d3.select('#idText' + d).style('visibility', 'visible').attr('fill', 'purple')
-                    })
-                    .on('mouseleave', function (d) {
-                        group.selectAll('#id' + d).attr('fill', 'black').attr('stroke', '#666')
-                        d3.select('#idText' + d).style('visibility', visible ? 'visible' : 'hidden').attr('fill', 'black')
-                    })
-            })
+    }
+
+    addRectSimple (group, size, visible) {
+        group.append('rect')
+            .classed('offsetRect', true)
+            .attr('id', (d, i) => 'id-' + i + '-' + (i + 1))
+            .attr('x', -size / 2)
+            .attr('y', 0)
+            .attr('width', size)
+            .attr('height', 40)
+            .style('fill', 'transparent')
     }
 
     addKeys (labels, mode) {
@@ -134,6 +141,10 @@ export default class d3AxisBottom extends d3AxisAbstract {
         let xScale = d3.scaleBand()
             .range([positions.x1, positions.x2])
             .domain(labels)
+        let tickRect = el.append('g').attr('id', 'ticksRect').selectAll('g')
+            .data(labels)
+            .enter()
+            .append('g')
         let tick = el.append('g').attr('id', 'ticks').selectAll('g')
             .data(labels)
             .enter()
@@ -170,8 +181,11 @@ export default class d3AxisBottom extends d3AxisAbstract {
             let step = (positions.x2 - positions.x1) / (labels.length - 1)
             tick.attr('transform', function (d, i) { return 'translate(' + (xScale(d)) + ',' + positions.y2 + ')' })
             this.addTickInterval(tick, step, true)
+            tickRect.attr('transform', function (d, i) { return 'translate(' + (xScale(d)) + ',' + positions.y2 + ')' })
+            this.addRectInterval(tickRect, step, true)
         }
         this.ticks = tick
+        this.ticksRect = tickRect
         return this
     }
 

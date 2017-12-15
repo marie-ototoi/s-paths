@@ -1,8 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import Main from './Main'
+
 import HeatMap from './views/HeatMap'
 import Timeline from './views/Timeline'
+import Map from './views/Map'
+
 import Aside from './Aside'
 import Debug from './Debug'
 import scale from '../lib/scaleLib'
@@ -43,6 +46,7 @@ class App extends React.Component {
             'HeatMap': HeatMap,
             'Timeline': Timeline
         }
+
         const main = this.getMainConfig()
         const MainComponent = main ? componentIds[main.id] : ''
         const aside = this.getSideConfig()
