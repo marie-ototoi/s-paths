@@ -43,7 +43,7 @@ class App extends React.Component {
         // console.log('configs', configs)
         // console.log('data', data)
         const componentIds = {
-            'HeatMap': HeatMap,
+            'HeatMap': Map,
             'Timeline': Timeline
         }
 

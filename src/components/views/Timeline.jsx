@@ -46,7 +46,7 @@ class Timeline extends React.Component {
     }
     prepareData () {
         const { data, display, zone, configs, palettes, getPropPalette, setLegend } = this.props
-        
+
         // prepare the data for display
         const selectedConfig = config.getSelectedConfig(configs, zone)
         const dataZone = dataLib.getResults(data, zone)
@@ -87,14 +87,13 @@ class Timeline extends React.Component {
         const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(dataZone)
         const prop2 = selectedConfig.selectedMatch.properties[1].path
         const catProp2 = selectedConfig.selectedMatch.properties[1].category
-        // 
         const colors = getPropPalette(palettes, prop2, nestedProp2.length)
         const palette = nestedProp2.map((p, i) => {
             return {
                 key: p.key,
                 color: colors[i],
                 propName: 'prop2',
-                label: p.values[0].labelprop2.value,
+                label: p.values[0].labelprop3.value,
                 category: catProp2
             }
         })
@@ -105,7 +104,7 @@ class Timeline extends React.Component {
         const { dataZone, selectedConfig, nestedProp1, palette, axisBottom } = this.customState
         const { data, display, zone, configs, palettes, getPropPalette } = this.props
         const classN = `Timeline ${this.state.elementName}`
-        // display settings 
+        // display settings
         axisBottom.x = display.zones[zone].x + display.viz.horizontal_margin
         axisBottom.y = display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin
         axisBottom.width = display.viz.useful_width

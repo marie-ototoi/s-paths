@@ -12,23 +12,23 @@ import { getPropPalette } from '../../actions/palettesActions'
 class Map extends React.Component {
     constructor (props) {
         super(props)
-        console.log('mapconstructor')
         this.setLegend = this.setLegend.bind(this)
         this.selectElements = this.selectElements.bind(this)
-        this.legendBehavior = this.legendBehavior.bind(this)
-        this.axisBehavior = this.axisBehavior.bind(this)
-        this.selectElementsAxis = this.selectElementsAxis.bind(this)
+        // this.legendBehavior = this.legendBehavior.bind(this)
+        // this.axisBehavior = this.axisBehavior.bind(this)
+        // this.selectElementsAxis = this.selectElementsAxis.bind(this)
         this.state = {
             setLegend: this.setLegend,
             selectElements: this.selectElements,
-            legendBehavior: this.legendBehavior,
-            axisBehavior: this.axisBehavior,
+            // legendBehavior: this.legendBehavior,
+            // axisBehavior: this.axisBehavior,
             elementName: `Map_${props.zone}`
         }
     }
     componentWillMount () {
 
     }
+
     render () {
         // console.log('salut Timeline')
         const { data, display, zone } = this.props
@@ -51,6 +51,14 @@ class Map extends React.Component {
         select(elements, zone, selections)
     }
     */
+
+    setLegend (legend) {
+        this.setState({ legend })
+    }
+    selectElements (elements) {
+        const { select, zone, selections } = this.props
+        select(elements, zone, selections)
+    }
     componentDidMount () {
         // console.log(this.props.data)
         d3Map.create(this.refs.Map, { ...this.props, ...this.state })
