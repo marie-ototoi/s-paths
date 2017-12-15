@@ -77,7 +77,9 @@ const draw = (el, props) => {
     elementUnits
         .append('line')
         .attr('class', 'selection')
-    const elementIndex = d3.select(el).selectAll('.element')
+
+    // this should go in redraw. + find a way to generate a unique element
+    const elementIndex = d3.select(el).selectAll('.element') 
         .attr('id', (d, i) => `timeline_element_${i}`)
         .each((d, i) => {
             d.color = palette.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
@@ -111,7 +113,7 @@ const redraw = (el, props) => {
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
         })
         .classed('selected', d => d.selected)
-        .attr('opacity', d => (selections.length > 0.7 && d.selected !== true) ? 0.3 : 0.8)
+        .attr('opacity', d => (selections.length > 0.7 && d.selected !== true) ? 0.2 : 1)
 }
 
 const resize = (el, props) => {

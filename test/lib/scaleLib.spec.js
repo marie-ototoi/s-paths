@@ -5,23 +5,23 @@ chai.use(sinonChai)
 import scale from '../../src/lib/scaleLib'
 
 const displayDef = {
-    dev: { x: 0, y: 0, width: 100, height: 100},
-    full: { x: 35, y: 35, width: 40, height: 40},
-    main: { x: 35, y: 35, width: 30, height: 30},
-    aside: { x: 70, y: 35, width: 30, height: 30}
+    dev: { x: 0, y: 0, width: 100, height: 100 },
+    full: { x: 35, y: 35, width: 40, height: 40 },
+    main: { x: 35, y: 35, width: 30, height: 30 },
+    aside: { x: 70, y: 35, width: 30, height: 30 }
 }
 const gridDef = {
-    xPoints : [0, 30, 35, 65, 70, 85, 100],
-    yPoints : [0, 30, 35, 65, 70, 85, 100]
+    xPoints: [0, 30, 35, 65, 70, 85, 100],
+    yPoints: [0, 30, 35, 65, 70, 85, 100]
 }
 const screens = [
-    { width: 1400, height : 700 },
-    { width: 1500, height : 650 }
+    { width: 1400, height: 700 },
+    { width: 1500, height: 650 }
 ]
 const stages = [
-    { width: 4666, height : 2333 },
-    { width: 1400, height : 700 },
-    { width: 3500, height : 1750 }
+    { width: 4666, height: 2333 },
+    { width: 1400, height: 700 },
+    { width: 3500, height: 1750 }
 ]
 
 describe('lib/scale', () => {

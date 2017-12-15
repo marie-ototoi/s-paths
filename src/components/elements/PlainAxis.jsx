@@ -2,6 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import d3PlainLegend from '../../d3/d3Axis/d3Axis'
 import { select } from '../../actions/selectionActions'
+import { selectProperty } from '../../actions/dataActions'
 import d3PlainAxis from '../../d3/d3PlainAxis'
 
 class PlainAxis extends React.Component {
@@ -13,20 +14,21 @@ class PlainAxis extends React.Component {
     }
 
     render () {
+        const { x, y } = this.props.axis
         return (<g className = "Axis"
-            transform = { `translate(${this.props.x}, ${this.props.y})` }
+            transform = { `translate(${x}, ${y})` }
             ref = { this.state.elementName }
         >
         </g>)
     }
     componentDidMount () {
-        d3PlainAxis.create(this.refs[this.state.ref], { ...this.props, ...this.state })
+        d3PlainAxis.create(this.refs[this.state.elementName], { ...this.props, ...this.state })
     }
     componentDidUpdate () {
-        d3PlainAxis.update(this.refs[this.state.ref], { ...this.props, ...this.state })
+        d3PlainAxis.update(this.refs[this.state.elementName], { ...this.props, ...this.state })
     }
     componentWillUnmount () {
-        d3PlainAxis.destroy(this.refs[this.state.ref], { ...this.props, ...this.state })
+        d3PlainAxis.destroy(this.refs[this.state.elementName], { ...this.props, ...this.state })
     }
 }
 
@@ -34,13 +36,16 @@ function mapStateToProps (state) {
     return {
         display: state.display,
         data: state.data,
-        selections: state.selections
+        selections: state.selections,
+        configs: state.configs.present,
+        dataset: state.dataset.present
     }
 }
 
 function mapDispatchToProps (dispatch) {
     return {
-        select: select(dispatch)
+        select: select(dispatch),
+        selectProperty: selectProperty(dispatch)
     }
 }
 

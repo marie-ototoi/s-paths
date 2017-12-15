@@ -31,6 +31,33 @@ const receiveStats = (dispatch) => (stats) => {
     })
 }
 
+const selectProperty = (dispatch) => (configs, zone, propIndex, path, dataset) => {
+    console.log('|||||||||||', config.selectProperty(configs, zone, propIndex, path))
+    const { endpoint, entrypoint, prefixes } = dataset
+    dispatch({
+        type: types.SET_CONFIGS,
+        configs: config.selectProperty(configs, zone, propIndex, path)
+    })
+    const newConfig = config.getSelectedConfig(configs, zone)
+    const newQuery = queryLib.makeQuery(entrypoint, newConfig)
+    queryLib.getData(endpoint, newQuery, prefixes)
+        .then((newData) => {
+            dispatch({
+                type: types.SET_DATA,
+                statements: {
+                    ...newData,
+                    results: {
+                        bindings: newData.results.bindings
+                    }
+                },
+                zone
+            })
+        })
+        .catch(error => {
+            console.error('Error getting data after property update', error)
+        })
+}
+
 const setEntrypoint = (dispatch) => (endpoint, entrypoint, constraints = '') => {
     return dispatch({
         type: types.SET_ENTRYPOINT,
@@ -41,7 +68,7 @@ const setEntrypoint = (dispatch) => (endpoint, entrypoint, constraints = '') => 
 }
 
 const loadData = (dispatch) => (dataset, views) => {
-    const {endpoint, entrypoint, prefixes} = dataset
+    const { endpoint, entrypoint, prefixes } = dataset
     getStats(dataset)
         .then(stats => {
             dispatch({
@@ -75,7 +102,7 @@ const loadData = (dispatch) => (dataset, views) => {
                         statements: {
                             ...dataMain,
                             results: {
-                                bindings: dataMain.results.bindings /* .sort((a, b) => a.prop1.value - b.prop1.value) */
+                                bindings: dataMain.results.bindings
                             }
                         },
                         zone: 'main'
@@ -85,7 +112,7 @@ const loadData = (dispatch) => (dataset, views) => {
                         statements: {
                             ...dataAside,
                             results: {
-                                bindings: dataAside.results.bindings /* .sort((a, b) => a.prop1.value - b.prop1.value) */
+                                bindings: dataAside.results.bindings
                             }
                         },
                         zone: 'aside'
@@ -100,4 +127,5 @@ const loadData = (dispatch) => (dataset, views) => {
 exports.init = init
 exports.loadData = loadData
 exports.receiveStats = receiveStats
+exports.selectProperty = selectProperty
 exports.setEntrypoint = setEntrypoint

@@ -54,27 +54,25 @@ WHERE {
     })
     it('should make a valid SPARQL to get stats for a prop', () => {
         expect(queryLib.makePropsQuery('nobel:LaureateAward', '', 1))
-            .to.equal(`SELECT DISTINCT ?property ?datatype ?language ?type ?isiri ?isliteral WHERE {
+            .to.equal(`SELECT DISTINCT ?property ?datatype ?language ?isiri ?isliteral WHERE {
         ?subject rdf:type nobel:LaureateAward . 
         ?subject ?property ?object .
-        OPTIONAL { ?object rdf:type ?type } .
         OPTIONAL { ?property rdfs:label ?propertylabel } .
         BIND(DATATYPE(?object) AS ?datatype) .
         BIND(ISIRI(?object) AS ?isiri) .
         BIND(ISLITERAL(?object) AS ?isliteral) .
         BIND(LANG(?object) AS ?language) .
-    } GROUP BY ?property ?datatype ?language ?type ?isiri ?isliteral`)
+    } GROUP BY ?property ?datatype ?language ?isiri ?isliteral`)
         expect(queryLib.makePropsQuery('nobel:LaureateAward/nobel:university/*', '', 2, 'http://localhost:8890/nobel'))
-            .to.equal(`SELECT DISTINCT ?property ?datatype ?language ?type ?isiri ?isliteral FROM <http://localhost:8890/nobel> WHERE {
+            .to.equal(`SELECT DISTINCT ?property ?datatype ?language ?isiri ?isliteral FROM <http://localhost:8890/nobel> WHERE {
         ?subject rdf:type nobel:LaureateAward . ?subject nobel:university ?interobject . OPTIONAL { ?interobject rdfs:label ?labelinterobject } . 
         ?interobject ?property ?object .
-        OPTIONAL { ?object rdf:type ?type } .
         OPTIONAL { ?property rdfs:label ?propertylabel } .
         BIND(DATATYPE(?object) AS ?datatype) .
         BIND(ISIRI(?object) AS ?isiri) .
         BIND(ISLITERAL(?object) AS ?isliteral) .
         BIND(LANG(?object) AS ?language) .
-    } GROUP BY ?property ?datatype ?language ?type ?isiri ?isliteral`)
+    } GROUP BY ?property ?datatype ?language ?isiri ?isliteral`)
     })
     it('should affect a prop to the right group', () => {
         const options = {

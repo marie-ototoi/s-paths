@@ -1,5 +1,5 @@
-.Timeline :hover {
-    opacity: 1;
+.Timeline .element:hover {
+    opacity: 0.8;
 }
 .Timeline .element {
     cursor:pointer;
