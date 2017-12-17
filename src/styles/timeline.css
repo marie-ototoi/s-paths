@@ -1,6 +1,6 @@
-.Timeline .element:hover {
+.Timeline .elements:hover {
     opacity: 0.8;
 }
-.Timeline .element {
+.Timeline .elements {
     cursor:pointer;
 }

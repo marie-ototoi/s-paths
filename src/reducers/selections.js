@@ -44,6 +44,10 @@ const selections = (state = defaultState, action) => {
         return state.filter(sel => {
             return !(elements2Remove.includes(sel.selector) && sel.zone === action.zone)
         })
+    case 'RESET_SELECTION':
+        return state.filter(sel => {
+            return !(sel.zone === action.zone)
+        })
     default:
         return state
     }

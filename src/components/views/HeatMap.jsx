@@ -27,12 +27,10 @@ class HeatMap extends React.Component {
 
     componentWillMount () {
         const { data, zone } = this.props
-        if (!dataLib.areLoaded(data, zone)) return
-
         const { configs } = this.props
         const selectedConfig = config.getSelectedConfig(configs, zone)
-        const dataZone = dataLib.getResults(data, zone)
-        const dataStat = statisticalOperator.computeStatisticalInformation(dataZone, selectedConfig)
+        
+        const dataStat = statisticalOperator.computeStatisticalInformation(data, selectedConfig)
         const paletteObj = []
         let nbColor = dataStat.max - dataStat.min + 1
         const colors = getQuantitativeColors(nbColor)
@@ -72,16 +70,19 @@ class HeatMap extends React.Component {
                 axisbehavior[item][fun] = axisbehavior[item][fun].bind(this, this.state.selectElements)
             }
         }
+        console.log( this.state.legend )
         let heatMapLegendBehavior = d3HeatMap.heatMapLegendBehavior()
         return (
             <g className = "HeatMap { this.props.zone }" ref = "HeatMap" transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` } >
                 { this.state.legend &&
                     <Legend
                         type = "plain"
-                        x = { 0 }
-                        y = { display.viz.useful_height + display.viz.vertical_margin }
-                        width = { display.viz.horizontal_margin }
-                        height = { display.viz.vertical_margin }
+                        dimensions = { {
+                            x: 0,
+                            y: display.viz.useful_height + display.viz.vertical_margin,
+                            width: display.viz.horizontal_margin,
+                            height: display.viz.vertical_margin
+                        } }                      
                         info = { this.state.legend }
                         zone = { zone }
                         selectElements = { selectElementsLegend }
@@ -146,17 +147,12 @@ class HeatMap extends React.Component {
 function mapStateToProps (state) {
     return {
         display: state.display,
-        data: state.data,
-        configs: state.configs.present,
-        selections: state.selections,
         palettes: state.palettes
     }
 }
 
 function mapDispatchToProps (dispatch) {
     return {
-        addSelection: addSelection(dispatch),
-        removeSelection: removeSelection(dispatch),
         getPropPalette: getPropPalette(dispatch),
         select: select(dispatch)
     }

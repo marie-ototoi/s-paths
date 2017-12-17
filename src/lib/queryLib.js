@@ -109,7 +109,7 @@ const makeQuery = (entrypoint, config, defaultGraph) => {
     let groupList = (config.entrypoint === undefined) ? `` : `?entrypoint `
     let defList = ``
     let orderList = ``
-    config.selectedMatch.properties.forEach((prop, index) => {
+    config.properties.forEach((prop, index) => {
         index += 1
         propList = propList.concat(`?prop${index} ?labelprop${index} `)
         orderList = orderList.concat(`?prop${index} `)

@@ -1,4 +1,6 @@
 export const INIT = 'INIT'
+export const RESET_SELECTION = 'RESET_SELECTION'
+export const SET_CONFIG = 'SET_CONFIG'
 export const SET_CONFIGS = 'SET_CONFIGS'
 export const SET_DATA = 'SET_DATA'
 export const SET_DISPLAY = 'SET_DISPLAY'

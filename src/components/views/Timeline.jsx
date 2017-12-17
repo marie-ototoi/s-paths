@@ -1,142 +1,103 @@
 import React from 'react'
-import deepEqual from 'deep-equal'
+import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 import * as d3 from 'd3'
 import d3Timeline from '../../d3/d3Timeline'
-import PlainAxis from '../elements/PlainAxis'
 import Legend from '../elements/Legend'
+import PlainAxis from '../elements/PlainAxis'
+import PropSelector from '../elements/PropSelector'
 import config from '../../lib/configLib'
 import dataLib from '../../lib/dataLib'
 import selectionLib from '../../lib/selectionLib'
+import scaleLib from '../../lib/scaleLib'
 import { getPropPalette } from '../../actions/palettesActions'
 import { select } from '../../actions/selectionActions'
 
-class Timeline extends React.Component {
+class Timeline extends React.PureComponent {
     constructor (props) {
         super(props)
-        this.setAxis = this.setAxis.bind(this)
+        this.selectElement = this.selectElement.bind(this)
         this.selectElements = this.selectElements.bind(this)
-        this.state = {
-            setAxis: this.setAxis,
-            selectElements: this.selectElements,
-            elementName: `Timeline_${props.zone}`
+        this.customState = {
+            elementName: `Timeline_${props.zone}`,
+            savedData: props.data,
+            selectElement: this.selectElement,
+            selectElements: this.selectElements
         }
-        this.customState = {}
     }
     componentWillMount () {
-        this.customState = { ...this.customState, savedConfigs: this.props.configs }
-        // console.log('on init component')
-        this.prepareData()
+        this.prepareData(this.props)
     }
-    shouldComponentUpdate () {
-        // recompute data only if the selected config has changed
-        const { configs, allConfigs, previousConfigs, zone } = this.props
-        const { savedConfigs } = this.customState
-        if (!savedConfigs || savedConfigs[0].length === 0) return
-        const thisConfig = config.getSelectedConfig(configs, zone)
-        const thisSavedConfig = config.getSelectedConfig(savedConfigs, zone)
-        if (!deepEqual(thisConfig, thisSavedConfig)) {
-            console.log('changed')
-            this.customState = { ...this.customState, savedConfigs: configs }
-            this.prepareData()
-            return true
-        } else {
-            return false
+    componentWillUpdate (nextProps, nextState) {
+        if (!shallowEqual(this.props.data, nextProps.data)) {
+            this.prepareData(nextProps)
         }
     }
-    prepareData () {
-        const { data, display, zone, configs, palettes, getPropPalette, setLegend } = this.props
-        
+    shouldComponentUpdate (nextProps, nextState) {
+        return !shallowEqual(this.props, nextProps)
+    }
+    prepareData (nextProps) {
+        const { data, configs, palettes, getPropPalette } = nextProps
         // prepare the data for display
-        const selectedConfig = config.getSelectedConfig(configs, zone)
-        const dataZone = dataLib.getResults(data, zone)
-        const nestedProp1 = dataLib.groupTimeData(dataZone, 'prop1', selectedConfig.selectedMatch.properties[0].format || 'YYYY-MM-DD', 100)
-        const axisBottom = {
-            info: nestedProp1.map(p => {
-                let values
-                const catProp1 = selectedConfig.selectedMatch.properties[0].category
-                if (catProp1 === 'datetime') {
-                    values = [d3.min(p.values, d => Number(d.year)), d3.max(p.values, d => Number(d.year))]
-                } else if (catProp1 === 'text' || catProp1 === 'uri') {
-                    values = p.key
-                } else if (catProp1 === 'number') {
-                    values = [d3.min(p.values, d => Number(d.prop1.value)), d3.max(p.values, d => Number(d.prop1.value))]
-                }
-                return {
-                    key: p.key,
-                    propName: 'prop1',
-                    values,
-                    category: catProp1
-                }
-            }),
-            category: selectedConfig.selectedMatch.properties[0].category,
-            configs: selectedConfig.matches.map(config => {
-                return {
-                    path: config.properties[0].path,
-                    selected: config.selected
-                }
-            }).reduce((configAcc, config) => {
-                const exists = configAcc.filter(c => c.path === config.path).length > 0
-                if (!exists) {
-                    configAcc.push(config)
-                }
-                return configAcc
-            }, [])
-        }
-        //
-        const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(dataZone)
-        const prop2 = selectedConfig.selectedMatch.properties[1].path
-        const catProp2 = selectedConfig.selectedMatch.properties[1].category
-        // 
-        const colors = getPropPalette(palettes, prop2, nestedProp2.length)
-        const palette = nestedProp2.map((p, i) => {
-            return {
-                key: p.key,
-                color: colors[i],
-                propName: 'prop2',
-                label: p.values[0].labelprop2.value,
-                category: catProp2
-            }
-        })
-        this.customState = { ...this.customState, dataZone, selectedConfig, nestedProp1, palette, axisBottom }
+        const selectedConfig = config.getSelectedConfig(configs)
+        // First prop to be displayed in the bottom axis
+        const categoryProp1 = selectedConfig.properties[0].category
+        const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format
+        const nestedProp1 = dataLib.groupTimeData(data, 'prop1', formatProp1, 100)
+        const axisBottom = dataLib.getAxis(nestedProp1, 'prop1', categoryProp1)
+        const listProp1 = dataLib.getPropList(configs, 0)
+        // Second prop to be displayed in the legend
+        const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data)
+        const pathProp2 = selectedConfig.properties[1].path
+        const categoryProp2 = selectedConfig.properties[1].category
+        const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
+        const legend = dataLib.getLegend(nestedProp2, colors, categoryProp2)
+        const listProp2 = dataLib.getPropList(configs, 1)
+        // Save to reuse in render
+        this.customState = { ...this.customState, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2 }
     }
     render () {
-        console.log('salut Timeline')
-        const { dataZone, selectedConfig, nestedProp1, palette, axisBottom } = this.customState
-        const { data, display, zone, configs, palettes, getPropPalette } = this.props
-        const classN = `Timeline ${this.state.elementName}`
-        // display settings 
-        axisBottom.x = display.zones[zone].x + display.viz.horizontal_margin
-        axisBottom.y = display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin
-        axisBottom.width = display.viz.useful_width
-        axisBottom.height = display.viz.vertical_margin
-
+        const { axisBottom, legend, listProp1, listProp2 } = this.customState
+        const { data, configs, display, zone } = this.props
+        // display settings
+        const classN = `Timeline ${this.customState.elementName}`
         return (<g className = { classN } >
             <g
                 transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
                 ref = "Timeline">
             </g>
             <Legend
-                x = { display.zones[zone].x }
-                y = { display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin }
                 type = "plain"
                 zone = { zone }
-                width = { display.viz.horizontal_margin }
-                height = { display.viz.vertical_margin }
-                info = { palette }
+                dimensions = { scaleLib.getDimensions('legend', display.zones[zone], display.viz, { x: 10, y: 22, width: -20, height: -30 }) }
+                legend = { legend }
                 selectElements = { this.selectElements }
             />
             <PlainAxis
                 type = "Bottom"
                 zone = { zone }
                 axis = { axisBottom }
+                dimensions = { scaleLib.getDimensions('axisBottom', display.zones[zone], display.viz) }
                 propIndex = { 0 }
                 selectElements = { this.selectElements }
             />
+            <PropSelector
+                propList = { listProp2 }
+                configs = { configs }
+                dimensions = { scaleLib.getDimensions('propSelectorLegend', display.zones[zone], display.viz, { x: 10, y: - 5, width: -80, height: 0 }) }
+                selectElements = { this.selectElements }
+                propIndex = { 1 }
+                zone = { zone }
+            />
+            <PropSelector
+                propList = { listProp1 }
+                configs = { configs }
+                dimensions = { scaleLib.getDimensions('propSelectorAxisBottom', display.zones[zone], display.viz, { x: 20, y: - 20, width: -40, height: 0 }) }
+                selectElements = { this.selectElements }
+                propIndex = { 0 }
+                zone = { zone }
+            />
         </g>)
-    }
-    setAxis (axis) {
-        this.setState({ axis })
     }
     selectElements (prop, value, category) {
         const elements = d3Timeline.getElements(this.refs.Timeline, prop, value, category)
@@ -144,12 +105,16 @@ class Timeline extends React.Component {
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }
+    selectElement (selection) {
+        const { select, zone, selections } = this.props
+        select([selection], zone, selections)
+    }
     componentDidMount () {
         // console.log(this.props.data)
         d3Timeline.create(this.refs.Timeline, { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        // console.log('update')
+        // console.log('update', this.props.selections)
         d3Timeline.update(this.refs.Timeline, { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
@@ -160,12 +125,7 @@ class Timeline extends React.Component {
 function mapStateToProps (state) {
     return {
         display: state.display,
-        data: state.data,
-        configs: state.configs.present,
-        previousConfigs: state.configs.past[state.configs.past.length - 1],
-        allConfigs: state.configs,
-        palettes: state.palettes,
-        selections: state.selections
+        palettes: state.palettes
     }
 }
 

@@ -1,20 +1,13 @@
 import * as d3 from 'd3'
-// import color from '../lib/paletteLib'
-import config from '../lib/configLib'
-import data from '../lib/dataLib'
+import d3Drag from 'd3-drag'
+import dataLib from '../lib/dataLib'
 import selectionLib from '../lib/selectionLib'
-import { addSelection, removeSelection } from '../actions/selectionActions'
-import { isString } from 'util'
 
 const create = (el, props) => {
-    // console.log('create', config.getSelectedConfig(props.configs, props.zone))
-    if (el && data.areLoaded(props.data, props.zone)) {
-        const { configs, palette, zone, getPropPalette, setLegend } = props
-
+    // console.log('create')
+    if (el && props.data) {
         draw(el, props)
-        redraw(el, props)
         resize(el, props)
-        assignBehavior(el, props)
     }
 }
 
@@ -46,7 +39,7 @@ const getElements = (el, propName, value, propCategory) => {
 const update = (el, props) => {
     //
     if (el && props.data) {
-        redraw(el, props)
+        draw(el, props)
         resize(el, props)
     }
 }
@@ -56,89 +49,88 @@ const destroy = (el) => {
 }
 
 const draw = (el, props) => {
-    const { nestedProp1, palette, selectedConfig } = props
+    const { nestedProp1, legend, selectedConfig, selectElement, selections, zone } = props
     // console.log(nestedProp1)
     const timeUnits = d3.select(el)
         .selectAll('g.time')
         .data(nestedProp1)
+    timeUnits
         .enter()
         .append('g')
         .attr('class', 'time')
-    const elementUnits = timeUnits.selectAll('line')
+    timeUnits
+        .exit()
+        .remove()
+    const elementUnits = d3.select(el).selectAll('g.time').selectAll('g.elements')
         .data(d => d.values)
+    elementUnits
         .enter()
         .append('g')
         .attr('class', 'elements')
-    elementUnits
-        .append('line')
+        .append('rect')
         .attr('class', 'element')
-        .attr('stroke', d => d.color)
-        // console.log(selectedConfig)
     elementUnits
-        .append('line')
-        .attr('class', 'selection')
+        .exit()
+        .remove()
 
-    // this should go in redraw. + find a way to generate a unique element
-    const elementIndex = d3.select(el).selectAll('.element') 
-        .attr('id', (d, i) => `timeline_element_${i}`)
+    d3.select(el)
+        .selectAll('g.time g.elements')
         .each((d, i) => {
-            d.color = palette.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
+            // console.log(d, d.selection)
+            d.id = d.id || `timeline_element_${dataLib.guid()}`
+            d.color = legend.info.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
             d.selection = {
-                selector: `timeline_element_${i}`,
+                selector: d.id,
                 props: [
-                    { path: selectedConfig.selectedMatch.properties[0].path, value: d.prop1 },
-                    { path: selectedConfig.selectedMatch.properties[1].path, value: d.prop2 },
-                    { path: selectedConfig.selectedMatch.properties[2].path, value: d.prop3 }
+                    { path: selectedConfig.properties[0].path, value: d.prop1 },
+                    { path: selectedConfig.properties[1].path, value: d.prop2 },
+                    { path: selectedConfig.properties[2].path, value: d.prop3 }
                 ]
             }
-        })
-    elementUnits
-        .attr('stroke', d => d.color)
-}
-
-const assignBehavior = (el, props) => {
-    const { selectElements } = props
-    const elementIndex = d3.select(el).selectAll('.elements')
-        .on('click', (d, i) => {
-            selectElements([d.selection])
-        })
-}
-
-const redraw = (el, props) => {
-    // changes when component is rerendered
-    const { selections, zone, selectElements } = props
-    const elementIndex = d3.select(el).selectAll('.elements')
-        .each((d, i) => {
-            // console.log(d.selection)
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
         })
+        .attr('id', d => d.id)
         .classed('selected', d => d.selected)
-        .attr('opacity', d => (selections.length > 0.7 && d.selected !== true) ? 0.2 : 1)
+        .attr('opacity', d => (selections.length > 0 && d.selected !== true) ? 0.4 : 1)
+        .attr('fill', d => d.color)
+        .on('click', d => {
+            selectElement(d.selection)
+        })
+        /*
+        .on('mouseenter', (d) => {
+            selectElement(d.selection)
+        }) */        
 }
 
 const resize = (el, props) => {
-    const { dataZone, nestedProp1, display } = props
+    const { nestedProp1, display } = props
     const xScale = d3.scaleLinear()
         .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
         .range([0, display.viz.useful_width])
     let maxUnitsPerYear = 1
-    const timeUnits = d3.select(el)
+    d3.select(el)
         .selectAll('g.time')
         .attr('transform', d => `translate(${xScale(Number(d.key))}, 0)`)
         .each(d => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
-    const elementUnits = timeUnits.selectAll('.elements')
+    const unitWidth = nestedProp1.reduce((acc, current) => {
+        if (acc.prev) {
+            let dif = xScale(Number(current.key)) - xScale(Number(acc.prev.key))
+            if (!acc.dif || dif < acc.dif) acc.dif = dif            
+        }
+        acc.prev = current
+        return acc
+    }, {}).dif
     const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
-    const unitWidth = Math.floor(display.viz.useful_width / timeUnits.size()) - 2
-    elementUnits
+    d3.select(el).selectAll('g.time').selectAll('.elements')
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
-    const elements = elementUnits.selectAll('.element')
-        .attr('x1', Math.ceil(unitWidth / 2))
-        .attr('x2', Math.ceil(unitWidth / 2))
-        .attr('y1', 0)
-        .attr('y2', -unitHeight + 1)
-        .attr('stroke-width', unitWidth - 1)
+    d3.select(el).selectAll('g.time').selectAll('.element')
+        .attr('x', 0)
+        .attr('width', unitWidth - 2)
+        .attr('y', -unitHeight)
+        .attr('height', unitHeight - 1)
+        // .attr('stroke-width', )
 }
 
 exports.create = create

@@ -5,18 +5,6 @@ const initialState = [
         properties: [],
         colors: ['#00441b', '#006d2c', '#238b45', '#41ae76', '#66c2a4', '#99d8c9', '#ccece6', '#e5f5f9']
     },
-    { 
-        properties: [],
-        colors: ['#4d004b', '#810f7c', '#88419d', '#8c6bb1', '#8c96c6', '#9ebcda', '#bfd3e6', '#e0ecf4']
-    },
-    {
-        properties: [],
-        colors: ['#084081', '#0868ac', '#2b8cbe', '#4eb3d3', '#7bccc4', '#a8ddb5', '#ccebc5', '#e0f3db']
-    },
-    {
-        properties: [],
-        colors: ['#7f0000', '#b30000', '#d7301f', '#ef6548', '#fc8d59', '#fdbb84', '#fdd49e', '#fee8c8']
-    },
     {
         properties: [],
         colors: ['#023858', '#045a8d', '#0570b0', '#3690c0', '#74a9cf', '#a6bddb', '#d0d1e6', '#ece7f2']
@@ -28,6 +16,18 @@ const initialState = [
     {
         properties: [],
         colors: ['#67001f', '#980043', '#ce1256', '#e7298a', '#df65b0', '#c994c7', '#d4b9da', '#e7e1ef']
+    },
+    {
+        properties: [],
+        colors: ['#4d004b', '#810f7c', '#88419d', '#8c6bb1', '#8c96c6', '#9ebcda', '#bfd3e6', '#e0ecf4']
+    },
+    {
+        properties: [],
+        colors: ['#084081', '#0868ac', '#2b8cbe', '#4eb3d3', '#7bccc4', '#a8ddb5', '#ccebc5', '#e0f3db']
+    },
+    {
+        properties: [],
+        colors: ['#7f0000', '#b30000', '#d7301f', '#ef6548', '#fc8d59', '#fdbb84', '#fdd49e', '#fee8c8']
     },
     {
         properties: [],

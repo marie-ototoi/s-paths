@@ -39,6 +39,19 @@ const configs = (state = [], action) => {
                 })
             }
         })
+    case types.SET_CONFIG:
+        return state.map(c => {
+            if (c.zone === action.zone) {
+                return {
+                    ...action.config,
+                    matches: action.config.matches.sort((a, b) => {
+                        return b.score - a.score
+                    })
+                }
+            } else {
+                return c
+            }
+        })
     default:
         return state
     }

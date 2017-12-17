@@ -2,8 +2,8 @@ import fetch from 'node-fetch'
 import rp from 'request-promise'
 import * as types from '../constants/ActionTypes'
 import stats from '../../test/data/nobel'
-import config from '../lib/configLib'
-import data from '../lib/dataLib'
+import configLib from '../lib/configLib'
+import dataLib from '../lib/dataLib'
 import queryLib from '../lib/queryLib'
 
 const getStats = (options) => {
@@ -31,17 +31,20 @@ const receiveStats = (dispatch) => (stats) => {
     })
 }
 
-const selectProperty = (dispatch) => (configs, zone, propIndex, path, dataset) => {
-    console.log('|||||||||||', config.selectProperty(configs, zone, propIndex, path))
+const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) => {
     const { endpoint, entrypoint, prefixes } = dataset
+    const updatedConfig = configLib.selectProperty(config, propIndex, path)
     dispatch({
-        type: types.SET_CONFIGS,
-        configs: config.selectProperty(configs, zone, propIndex, path)
+        type: types.SET_CONFIG,
+        config: updatedConfig,
+        zone
     })
-    const newConfig = config.getSelectedConfig(configs, zone)
+    const newConfig = configLib.getSelectedConfig(updatedConfig)
     const newQuery = queryLib.makeQuery(entrypoint, newConfig)
+    // console.log('new data', newQuery)
     queryLib.getData(endpoint, newQuery, prefixes)
         .then((newData) => {
+            // console.log('new data', newData)
             dispatch({
                 type: types.SET_DATA,
                 statements: {
@@ -50,6 +53,10 @@ const selectProperty = (dispatch) => (configs, zone, propIndex, path, dataset) =
                         bindings: newData.results.bindings
                     }
                 },
+                zone
+            })
+            dispatch({
+                type: types.RESET_SELECTION,
                 zone
             })
         })
@@ -76,7 +83,7 @@ const loadData = (dispatch) => (dataset, views) => {
                 stats
             })
             // for each views, checks which properties ou sets of properties could match and evaluate
-            let configs = config.activateDefaultConfigs(config.getConfigs(views, stats))
+            let configs = configLib.activateDefaultConfigs(configLib.defineConfigs(views, stats))
             dispatch({
                 type: types.SET_CONFIGS,
                 configs
@@ -84,9 +91,9 @@ const loadData = (dispatch) => (dataset, views) => {
             return new Promise((resolve) => resolve(configs))
         })
         .then(configs => {
-            const configMain = config.getSelectedConfig(configs, 'main')
+            const configMain = configLib.getSelectedConfig(configLib.getConfigs(configs, 'main'))
             const queryMain = queryLib.makeQuery(entrypoint, configMain)
-            const configAside = config.getSelectedConfig(configs, 'aside')
+            const configAside = configLib.getSelectedConfig(configLib.getConfigs(configs, 'aside'))
             const queryAside = queryLib.makeQuery(entrypoint, configAside)
             /* return Promise.all([
                 new Promise((resolve) => resolve(stats.load('Timeline'))),

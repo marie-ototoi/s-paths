@@ -1,16 +1,20 @@
 import React from 'react'
+import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 import d3PlainLegend from '../../d3/d3PlainLegend'
 import { select } from '../../actions/selectionActions'
 
-class Legend extends React.Component {
+class Legend extends React.PureComponent {
     render () {
-        const { zone } = this.props
+        const { zone, dimensions } = this.props
         return (<g className = "Legend"
-            transform = { `translate(${this.props.x}, ${this.props.y})` }
+            transform = { `translate(${dimensions.x}, ${dimensions.y})` }
             ref = { `legend_${zone}` }
         >
         </g>)
+    }
+    shouldComponentUpdate (nextProps, nextState) {
+        return !shallowEqual(this.props, nextProps)
     }
     componentDidMount () {
         const { zone, type } = this.props
@@ -19,6 +23,7 @@ class Legend extends React.Component {
         }
     }
     componentDidUpdate () {
+        // console.log('upd')
         const { zone, type } = this.props
         if (type === 'plain') {
             d3PlainLegend.update(this.refs[`legend_${zone}`], this.props)
@@ -35,7 +40,6 @@ class Legend extends React.Component {
 function mapStateToProps (state) {
     return {
         display: state.display,
-        data: state.data,
         selections: state.selections
     }
 }

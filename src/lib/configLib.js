@@ -1,9 +1,8 @@
-const getSelectedConfig = (configs, zone) => {
-    let config = configs.filter(c => c.zone === zone)[0]
-    return {
-        ...config,
-        selectedMatch: config.matches.filter(m => m.selected === true)[0]
-    } || {}
+const getSelectedConfig = (configs) => {
+    return configs.matches.filter(m => m.selected === true)[0]
+}
+const getConfigs = (configs, zone) => {
+    return configs.filter(c => c.zone === zone)[0]
 }
 const getViewDef = (views, id) => {
     // console.log(views, id)
@@ -32,7 +31,7 @@ const getCost = (val, min, max, optimal, score) => {
         return deviationCost * (optimal[0] - val)
     } else if (overRange(val, optimal) && max) {
         return deviationCost * (val - optimal[1])
-    } 
+    }
     return score / 2
 }
 const scoreProp = (prop, constraint) => {
@@ -60,15 +59,17 @@ const scoreProp = (prop, constraint) => {
     cost += prop.level * 0.3
     let score = maxscore - cost
     // modulates score according to the coverage of the dataset by this prop
-    score *= prop.coverage / 100
+    score *= prop.coverage / 10
     return (score > 0) ? score : 0
 }
 const scoreMatch = (match) => {
     match = match.filter(m => m.score >= 0)
     // mean of each property's score
     let score = match.map(m => m.score).reduce((a, b) => a + b , 0) / match.length
+    let coverage = match.map(m => m.coverage).reduce((a, b) => a + b , 0) / match.length
     // bonus for each property represented
     score += 0.3 * match.length
+    score *= coverage / 10
     // domain rules to add values for some properties : TO DO 
     return score
 }
@@ -86,7 +87,7 @@ const findAllMatches = (inputList, addList) => {
         return a.concat(b)
     }, [])
 }
-const getConfigs = (views, stats) => {
+const defineConfigs = (views, stats) => {
     return views.map(view => {
         let propList = []
         // make a list of all possible properties for each constrained prop zone
@@ -204,53 +205,46 @@ const activateDefaultConfigs = (configs) => {
         }
     })
 }
-const selectProperty = (configs, zone, propIndex, path) => {
-    // temporary : select the first 2 ones
-    return configs.map(config => {
-        if (config.zone === zone) {
-            let selectedMatch = config.matches.filter(match => match.selected === true)[0]
-            let possibleConfigs = config.matches.map((match, index) => {
-                let score
-                if (match.properties[propIndex].path !== path) {
-                    score = null
-                } else {
-                    let indexProp = 0
-                    score = match.properties.reduce((acc, currentProp) => {
-                        if (currentProp.path === selectedMatch.properties[indexProp].path) {
-                            acc += match.properties.length - indexProp
-                        }
-                        indexProp++
-                        return acc
-                    }, 0)
-                }
-                return {
-                    index,
-                    score
-                }
-            }).filter(match => {
-                return match.score !== null
-            }).sort((a, b) => {
-                return b.score - a.score
-            })
-            // console.log(possibleConfigs)
-            let bestConfigIndex = possibleConfigs[0].index
-            return {
-                ...config,
-                matches: config.matches.map((match, index) => {
-                    return {
-                        ...match,
-                        selected: (index === bestConfigIndex)
-                    }                    
-                })
-            }
+const selectProperty = (config, propIndex, path) => {
+    let selectedMatch = config.matches.filter(match => match.selected === true)[0]
+    let possibleConfigs = config.matches.map((match, index) => {
+        let score
+        if (match.properties[propIndex].path !== path) {
+            score = null
         } else {
-            return config
+            let indexProp = 0
+            score = match.properties.reduce((acc, currentProp) => {
+                if (currentProp.path === selectedMatch.properties[indexProp].path) {
+                    acc += match.properties.length - indexProp
+                }
+                indexProp++
+                return acc
+            }, 0)
         }
+        return {
+            index,
+            score
+        }
+    }).filter(match => {
+        return match.score !== null
+    }).sort((a, b) => {
+        return b.score - a.score
     })
+    let bestConfigIndex = possibleConfigs[0].index
+    return {
+        ...config,
+        matches: config.matches.map((match, index) => {
+            return {
+                ...match,
+                selected: (index === bestConfigIndex)
+            }
+        })
+    }
 }
 exports.activateDefaultConfigs = activateDefaultConfigs
 exports.selectProperty = selectProperty
 exports.findAllMatches = findAllMatches
+exports.defineConfigs = defineConfigs
 exports.getConfigs = getConfigs
 exports.getDeviationCost = getDeviationCost
 exports.getViewDef = getViewDef

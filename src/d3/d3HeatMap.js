@@ -257,7 +257,8 @@ const selectDrag = (props, el, position) => {
 }
 
 const create = (el, props) => {
-    if (!(el && dataLib.areLoaded(props.data, props.zone))) return
+    // console.log(el, props)
+    if (!(el && props.data)) return
 
     let data = props.dataStat
     let xElements = d3.set(data.data.map(item => item.prop1)).values()
@@ -288,8 +289,8 @@ const create = (el, props) => {
             d.selection = {
                 selector: `heatMap_element_${i}`,
                 props: [
-                    { path: selectedConfig.selectedMatch.properties[0].path, value: d.prop1 },
-                    { path: selectedConfig.selectedMatch.properties[1].path, value: d.prop2 }
+                    { path: selectedConfig.properties[0].path, value: d.prop1 },
+                    { path: selectedConfig.properties[1].path, value: d.prop2 }
                 ]
             }
         })

@@ -54,10 +54,9 @@ describe('lib/config', () => {
         expect(config.getDeviationCost(3, 20, [5, 10], 0.5)).to.equal(0.5 / (20 - 10))
     })
     it('should change selected config for a given zone', () => {
-        let formerConfig = [
-            {
-                zone: 'main',
-                matches: [
+        let formerConfig = {
+            zone: 'main',
+            matches: [
                     {
                         properties: [
                             { path: 'nobel:LaureateAward/nobel:category/*' },
@@ -90,24 +89,9 @@ describe('lib/config', () => {
                         ],
                         selected: false
                     }
-                ]
-            },
-            {
-                zone: 'aside',
-                matches: [
-                    {
-                        properties: [
-                            { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' },
-                            { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
-                            { path: 'nobel:LaureateAward/nobel:category/*' }
-                        ],
-                        selected: false
-                    }
-                ]
-            }
-        ]
-        let newConfig = config.selectProperty(formerConfig, 'main', 1, 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*')
-            .filter(c => c.zone === 'main')[0]
+            ]
+        }
+        let newConfig = config.selectProperty(formerConfig, 1, 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*')
         expect(newConfig.matches[0].selected).to.be.false
         expect(newConfig.matches[1].selected).to.be.false
         expect(newConfig.matches[2].selected).to.be.true

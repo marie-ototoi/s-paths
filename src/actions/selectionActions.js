@@ -19,6 +19,14 @@ const addSelection = (dispatch) => (selector, zone, props) => {
     })
 }
 
+const resetSelection = (dispatch) => (zone) => {
+    // replace by select
+    return dispatch({
+        type: 'RESET_SELECTION',
+        zone
+    })
+}
+
 const select = (dispatch) => (elements, zone, selections) => {
     // console.log(elements, selections, selectionLib.areSelected(elements, zone, selections))
     if (selectionLib.areSelected(elements, zone, selections)) {

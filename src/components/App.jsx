@@ -7,6 +7,8 @@ import Aside from './Aside'
 import Debug from './Debug'
 import scale from '../lib/scaleLib'
 import dataLib from '../lib/dataLib'
+import configLib from '../lib/configLib'
+import selectionLib from '../lib/selectionLib'
 import { getScreen, getZones, setDisplay } from '../actions/displayActions'
 import { loadData, init, setStats } from '../actions/dataActions'
 
@@ -15,14 +17,6 @@ class App extends React.Component {
         super(props)
         this.onResize = this.onResize.bind(this)
         window.addEventListener('resize', this.onResize)
-    }
-    getMainConfig () {
-        const { configs } = this.props
-        return configs.filter(c => c.zone === 'main')[0]
-    }
-    getSideConfig () {
-        const { configs } = this.props
-        return configs.filter(c => c.zone === 'aside')[0]
     }
     componentDidMount () {
         this.onResize()
@@ -43,9 +37,9 @@ class App extends React.Component {
             'HeatMap': HeatMap,
             'Timeline': Timeline
         }
-        const main = this.getMainConfig()
+        const main = configLib.getConfigs(configs, 'main')
         const MainComponent = main ? componentIds[main.id] : ''
-        const aside = this.getSideConfig()
+        const aside = configLib.getConfigs(configs, 'aside')
         const SideComponent = aside ? componentIds[aside.id] : ''
         return (<div
             className = "view"
@@ -62,16 +56,27 @@ class App extends React.Component {
                     <Debug />
                 }
                 { main && dataLib.areLoaded(this.props.data, 'main') &&
-                    <MainComponent zone = "main"/>
+                    <MainComponent
+                        zone = "main"
+                        data = { dataLib.getResults(this.props.data, 'main') }
+                        configs = { configLib.getConfigs(this.props.configs, 'main') }
+                        selections = { selectionLib.getSelections(this.props.selections, 'main') }
+                    />
                 }
-                { aside && dataLib.areLoaded(this.props.data, 'aside') &&
-                    <SideComponent zone = "aside" />
+                { aside && dataLib.areLoaded(this.props.data, 'aside') && false &&
+                    <SideComponent
+                        zone = "aside"
+                        data = { dataLib.getResults(this.props.data, 'aside') }
+                        configs = { configLib.getConfigs(this.props.configs, 'aside') }
+                        selections = { selectionLib.getSelections(this.props.selections, 'aside') }
+                    />
                 }
             </svg>
         </div>)
     }
     onResize () {
         const { display, env, mode } = this.props
+        // change this for an action function
         this.props.setDisplay({
             env,
             mode,
@@ -89,7 +94,8 @@ function mapStateToProps (state) {
         display: state.display,
         dataset: state.dataset.present,
         views: state.views,
-        configs: state.configs.present
+        configs: state.configs.present,
+        selections: state.selections
     }
 }
 

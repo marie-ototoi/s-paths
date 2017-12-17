@@ -45,6 +45,47 @@ const getGrid = (gridDef, stage) => {
     return { xPoints, yPoints }
 }
 
+const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, height: 0 }) => {
+    switch (element) {
+    case 'legend':
+        return {
+            x: origin.x + offset.x,
+            y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
+            width: viz.horizontal_margin + offset.width,
+            height: viz.vertical_margin + offset.height
+        }
+    case 'axisBottom':
+        return {
+            x: origin.x + viz.horizontal_margin + offset.x,
+            y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
+            width: viz.useful_width + offset.width,
+            height: viz.vertical_margin + offset.height
+        }
+    case 'axisLeft':
+        return {
+            x: origin.x + offset.x,
+            y: origin.y + viz.vertical_margin + offset.y,
+            width: viz.horizontal_margin + offset.width,
+            height: viz.useful_height + offset.height
+        }
+    case 'propSelectorLegend':
+        return {
+            x: origin.x + offset.x,
+            y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
+            width: viz.horizontal_margin + offset.width,
+            height: 20 + offset.height
+        }
+    case 'propSelectorAxisBottom':
+        return {
+            x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
+            y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
+            width: viz.horizontal_margin + offset.width,
+            height: 20 + offset.height
+        }
+    }
+}
+
+exports.getDimensions = getDimensions
 exports.getGrid = getGrid
 exports.getViz = getViz
 exports.getZones = getZones

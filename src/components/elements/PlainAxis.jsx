@@ -14,7 +14,7 @@ class PlainAxis extends React.Component {
     }
 
     render () {
-        const { x, y } = this.props.axis
+        const { x, y } = this.props.dimensions
         return (<g className = "Axis"
             transform = { `translate(${x}, ${y})` }
             ref = { this.state.elementName }
@@ -35,9 +35,8 @@ class PlainAxis extends React.Component {
 function mapStateToProps (state) {
     return {
         display: state.display,
-        data: state.data,
         selections: state.selections,
-        configs: state.configs.present,
+        
         dataset: state.dataset.present
     }
 }

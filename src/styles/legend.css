@@ -2,9 +2,9 @@
     font-size: 0.75em;   
 }
 .Legend .legenditem {
-    opacity: 0.8;
+    opacity: 1;
     cursor: pointer;
 }
-.Legend :hover {
-    opacity: 1;
+.Legend .legenditem:hover {
+    opacity: 0.8;
 }
