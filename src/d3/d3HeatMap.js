@@ -234,7 +234,6 @@ const deselectCell = (el, cell, up, down, left, right) => {
     }
     */
 }
-
 const selectDrag = (props, el, position) => {
     let listRect = []
     position.x1 -= Number(d3.select(el).attr('transform').split(',')[0].split('(')[1])
@@ -320,8 +319,8 @@ const create = (el, props) => {
     /* ******************************************************************************************************** */
     /* *****************************    init legend    ********************************************************* */
     /* ******************************************************************************************************** */
-    const { setLegend } = props
-    setLegend(props.palette)
+    // const { setLegend } = props
+    // setLegend(props.palette)
 
     /* ******************************************************************************************************** */
     /* *****************************    compute size/placement of items    ************************************ */
@@ -381,8 +380,7 @@ const resize = (el, props) => {
     let yScale = d3.scaleBand()
         .range([0, height])
         .domain(yElements)
-    /*
-    if (d3.select('#selectionCenter').attr('itemX') === null) d3.select('#selectionCenter').attr('itemX', itemSizeX - 1)
+    /*  if (d3.select('#selectionCenter').attr('itemX') === null) d3.select('#selectionCenter').attr('itemX', itemSizeX - 1)
     if (d3.select('#selectionCenter').attr('itemY') === null) d3.select('#selectionCenter').attr('itemY', itemSizeY - 1)
 
     let ratioX = ((itemSizeX - 1) / d3.select('#selectionCenter').attr('itemX'))
@@ -395,8 +393,8 @@ const resize = (el, props) => {
         .attr('x1', function () { return this.getAttribute('x1')  ratio })
         .attr('y1', function () { return this.getAttribute('y1') * ratio })
         .attr('x2', function () { return this.getAttribute('x2') * ratio })
-        .attr('y2', function () { return this.getAttribute('y2') * ratio })
-*/
+        .attr('y2', function () { return this.getAttribute('y2') * ratio }) */
+
     d3.select(el).select('#center').selectAll('rect')
         .attr('width', itemSizeX - 1)
         .attr('height', itemSizeY - 1)
@@ -418,27 +416,14 @@ const getMaxLength = (el) => {
     return max
 }
 
-const heatMapAxisBehaviors = (type) => {
-    return {
-        title: {
-            mouseover: () => {},
-            mouseleave: () => {},
-            click: () => {}
-        },
-        key: {
-            mouseover: () => {},
-            mouseleave: () => {},
-            click: (selectElements, name) => {
-                let listRect = []
-                d3.select('#center').selectAll('rect').filter(function () {
-                    return this.getAttribute('idProp').includes('-' + name + '-')
-                }).each(function (d) {
-                    listRect.push(d.selection)
-                })
-                selectElements(listRect)
-            }
-        }
-    }
+const heatMapAxisBehaviors = (item) => {
+    let listRect = []
+    d3.select('#center').selectAll('rect').filter(function () {
+        return this.getAttribute('idProp').includes('-' + item + '-')
+    }).each(function (d) {
+        listRect.push(d.selection)
+    })
+    return listRect
 }
 
 const heatMapLegendBehavior = (color) => {

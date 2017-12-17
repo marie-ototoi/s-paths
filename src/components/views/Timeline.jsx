@@ -43,7 +43,7 @@ class Timeline extends React.PureComponent {
         // First prop to be displayed in the bottom axis
         const categoryProp1 = selectedConfig.properties[0].category
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format
-        const nestedProp1 = dataLib.groupTimeData(data, 'prop1', formatProp1, 100)
+        const nestedProp1 = dataLib.groupTimeData(data, 'prop1', formatProp1, 50)
         const axisBottom = dataLib.getAxis(nestedProp1, 'prop1', categoryProp1)
         const listProp1 = dataLib.getPropList(configs, 0)
         // Second prop to be displayed in the legend

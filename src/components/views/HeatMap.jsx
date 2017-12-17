@@ -14,13 +14,16 @@ import dataLib from '../../lib/dataLib'
 class HeatMap extends React.Component {
     constructor (props) {
         super(props)
+
         this.setLegend = this.setLegend.bind(this)
         this.selectElements = this.selectElements.bind(this)
-        this.selectElementsLegend = this.selectElementsLegend.bind(this)
+        this.legendBehavior = this.legendBehavior.bind(this)
+        this.axisBehavior = this.axisBehavior.bind(this)
         this.state = {
             setLegend: this.setLegend,
             selectElements: this.selectElements,
-            selectElementsLegend: this.selectElementsLegend,
+            legendBehavior: this.legendBehavior,
+            axisBehavior: this.axisBehavior,
             elementName: `HeatMap_${props.zone}`
         }
     }
@@ -29,7 +32,6 @@ class HeatMap extends React.Component {
         const { data, zone } = this.props
         const { configs } = this.props
         const selectedConfig = config.getSelectedConfig(configs, zone)
-        
         const dataStat = statisticalOperator.computeStatisticalInformation(data, selectedConfig)
         const paletteObj = []
         let nbColor = dataStat.max - dataStat.min + 1
@@ -58,20 +60,22 @@ class HeatMap extends React.Component {
             palette: paletteObj,
             selectedConfig: selectedConfig
         }
+        this.state.setLegend(paletteObj)
     }
 
     render () {
         const { display, zone } = this.props
-        const { dataStat, selectElementsLegend } = this.state
+        const { dataStat, legendBehavior, axisBehavior } = this.state
 
-        let axisbehavior = d3HeatMap.heatMapAxisBehaviors()
+        /*      let axisbehavior = d3HeatMap.heatMapAxisBehaviors()
         for (var item in axisbehavior) {
             for (var fun in axisbehavior[item]) {
                 axisbehavior[item][fun] = axisbehavior[item][fun].bind(this, this.state.selectElements)
             }
         }
-        console.log( this.state.legend )
-        let heatMapLegendBehavior = d3HeatMap.heatMapLegendBehavior()
+
+        let heatMapLegendBehavior = d3HeatMap.heatMapLegendBehavior() */
+
         return (
             <g className = "HeatMap { this.props.zone }" ref = "HeatMap" transform = { `translate(${display.zones[this.props.zone].x}, ${display.zones[this.props.zone].y})` } >
                 { this.state.legend &&
@@ -85,7 +89,7 @@ class HeatMap extends React.Component {
                         } }                      
                         info = { this.state.legend }
                         zone = { zone }
-                        selectElements = { selectElementsLegend }
+                        selectElements = { legendBehavior }
                     />
                 }
                 { dataStat &&
@@ -95,7 +99,7 @@ class HeatMap extends React.Component {
                         keys = {d3.set(dataStat.data.map(item => item.prop2)).values()}
                         keysDisplay = "simple"
                         titles = {['Gender', 'TEST']}
-                        behaviors = {axisbehavior}
+                        behaviors = {axisBehavior}
                     />
                 }
                 { dataStat &&
@@ -105,7 +109,7 @@ class HeatMap extends React.Component {
                         keys = {d3.set(dataStat.data.map(item => item.prop1)).values()}
                         keysDisplay = "interval"
                         titles = {['Date', 'TEST']}
-                        behaviors = {axisbehavior}
+                        behaviors = {axisBehavior}
                     />
                 }
             </g>
@@ -116,16 +120,26 @@ class HeatMap extends React.Component {
         this.setState({ legend })
     }
 
-    selectElementsLegend (prop, value, category) {
+    legendBehavior (prop, value, category) {
         const { select, zone, selections } = this.props
         let elements = d3HeatMap.heatMapLegendBehavior(category)
         select(elements, zone, selections)
+    }
+
+    axisBehavior (item, type, category) {
+        //console.log(item, type)
+        const { select, zone, selections } = this.props
+        if (item === 'key' && type === 'click') {
+            let elements = d3HeatMap.heatMapAxisBehaviors(category)
+            select(elements, zone, selections)
+        }
     }
 
     selectElements (elements) {
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }
+
     addCallbackToProps () {
         return {
             ...this.props,

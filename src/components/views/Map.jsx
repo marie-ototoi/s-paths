@@ -12,36 +12,32 @@ import { getPropPalette } from '../../actions/palettesActions'
 class Map extends React.Component {
     constructor (props) {
         super(props)
+        this.setLegend = this.setLegend.bind(this)
         this.selectElements = this.selectElements.bind(this)
+        // this.legendBehavior = this.legendBehavior.bind(this)
+        // this.axisBehavior = this.axisBehavior.bind(this)
+        // this.selectElementsAxis = this.selectElementsAxis.bind(this)
         this.state = {
+            setLegend: this.setLegend,
             selectElements: this.selectElements,
+            // legendBehavior: this.legendBehavior,
+            // axisBehavior: this.axisBehavior,
             elementName: `Map_${props.zone}`
         }
     }
     componentWillMount () {
 
     }
+
     render () {
         // console.log('salut Timeline')
         const { data, display, zone } = this.props
-        const { nestedProp1 } = this.state
         const classN = `Map ${this.refs.elementName}`
         return (<g className = { classN } >
             <g
                 transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
                 ref = "Map">
             </g>
-            <Legend
-                x = { display.zones[zone].x }
-                y = { display.zones[zone].y + display.viz.useful_height + display.viz.vertical_margin }
-                type = "plain"
-                zone = { zone }
-                refsvg = { this.props.refsvg }
-                width = { display.viz.horizontal_margin }
-                height = { display.viz.vertical_margin }
-                info = { this.state.palette }
-                selectElements = { this.selectElements }
-            />
         </g>)
     }
     /*    setAxis (axis) {
@@ -55,16 +51,24 @@ class Map extends React.Component {
         select(elements, zone, selections)
     }
     */
+
+    setLegend (legend) {
+        this.setState({ legend })
+    }
+    selectElements (elements) {
+        const { select, zone, selections } = this.props
+        select(elements, zone, selections)
+    }
     componentDidMount () {
         // console.log(this.props.data)
-        d3Map.create(this.refs.Timeline, { ...this.props, ...this.state })
+        d3Map.create(this.refs.Map, { ...this.props, ...this.state })
     }
     componentDidUpdate () {
         // console.log('update')
-        d3Map.update(this.refs.Timeline, { ...this.props, ...this.state })
+        d3Map.update(this.refs.Map, { ...this.props, ...this.state })
     }
     componentWillUnmount () {
-        d3Map.destroy(this.refs.Timeline, { ...this.props, ...this.state })
+        d3Map.destroy(this.refs.Map, { ...this.props, ...this.state })
     }
 }
 

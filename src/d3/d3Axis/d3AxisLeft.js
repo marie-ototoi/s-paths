@@ -44,18 +44,35 @@ export default class d3AxisBottom extends d3AxisAbstract {
         return this
     }
 
+    mouseoverBehaviors (d) {
+        let group = this.el
+        let tab = d.split('-')
+        for (var i = 1; i < tab.length; i++) {
+            group.selectAll('line').selectAll('#id-' + tab[i]).style('fill', 'purple').style('stroke', 'purple')
+            group.select('#idText-' + tab[i]).style('fill', 'purple')
+        }
+    }
+
+    mouseleaveBehaviors (d) {
+        let group = this.el
+        let tab = d.split('-')
+        for (var i = 1; i < tab.length; i++) {
+            group.selectAll('line').selectAll('#id-' + tab[i]).style('fill', '#666').style('stroke', '#666')
+            group.select('#idText-' + tab[i]).style('fill', '#666')
+        }
+    }
+
     addTick (group, size, visible) {
         group.append('line')
-            .attr('id', d => 'id' + d)
+            .attr('id', (d, i) => 'id-' + i)
             .attr('x1', -size * 0.5)
             .attr('x2', size * 0.5)
             .attr('y1', 0)
             .attr('y2', 0)
             .attr('stroke-width', 1)
             .attr('stroke', '#666')
-        group.append('rect')
         group.append('text')
-            .attr('id', d => 'idText' + d)
+            .attr('id', (d, i) => 'idText-' + i)
             .text(d => d)
             .attr('font-size', '16px')
             .attr('font-family', 'arial')
@@ -66,24 +83,17 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .attr('y', 5)
             .style('pointer-events', 'none')
             .style('visibility', visible ? 'visible' : 'hidden')
-            .each(function (d) {
-                if (this.getBBox === undefined) return
-                let bbox = this.getBBox()
-                group.select('rect')
-                    .attr('x', bbox.x)
-                    .attr('y', bbox.y)
-                    .attr('width', bbox.width)
-                    .attr('height', bbox.height)
-                    .attr('fill', 'transparent')
-                    .on('mouseover', function (d) {
-                        group.selectAll('#id' + d).attr('fill', 'purple').attr('stroke', 'purple')
-                        d3.select('#idText' + d).style('visibility', 'visible').attr('fill', 'purple')
-                    })
-                    .on('mouseleave', function (d) {
-                        group.selectAll('#id' + d).attr('fill', 'black').attr('stroke', '#666')
-                        d3.select('#idText' + d).style('visibility', visible ? 'visible' : 'hidden').attr('fill', 'black')
-                    })
-            })
+    }
+
+    addRectSimple (group, size, visible) {
+        group.append('rect')
+            .classed('offsetRect', true)
+            .attr('id', (d, i) => 'id-' + i)
+            .attr('x', -40)
+            .attr('y', -size / 2)
+            .attr('width', 40)
+            .attr('height', size)
+            .style('fill', 'transparent')
     }
 
     addKeys (labels) {
@@ -96,6 +106,11 @@ export default class d3AxisBottom extends d3AxisAbstract {
              y2: Number(this.el.select('line').attr('y2'))
          }
         let step = Math.abs((positions.y2 - positions.y1)) / labels.length
+        let tickRect = el.append('g').attr('id', 'ticksRect').selectAll('g')
+            .data(labels)
+            .enter()
+            .append('g')
+            .attr('transform', function (d, i) { return 'translate(' + positions.x1 + ',' + (positions.y2 + (i * step) + (step / 2)) + ')' })
         let tick = el.append('g').attr('id', 'ticks').selectAll('g')
             .data(labels)
             .enter()
@@ -110,6 +125,7 @@ export default class d3AxisBottom extends d3AxisAbstract {
             var mod = parseInt(1 + (labels.length / 15))
             return !(i === 0 || i % mod === 0)
         }), 30, false)
+        this.addRectSimple(tickRect, step, true)
 
         d3.select('#ticks').append('g').append('line')
             .attr('x1', positions.x1 - 10)
@@ -127,6 +143,7 @@ export default class d3AxisBottom extends d3AxisAbstract {
             .attr('stroke', '#666')
 
         this.ticks = tick
+        this.ticksRect = tickRect
         return this
     }
 

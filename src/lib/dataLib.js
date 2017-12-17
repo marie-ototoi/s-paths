@@ -91,16 +91,19 @@ const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
         }
     }).sort((a, b) => a.year - b.year)
     let yearNest = d3.nest().key(prop => prop.year).entries(dataToNest)
+    let yearNumber = Number(yearNest[yearNest.length - 1].key) - Number(yearNest[0].key)
     let decadeNest = d3.nest().key(prop => prop.decade).entries(dataToNest)
+    let decadeNumber = (Number(decadeNest[decadeNest.length - 1].key) - Number(decadeNest[0].key)) / 10
     let centuryNest = d3.nest().key(prop => prop.century).entries(dataToNest)
-    // console.log(yearNest.length, decadeNest.length, centuryNest.length)
+    let centuryNumber = (Number(centuryNest[centuryNest.length - 1].key) - Number(centuryNest[0].key)) / 100
+    //console.log(yearNest.length, yearNumber, decadeNest.length, decadeNumber, centuryNest.length, centuryNumber)
     let nest
     let additionalValue
     let keyFormat
-    if (yearNest.length < max) {
+    if (yearNumber < max) {
         nest = yearNest
         additionalValue = Number(yearNest[yearNest.length - 1].key) + 1
-    } else if (decadeNest.length < max) {
+    } else if (decadeNumber < max) {
         nest = decadeNest
         additionalValue = Number(decadeNest[decadeNest.length - 1].key) + 10
     } else {

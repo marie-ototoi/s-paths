@@ -1,8 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 import Main from './Main'
+
 import HeatMap from './views/HeatMap'
 import Timeline from './views/Timeline'
+import Map from './views/Map'
+
 import Aside from './Aside'
 import Debug from './Debug'
 import scale from '../lib/scaleLib'
@@ -34,7 +37,7 @@ class App extends React.Component {
         // console.log('configs', configs)
         // console.log('data', data)
         const componentIds = {
-            'HeatMap': HeatMap,
+            'HeatMap': Map,
             'Timeline': Timeline
         }
         const main = configLib.getConfigs(configs, 'main')
