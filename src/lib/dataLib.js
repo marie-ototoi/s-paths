@@ -78,7 +78,7 @@ const getAxis = (nestedProps, propName, category) => {
 }
 
 const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
-    //console.log(data, propName, format, max, propsToAdd)
+    // console.log(data, propName, format, max, propsToAdd)
     let dataToNest = data.map(d => {
         let dateProp = moment(d[propName].value, format)
         if (!dateProp.isValid()) throw 'Cannot use time format'
