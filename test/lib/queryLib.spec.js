@@ -30,12 +30,11 @@ WHERE {
     })
     it('should make a valid SPARQL query with given entrypoint and props', () => {
         const config1 = {
-            selectedMatch: {
-                properties: [
-                    { path: 'nobel:LaureateAward/nobel:year/*' },
-                    { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
-                ]
-            }
+            properties: [
+                { path: 'nobel:LaureateAward/nobel:year/*' },
+                { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
+            ],
+            selected: true
         }
         const config2 = {
             ...config1,
@@ -102,5 +101,13 @@ WHERE {
         }
         expect(queryLib.usePrefix('http://purl.org/dc/terms/isPartOf', prefixes))
             .to.equal('dct:isPartOf')
+        expect(queryLib.usePrefix('http://unknown.url/toto', prefixes))
+            .to.equal('http://unknown.url/toto')
+    })
+    it('should generate a prefix of expected length', () => {
+        expect(queryLib.createPrefix('http://purl.org/dc/terms/isPartOf', 3))
+            .to.equal('dct')
+        expect(queryLib.createPrefix('http://purl.org/NET/c4dm/event.owl#', 4))
+            .to.equal('netc')
     })
 })

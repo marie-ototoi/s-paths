@@ -31,6 +31,62 @@ const getData = (endpoint, query, prefixes) => {
         .execute()
 }
 
+const getPrefix = (uri) => {
+    const prefixes = [
+        { prefix: 'dcterms', url: 'http://purl.org/dc/terms/' },
+        { prefix: 'd2r', url: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#' },
+        { prefix: 'dbpedia', url: 'http://dbpedia.org/resource/' },
+        { prefix: 'dbpedia-owl', url: 'http://dbpedia.org/ontology/' },
+        { prefix: 'dbpprop', url: 'http://dbpedia.org/property/' },
+        { prefix: 'foaf', url: 'http://xmlns.com/foaf/0.1/' },
+        { prefix: 'freebase', url: 'http://rdf.freebase.com/ns/' },
+        { prefix: 'map', url: 'http://data.nobelprize.org/resource/#' },
+        { prefix: 'meta', url: 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#' },
+        { prefix: 'nobel', url: 'http://data.nobelprize.org/terms/' },
+        { prefix: 'owl', url: 'http://www.w3.org/2002/07/owl#' },
+        { prefix: 'rdf', url: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#' },
+        { prefix: 'rdfs', url: 'http://www.w3.org/2000/01/rdf-schema#' },
+        { prefix: 'skos', url: 'http://www.w3.org/2004/02/skos/core#' },
+        { prefix: 'viaf', url: 'http://viaf.org/viaf/' },
+        { prefix: 'xsd', url: 'http://www.w3.org/2001/XMLSchema#' },
+        { prefix: 'yago', url: 'http://yago-knowledge.org/resource/' },
+        { prefix: 'bio', url: 'http://vocab.org/bio/0.1/' }, // BnF
+        { prefix: 'bibo', url: 'http://purl.org/ontology/bibo/' },
+        { prefix: 'dcmi-box', url: 'http://dublincore.org/documents/dcmi-box' },
+        { prefix: 'dcmitype', url: 'http://purl.org/dc/dcmitype/' },
+        { prefix: 'frbr-rda', url: 'http://rdvocab.info/uri/schema/FRBRentitiesRDA/' },
+        { prefix: 'geo', url: 'http://www.w3.org/2003/01/geo/wgs84_pos#' },
+        { prefix: 'geonames', url: 'http://www.geonames.org/ontology#' },
+        { prefix: 'ign', url: 'http://data.ign.fr/ontology/topo.owl#' },
+        { prefix: 'insee', url: 'http://rdf.insee.fr/geo' },
+        { prefix: 'isni', url: 'http://isni.org/ontology#' },
+        { prefix: 'marcrel', url: 'http://id.loc.gov/vocabulary/relators' },
+        { prefix: 'mo', url: 'http://musicontology.com/' },
+        { prefix: 'ore', url: 'http://www.openarchives.org/ore/terms/' },
+        { prefix: 'rdagroup1elements', url: 'http://rdvocab.info/Elements/' },
+        { prefix: 'rdagroup2elements', url: 'http://rdvocab.info/ElementsGr2/' },
+        { prefix: 'rdarelationships', url: 'http://rdvocab.info/RDARelationshipsWEMI' },
+        { prefix: 'schemaorg', url: 'http://schema.org/' },
+        { prefix: 'blt', url: 'http://www.bl.uk/schemas/bibliographic/blterms#' }, // t-mus
+        { prefix: 'event', url: 'http://purl.org/NET/c4dm/event.owl#' },
+        { prefix: 'frbr', url: 'http://purl.org/vocab/frbr/core#' },
+        { prefix: 'sim', url: 'http://purl.org/ontology/similarity/' },
+        { prefix: 'slickm', url: 'http://slickmem.data.t-mus.org/' },
+        { prefix: 'slickmem', url: 'http://slickmem.data.t-mus.org/terms/' }
+    ]
+    /* if (usePrefix(uri, prefixes).length === uri.length) {
+        return 
+    } else {
+        return 
+    } */
+}
+
+const createPrefix = (uri, length) => {
+    uri = uri.replace(/([.:\/-_#]|purl\.org|http|www)*/, '')
+    uri = uri.split('/').join('').toLowerCase()
+    return uri.substr(0, length)
+}
+
 const usePrefix = (uri, prefixes) => {
     return uri.replace(uri, (match, offset, string) => {
         for (var pref in prefixes) {
@@ -79,20 +135,24 @@ const mergeStatsWithProps = (props, stats, totalEntities) => {
 }
 
 const defineGroup = (prop, previousPath, level, options) => {
-    const { property, datatype, isiri, isliteral, language } = prop
-    const { ignoreList, prefixes } = options
+    const { avgcharlength, property, datatype, isiri, isliteral, language } = prop
+    const { ignoreList, maxChar, prefixes } = options
     const path = `${previousPath}/${usePrefix(property.value, prefixes)}/*`
     let returnprops = {}
     // console.log(datatype)
     if (ignoreList.includes(property.value)) {
         returnprops.category = 'ignore'
-    } else if (isliteral.value === '1' || isliteral.value === 'true') {
+    } else if (isliteral && (isliteral.value === '1' || isliteral.value === 'true')) {
         if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#date') {
             returnprops.category = 'datetime'
         } else if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#integer') {
             returnprops.category = 'number'
-        } else {
-            returnprops.category = 'text'
+        } else if (datatype) {
+            if (avgcharlength && avgcharlength.value > maxChar) {
+                returnprops.category = 'ignore'
+            } else {
+                returnprops.category = 'text'
+            }
         }
     } else if (isiri.value === '1' || isiri.value === 'true') {
         returnprops.category = 'uri'
@@ -154,6 +214,7 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
     return query
 }
 
+exports.createPrefix = createPrefix
 exports.defineGroup = defineGroup
 exports.getData = getData
 exports.FSL2SPARQL = FSL2SPARQL
