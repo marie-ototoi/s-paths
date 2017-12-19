@@ -82,9 +82,10 @@ const getPrefix = (uri) => {
 }
 
 const createPrefix = (uri, length) => {
-    uri = uri.replace(/([.:\/-_#]|purl\.org|http|www)*/, '')
-    uri = uri.split('/').join('').toLowerCase()
-    return uri.substr(0, length)
+    return uri.replace(/([\/:#_\-.]|purl|org|http|www)/g, function (match, p1) { 
+        console.log(match, p1)
+        if (p1) return ''
+    }).toLowerCase().substr(0, length)
 }
 
 const usePrefix = (uri, prefixes) => {
