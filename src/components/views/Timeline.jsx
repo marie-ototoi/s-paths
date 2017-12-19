@@ -84,7 +84,7 @@ class Timeline extends React.PureComponent {
             <PropSelector
                 propList = { listProp2 }
                 configs = { configs }
-                dimensions = { scaleLib.getDimensions('propSelectorLegend', display.zones[zone], display.viz, { x: 10, y: - 5, width: -80, height: 0 }) }
+                dimensions = { scaleLib.getDimensions('propSelectorLegend', display.zones[zone], display.viz, { x: 10, y: -5, width: -80, height: 0 }) }
                 selectElements = { this.selectElements }
                 propIndex = { 1 }
                 zone = { zone }
@@ -92,7 +92,7 @@ class Timeline extends React.PureComponent {
             <PropSelector
                 propList = { listProp1 }
                 configs = { configs }
-                dimensions = { scaleLib.getDimensions('propSelectorAxisBottom', display.zones[zone], display.viz, { x: 20, y: - 20, width: -40, height: 0 }) }
+                dimensions = { scaleLib.getDimensions('propSelectorAxisBottom', display.zones[zone], display.viz, { x: 20, y: -20, width: -40, height: 0 }) }
                 selectElements = { this.selectElements }
                 propIndex = { 0 }
                 zone = { zone }

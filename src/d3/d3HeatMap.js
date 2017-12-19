@@ -235,6 +235,7 @@ const deselectCell = (el, cell, up, down, left, right) => {
     */
 }
 const selectDrag = (props, el, position) => {
+    console.log(props, el, position)
     let listRect = []
     position.x1 -= Number(d3.select(el).attr('transform').split(',')[0].split('(')[1])
     position.x2 -= Number(d3.select(el).attr('transform').split(',')[0].split('(')[1])
@@ -256,6 +257,14 @@ const selectDrag = (props, el, position) => {
 }
 
 const create = (el, props) => {
+    // console.log('create')
+    if (el && props.data) {
+        draw(el, props)
+        resize(el, props)
+    }
+}
+
+const draw = (el, props) => {
     // console.log(el, props)
     if (!(el && props.data)) return
 
@@ -266,7 +275,7 @@ const create = (el, props) => {
     /* ******************************************************************************************************** */
     /* *****************************    Create group and bind data    ***************************************** */
     /* ******************************************************************************************************** */
-    const { selectedConfig } = props
+    const { nestedProp1, legend, selectedConfig, selectElement, selections, zone } = props
     let div = d3.select(el).append('g').attr('id', 'heatMapCenterPanel')
     d3.select(el).append('g').attr('id', 'centerPatternLib')
     div.append('g').attr('id', 'center')
@@ -284,14 +293,19 @@ const create = (el, props) => {
             return d.color
         })
         .attr('opacity', 0.4)
-        .each(function (d, i) {
+        .each((d, i) => {
+            // console.log(d, d.selection)
+            d.id = d.id || `heatmap_element_${dataLib.guid()}`
+            // d.color = legend.info.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
             d.selection = {
-                selector: `heatMap_element_${i}`,
+                selector: d.id,
                 props: [
                     { path: selectedConfig.properties[0].path, value: d.prop1 },
                     { path: selectedConfig.properties[1].path, value: d.prop2 }
+                //    { path: selectedConfig.properties[2].path, value: d.prop3 }
                 ]
             }
+            d.selected = selectionLib.areSelected([d.selection], zone, selections)
         })
 
         /* ******************************************************************************************************** */
@@ -307,8 +321,8 @@ const create = (el, props) => {
             this.setAttribute('stroke-width', 0.5)
             this.setAttribute('stroke', 'transparent')
         })
-        .on('click', function (d) {
-            selectElements([d.selection])
+        .on('click', d => {
+            selectElement(d.selection)
         })
 
     /* ******************************************************************************************************** */
@@ -330,6 +344,7 @@ const create = (el, props) => {
 
 const update = (el, props) => {
     if (el && props.data) {
+        draw(el, props)
         resize(el, props)
         redraw(el, props)
     }
@@ -363,20 +378,27 @@ const redraw = (el, props) => {
 }
 
 const resize = (el, props) => {
+    const { nestedProp1, selectedConfig, display } = props
     let xElements = d3.set(props.dataStat.data.map(item => item.prop1)).values()
     let yElements = d3.set(props.dataStat.data.map(item => item.prop2)).values()
 
     let width = props.display.viz.useful_width
     let height = props.display.viz.useful_height
-    d3.select(el).select('#heatMapCenterPanel').attr('transform', ('translate(' + props.display.viz.horizontal_margin + ',' + props.display.viz.vertical_margin + ')'))
 
     let itemSizeX = width / xElements.length
     let itemSizeY = height / yElements.length
+    const categoryProp1 = selectedConfig.properties[0].category
 
-    let xScale = d3.scaleBand()
-        .range([0, width])
-        .domain(xElements)
-
+    let xScale = null
+    if (categoryProp1 === 'datetime') {
+        xScale = d3.scaleLinear()
+            .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
+            .range([0, width])
+    } else {
+        xScale = d3.scaleBand()
+            .domain(xElements)
+            .range([0, width])
+    }
     let yScale = d3.scaleBand()
         .range([0, height])
         .domain(yElements)
@@ -398,7 +420,7 @@ const resize = (el, props) => {
     d3.select(el).select('#center').selectAll('rect')
         .attr('width', itemSizeX - 1)
         .attr('height', itemSizeY - 1)
-        .attr('x', d => xScale(d.prop1) + 0.5)
+        .attr('x', d => { return xScale(d.prop1) + 0.5 })
         .attr('y', d => yScale(d.prop2) + 0.5)
 }
 
@@ -426,13 +448,14 @@ const heatMapAxisBehaviors = (item) => {
     return listRect
 }
 
-const heatMapLegendBehavior = (color) => {
+const getElements = (el, color) => {
     let listRect = []
-    d3.select('#center').selectAll('rect').filter(function () {
+    d3.select(el).select('#center').selectAll('rect').filter(function () {
         return this.getAttribute('fill').includes(color)
     }).each(function (d) {
         listRect.push(d.selection)
     })
+    console.log(listRect)
     return listRect
 }
 
@@ -440,4 +463,4 @@ exports.create = create
 exports.destroy = destroy
 exports.update = update
 exports.heatMapAxisBehaviors = heatMapAxisBehaviors
-exports.heatMapLegendBehavior = heatMapLegendBehavior
+exports.getElements = getElements

@@ -3,21 +3,18 @@ import promiseSettle from 'promise-settle'
 import queryLib from '../src/lib/queryLib'
 const router = express.Router()
 
-router.post('/:class', (req, res) => {
-    if (!req.params.class || !req.body.endpoint) {
-        console.error('You must provide at least an entrypoint and an endpoint')
-        res.end()
-    }
-    getStats({ entrypoint: req.params.class, ...req.body })
+router.get('/:class', (req, res) => {
+    // req.params.class
+    getStats({ entrypoint: req.params.class })
         .then(props => {
-            console.log('POST !!!!!!!!!!!!!!!!!!!!!!!!!', props)
+            console.log('GET !!!!!!!!!!!!!!!!!!!!!!!!!', req.params.options, props)
             res.json(props)
-            res.end()
         })
         .catch((err) => {
-            console.error('Error retrieving stats', err)
+            console.log('Error retrieving stats', err)
         })
 })
+
 const getStats = (opt) => {
     const ignore = opt.ignoreList ? [...opt.ignoreList] : []
     const options = {

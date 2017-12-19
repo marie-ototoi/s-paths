@@ -37,7 +37,7 @@ class App extends React.Component {
         // console.log('configs', configs)
         // console.log('data', data)
         const componentIds = {
-            'HeatMap': Map,
+            'HeatMap': HeatMap,
             'Timeline': Timeline
         }
         const main = configLib.getConfigs(configs, 'main')
@@ -66,7 +66,7 @@ class App extends React.Component {
                         selections = { selectionLib.getSelections(this.props.selections, 'main') }
                     />
                 }
-                { aside && dataLib.areLoaded(this.props.data, 'aside') && false &&
+                { aside && dataLib.areLoaded(this.props.data, 'aside') &&
                     <SideComponent
                         zone = "aside"
                         data = { dataLib.getResults(this.props.data, 'aside') }
