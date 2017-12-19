@@ -62,13 +62,18 @@ const makePropsQuery = (entitiesClass, constraints, level, defaultGraph) => {
 
 const mergeStatsWithProps = (props, stats, totalEntities) => {
     return props.map((prop, index) => {
-        let returnprops = { ...prop }
-        if (prop.category === 'text' && stats[index].results.bindings[0].avgcharlength) returnprops.avgcharlength = Math.floor(Number(stats[index].results.bindings[0].avgcharlength.value))
-        return {
-            ...returnprops,
-            total: Number(stats[index].results.bindings[0].total.value),
-            unique: Number(stats[index].results.bindings[0].unique.value),
-            coverage: Number(stats[index].results.bindings[0].coverage.value) * 100 / totalEntities
+        if (stats[index].isFulfilled()) {
+            let returnprops = { ...prop }
+            let stat = stats[index].value()
+            if (prop.category === 'text' && stat.results.bindings[0].avgcharlength) returnprops.avgcharlength = Math.floor(Number(stat.results.bindings[0].avgcharlength.value))
+            return {
+                ...returnprops,
+                total: Number(stat.results.bindings[0].total.value),
+                unique: Number(stat.results.bindings[0].unique.value),
+                coverage: Number(stat.results.bindings[0].coverage.value) * 100 / totalEntities
+            }
+        } else {
+            return prop
         }
     })
 }

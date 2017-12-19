@@ -30,6 +30,7 @@
     "fetch": "^1.1.0",
     "mongoose": "^4.13.5",
     "node-fetch": "^1.7.3",
+    "promise-settle": "^0.3.0",
     "request": "^2.83.0",
     "request-promise": "^4.2.2",
     "rewire": "^3.0.2",
