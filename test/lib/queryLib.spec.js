@@ -110,4 +110,10 @@ WHERE {
         expect(queryLib.createPrefix('http://purl.org/NET/c4dm/event.owl#', 4))
             .to.equal('netc')
     })
+    it('should return the root of an url', () => {
+        expect(queryLib.getRoot('http://purl.org/dc/terms/isPartOf'))
+            .to.equal('http://purl.org/dc/terms/')
+        expect(queryLib.getRoot('http://www.w3.org/2003/01/geo/wgs84_pos#SpatialThing'))
+            .to.equal('http://www.w3.org/2003/01/geo/wgs84_pos#')
+    })
 })

@@ -31,8 +31,8 @@ const getData = (endpoint, query, prefixes) => {
         .execute()
 }
 
-const getPrefix = (uri) => {
-    const prefixes = [
+const getPrefix = (uri, prefixes) => {
+    /* const prefixes = [
         { prefix: 'dcterms', url: 'http://purl.org/dc/terms/' },
         { prefix: 'd2r', url: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#' },
         { prefix: 'dbpedia', url: 'http://dbpedia.org/resource/' },
@@ -74,7 +74,7 @@ const getPrefix = (uri) => {
         { prefix: 'slickm', url: 'http://slickmem.data.t-mus.org/' },
         { prefix: 'slickmem', url: 'http://slickmem.data.t-mus.org/terms/' }
     ]
-    /* if (usePrefix(uri, prefixes).length === uri.length) {
+    if (usePrefix(uri, prefixes).length === uri.length) {
         return 
     } else {
         return 
@@ -96,6 +96,19 @@ const usePrefix = (uri, prefixes) => {
         }
         return match
     })
+}
+
+const getRoot = (uri) => {
+    const splitSlash = uri.split('/')
+    const slashEnd = splitSlash[splitSlash.length - 1]
+    const splitHash = uri.split('#')
+    const hashEnd = splitHash[splitHash.length - 1]
+    if ((slashEnd !== '' &&
+    slashEnd.length < hashEnd.length)) {
+        return splitSlash.slice(0, -1).join('/').concat('/')
+    } else {
+        return splitHash.slice(0, -1).join('#').concat('#')
+    }
 }
 
 const makePropsQuery = (entitiesClass, constraints, level, defaultGraph) => {
@@ -218,6 +231,7 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
 exports.createPrefix = createPrefix
 exports.defineGroup = defineGroup
 exports.getData = getData
+exports.getRoot = getRoot
 exports.FSL2SPARQL = FSL2SPARQL
 exports.makeQuery = makeQuery
 exports.makePropQuery = makePropQuery

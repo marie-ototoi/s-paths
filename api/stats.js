@@ -1,18 +1,24 @@
 import express from 'express'
 import promiseSettle from 'promise-settle'
 import queryLib from '../src/lib/queryLib'
+import prefixModel from '../models/prefix'
 const router = express.Router()
 
-router.get('/:class', (req, res) => {
-    // req.params.class
-    getStats({ entrypoint: req.params.class })
-        .then(props => {
-            console.log('GET !!!!!!!!!!!!!!!!!!!!!!!!!', req.params.options, props)
-            res.json(props)
-        })
-        .catch((err) => {
-            console.log('Error retrieving stats', err)
-        })
+router.post('/:class', (req, res) => {
+    if (!req.params.class || !req.body.endpoint) {
+        console.error('You must provide at least an entrypoint and an endpoint')
+        res.end()
+    } else {
+        // console.log(prefixModel.findOrCreate ('nobel', 'http://data.nobelprize.org/terms/'))
+        getStats({ entrypoint: req.params.class, ...req.body })
+            .then(props => {
+                console.log('POST !!!!!!!!!!!!!!!!!!!!!!!!!', req.params.options, props)
+                res.json(props)
+            })
+            .catch((err) => {
+                console.log('Error retrieving stats', err)
+            })
+    }
 })
 
 const getStats = (opt) => {
