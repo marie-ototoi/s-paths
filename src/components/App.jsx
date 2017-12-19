@@ -66,7 +66,7 @@ class App extends React.Component {
                         selections = { selectionLib.getSelections(this.props.selections, 'main') }
                     />
                 }
-                { aside && dataLib.areLoaded(this.props.data, 'aside') && false &&
+                { aside && dataLib.areLoaded(this.props.data, 'aside') &&
                     <SideComponent
                         zone = "aside"
                         data = { dataLib.getResults(this.props.data, 'aside') }

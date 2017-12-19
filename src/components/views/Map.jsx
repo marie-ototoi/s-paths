@@ -30,7 +30,7 @@ class Map extends React.Component {
     }
 
     render () {
-        // console.log('salut Timeline')
+        console.log('salut Map')
         const { data, display, zone } = this.props
         const classN = `Map ${this.refs.elementName}`
         return (<g className = { classN } >
