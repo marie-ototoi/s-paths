@@ -99,7 +99,7 @@ const create = (el, props) => {
                     */
         })
 
-    d3.select(el).append('g').attr('id', 'places')
+    /*    d3.select(el).append('g').attr('id', 'places')
         .selectAll('circle')
         .data(places.results.bindings)
         .enter()
@@ -118,14 +118,14 @@ const create = (el, props) => {
     let clipHeight = clipY + bBoxScale.height + 10
     console.log(clipX, clipY, clipWidth, clipHeight)
     projection.clipExtent([[clipX, clipY], [clipWidth, clipHeight]])
-*/
+
     let bBoxScale = d3.select(el).select('#places').node().getBoundingClientRect()
     let k = bBoxScale.width > bBoxScale.height ? width / (bBoxScale.width + 20) : height / (bBoxScale.height + 20)
     let x = -((bBoxScale.x - props.display.viz.horizontal_margin + (bBoxScale.width / 2)) * (k - 1))
     let y = -((bBoxScale.y - props.display.viz.vertical_margin + (bBoxScale.height / 2)) * (k - 1))
     computeCliping(el, props, k, x, y)
     d3.select(el).selectAll('circle')
-        .attr('transform', 'scale(' + k + ') ' + 'translate(' + x / k + ',' + y / k + ')')
+        .attr('transform', 'scale(' + k + ') ' + 'translate(' + x / k + ',' + y / k + ')') */
     /* ******************************************************************************************************** */
     /* *****************************    init legend    ********************************************************* */
     /* ******************************************************************************************************** */

@@ -37,7 +37,7 @@ class App extends React.Component {
         // console.log('configs', configs)
         // console.log('data', data)
         const componentIds = {
-            'HeatMap': Map,
+            'HeatMap': HeatMap,
             'Timeline': Timeline
         }
         const main = configLib.getConfigs(configs, 'main')

@@ -1,8 +1,8 @@
 import * as types from '../constants/ActionTypes'
 
 const initialState = {
-    endpoint: 'http://localhost:8890/sparql', // 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://slickmem.data.t-mus.org/sparql'
-    entrypoint: 'foaf:Document', // 'nobel:Laureate', // 'nobel:LaureateAward',
+    endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://slickmem.data.t-mus.org/sparql'
+    entrypoint: 'nobel:LaureateAward', // 'nobel:Laureate', // 'nobel:LaureateAward',
     defaultGraph: 'http://localhost:8890/data10',
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',

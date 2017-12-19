@@ -78,7 +78,7 @@ const loadData = (dispatch) => (dataset, views) => {
     const { endpoint, entrypoint, prefixes } = dataset
     getStats(dataset)
         .then(stats => {
-            if (stats.total_instances === 0)  return new Promise((resolve, reject) => reject('No such entity in the endpoint'))
+            if (stats.total_instances === 0) return new Promise((resolve, reject) => reject('No such entity in the endpoint'))
             dispatch({
                 type: types.SET_STATS,
                 stats
@@ -92,13 +92,12 @@ const loadData = (dispatch) => (dataset, views) => {
             return new Promise((resolve) => resolve(configs))
         })
         .then(configs => {
-            
             const configMain = configLib.getSelectedConfig(configLib.getConfigs(configs, 'main'))
             const queryMain = queryLib.makeQuery(entrypoint, configMain)
             const configAside = configLib.getSelectedConfig(configLib.getConfigs(configs, 'aside'))
             const queryAside = queryLib.makeQuery(entrypoint, configAside)
-            console.log(queryMain)
-            console.log(queryAside)
+            console.log('queryMain', queryMain)
+            console.log('queryaside', queryAside)
             /* return Promise.all([
                 new Promise((resolve) => resolve(stats.load('Timeline'))),
                 new Promise((resolve) => resolve(stats.load('HeatMap')))

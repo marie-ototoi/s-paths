@@ -4,7 +4,7 @@ import queryLib from '../src/lib/queryLib'
 const router = express.Router()
 
 router.get('/:class', (req, res) => {
-    //req.params.class
+    // req.params.class
     getStats({ entrypoint: req.params.class })
         .then(props => {
             console.log('GET !!!!!!!!!!!!!!!!!!!!!!!!!', req.params.options, props)
@@ -29,8 +29,8 @@ const getStats = (opt) => {
     const options = {
         entrypoint: opt.entrypoint,
         constraints: opt.constraints || '',
-        defaultGraph: opt.defaultGraph || 'http://localhost:8890/data10',
-        endpoint: 'http://localhost:8890/sparql', // 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql'
+        /* defaultGraph: opt.defaultGraph || 'http://localhost:8890/data10', */
+        endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql'
         ignoreList: [...ignore, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
         maxLevel: opt.maxLevel || 4,
         maxUnique: opt.maxUnique || 100,
