@@ -1,4 +1,5 @@
 const mongoose = require('mongoose')
+mongoose.Promise = Promise
 
 module.exports = mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true })
     .then(

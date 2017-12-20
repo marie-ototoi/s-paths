@@ -9,10 +9,10 @@ router.post('/:class', (req, res) => {
         console.error('You must provide at least an entrypoint and an endpoint')
         res.end()
     } else {
-        // console.log(prefixModel.findOrCreate ('nobel', 'http://data.nobelprize.org/terms/'))
+        
         getStats({ entrypoint: req.params.class, ...req.body })
             .then(props => {
-                console.log('POST !!!!!!!!!!!!!!!!!!!!!!!!!', req.params.options, props)
+                console.log('API stats', props)
                 res.json(props)
             })
             .catch((err) => {
@@ -35,10 +35,22 @@ const getStats = (opt) => {
         maxChar: opt.maxChar || 55,
         prefixes: opt.prefixes || {}
     }
-    const totalQuery = queryLib.makeTotalQuery(options.entrypoint, options.constraints, options.defaultGraph)
-    // console.log(totalQuery)
     let total
-    return queryLib.getData(options.endpoint, totalQuery, options.prefixes)
+    return new Promise(resolve => {
+        if (queryLib.usesPrefix(options.entrypoint)) {
+            resolve(options.entrypoint)
+        } else {
+            // to be completed
+            //prefixModel.findOrCreate('http://data.nobelprize.org/terms/')
+
+        }
+    })
+        .then(entrypoint => {
+            return new Promise(resolve => resolve(queryLib.makeTotalQuery(entrypoint, options.constraints, options.defaultGraph)))
+        })
+        .then(totalQuery => {
+            return queryLib.getData(options.endpoint, totalQuery, options.prefixes)
+        })
         .then(totalcount => {
             // console.log(totalcount)
             total = Number(totalcount.results.bindings[0].total.value)

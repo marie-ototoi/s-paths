@@ -81,9 +81,12 @@ const getPrefix = (uri, prefixes) => {
     } */
 }
 
+const usesPrefix = (uri) => {
+    return uri.match(/:/g) && !uri.match(/\//g)
+}
+
 const createPrefix = (uri, length) => {
     return uri.replace(/([\/:#_\-.]|purl|org|http|www)/g, function (match, p1) { 
-        console.log(match, p1)
         if (p1) return ''
     }).toLowerCase().substr(0, length)
 }
@@ -239,3 +242,4 @@ exports.makePropsQuery = makePropsQuery
 exports.makeTotalQuery = makeTotalQuery
 exports.mergeStatsWithProps = mergeStatsWithProps
 exports.usePrefix = usePrefix
+exports.usesPrefix = usesPrefix
