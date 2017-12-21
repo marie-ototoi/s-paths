@@ -172,6 +172,14 @@ class HeatMap extends React.Component {
                 propIndex = { 0 }
                 selectElements = { this.selectElements }
             />
+            { dataStat &&
+                <Axis display = {display}
+                    type = "left"
+                    zone = { zone }
+                    keys = {d3.set(dataStat.data.map(item => item.prop2)).values()}
+                    keysDisplay = "simple"
+                    titles = {['Title', 'TEST']}
+                />}
             <PropSelector
                 propList = { listProp2 }
                 configs = { configs }
@@ -229,8 +237,9 @@ class HeatMap extends React.Component {
 */
 
     selectElements (prop, value, category) {
-        const elements = d3HeatMap.getElements(this.refs.HeatMap, category)
-        // console.log(prop, value, elements)
+        let elements = []
+        if (category !== undefined) d3HeatMap.getElements(this.refs.HeatMap, category)
+        else elements = prop
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }
