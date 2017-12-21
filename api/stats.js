@@ -1,81 +1,56 @@
 import express from 'express'
 import promiseSettle from 'promise-settle'
 import queryLib from '../src/lib/queryLib'
+import prefixModel from '../models/prefix'
 const router = express.Router()
 
-router.get('/:class', (req, res) => {
-    // req.params.class
-    getStats({ entrypoint: req.params.class })
-        .then(props => {
-            console.log('GET !!!!!!!!!!!!!!!!!!!!!!!!!', req.params.options, props)
-            res.json(props)
-        })
-        .catch((err) => {
-            console.log('Error retrieving stats', err)
-        })
-})
 router.post('/:class', (req, res) => {
-    getStats({ entrypoint: req.params.class, ...req.body })
-        .then(props => {
-            console.log('POST !!!!!!!!!!!!!!!!!!!!!!!!!', props)
-            res.json(props)
-        })
-        .catch((err) => {
-            console.log('Error retrieving stats', err)
-        })
+    if (!req.params.class || !req.body.endpoint) {
+        console.error('You must provide at least an entrypoint and an endpoint')
+        res.end()
+    } else {
+        
+        getStats({ entrypoint: req.params.class, ...req.body })
+            .then(props => {
+                console.log('API stats', props)
+                res.json(props)
+            })
+            .catch((err) => {
+                console.log('Error retrieving stats', err)
+            })
+    }
 })
+
 const getStats = (opt) => {
     const ignore = opt.ignoreList ? [...opt.ignoreList] : []
     const options = {
         entrypoint: opt.entrypoint,
         constraints: opt.constraints || '',
-        /* defaultGraph: opt.defaultGraph || 'http://localhost:8890/data10', */
-        endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql'
+        defaultGraph: opt.defaultGraph || null,
+        endpoint: opt.endpoint,
         ignoreList: [...ignore, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
+        dateList: opt.dateList,
         maxLevel: opt.maxLevel || 4,
         maxUnique: opt.maxUnique || 100,
         maxChar: opt.maxChar || 55,
-        prefixes: opt.prefixes || {
-            dcterms: 'http://purl.org/dc/terms/',
-            d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
-            dbpedia: 'http://dbpedia.org/resource/',
-            'dbpedia-owl': 'http://dbpedia.org/ontology/',
-            dbpprop: 'http://dbpedia.org/property/',
-            foaf: 'http://xmlns.com/foaf/0.1/',
-            freebase: 'http://rdf.freebase.com/ns/',
-            map: 'http://data.nobelprize.org/resource/#',
-            meta: 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#',
-            nobel: 'http://data.nobelprize.org/terms/',
-            owl: 'http://www.w3.org/2002/07/owl#',
-            rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-            rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
-            skos: 'http://www.w3.org/2004/02/skos/core#',
-            viaf: 'http://viaf.org/viaf/',
-            xsd: 'http://www.w3.org/2001/XMLSchema#',
-            yago: 'http://yago-knowledge.org/resource/',
-            bio: 'http://vocab.org/bio/0.1/', // BnF
-            bibo: 'http://purl.org/ontology/bibo/',
-            'dcmi-box': 'http://dublincore.org/documents/dcmi-box',
-            dcmitype: 'http://purl.org/dc/dcmitype/',
-            'frbr-rda': 'http://rdvocab.info/uri/schema/FRBRentitiesRDA/',
-            geo: 'http://www.w3.org/2003/01/geo/wgs84_pos#',
-            geonames: 'http://www.geonames.org/ontology#',
-            ign: 'http://data.ign.fr/ontology/topo.owl#',
-            insee: 'http://rdf.insee.fr/geo',
-            isni: 'http://isni.org/ontology#',
-            marcrel: 'http://id.loc.gov/vocabulary/relators',
-            mo: 'http://musicontology.com/',
-            ore: 'http://www.openarchives.org/ore/terms/',
-            rdagroup1elements: 'http://rdvocab.info/Elements/',
-            rdagroup2elements: 'http://rdvocab.info/ElementsGr2/',
-            rdarelationships: 'http://rdvocab.info/RDARelationshipsWEMI',
-            schemaorg: 'http://schema.org/'
-        }
+        prefixes: opt.prefixes || {}
     }
-    const totalQuery = queryLib.makeTotalQuery(options.entrypoint, options.constraints, options.defaultGraph)
-    // console.log(totalQuery)
     let total
-    return queryLib.getData(options.endpoint, totalQuery, options.prefixes)
+    return new Promise(resolve => {
+        if (queryLib.usesPrefix(options.entrypoint)) {
+            resolve(options.entrypoint)
+        } else {
+            // to be completed
+            //prefixModel.findOrCreate('http://data.nobelprize.org/terms/')
+
+        }
+    })
+        .then(entrypoint => {
+            return new Promise(resolve => resolve(queryLib.makeTotalQuery(entrypoint, options.constraints, options.defaultGraph)))
+        })
+        .then(totalQuery => {
+            return queryLib.getData(options.endpoint, totalQuery, options.prefixes)
+        })
         .then(totalcount => {
             // console.log(totalcount)
             total = Number(totalcount.results.bindings[0].total.value)
@@ -116,8 +91,7 @@ const getStatsLevel = (categorizedProps, level, total, options) => {
                         return queryLib.defineGroup(prop, queriedProps[index].path, level, options)
                     }).filter(prop => {
                         return (prop.category !== 'ignore') &&
-                        !checkExistingProps.includes(prop.property) &&
-                        !(prop.avgcharlength > maxChar)
+                        !checkExistingProps.includes(prop.property)
                     })
                     newCategorizedProps.push(...filteredCategorizedProps)
                 }
@@ -147,7 +121,7 @@ const getStatsLevel = (categorizedProps, level, total, options) => {
             }
         })
         .catch((err) => {
-            console.log('Error retrieving stats', err)
+            console.error('Error retrieving stats', err)
         })
 }
 router.post('/:class', (req, res) => {
