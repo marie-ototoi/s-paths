@@ -155,13 +155,23 @@ const resize = (el, props) => {
         .attr('y', d => yScale(d.prop2) + 0.5)
 }
 
-const getElements = (el, color) => {
+const getElements = (el, prop, value) => {
+    console.log('GETELEMENTS', prop)
     let listRect = []
-    d3.select(el).select('#center').selectAll('rect').filter(function () {
-        return this.getAttribute('fill').includes(color)
-    }).each(function (d) {
-        listRect.push(d.selection)
-    })
+    if (prop === 'color') {
+        d3.select(el).select('#center').selectAll('rect').filter(function () {
+            return this.getAttribute('fill').includes(value)
+        }).each(function (d) {
+            listRect.push(d.selection)
+        })
+    } else if (prop === 'prop1') {
+        d3.select(el).select('#center').selectAll('rect').filter(function () {
+            console.log(this.getAttribute('idProp'), value[0])
+            return this.getAttribute('idProp').includes(value[0])
+        }).each(function (d) {
+            listRect.push(d.selection)
+        })
+    }
     console.log(listRect)
     return listRect
 }

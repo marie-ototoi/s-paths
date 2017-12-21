@@ -76,7 +76,7 @@ class HeatMap extends React.Component {
                 color: colors[i],
                 label: key,
                 category: colors[i],
-                propName: 'none'
+                propName: 'color'
             })
         }
 
@@ -90,9 +90,6 @@ class HeatMap extends React.Component {
         }
         const legend = { info: paletteObj }
         // Second prop to be displayed in the legend
-        const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data)
-        const pathProp2 = selectedConfig.properties[1].path
-        const categoryProp2 = selectedConfig.properties[1].category
         // const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         //  const legend = dataLib.getLegend(nestedProp2, colors, categoryProp2)
         const listProp2 = dataLib.getPropList(configs, 1)
@@ -237,9 +234,11 @@ class HeatMap extends React.Component {
 */
 
     selectElements (prop, value, category) {
+        console.log(prop, value, category)
         let elements = []
-        if (category !== undefined) d3HeatMap.getElements(this.refs.HeatMap, category)
-        else elements = prop
+        if (category === undefined && value === undefined) elements = prop
+        else if (prop === 'color') elements = d3HeatMap.getElements(this.refs.HeatMap, 'color', category)
+        else if (prop === 'prop1' || prop === 'prop2') elements = d3HeatMap.getElements(this.refs.HeatMap, prop, value)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }
