@@ -10,7 +10,9 @@ class Axis extends React.Component {
     }
 
     render () {
-        return (<g className = "Axis" ref = {this.props.zone + '-' + this.props.type} ></g>)
+        return (<g className = "Axis"
+            ref = {this.props.zone + '-' + this.props.type} >
+        </g>)
     }
     componentDidMount () {
         if (this.props.zone === undefined || this.props.type === undefined) return

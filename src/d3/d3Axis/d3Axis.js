@@ -9,13 +9,13 @@ const create = (el, props) => {
         bottom(el, props)
             .addKeys(props.keys, props.keysDisplay)
             .addTitles(props.titles)
-            .assignBehaviors(props.behaviors)
+        //            .assignBehaviors(props.behaviors)
         break
     case 'left':
         left(el, props)
             .addKeys(props.keys, props.keysDisplay)
             .addTitles(props.titles)
-            .assignBehaviors(props.behaviors)
+        //          .assignBehaviors(props.behaviors)
         break
     default:
     }
@@ -66,6 +66,7 @@ const left = (el, props) => {
          x2: props.display.viz.horizontal_margin,
          y2: props.display.viz.vertical_margin
      }
+    d3.select(el).attr('transform', 'translate(' + props.display.zones[props.zone].x + ',' + props.display.zones[props.zone].y + ')')
     return new d3AxisLeft(el, position)
 }
 const right = (el, props) => {
