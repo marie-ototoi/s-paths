@@ -4,13 +4,12 @@ import queryLib from '../src/lib/queryLib'
 import prefixModel from '../models/prefix'
 const router = express.Router()
 
-router.post('/:class', (req, res) => {
-    if (!req.params.class || !req.body.endpoint) {
+router.post('/', (req, res) => {
+    if (!req.body.entrypoint || !req.body.endpoint) {
         console.error('You must provide at least an entrypoint and an endpoint')
         res.end()
     } else {
-        
-        getStats({ entrypoint: req.params.class, ...req.body })
+        getStats(req.body)
             .then(props => {
                 console.log('API stats', props)
                 res.json(props)
@@ -23,7 +22,7 @@ router.post('/:class', (req, res) => {
 
 const getStats = (opt) => {
     const ignore = opt.ignoreList ? [...opt.ignoreList] : []
-    const options = {
+    let options = {
         entrypoint: opt.entrypoint,
         constraints: opt.constraints || '',
         defaultGraph: opt.defaultGraph || null,
@@ -36,33 +35,35 @@ const getStats = (opt) => {
         prefixes: opt.prefixes || {}
     }
     let total
-    return new Promise(resolve => {
-        if (queryLib.usesPrefix(options.entrypoint)) {
-            resolve(options.entrypoint)
-        } else {
-            // to be completed
-            //prefixModel.findOrCreate('http://data.nobelprize.org/terms/')
-
-        }
-    })
+    return prefixModel.findOrCreate(options.prefixes)
+        .then(results => {
+            if (queryLib.usesPrefix(options.entrypoint, options.prefixes)) {
+                return options.entrypoint
+            } else {
+                return prefixModel.findOrGenerateOne(options.entrypoint)
+                    .then(prefix => {
+                        // console.log('prefix', prefix)
+                        options.prefixes[prefix.prefix] = prefix._id
+                        return queryLib.usePrefix(options.entrypoint, options.prefixes)
+                    })
+            }
+        })
         .then(entrypoint => {
-            return new Promise(resolve => resolve(queryLib.makeTotalQuery(entrypoint, options.constraints, options.defaultGraph)))
+            // console.log('entrypoint', entrypoint)
+            options.entrypoint = entrypoint
+            return queryLib.makeTotalQuery(entrypoint, options.constraints, options.defaultGraph)
         })
         .then(totalQuery => {
+            // console.log('totalQuery', totalQuery)
             return queryLib.getData(options.endpoint, totalQuery, options.prefixes)
         })
         .then(totalcount => {
-            // console.log(totalcount)
             total = Number(totalcount.results.bindings[0].total.value)
             const entryProp = [{ path: options.entrypoint, previousPath: options.entrypoint, level: 0, category: 'entrypoint' }]
-            if (total === 0) {
-                return new Promise(resolve => resolve([]))
-            } else {
-                return getStatsLevel(entryProp, 1, total, options)
-            }
+            return (total === 0) ? new Promise(resolve => resolve([])) : getStatsLevel(entryProp, 1, total, options)
         })
         .then(props => {
-            return new Promise(resolve => resolve({ total_instances: total, statements: props }))
+            return new Promise(resolve => resolve({ total_instances: total, statements: props, options }))
         })
 }
 const getStatsLevel = (categorizedProps, level, total, options) => {

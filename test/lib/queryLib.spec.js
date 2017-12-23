@@ -117,9 +117,10 @@ WHERE {
             .to.equal('http://www.w3.org/2003/01/geo/wgs84_pos#')
     })
     it('should return true if the url is already reduced with a prefix, else false', () => {
-        expect(queryLib.usesPrefix('nobel:LaureateAward'))
+        const pref = { nobel: 'http://data.nobelprize.org/terms/' }
+        expect(queryLib.usesPrefix('nobel:LaureateAward', pref))
             .to.equal(true)
-        expect(queryLib.usesPrefix('http://www.w3.org/2003/01/geo/wgs84_pos#SpatialThing'))
+        expect(queryLib.usesPrefix('http://www.w3.org/2003/01/geo/wgs84_pos#SpatialThing', pref))
             .to.equal(false)
     })
 })

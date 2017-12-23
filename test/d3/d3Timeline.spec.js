@@ -9,7 +9,6 @@ import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
 import { draw, resize, assignBehavior } from '../../src/d3/d3Timeline'
 import { load, loadEmpty, loadError } from '../data/nobel'
-import statLib from '../../src/lib/statLib'
 
 describe('d3Timeline', function () {
     it('should trigger select method on click', function () {

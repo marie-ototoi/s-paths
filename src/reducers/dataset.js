@@ -2,7 +2,7 @@ import * as types from '../constants/ActionTypes'
 
 const initialState = {
     endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql', //  'http://slickmem.data.t-mus.org/sparql'
-    entrypoint: 'nobel:Laureate', //'foaf:Document', //  'nobel:LaureateAward',
+    entrypoint: 'http://data.nobelprize.org/terms/Laureate', //'nobel:Laureate', //'foaf:Document', //  'nobel:LaureateAward',
     /* defaultGraph: 'http://localhost:8890/data10', */
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',
@@ -14,7 +14,7 @@ const initialState = {
         freebase: 'http://rdf.freebase.com/ns/',
         map: 'http://data.nobelprize.org/resource/#',
         meta: 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#',
-        nobel: 'http://data.nobelprize.org/terms/',
+        /*nobel: 'http://data.nobelprize.org/terms/',*/
         owl: 'http://www.w3.org/2002/07/owl#',
         rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
         rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
@@ -56,32 +56,26 @@ const dataset = (state = initialState, action) => {
     switch (action.type) {
     case types.INIT:
         return {
-            ...state,
-            status: 'fetching_props'
+            ...state
         }
-    case types.SET_ENTRYPOINT:
+    case types.SET_PREFIXED_ENTRYPOINT:
         return {
             ...state,
-            endpoint: action.endpoint,
-            entryPoint: action.entryPoint,
-            constraints: action.constraints || '',
-            status: 'fetching_props'
+            entrypoint: action.entrypoint,
+            prefixes: action.prefixes
         }
     case types.SET_STATS:
         return {
             ...state,
-            status: 'ranking_views',
             stats: action.stats
         }
     case types.SET_CONFIGS:
         return {
-            ...state,
-            status: 'fetching_data'
+            ...state
         }
     case types.SET_DATA:
         return {
-            ...state,
-            status: 'ok'
+            ...state
         }
     default:
         return state
