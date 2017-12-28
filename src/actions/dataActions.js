@@ -40,7 +40,7 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
         zone
     })
     const newConfig = configLib.getSelectedConfig(updatedConfig)
-    const newQuery = queryLib.makeQuery(entrypoint, newConfig)
+    const newQuery = queryLib.makeQuery(entrypoint, newConfig, updatedConfig)
     // console.log('new data', newQuery)
     queryLib.getData(endpoint, newQuery, prefixes)
         .then((newData) => {
@@ -66,7 +66,7 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
 }
 
 const loadData = (dispatch) => (dataset, views) => {
-    let { endpoint, entrypoint, prefixes } = dataset
+    let { endpoint, entrypoint, prefixes, defaultGraph } = dataset
     getStats(dataset)
         .then(stats => {
             if (stats.total_instances === 0) return new Promise((resolve, reject) => reject('No such entity in the endpoint'))
@@ -79,7 +79,7 @@ const loadData = (dispatch) => (dataset, views) => {
                 entrypoint: stats.options.entrypoint,
                 prefixes: stats.options.prefixes
             })
-            entrypoint = stats.options.endpoint
+            entrypoint = stats.options.entrypoint
             prefixes = stats.options.prefixes
             // for each views, checks which properties ou sets of properties could match and evaluate
             let configs = configLib.activateDefaultConfigs(configLib.defineConfigs(views, stats))
@@ -90,10 +90,12 @@ const loadData = (dispatch) => (dataset, views) => {
             return configs
         })
         .then(configs => {
-            const configMain = configLib.getSelectedConfig(configLib.getConfigs(configs, 'main'))
-            const queryMain = queryLib.makeQuery(entrypoint, configMain)
-            const configAside = configLib.getSelectedConfig(configLib.getConfigs(configs, 'aside'))
-            const queryAside = queryLib.makeQuery(entrypoint, configAside)
+            const configMain = configLib.getConfigs(configs, 'main')
+            const selectedConfigMain = configLib.getSelectedConfig(configMain)
+            const queryMain = queryLib.makeQuery(entrypoint, selectedConfigMain, configMain, defaultGraph)
+            const configAside = configLib.getConfigs(configs, 'aside')
+            const selectedConfigAside = configLib.getSelectedConfig(configAside)
+            const queryAside = queryLib.makeQuery(entrypoint, selectedConfigAside, configAside, defaultGraph)
             // console.log('queryMain', queryMain)
             // console.log('queryaside', queryAside)
             /* return Promise.all([

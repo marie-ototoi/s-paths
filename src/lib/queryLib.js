@@ -136,30 +136,35 @@ const defineGroup = (prop, previousPath, level, options) => {
     }
 }
 
-const makeQuery = (entrypoint, config, defaultGraph) => {
+const makeQuery = (entrypoint, selectedConfig, configZone, defaultGraph) => {
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
-    let propList = (config.entrypoint === undefined) ? `` : `?entrypoint `
-    let groupList = (config.entrypoint === undefined) ? `` : `?entrypoint `
+    let propList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
+    let groupList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
     let defList = ``
     let orderList = ``
-    config.properties.forEach((prop, index) => {
+    // console.log(selectedConfig)
+    selectedConfig.properties.forEach((prop, index) => {
         index += 1
         propList = propList.concat(`?prop${index} ?labelprop${index} `)
         orderList = orderList.concat(`?prop${index} `)
-        if (config.entrypoint === undefined) {
+        if (configZone.entrypoint === undefined) {
             propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
             orderList = orderList.concat(`?countprop${index} `)
         }
         groupList = groupList.concat(`?prop${index} ?labelprop${index} `)
         defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`, 'entrypoint', (index === 1)))
     })
-    /* console.log(`SELECT DISTINCT ${propList}
-    WHERE { ?entrypoint rdf:type ${entrypoint} .
-    ${defList}
-    } GROUP BY ${groupList}ORDER BY ${orderList}`) */
+    /* console.log(`SELECT DISTINCT ${propList}${graph}
+    WHERE {
+        OPTIONAL {
+        ${defList}
+        }
+        } GROUP BY ${groupList}ORDER BY ${orderList}`) */
     return `SELECT DISTINCT ${propList}${graph}
 WHERE {
+OPTIONAL {
 ${defList}
+}
 } GROUP BY ${groupList}ORDER BY ${orderList}`
 }
 

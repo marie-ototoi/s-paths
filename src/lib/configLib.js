@@ -1,5 +1,5 @@
-const getSelectedConfig = (configs) => {
-    return configs.matches.filter(m => m.selected === true)[0]
+const getSelectedConfig = (config) => {
+    return config.matches.filter(m => m.selected === true)[0]
 }
 const getConfigs = (configs, zone) => {
     return configs.filter(c => c.zone === zone)[0]

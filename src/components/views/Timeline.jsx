@@ -38,6 +38,7 @@ class Timeline extends React.PureComponent {
     }
     prepareData (nextProps) {
         const { data, configs, palettes, getPropPalette } = nextProps
+        // console.log(data)
         // prepare the data for display
         const selectedConfig = config.getSelectedConfig(configs)
         // First prop to be displayed in the bottom axis

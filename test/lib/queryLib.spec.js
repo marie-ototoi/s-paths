@@ -36,16 +36,12 @@ WHERE {
             ],
             selected: true
         }
-        const config2 = {
-            ...config1,
-            entrypoint: {}
-        }
-        expect(queryLib.makeQuery('nobel:LaureateAward', config1, 'http://localhost:8890/nobel'))
+        expect(queryLib.makeQuery('nobel:LaureateAward', config1, {}, 'http://localhost:8890/nobel'))
             .to.equal(`SELECT DISTINCT ?prop1 ?labelprop1 (COUNT(?prop1) as ?countprop1) ?prop2 ?labelprop2 (COUNT(?prop2) as ?countprop2) FROM <http://localhost:8890/nobel> 
 WHERE {
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label ?labelprop2 } . 
 } GROUP BY ?prop1 ?labelprop1 ?prop2 ?labelprop2 ORDER BY ?prop1 ?countprop1 ?prop2 ?countprop2 `)
-        expect(queryLib.makeQuery('nobel:LaureateAward', config2))
+        expect(queryLib.makeQuery('nobel:LaureateAward', config1, { entrypoint: {} }))
             .to.equal(`SELECT DISTINCT ?entrypoint ?prop1 ?labelprop1 ?prop2 ?labelprop2 
 WHERE {
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label ?labelprop2 } . 
