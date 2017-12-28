@@ -162,9 +162,7 @@ const makeQuery = (entrypoint, selectedConfig, configZone, defaultGraph) => {
         } GROUP BY ${groupList}ORDER BY ${orderList}`) */
     return `SELECT DISTINCT ${propList}${graph}
 WHERE {
-OPTIONAL {
 ${defList}
-}
 } GROUP BY ${groupList}ORDER BY ${orderList}`
 }
 

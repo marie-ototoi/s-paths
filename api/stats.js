@@ -63,11 +63,17 @@ const getStats = (opt) => {
             return (total === 0) ? new Promise(resolve => resolve([])) : getStatsLevel(entryProp, 1, total, options)
         })
         .then(props => {
-            return new Promise(resolve => resolve({ total_instances: total, statements: props, options }))
+            return prefixModel.find()
+                .then(newPrefixes => {
+                    newPrefixes.forEach(prefix => {
+                        options.prefixes[prefix.prefix] = prefix._id
+                    })
+                    return new Promise(resolve => resolve({ total_instances: total, statements: props, options }))
+                })
         })
 }
 const getStatsLevel = (categorizedProps, level, total, options) => {
-    const { entrypoint, constraints, endpoint, prefixes, maxLevel, maxUnique, maxChar, defaultGraph } = options
+    let { entrypoint, constraints, endpoint, prefixes, maxLevel, maxUnique, maxChar, defaultGraph } = options
     let newCategorizedProps = []
     const queriedProps = categorizedProps.filter(prop => {
         return (prop.level === level - 1 &&
@@ -100,12 +106,20 @@ const getStatsLevel = (categorizedProps, level, total, options) => {
             // console.log('[[[[[[[[[[[[[[', newCategorizedProps.length, newCategorizedProps)
             if (newCategorizedProps.length > 0) {
                 return promiseSettle(newCategorizedProps.map(prop => {
-                    let propQuery = queryLib.makePropQuery(prop, constraints, defaultGraph)
-                    // console.log('[[[[[[[[[[[[[[', propQuery)
-                    return queryLib.getData(endpoint, propQuery, prefixes)
+                    return prefixModel.findOrGenerateOne(prop.property)
                 }))
+                    .then(newPrefixes => {
+                        newPrefixes.forEach(prefix => {
+                            if (prefix.prefix) prefixes[prefix.prefix] = prefix._id
+                        })
+                        return promiseSettle(newCategorizedProps.map(prop => {
+                            let propQuery = queryLib.makePropQuery(prop, constraints, defaultGraph)
+                            // console.log('[[[[[[[[[[[[[[', propQuery)
+                            return queryLib.getData(endpoint, propQuery, prefixes)
+                        }))
+                    })
             } else {
-                return new Promise(resolve => resolve([]))
+                return []
             }
         })
         .then(stats => {

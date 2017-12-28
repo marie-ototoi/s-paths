@@ -1,9 +1,9 @@
 import * as types from '../constants/ActionTypes'
 
 const initialState = {
-    endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql', //  'http://slickmem.data.t-mus.org/sparql'
-    entrypoint: 'http://data.nobelprize.org/terms/Laureate', //'nobel:Laureate', //'foaf:Document', //  'nobel:LaureateAward',
-    /* defaultGraph: 'http://localhost:8890/data10', */
+    endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', //'http://localhost:8890/sparql', //    'http://slickmem.data.t-mus.org/sparql'
+    entrypoint: 'http://data.nobelprize.org/terms/Laureate', //'http://xmlns.com/foaf/0.1/Document', //'foaf:Document', // 'nobel:Laureate',  //  'nobel:LaureateAward',
+    defaultGraph: null, // 'http://localhost:8890/data10',
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',
         d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
@@ -14,7 +14,7 @@ const initialState = {
         freebase: 'http://rdf.freebase.com/ns/',
         map: 'http://data.nobelprize.org/resource/#',
         meta: 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#',
-        /*nobel: 'http://data.nobelprize.org/terms/',*/
+        nobel: 'http://data.nobelprize.org/terms/',
         owl: 'http://www.w3.org/2002/07/owl#',
         rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
         rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
@@ -30,7 +30,7 @@ const initialState = {
         geo: 'http://www.w3.org/2003/01/geo/wgs84_pos#',
         geonames: 'http://www.geonames.org/ontology#',
         ign: 'http://data.ign.fr/ontology/topo.owl#',
-        insee: 'http://rdf.insee.fr/geo',
+        insee: 'http://rdf.insee.fr/def/geo#',
         isni: 'http://isni.org/ontology#',
         marcrel: 'http://id.loc.gov/vocabulary/relators',
         mo: 'http://musicontology.com/',

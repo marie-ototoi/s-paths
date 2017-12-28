@@ -77,8 +77,9 @@ const getAxis = (nestedProps, propName, category) => {
     }
 }
 
-const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
-    // console.log(data, propName, format, max, propsToAdd)
+const groupTimeData = (data, propName, format, max, forceGroup) => {
+    // console.log(data, propName, format, max)
+    let group
     let dataToNest = data.map(d => {
         let dateProp = moment(d[propName].value, format)
         if (!dateProp.isValid()) throw 'Cannot use time format'
@@ -100,29 +101,25 @@ const groupTimeData = (data, propName, format, max, propsToAdd = []) => {
     let nest
     let additionalValue
     let keyFormat
-    if (yearNumber < max) {
+    if (forceGroup === 'year' || yearNumber < max) {
         nest = yearNest
+        group = 'year'
         additionalValue = Number(yearNest[yearNest.length - 1].key) + 1
-    } else if (decadeNumber < max) {
+    } else if (forceGroup === 'decade' || (!forceGroup && decadeNumber < max)) {
         nest = decadeNest
+        group = 'decade'
         additionalValue = Number(decadeNest[decadeNest.length - 1].key) + 10
     } else {
         nest = centuryNest
+        group = 'century'
         additionalValue = Number(centuryNest[centuryNest.length - 1].key) + 100
     }
-    return [...nest.map(group => {
-        let groupWithAdd = {
-            ...group,
-            values: group.values.sort((a, b) => b.prop2.value.localeCompare(a.prop2.value))
+    return [...nest.map(keygroup => {
+        return {
+            ...keygroup,
+            values: keygroup.values.sort((a, b) => b.prop2.value.localeCompare(a.prop2.value))
         }
-        propsToAdd.forEach(prop => {
-            groupWithAdd[prop] = 0
-            group.values.forEach(val => {
-                groupWithAdd[prop] += Number(val[prop]) || 1
-            })
-        })
-        return groupWithAdd
-    }), { key: additionalValue, values: [] }]
+    }), { key: additionalValue, values: [], group }]
 }
 
 exports.areLoaded = areLoaded
