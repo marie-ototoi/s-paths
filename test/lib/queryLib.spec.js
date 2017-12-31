@@ -6,13 +6,15 @@ import queryLib from '../../src/lib/queryLib'
 
 describe('lib/queryLib', () => {
     it('should write query to get stats', () => {
-        expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*' })).to.equal(`SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) (COUNT(DISTINCT ?entrypoint) AS ?coverage) 
+        expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*' }, { constraints: '' })).to.equal(`SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) (COUNT(DISTINCT ?entrypoint) AS ?coverage) 
 WHERE {
+
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object . OPTIONAL { ?object rdfs:label ?labelobject } .  
 
 }`)
-        expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*', category: 'text' }, '', 'http://localhost:8890/nobel')).to.equal(`SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) (AVG(?charlength) as ?avgcharlength) (COUNT(DISTINCT ?entrypoint) AS ?coverage) FROM <http://localhost:8890/nobel> 
+        expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*', category: 'text' }, { constraints: '', defaultGraph: 'http://localhost:8890/nobel' }, true)).to.equal(`SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) (AVG(?charlength) as ?avgcharlength) (COUNT(DISTINCT ?entrypoint) AS ?coverage) FROM <http://localhost:8890/nobel> 
 WHERE {
+
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object . OPTIONAL { ?object rdfs:label ?labelobject } .  
 BIND(STRLEN(?object) AS ?charlength)
 }`)

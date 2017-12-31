@@ -2,11 +2,11 @@ import * as types from '../constants/ActionTypes'
 
 const initialState = {
     endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', //'http://localhost:8890/sparql', //    'http://slickmem.data.t-mus.org/sparql'
-    entrypoint: 'http://data.nobelprize.org/terms/Laureate', //'http://xmlns.com/foaf/0.1/Document', //'foaf:Document', // 'nobel:Laureate',  //  'nobel:LaureateAward',
+    entrypoint: 'http://data.nobelprize.org/terms/LaureateAward', //'http://xmlns.com/foaf/0.1/Document', //'foaf:Document', // 'nobel:Laureate',  //  'nobel:LaureateAward',
     defaultGraph: null, // 'http://localhost:8890/data10',
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',
-        d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
+        /*d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
         dbpedia: 'http://dbpedia.org/resource/',
         'dbpedia-owl': 'http://dbpedia.org/ontology/',
         dbpprop: 'http://dbpedia.org/property/',
@@ -32,7 +32,7 @@ const initialState = {
         ign: 'http://data.ign.fr/ontology/topo.owl#',
         insee: 'http://rdf.insee.fr/def/geo#',
         isni: 'http://isni.org/ontology#',
-        marcrel: 'http://id.loc.gov/vocabulary/relators',
+        marcrel: 'http://id.loc.gov/vocabulary/relators/',
         mo: 'http://musicontology.com/',
         ore: 'http://www.openarchives.org/ore/terms/',
         rdagroup1elements: 'http://rdvocab.info/Elements/',
@@ -44,7 +44,7 @@ const initialState = {
         frbr: 'http://purl.org/vocab/frbr/core#',
         sim: 'http://purl.org/ontology/similarity/',
         slickm: 'http://slickmem.data.t-mus.org/',
-        slickmem: 'http://slickmem.data.t-mus.org/terms/'
+        slickmem: 'http://slickmem.data.t-mus.org/terms/'*/
     },
     status: 'off',
     stats: []

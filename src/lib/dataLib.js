@@ -77,7 +77,7 @@ const getAxis = (nestedProps, propName, category) => {
     }
 }
 
-const groupTimeData = (data, propName, format, max, forceGroup) => {
+const groupTimeData = (data, propName, format, max, propsToAdd = [], forceGroup) => {
     // console.log(data, propName, format, max)
     let group
     let dataToNest = data.map(d => {
@@ -115,10 +115,17 @@ const groupTimeData = (data, propName, format, max, forceGroup) => {
         additionalValue = Number(centuryNest[centuryNest.length - 1].key) + 100
     }
     return [...nest.map(keygroup => {
-        return {
+        let groupWithAdd = {
             ...keygroup,
             values: keygroup.values.sort((a, b) => b.prop2.value.localeCompare(a.prop2.value))
         }
+        propsToAdd.forEach(prop => {
+            groupWithAdd[prop] = 0
+            keygroup.values.forEach(val => {
+                groupWithAdd[prop] += Number(val[prop]) || 1
+            })
+        })
+        return groupWithAdd
     }), { key: additionalValue, values: [], group }]
 }
 

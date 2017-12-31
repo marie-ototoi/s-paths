@@ -2,13 +2,15 @@ import * as d3 from 'd3'
 import moment from 'moment'
 import {SparqlClient, SPARQL} from 'sparql-client-2'
 
-const makePropQuery = (prop, constraints, defaultGraph) => {
+const makePropQuery = (prop, options, firstTimeQuery) => {
+    const { constraints, defaultGraph } = options
     const { path } = prop
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     const avgchar = (prop.category === 'text') ? `(AVG(?charlength) as ?avgcharlength) ` : ``
-    const char = (prop.category === 'text') ? `BIND(STRLEN(?object) AS ?charlength)` : ``
+    const char = (prop.category === 'text' && firstTimeQuery) ? `BIND(STRLEN(?object) AS ?charlength)` : ``
     return `SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) ${avgchar}(COUNT(DISTINCT ?entrypoint) AS ?coverage) ${graph}
 WHERE {
+${constraints}
 ${FSL2SPARQL(path, 'object')} 
 ${char}
 }`
@@ -47,6 +49,16 @@ const usePrefix = (uri, prefixes) => {
         for (var pref in prefixes) {
             let splittedUri = match.split(prefixes[pref])
             if (splittedUri.length > 1) return `${pref}:${splittedUri[1]}`
+        }
+        return match
+    })
+}
+
+const useFullUri = (path, prefixes) => {
+    return path.replace(path, (match, offset, string) => {
+        for (var pref in prefixes) {
+            let splittedUri = match.split(pref + ':')
+            if (splittedUri.length > 1) return `${prefixes[pref]}${splittedUri[1]}`
         }
         return match
     })
@@ -195,5 +207,6 @@ exports.makePropQuery = makePropQuery
 exports.makePropsQuery = makePropsQuery
 exports.makeTotalQuery = makeTotalQuery
 exports.mergeStatsWithProps = mergeStatsWithProps
+exports.useFullUri = useFullUri
 exports.usePrefix = usePrefix
 exports.usesPrefix = usesPrefix

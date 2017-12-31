@@ -27,7 +27,7 @@ prefixSchema.statics = {
                 }
             })
     },
-    findOrCreate (prefixes) {
+    createOrUpdate (prefixes) {
         let allPromises = []
         for (let prefix in prefixes) {
             allPromises.push(this.update(
@@ -51,7 +51,7 @@ prefixSchema.statics = {
                     // console.log(pref, root)
                     return this.update(
                         { _id: root },
-                        { $set: { prefix: pref, createdAt: Date.now() } },
+                        { $set: { prefix: pref, modifiedAt: Date.now() }, $setOnInsert: { createdAt: Date.now() } },
                         { upsert: true }
                     ).exec()
                 })

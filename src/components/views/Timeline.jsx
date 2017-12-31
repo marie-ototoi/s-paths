@@ -59,7 +59,7 @@ class Timeline extends React.PureComponent {
     }
     render () {
         const { axisBottom, legend, listProp1, listProp2 } = this.customState
-        const { data, configs, display, zone } = this.props
+        const { configs, display, zone } = this.props
         // display settings
         const classN = `Timeline ${this.customState.elementName}`
         return (<g className = { classN } >

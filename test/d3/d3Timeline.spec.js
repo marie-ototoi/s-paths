@@ -22,7 +22,7 @@ describe('d3Timeline', function () {
     })
     it('should draw a group with a line inside for each element', function () {
         // draw
-        draw(document.body.innerHTML = '<g class="Timeline" id="Timeline"></g>')
+        // draw(document.body.innerHTML = '<g class="Timeline" id="Timeline"></g>')
     })
     it('should color the element from the corresponding color in the palette', function () {
         // draw
