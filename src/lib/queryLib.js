@@ -1,6 +1,7 @@
 import * as d3 from 'd3'
 import moment from 'moment'
 import {SparqlClient, SPARQL} from 'sparql-client-2'
+import configLib from './configLib'
 
 const makePropQuery = (prop, options, firstTimeQuery) => {
     const { constraints, defaultGraph } = options
@@ -16,7 +17,8 @@ ${char}
 }`
 }
 
-const makeTotalQuery = (entitiesClass, constraints, defaultGraph) => {
+const makeTotalQuery = (entitiesClass, options) => {
+    let { constraints, defaultGraph } = options
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     return `SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) ${graph}
 WHERE {
@@ -38,10 +40,10 @@ const usesPrefix = (uri, prefixes) => {
     return uri.match(/:/g) && !uri.match(/\//g) && prefixes[parts[0]] !== undefined
 }
 
-const createPrefix = (uri, length) => {
+const createPrefix = (uri) => {
     return uri.replace(/([\/:#_\-.]|purl|org|data|http|www)/g, (match, p1) => { 
         if (p1) return ''
-    }).toLowerCase().substr(0, length)
+    }).toLowerCase()
 }
 
 const usePrefix = (uri, prefixes) => {
@@ -77,8 +79,16 @@ const getRoot = (uri) => {
     }
 }
 
-const makePropsQuery = (entitiesClass, constraints, level, defaultGraph) => {
+const convertPath = (fullPath, prefixes) => {
+    var uriRegex = /<[\w\d:\.#\-_\/#]+>?/gi
+    return fullPath.replace(uriRegex, (match, p1) => {
+        if (match) return usePrefix(match.substr(1, match.length - 2), prefixes)
+    })
+}
+
+const makePropsQuery = (entitiesClass, options, level) => {
     // this is valid only for first level
+    const { constraints, defaultGraph } = options
     const pathQuery = FSL2SPARQL(entitiesClass, 'interobject', 'subject')
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     const subject = (level === 1) ? '?subject' : '?interobject'
@@ -94,6 +104,31 @@ const makePropsQuery = (entitiesClass, constraints, level, defaultGraph) => {
     /* for (let index = 1; index <= levels; index ++) {
         let subject
     } */
+}
+
+const prefixDefined = (uri, prefixes) => {
+    let root = getRoot(uri)
+    let rootList = []
+    for (let pref in prefixes) {
+        rootList.push(prefixes[pref])
+    }
+    return rootList.includes(root)
+}
+
+const addSmallestPrefix = (url, prefixes) => {
+    const root = getRoot(url)
+    const flatRoot = createPrefix(root)
+    const checkRoot = (len) => {
+        let newPref = flatRoot.substr(0, len)
+        if (prefixes[newPref]) {
+            return checkRoot(len + 1)
+        } else {
+            return newPref
+        }
+    }
+    let prefix = checkRoot(5)
+    prefixes[prefix] = root
+    return prefixes
 }
 
 const mergeStatsWithProps = (props, stats, totalEntities) => {
@@ -114,10 +149,11 @@ const mergeStatsWithProps = (props, stats, totalEntities) => {
     })
 }
 
-const defineGroup = (prop, previousPath, level, options) => {
+const defineGroup = (prop, previousProp, level, options) => {
     const { avgcharlength, property, datatype, isiri, isliteral, language } = prop
     const { ignoreList, maxChar, prefixes } = options
-    const path = `${previousPath}/${usePrefix(property.value, prefixes)}/*`
+    const fullPath = `${previousProp.fullPath}/<${property.value}>/*`
+    const path = convertPath(fullPath, prefixes)
     let returnprops = {}
     // console.log(datatype)
     if (ignoreList.includes(property.value)) {
@@ -142,13 +178,18 @@ const defineGroup = (prop, previousPath, level, options) => {
     if (language && language.value) returnprops.language = language.value
     return {
         ...returnprops,
+        entrypoint: previousProp.entrypoint,
         property: property.value,
+        fullPath,
         path,
         level
     }
 }
 
-const makeQuery = (entrypoint, selectedConfig, configZone, defaultGraph) => {
+// to do : take constraints into account
+const makeQuery = (entrypoint, configZone, options) => {
+    const { defaultGraph, constraints } = options
+    let selectedConfig = configLib.getSelectedConfig(configZone)
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     let propList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
     let groupList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
@@ -174,6 +215,7 @@ const makeQuery = (entrypoint, selectedConfig, configZone, defaultGraph) => {
         } GROUP BY ${groupList}ORDER BY ${orderList}`) */
     return `SELECT DISTINCT ${propList}${graph}
 WHERE {
+${constraints}
 ${defList}
 } GROUP BY ${groupList}ORDER BY ${orderList}`
 }
@@ -197,6 +239,7 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
     return query
 }
 
+exports.convertPath = convertPath
 exports.createPrefix = createPrefix
 exports.defineGroup = defineGroup
 exports.FSL2SPARQL = FSL2SPARQL
@@ -207,6 +250,8 @@ exports.makePropQuery = makePropQuery
 exports.makePropsQuery = makePropsQuery
 exports.makeTotalQuery = makeTotalQuery
 exports.mergeStatsWithProps = mergeStatsWithProps
+exports.prefixDefined = prefixDefined
+exports.addSmallestPrefix = addSmallestPrefix
 exports.useFullUri = useFullUri
 exports.usePrefix = usePrefix
 exports.usesPrefix = usesPrefix

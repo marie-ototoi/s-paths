@@ -40,7 +40,7 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
         zone
     })
     const newConfig = configLib.getSelectedConfig(updatedConfig)
-    const newQuery = queryLib.makeQuery(entrypoint, newConfig, updatedConfig)
+    const newQuery = queryLib.makeQuery(entrypoint, updatedConfig, dataset)
     // console.log('new data', newQuery)
     queryLib.getData(endpoint, newQuery, prefixes)
         .then((newData) => {
@@ -91,11 +91,9 @@ const loadData = (dispatch) => (dataset, views) => {
         })
         .then(configs => {
             const configMain = configLib.getConfigs(configs, 'main')
-            const selectedConfigMain = configLib.getSelectedConfig(configMain)
-            const queryMain = queryLib.makeQuery(entrypoint, selectedConfigMain, configMain, defaultGraph)
+            const queryMain = queryLib.makeQuery(entrypoint, configMain, dataset)
             const configAside = configLib.getConfigs(configs, 'aside')
-            const selectedConfigAside = configLib.getSelectedConfig(configAside)
-            const queryAside = queryLib.makeQuery(entrypoint, selectedConfigAside, configAside, defaultGraph)
+            const queryAside = queryLib.makeQuery(entrypoint, configAside, dataset)
             // console.log('queryMain', queryMain)
             // console.log('queryaside', queryAside)
             /* return Promise.all([

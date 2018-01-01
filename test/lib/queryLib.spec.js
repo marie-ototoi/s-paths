@@ -20,7 +20,7 @@ BIND(STRLEN(?object) AS ?charlength)
 }`)
     })
     it('should write query to get total number of entities', () => {
-        expect(queryLib.makeTotalQuery('nobel:LaureateAward', '')).to.equal(`SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) 
+        expect(queryLib.makeTotalQuery('nobel:LaureateAward', { constraints: '', prefixes: {} })).to.equal(`SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) 
 WHERE {
 ?entrypoint rdf:type nobel:LaureateAward . 
 }`)
@@ -32,25 +32,31 @@ WHERE {
     })
     it('should make a valid SPARQL query with given entrypoint and props', () => {
         const config1 = {
-            properties: [
-                { path: 'nobel:LaureateAward/nobel:year/*' },
-                { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
-            ],
-            selected: true
+            matches: [
+                {
+                    properties: [
+                        { path: 'nobel:LaureateAward/nobel:year/*' },
+                        { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
+                    ],
+                    selected: true
+                }
+            ]
         }
-        expect(queryLib.makeQuery('nobel:LaureateAward', config1, {}, 'http://localhost:8890/nobel'))
+        expect(queryLib.makeQuery('nobel:LaureateAward', config1, { defaultGraph: 'http://localhost:8890/nobel', constraints: '' }))
             .to.equal(`SELECT DISTINCT ?prop1 ?labelprop1 (COUNT(?prop1) as ?countprop1) ?prop2 ?labelprop2 (COUNT(?prop2) as ?countprop2) FROM <http://localhost:8890/nobel> 
 WHERE {
+
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label ?labelprop2 } . 
 } GROUP BY ?prop1 ?labelprop1 ?prop2 ?labelprop2 ORDER BY ?prop1 ?countprop1 ?prop2 ?countprop2 `)
-        expect(queryLib.makeQuery('nobel:LaureateAward', config1, { entrypoint: {} }))
+        expect(queryLib.makeQuery('nobel:LaureateAward', { ...config1, entrypoint: {} }, { constraints: '' }))
             .to.equal(`SELECT DISTINCT ?entrypoint ?prop1 ?labelprop1 ?prop2 ?labelprop2 
 WHERE {
+
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label ?labelprop2 } . 
 } GROUP BY ?entrypoint ?prop1 ?labelprop1 ?prop2 ?labelprop2 ORDER BY ?prop1 ?prop2 `)
     })
     it('should make a valid SPARQL to get stats for a prop', () => {
-        expect(queryLib.makePropsQuery('nobel:LaureateAward', '', 1))
+        expect(queryLib.makePropsQuery('nobel:LaureateAward', { constraints: '' }, 1))
             .to.equal(`SELECT DISTINCT ?property ?datatype ?language ?isiri ?isliteral WHERE {
         ?subject rdf:type nobel:LaureateAward . 
         ?subject ?property ?object .
@@ -60,7 +66,7 @@ WHERE {
         BIND(ISLITERAL(?object) AS ?isliteral) .
         BIND(LANG(?object) AS ?language) .
     } GROUP BY ?property ?datatype ?language ?isiri ?isliteral`)
-        expect(queryLib.makePropsQuery('nobel:LaureateAward/nobel:university/*', '', 2, 'http://localhost:8890/nobel'))
+        expect(queryLib.makePropsQuery('nobel:LaureateAward/nobel:university/*', { constraints: '', defaultGraph: 'http://localhost:8890/nobel' }, 2))
             .to.equal(`SELECT DISTINCT ?property ?datatype ?language ?isiri ?isliteral FROM <http://localhost:8890/nobel> WHERE {
         ?subject rdf:type nobel:LaureateAward . ?subject nobel:university ?interobject . OPTIONAL { ?interobject rdfs:label ?labelinterobject } . 
         ?interobject ?property ?object .
@@ -73,8 +79,15 @@ WHERE {
     })
     it('should affect a prop to the right group', () => {
         const options = {
-            prefixes: { dct: 'http://purl.org/dc/terms/' },
-            ignoreList: ''
+            prefixes: {
+                nobel: 'http://data.nobelprize.org/terms/',
+                dct: 'http://purl.org/dc/terms/'
+            },
+            ignoreList: []
+        }
+        const prevProp = {
+            fullPath: '<http://data.nobelprize.org/terms/LaureateAward>',
+            entrypoint: 'nobel:LaureateAward'
         }
         const stat = {
             property: { type: 'uri', value: 'http://purl.org/dc/terms/isPartOf' },
@@ -85,12 +98,14 @@ WHERE {
                 value: 'true'
             }
         }
-        expect(queryLib.defineGroup(stat, 'nobel:LaureateAward', 1, options))
+        expect(queryLib.defineGroup(stat, prevProp, 1, options))
             .to.deep.equal({
                 property: stat.property.value,
                 category: 'uri',
+                entrypoint: 'nobel:LaureateAward',
+                path: 'nobel:LaureateAward/dct:isPartOf/*',
                 level: 1,
-                path: 'nobel:LaureateAward/dct:isPartOf/*'
+                fullPath: '<http://data.nobelprize.org/terms/LaureateAward>/<http://purl.org/dc/terms/isPartOf>/*'
             })
     })
     it('should replace the beginning of a url with a prefix', () => {
@@ -102,11 +117,11 @@ WHERE {
         expect(queryLib.usePrefix('http://unknown.url/toto', prefixes))
             .to.equal('http://unknown.url/toto')
     })
-    it('should generate a prefix of expected length', () => {
+    it('should generate a prefix root', () => {
         expect(queryLib.createPrefix('http://purl.org/dc/terms/isPartOf', 3))
-            .to.equal('dct')
+            .to.equal('dctermsispartof')
         expect(queryLib.createPrefix('http://purl.org/NET/c4dm/event.owl#', 4))
-            .to.equal('netc')
+            .to.equal('netc4dmeventowl')
     })
     it('should return the root of an url', () => {
         expect(queryLib.getRoot('http://purl.org/dc/terms/isPartOf'))
@@ -119,6 +134,44 @@ WHERE {
         expect(queryLib.usesPrefix('nobel:LaureateAward', pref))
             .to.equal(true)
         expect(queryLib.usesPrefix('http://www.w3.org/2003/01/geo/wgs84_pos#SpatialThing', pref))
+            .to.equal(false)
+    })
+
+    it('should transform a full path in a prefixed path', () => {
+        let prefixes = {
+            nobel: 'http://data.nobelprize.org/terms/',
+            nobel2: 'http://data.nobelprize.org/terms#',
+            foaf: 'http://xmlns.com/foaf/0.1/'
+        }
+        expect(queryLib.convertPath('<http://data.nobelprize.org/terms/LaureateAward>/<http://data.nobelprize.org/terms/laureate>/<http://data.nobelprize.org/terms/Laureate>/<http://xmlns.com/foaf/0.1/gender>/*', prefixes))
+            .to.equal('nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*')
+        expect(queryLib.convertPath('<http://data.nobelprize.org/terms#LaureateAward>/<http://data.nobelprize.org/terms#laureate>/<http://data.nobelprize.org/terms#Laureate>/<http://xmlns.com/foaf/0.1/gender>/*', prefixes))
+            .to.equal('nobel2:LaureateAward/nobel2:laureate/nobel2:Laureate/foaf:gender/*')
+    })
+
+    it('should add the shortest prefix available prefix to the list', () => {
+        let prefixes = {
+            nobel: 'http://data.nobelprize.org/terms/'
+        }
+        expect(queryLib.addSmallestPrefix('http://xmlns.com/foaf/0.1/gender', prefixes))
+            .to.deep.equal({
+                ...prefixes,
+                xmlns: 'http://xmlns.com/foaf/0.1/'
+            })
+        expect(queryLib.addSmallestPrefix('http://data.nobelprize.org/te', prefixes))
+            .to.deep.equal({
+                ...prefixes,
+                nobelp: 'http://data.nobelprize.org/'
+            })
+    })
+
+    it('should check if prefix already defined ', () => {
+        let prefixes = {
+            nobel: 'http://data.nobelprize.org/terms/'
+        }
+        expect(queryLib.prefixDefined('http://data.nobelprize.org/terms/LaureateAward', prefixes))
+            .to.equal(true)
+        expect(queryLib.prefixDefined('http://xmlns.com/foaf/0.1/gender', prefixes))
             .to.equal(false)
     })
 })

@@ -4,6 +4,9 @@ const initialState = {
     endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', //'http://localhost:8890/sparql', //    'http://slickmem.data.t-mus.org/sparql'
     entrypoint: 'http://data.nobelprize.org/terms/LaureateAward', //'http://xmlns.com/foaf/0.1/Document', //'foaf:Document', // 'nobel:Laureate',  //  'nobel:LaureateAward',
     defaultGraph: null, // 'http://localhost:8890/data10',
+    constraints: '',  // '?entrypoint <http://data.nobelprize.org/terms/year> ?year . filter (?year > 1980)',
+    forceUpdate: false,
+    maxLevel: 4,
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',
         /*d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
