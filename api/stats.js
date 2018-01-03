@@ -9,16 +9,17 @@ const router = express.Router()
 
 router.post('/', (req, res) => {
     if (!req.body.entrypoint || !req.body.endpoint) {
-        console.error('You must provide at least an entrypoint and an endpoint')
+        // console.error('You must provide at least an entrypoint and an endpoint')
         res.end()
     } else {
         getStats(req.body)
             .then(props => {
-                console.log('API stats', props)
+                // console.log('API stats', props)
                 res.json(props)
+                res.end()
             })
             .catch((err) => {
-                console.log('Error retrieving stats', err)
+                console.error('Error retrieving stats', err)
             })
     }
 })
@@ -38,7 +39,7 @@ const getStats = (opt) => {
         maxChar: opt.maxChar || 55,
         prefixes: opt.prefixes || {}
     }
-    let { prefixes, entrypoint, forceUpdate, constraints, defaultGraph, endpoint } = options
+    let { prefixes, entrypoint, forceUpdate, endpoint } = options
     if (forceUpdate === true) propertyModel.deleteMany({ entrypoint: entrypoint })
     let total
     // add prefix to entrypoint if full url
@@ -134,8 +135,6 @@ const getLabels = (prefixes, props) => {
                     // nothing
                     return response
                 }
-            }).catch(err => {
-                console.error(err)
             })
         })
     ).then(resp => {
@@ -208,7 +207,7 @@ const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQu
 }
 
 const getPropsLevel = (categorizedProps, level, options) => {
-    let { entrypoint, constraints, endpoint, prefixes, maxLevel, defaultGraph } = options
+    let { entrypoint, endpoint, prefixes, maxLevel } = options
     let newCategorizedProps = []
     // look for savedProps in the database
     return propertyModel.find({ entrypoint: entrypoint, level: level }).exec()
@@ -291,8 +290,6 @@ const getPropsLevel = (categorizedProps, level, options) => {
             } else {
                 return { statements: returnProps, options }
             }
-        }).catch(err => {
-            console.error('Error retrieving stats', err)
         })
 }
 

@@ -21,7 +21,7 @@
   "author": "Marie Destandau <marie.destandau@inria.fr>",
   "license": "ISC",
   "bugs": {
-    "url": ""
+    "url": "https://gitlab.inria.fr/dashboard/issues"
   },
   "dependencies": {
     "cors": "^2.8.4",
@@ -31,11 +31,11 @@
     "mongodb": "^3.0.0-rc0",
     "mongoose": "^4.13.7",
     "node-fetch": "^1.7.3",
+    "pluralize": "^7.0.0",
     "promise-settle": "^0.3.0",
     "rdf-fetch": "^1.0.0",
     "rdflib": "^0.16.5",
     "request": "^2.83.0",
-    "request-promise": "^4.2.2",
     "rewire": "^3.0.2",
     "shallowequal": "^1.0.2"
   },

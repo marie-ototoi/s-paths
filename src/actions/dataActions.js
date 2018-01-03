@@ -1,13 +1,12 @@
 import fetch from 'node-fetch'
-import rp from 'request-promise'
 import * as types from '../constants/ActionTypes'
-import stats from '../../test/data/nobel'
+// import stats from '../../test/data/nobel'
 import configLib from '../lib/configLib'
-import dataLib from '../lib/dataLib'
+// import dataLib from '../lib/dataLib'
 import queryLib from '../lib/queryLib'
 
 const getStats = (options) => {
-    console.log(JSON.stringify(options))
+    // console.log(JSON.stringify(options))
     return fetch(('http://localhost:5000/stats/'),
         {
             method: 'POST',
@@ -39,7 +38,6 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
         config: updatedConfig,
         zone
     })
-    const newConfig = configLib.getSelectedConfig(updatedConfig)
     const newQuery = queryLib.makeQuery(entrypoint, updatedConfig, dataset)
     // console.log('new data', newQuery)
     queryLib.getData(endpoint, newQuery, prefixes)
@@ -66,10 +64,10 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
 }
 
 const loadData = (dispatch) => (dataset, views) => {
-    let { endpoint, entrypoint, prefixes, defaultGraph } = dataset
+    let { endpoint, entrypoint, prefixes } = dataset
     getStats(dataset)
         .then(stats => {
-            if (stats.total_instances === 0) return new Promise((resolve, reject) => reject('No such entity in the endpoint'))
+            if (stats.total_instances === 0) return new Promise((resolve, reject) => reject(new Error('No such entity in the endpoint')))
             dispatch({
                 type: types.SET_STATS,
                 stats
@@ -77,7 +75,8 @@ const loadData = (dispatch) => (dataset, views) => {
             dispatch({
                 type: types.SET_PREFIXED_ENTRYPOINT,
                 entrypoint: stats.options.entrypoint,
-                prefixes: stats.options.prefixes
+                prefixes: stats.options.prefixes,
+                labels: stats.options.labels
             })
             entrypoint = stats.options.entrypoint
             prefixes = stats.options.prefixes

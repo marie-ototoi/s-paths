@@ -24,10 +24,11 @@ const areLoaded = (data, zone) => {
         data.filter(d => d.zone === zone)[0].statements.results.bindings.length > 0
 }
 
-const getPropList = (configs, propIndex) => {
+const getPropList = (configs, propIndex, labels) => {
     return configs.matches.map(config => {
         return {
             path: config.properties[propIndex].path,
+            readablePath: getReadablePathsParts(config.properties[propIndex].path, labels),
             selected: config.selected
         }
     }).reduce((configAcc, config) => {
@@ -51,6 +52,19 @@ const getLegend = (nestedProps, colors, category) => {
             }
         })
     }
+}
+
+const getReadablePathsParts = (path, labels) => {
+    const parts = path.split('/')
+    return parts
+        .filter((part, index) => index !== 0 && part !== '*')
+        .map(part => {
+            let prop = labels.filter(l => l.prefUri === part)
+            return {
+                label: prop[0].label || part,
+                comment: prop[0].comment || undefined,
+            }
+        })
 }
 
 const getAxis = (nestedProps, propName, category) => {

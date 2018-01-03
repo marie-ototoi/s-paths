@@ -1,8 +1,9 @@
 import chai, {expect} from 'chai'
-import sinon from 'sinon'
+// import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-chai.use(sinonChai)
 import queryLib from '../../src/lib/queryLib'
+
+chai.use(sinonChai)
 
 describe('lib/queryLib', () => {
     it('should write query to get stats', () => {

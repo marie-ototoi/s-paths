@@ -1,5 +1,4 @@
 import * as d3 from 'd3'
-import dataLib from '../lib/dataLib'
 
 const create = (el, props) => {
     //
@@ -10,7 +9,7 @@ const create = (el, props) => {
     }
 }
 
-const draw = (el, props) => {       
+const draw = (el, props) => {
 }
 
 const update = (el, props) => {
@@ -45,7 +44,7 @@ const resize = (el, props) => {
         const minDif = info.reduce((acc, current) => {
             if (acc.prev) {
                 let dif = Number(current.key) - Number(acc.prev.key)
-                if (!acc.dif || dif < acc.dif) acc.dif = dif            
+                if (!acc.dif || dif < acc.dif) acc.dif = dif
             }
             acc.prev = current
             return acc
@@ -59,8 +58,15 @@ const resize = (el, props) => {
     d3.select(el).append('g')
         .attr('class', `axis${type}`)
         .call(axisEl)
-    d3.select(el).selectAll('.domain').remove()
-    const ticks = d3.select(el).selectAll('.tick')
+    // d3.select(el).selectAll('.domain').remove()
+    d3.select(el).select(`.axis${type}`)
+        .append('line')
+        .attr('class', `legendline`)
+        .attr('x1', 0)
+        .attr('y1', 0.5)
+        .attr('x2', -20)
+        .attr('y2', 0.5)
+    const ticks = d3.select(el).selectAll(`.axis${type} .tick`)
     const tickWidth = Math.floor(dimensions.width / ticks.size())
     ticks.append('rect')
         .classed('reactzone', true)

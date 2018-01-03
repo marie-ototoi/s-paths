@@ -49,9 +49,16 @@ const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, he
     switch (element) {
     case 'legend':
         return {
-            x: origin.x + offset.x,
-            y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
+            x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
+            y: origin.y + viz.vertical_margin + offset.y,
             width: viz.horizontal_margin + offset.width,
+            height: viz.vertical_margin + offset.height
+        }
+    case 'header':
+        return {
+            x: origin.x + viz.horizontal_margin + offset.x,
+            y: origin.y + offset.y,
+            width: viz.useful_width + offset.width,
             height: viz.vertical_margin + offset.height
         }
     case 'axisBottom':
@@ -70,14 +77,14 @@ const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, he
         }
     case 'propSelectorLegend':
         return {
-            x: origin.x + offset.x,
-            y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
+            x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
+            y: origin.y + viz.vertical_margin + offset.y,
             width: viz.horizontal_margin + offset.width,
             height: 20 + offset.height
         }
     case 'propSelectorAxisBottom':
         return {
-            x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
+            x: origin.x + offset.x,
             y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
             width: viz.horizontal_margin + offset.width,
             height: 20 + offset.height

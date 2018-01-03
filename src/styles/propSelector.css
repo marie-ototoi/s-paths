@@ -1,4 +1,17 @@
-.propSelector {
+.propSelector select {
     font-size: 0.75em;
     outline: none;
+    text-align: right;
+}
+.propSelector select.right {
+    direction: rtl;
+}
+.propSelector select option {
+    text-align: right;
+    direction: ltr;
+}
+
+.propSelector text {
+    font-size: 0.75em;
+    font-weight: bold;
 }

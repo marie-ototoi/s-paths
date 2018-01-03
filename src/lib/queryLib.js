@@ -1,6 +1,6 @@
-import * as d3 from 'd3'
-import moment from 'moment'
-import {SparqlClient, SPARQL} from 'sparql-client-2'
+// import * as d3 from 'd3'
+// import moment from 'moment'
+import { SparqlClient } from 'sparql-client-2'
 import configLib from './configLib'
 
 const makePropQuery = (prop, options, firstTimeQuery) => {
@@ -41,7 +41,7 @@ const usesPrefix = (uri, prefixes) => {
 }
 
 const createPrefix = (uri) => {
-    return uri.replace(/([\/:#_\-.]|purl|org|data|http|www)/g, (match, p1) => { 
+    return uri.replace(/([/:#_\-.]|purl|org|data|http|www)/g, (match, p1) => {
         if (p1) return ''
     }).toLowerCase()
 }
@@ -80,7 +80,7 @@ const getRoot = (uri) => {
 }
 
 const convertPath = (fullPath, prefixes) => {
-    var uriRegex = /<[\w\d:\.#\-_\/#]+>?/gi
+    var uriRegex = /<[\w\d:.#_\-/#]+>?/gi
     return fullPath.replace(uriRegex, (match, p1) => {
         if (match) return usePrefix(match.substr(1, match.length - 2), prefixes)
     })

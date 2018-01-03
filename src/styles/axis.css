@@ -1,6 +1,10 @@
 .Axis line{
     stroke: #888;
 }
+.Axis .legendline{
+    stroke: #000;
+    stroke-width: 0.5px;
+}
 .Axis text{
     fill: #666;
 }

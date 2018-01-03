@@ -1,15 +1,15 @@
 import * as types from '../constants/ActionTypes'
 
 const initialState = {
-    endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', //'http://localhost:8890/sparql', //    'http://slickmem.data.t-mus.org/sparql'
-    entrypoint: 'http://data.nobelprize.org/terms/LaureateAward', //'http://xmlns.com/foaf/0.1/Document', //'foaf:Document', // 'nobel:Laureate',  //  'nobel:LaureateAward',
+    endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql', //    'http://slickmem.data.t-mus.org/sparql'
+    entrypoint: 'http://data.nobelprize.org/terms/LaureateAward', // 'http://xmlns.com/foaf/0.1/Document', //'foaf:Document', // 'nobel:Laureate',  //  'nobel:LaureateAward',
     defaultGraph: null, // 'http://localhost:8890/data10',
-    constraints: '',  // '?entrypoint <http://data.nobelprize.org/terms/year> ?year . filter (?year > 1980)',
+    constraints: '', // '?entrypoint <http://data.nobelprize.org/terms/year> ?year . filter (?year > 1980)',
     forceUpdate: false,
     maxLevel: 4,
     prefixes: {
-        dcterms: 'http://purl.org/dc/terms/',
-        /*d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
+        dcterms: 'http://purl.org/dc/terms/'/* ,
+        d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
         dbpedia: 'http://dbpedia.org/resource/',
         'dbpedia-owl': 'http://dbpedia.org/ontology/',
         dbpprop: 'http://dbpedia.org/property/',
@@ -47,13 +47,11 @@ const initialState = {
         frbr: 'http://purl.org/vocab/frbr/core#',
         sim: 'http://purl.org/ontology/similarity/',
         slickm: 'http://slickmem.data.t-mus.org/',
-        slickmem: 'http://slickmem.data.t-mus.org/terms/'*/
+        slickmem: 'http://slickmem.data.t-mus.org/terms/' */
     },
     status: 'off',
     stats: []
 }
-
-const initialConfig = { properties: [], score: 0 }
 
 const dataset = (state = initialState, action) => {
     switch (action.type) {
@@ -65,7 +63,8 @@ const dataset = (state = initialState, action) => {
         return {
             ...state,
             entrypoint: action.entrypoint,
-            prefixes: action.prefixes
+            prefixes: action.prefixes,
+            labels: action.labels
         }
     case types.SET_STATS:
         return {
