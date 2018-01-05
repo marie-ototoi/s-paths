@@ -28,9 +28,10 @@ class Nav extends React.PureComponent {
             { options.map((option, i) => {
                 const barWidth = maxBarWidth * option.total / options[0].total
                 return <g key = { this.props.zone + '_summary_' + i }>
-                    <rect width = { barWidth } height = { 12 } y = { 60 + margin + i * 16 } x = { margin * 2 + itemWidth } fill = "#E0E0E0"></rect>
+                    <rect width = { maxBarWidth } height = { 12 } y = { 60 + margin + i * 16 } x = { margin * 2 + itemWidth } fill = "#E0E0E0"></rect>
+                    <rect width = { barWidth } height = { 6 } y = { 63 + margin + i * 16 } x = { margin * 2 + itemWidth } fill = "#666666"></rect>
                     <text x = { margin } fill = "#666666" y = { 60 + margin + 10 + i * 16 }>{ option.label }</text>
-                    <text x = { maxBarWidth + margin * 3 + itemWidth } fill = "#333333" y = { 60 + margin + 10 + i * 16 }>{ option.total }</text>
+                    <text x = { maxBarWidth + margin * 3 + itemWidth } fill = "#666666" y = { 60 + margin + 10 + i * 16 }>{ option.total }</text>
                 </g>
             }) }
         </g>)
