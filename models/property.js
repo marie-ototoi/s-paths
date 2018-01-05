@@ -5,6 +5,7 @@ const propertySchema = new mongoose.Schema({
     property: { type: String, required: true },
     category: { type: String, required: true },
     entrypoint: { type: String, required: true },
+    endpoint: { type: String, required: true },
     level: { type: Number, required: true },
     total: { type: Number },
     unique: { type: Number },
@@ -20,7 +21,8 @@ propertySchema.statics = {
             return this.update(
                 {
                     fullPath: prop.fullPath,
-                    entrypoint: prop.entrypoint
+                    entrypoint: prop.entrypoint,
+                    endpoint: prop.endpoint
                 },
                 {
                     $set: {

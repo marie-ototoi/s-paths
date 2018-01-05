@@ -1,11 +1,11 @@
 import * as types from '../constants/ActionTypes'
 
 const initialState = {
-    endpoint: 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql', //    'http://slickmem.data.t-mus.org/sparql'
-    entrypoint: 'http://data.nobelprize.org/terms/LaureateAward', // 'http://xmlns.com/foaf/0.1/Document', //'foaf:Document', // 'nobel:Laureate',  //  'nobel:LaureateAward',
-    defaultGraph: null, // 'http://localhost:8890/data10',
+    endpoint: 'http://localhost:8890/sparql', // 'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql', // , //    'http://slickmem.data.t-mus.org/sparql'
+    entrypoint: 'http://data.nobelprize.org/terms/Laureate', //'http://www.w3.org/2004/02/skos/core#Concept', //  'http://xmlns.com/foaf/0.1/Person' //, // 'nobel:Laureate',  //  'nobel:LaureateAward',
+    defaultGraph: 'http://localhost:8890/nobel', // null, // ,
     constraints: '', // '?entrypoint <http://data.nobelprize.org/terms/year> ?year . filter (?year > 1980)',
-    forceUpdate: false,
+    forceUpdate: true,
     maxLevel: 4,
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/'/* ,

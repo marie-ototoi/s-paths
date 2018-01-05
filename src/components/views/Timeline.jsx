@@ -5,6 +5,7 @@ import * as d3 from 'd3'
 import d3Timeline from '../../d3/d3Timeline'
 import Header from '../elements/Header'
 import Legend from '../elements/Legend'
+import Nav from '../elements/Nav'
 import PlainAxis from '../elements/PlainAxis'
 import PropSelector from '../elements/PropSelector'
 import config from '../../lib/configLib'
@@ -48,7 +49,7 @@ class Timeline extends React.PureComponent {
         const axisBottom = dataLib.getAxis(nestedProp1, 'prop1', categoryProp1)
         const listProp1 = dataLib.getPropList(configs, 0, dataset.labels)
         // Second prop to be displayed in the legend
-        const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data)
+        const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
         const pathProp2 = selectedConfig.properties[1].path
         const categoryProp2 = selectedConfig.properties[1].category
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
@@ -59,7 +60,7 @@ class Timeline extends React.PureComponent {
     }
     render () {
         const { axisBottom, legend, listProp1, listProp2 } = this.customState
-        const { configs, data, display, zone } = this.props
+        const { configs, data, display, selections, zone } = this.props
         // display settings
         const classN = `Timeline ${this.customState.elementName}`
         return (<g className = { classN } >
@@ -69,7 +70,13 @@ class Timeline extends React.PureComponent {
             </g>
             <Header
                 zone = { zone }
-                dimensions = { scaleLib.getDimensions('header', display.zones[zone], display.viz, { x: 0, y: 30, width: 0, height: 0 }) }
+                dimensions = { scaleLib.getDimensions('header', display.zones[zone], display.viz, { x: 0, y: 0, width: 0, height: 0 }) }
+            />
+            <Nav
+                zone = { zone }
+                displayedInstances = { data.length }
+                selections = { selections }
+                dimensions = { scaleLib.getDimensions('nav', display.zones[zone], display.viz, { x: 0, y: 0, width: 0, height: 0 }) }
             />
             <Legend
                 type = "plain"

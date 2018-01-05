@@ -10,7 +10,7 @@ class PropSelector extends React.PureComponent {
             elementName: `${props.zone}_selector_${props.propIndex} propSelector`,
             selected: false,
             selectedPath: '',
-            selectedLabel: props.propList[0].readablePath.map(part => part.label).join(' > ')
+            selectedLabel: props.propList[0].readablePath
         }
     }
     handleSelect (e) {
@@ -18,7 +18,7 @@ class PropSelector extends React.PureComponent {
         this.setState({
             selected: false,
             selectedPath: e.target.value,
-            selectedLabel: propList[e.target.options.selectedIndex].readablePath.map(part => part.label).join(' > ')
+            selectedLabel: propList[e.target.options.selectedIndex].readablePath
         })
         this.props.selectProperty(configs, zone, propIndex, e.target.value, dataset)
     }
@@ -26,28 +26,26 @@ class PropSelector extends React.PureComponent {
         const { align, dimensions, propList } = this.props
         const { x, y, width, height } = dimensions
         const alignClass = (align === 'right') ? 'right' : 'left'
-        return (!this.state.selected) ? (
-            <g
-                transform = { `translate(${x}, ${y})` }
-                className = {this.state.elementName}
-            >
-                <text
-                    x = { (align === 'right') ? (width - 5) : 0 }
-                    textAnchor = { (align === 'right') ? 'end' : 'start' }
-                    y = "15"
-                    width = { width }
-                    onClick = { (e) => this.setState({ selected: true }) }
-                >
-                    { this.state.selectedLabel }
-                </text>
-            </g>
-        ) : (
+        return (
             <foreignObject className = {this.state.elementName}
                 transform = { `translate(${x}, ${y})` }
                 ref = { this.state.elementName }
                 width = { width }
                 height = { height }
             >
+                { (!this.state.selected) &&
+                    <p
+                        className = { alignClass }
+                        onClick = { (e) => this.setState({ selected: true }) }
+                    >
+                        { this.state.selectedLabel.map((part, index) => {
+                            return <span key = {`${this.state.elementName}_path_${index}`}>
+                                <span title = { part.comment}>{part.label}</span> { (index < this.state.selectedLabel.length - 1) ? ' / ' : '' }
+                            </span>
+                        }) }
+                    </p>
+                }
+                { (this.state.selected) &&
                 <select
                     className = { alignClass }
                     value = { this.state.selectedPath }
@@ -59,10 +57,11 @@ class PropSelector extends React.PureComponent {
                             value = { config.path }
                             key = { this.state.elementName + i }
                         >
-                            { config.readablePath.map(part => part.label).join(' > ') }
+                            { config.readablePath.map(part => part.label).join(' / ') }
                         </option>
                     }) }
                 </select>
+                }
             </foreignObject>
         )
     }

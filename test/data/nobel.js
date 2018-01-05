@@ -1,6 +1,6 @@
 const explore = (resourceEnsemble, maxUnique, maxDepth) => {
     return {
-        total_instances: 911,
+        totalInstances: 911,
         statements: [
             {
                 path: 'nobel:LaureateAward/nobel:year/*',

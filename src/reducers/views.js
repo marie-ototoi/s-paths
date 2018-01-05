@@ -38,7 +38,7 @@ const defaultState = [
             [
                 {
                     category: 'datetime',
-                    unique: { min: 2 }
+                    unique: { min: 2, max: 200 }
                 }
             ],
             [

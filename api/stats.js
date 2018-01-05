@@ -14,7 +14,7 @@ router.post('/', (req, res) => {
     } else {
         getStats(req.body)
             .then(props => {
-                // console.log('API stats', props)
+                console.log('API stats', props)
                 res.json(props)
                 res.end()
             })
@@ -41,7 +41,9 @@ const getStats = (opt) => {
     }
     let { prefixes, entrypoint, forceUpdate, endpoint } = options
     if (forceUpdate === true) propertyModel.deleteMany({ entrypoint: entrypoint })
-    let total
+    let totalInstances
+    let selectionInstances
+    let displayedInstances
     // add prefix to entrypoint if full url
     if (!queryLib.usesPrefix(entrypoint, prefixes)) {
         if (!queryLib.prefixDefined(entrypoint)) {
@@ -49,46 +51,63 @@ const getStats = (opt) => {
         }
         entrypoint = queryLib.usePrefix(entrypoint, prefixes)
     }
-    // get number of entities of the set of entrypoint class limited by given constraints
-    let totalQuery = queryLib.makeTotalQuery(entrypoint, options)
-    return queryLib.getData(endpoint, totalQuery, prefixes)
-        .then(totalcount => {
-            total = Number(totalcount.results.bindings[0].total.value)
-            if (total === 0) {
-                // if number of entities is null return an empty array
-                return { statements: [], options }
-            } else {
-                // create first prop for entrypoint to feed recursive function
-                const entryProp = [{
-                    fullPath: '<' + queryLib.useFullUri(entrypoint, prefixes) + '>',
-                    path: entrypoint,
-                    entrypoint: queryLib.useFullUri(entrypoint, prefixes),
-                    level: 0,
-                    category: 'entrypoint'
-                }]
-                // check if props available in database
-                // if necessary retrieve missing level
-                // or recursively retrieve properties
-                return getPropsLevel(entryProp, 1, options)
-            }
-        })
-        .then(resp => {
-            // get stats to match the props
-            return getStatsLevel(resp.statements, [], 1, total, options, true)
-        }).then(resp => {
-            // get human readable rdfs:labels and rdfs:comments of all properties listed
-            return getLabels(resp.options.prefixes, resp.statements)
-                .then(labels => {
-                    return {
-                        statements: resp.statements.sort((a, b) => a.level - b.level),
-                        total_instances: total,
-                        options: {
-                            ...resp.options,
-                            labels
-                        }
-                    }
+    // number of entities of the set of entrypoint class
+    let totalQuery = queryLib.makeTotalQuery(entrypoint, { ...options, constraints: '' })
+    // number of entities of the set of entrypoint class limited by given constraints
+    let selectionQuery = queryLib.makeTotalQuery(entrypoint, options)
+    // retrieve number of entities
+    return new Promise((resolve, reject) => {
+        queryLib.getData(endpoint, totalQuery, prefixes)
+            .then(totalcount => {
+                totalInstances = Number(totalcount.results.bindings[0].total.value)
+                if (options.constraints === '') {
+                    selectionInstances = totalInstances
+                    resolve(true)
+                } else {
+                    queryLib.getData(endpoint, selectionQuery, prefixes)
+                        .then(selectioncount => {
+                            selectionInstances = Number(selectioncount.results.bindings[0].total.value)
+                            resolve(true)
+                        })
+                }
+            })
+    }).then(ok => {
+        if (selectionInstances === 0) {
+            // if number of entities is null return an empty array
+            return { statements: [], options }
+        } else {
+            // create first prop for entrypoint to feed recursive function
+            const entryProp = [{
+                fullPath: '<' + queryLib.useFullUri(entrypoint, prefixes) + '>',
+                path: entrypoint,
+                entrypoint: queryLib.useFullUri(entrypoint, prefixes),
+                level: 0,
+                category: 'entrypoint'
+            }]
+            // check if props available in database
+            // if necessary retrieve missing level
+            // or recursively retrieve properties
+            return getPropsLevel(entryProp, 1, options)
+                .then(resp => {
+                    // get stats to match the props
+                    return getStatsLevel(resp.statements, [], 1, totalInstances, options, true) // last parameter is for first time query, should be changed dynamically
+                }).then(resp => {
+                    // get human readable rdfs:labels and rdfs:comments of all properties listed
+                    return getLabels(resp.options.prefixes, resp.statements)
+                        .then(labels => {
+                            return {
+                                statements: resp.statements.sort((a, b) => a.level - b.level),
+                                totalInstances,
+                                selectionInstances,
+                                options: {
+                                    ...resp.options,
+                                    labels
+                                }
+                            }
+                        })
                 })
-        })
+        }
+    })
 }
 
 const getLabels = (prefixes, props) => {
@@ -165,21 +184,22 @@ const getLabels = (prefixes, props) => {
 }
 
 const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQuery) => {
-    // if the query is about the whole set and stats have already been saved
-    if (options.constraints === '' && props[1] && props[1].coverage !== null) return { statements: props, options }
-    // else
+    console.log(props)
     const queriedProps = props.filter(prop => {
         // check levels one after another 
+        // except for first time exploration,
         // lower levels are sent only if upper levels have not been kept 
         return (prop.level === level &&
-            propsWithStats.filter(prevProp => prop.path.indexOf(prevProp.path) === 0 && prop.level === prevProp.level + 1).length === 0 // if the beginnig of the path is displayed at a higher level, don't keep (could be discussed)
-        )
+            (propsWithStats.filter(prevProp => prop.path.indexOf(prevProp.path) === 0 &&
+            prop.level === prevProp.level + 1).length === 0)) // if the beginnig of the path is displayed at a higher level, don't keep (could be discussed)
     })
     if (queriedProps.length === 0) {
         // end of the recursive loop
         return { statements: propsWithStats, options }
     } else {
-        // get all 
+        // if the query is about the whole set and stats have already been saved
+        //if (options.constraints === '' && queriedProps[0].coverage >= 0) return getStatsLevel(props, [ ...queriedProps, ...propsWithStats ], level + 1, total, options, firstTimeQuery)
+        // get all
         return promiseSettle(queriedProps.map(prop => {
             let propQuery = queryLib.makePropQuery(prop, options, firstTimeQuery)
             return queryLib.getData(options.endpoint, propQuery, options.prefixes)
@@ -191,13 +211,13 @@ const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQu
                 // save all stats, only if they are relative to the whole ensemble
                 if (options.constraints === '') propertyModel.createOrUpdate(merged)
                 // do not wait for success
-                // filter based on unique values
+                // filter based on unique values, only if not first time
                 return merged.filter(prop => {
-                    return (prop.category === 'number' ||
-                    prop.category === 'datetime' ||
+                    return (prop.total > 0 &&
+                    ((prop.category === 'number') ||
+                    (prop.category === 'datetime') ||
                     (prop.category === 'text' && prop.avgcharlength <= options.maxChar && prop.unique <= options.maxUnique) ||
-                    (prop.category === 'uri' && prop.unique <= options.maxUnique)) &&
-                    prop.total > 0
+                    (prop.category === 'uri' && prop.unique <= options.maxUnique)))
                 })
             })
             .then(merged => {
@@ -210,7 +230,7 @@ const getPropsLevel = (categorizedProps, level, options) => {
     let { entrypoint, endpoint, prefixes, maxLevel } = options
     let newCategorizedProps = []
     // look for savedProps in the database
-    return propertyModel.find({ entrypoint: entrypoint, level: level }).exec()
+    return propertyModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level }).exec()
         .then(props => {
             if (props.length > 0) {
                 // console.log('////////////////////////// saved props')

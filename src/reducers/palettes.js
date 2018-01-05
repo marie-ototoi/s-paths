@@ -3,7 +3,7 @@ import * as types from '../constants/ActionTypes'
 const initialState = [
     {
         properties: [],
-        colors: ['#00441b', '#006d2c', '#238b45', '#41ae76', '#66c2a4', '#99d8c9', '#ccece6', '#e5f5f9']
+        colors: ['hsl(180, 100%, 40%)', 'hsl(190, 100%, 40%)', 'hsl(200, 100%, 40%)', 'hsl(210, 100%, 40%)', 'hsl(220, 100%, 40%)', 'hsl(230, 100%, 40%)']
     },
     {
         properties: [],

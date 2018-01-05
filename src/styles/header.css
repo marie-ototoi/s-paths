@@ -1,0 +1,9 @@
+h1 {
+    font-size: 1.5em;
+    padding-top: 19px;
+}
+h1 span {
+    font-size: 0.75em;
+    font-weight: normal;
+    color: #777;
+}

@@ -30,6 +30,23 @@ const receiveStats = (dispatch) => (stats) => {
     })
 }
 
+const exploreSelection = (dispatch) => (selection, zone, dataset, views) => {
+    // build query for selection
+
+    // constraints = concat each selected element query
+    /* 
+    select distinct ?entrypoint 
+    FROM <http://localhost:8890/nobel> 
+    where { 
+    ?entrypoint rdf:type <http://data.nobelprize.org/terms/Laureate> . 
+    FILTER regex(?entrypoint, "http://data.nobelprize.org/resource/laureate/1$|http://data.nobelprize.org/resource/laureate/10$", "i") 
+    } */
+    // load data
+    // undo : get last configs do not load stats again / 
+    // how to synchronize all reducers for undo ? dataset, data config
+    // forget about selections when change data
+}
+
 const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) => {
     const { endpoint, entrypoint, prefixes } = dataset
     const updatedConfig = configLib.selectProperty(config, propIndex, path)
@@ -67,7 +84,7 @@ const loadData = (dispatch) => (dataset, views) => {
     let { endpoint, entrypoint, prefixes } = dataset
     getStats(dataset)
         .then(stats => {
-            if (stats.total_instances === 0) return new Promise((resolve, reject) => reject(new Error('No such entity in the endpoint')))
+            if (stats.totalInstances === 0) return new Promise((resolve, reject) => reject(new Error('No such entity in the endpoint')))
             dispatch({
                 type: types.SET_STATS,
                 stats
@@ -80,6 +97,7 @@ const loadData = (dispatch) => (dataset, views) => {
             })
             entrypoint = stats.options.entrypoint
             prefixes = stats.options.prefixes
+            // console.log('ici ?', stats.statements)
             // for each views, checks which properties ou sets of properties could match and evaluate
             let configs = configLib.activateDefaultConfigs(configLib.defineConfigs(views, stats))
             dispatch({
@@ -133,6 +151,7 @@ const loadData = (dispatch) => (dataset, views) => {
 }
 
 exports.init = init
+exports.exploreSelection = exploreSelection
 exports.loadData = loadData
 exports.receiveStats = receiveStats
 exports.selectProperty = selectProperty

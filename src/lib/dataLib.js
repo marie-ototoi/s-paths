@@ -50,19 +50,20 @@ const getLegend = (nestedProps, colors, category) => {
                 label: p.values[0].labelprop2 ? p.values[0].labelprop2.value : p.key,
                 category
             }
-        })
+        }).sort((a, b) => { return a.label.localeCompare(b.label) })
     }
 }
 
 const getReadablePathsParts = (path, labels) => {
     const parts = path.split('/')
+    if (!labels) return parts.map(part => { return { label: part } })
     return parts
         .filter((part, index) => index !== 0 && part !== '*')
         .map(part => {
             let prop = labels.filter(l => l.prefUri === part)
             return {
                 label: prop[0].label || part,
-                comment: prop[0].comment || undefined,
+                comment: prop[0].comment || undefined
             }
         })
 }
@@ -96,7 +97,7 @@ const groupTimeData = (data, propName, format, max, propsToAdd = [], forceGroup)
     let group
     let dataToNest = data.map(d => {
         let dateProp = moment(d[propName].value, format)
-        if (!dateProp.isValid()) throw 'Cannot use time format'
+        if (!dateProp.isValid()) throw new Error('Cannot use time format')
         return {
             ...d,
             dateProp,
@@ -111,7 +112,7 @@ const groupTimeData = (data, propName, format, max, propsToAdd = [], forceGroup)
     let decadeNumber = (Number(decadeNest[decadeNest.length - 1].key) - Number(decadeNest[0].key)) / 10
     let centuryNest = d3.nest().key(prop => prop.century).entries(dataToNest)
     let centuryNumber = (Number(centuryNest[centuryNest.length - 1].key) - Number(centuryNest[0].key)) / 100
-    //console.log(yearNest.length, yearNumber, decadeNest.length, decadeNumber, centuryNest.length, centuryNumber)
+    // console.log(yearNest.length, yearNumber, decadeNest.length, decadeNumber, centuryNest.length, centuryNumber)
     let nest
     let additionalValue
     let keyFormat

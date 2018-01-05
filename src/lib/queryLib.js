@@ -78,6 +78,10 @@ const getRoot = (uri) => {
         return splitHash.slice(0, -1).join('#').concat('#')
     }
 }
+const getPropName = (uri) => {
+    const root = getRoot(uri)
+    return uri.replace(root, '')
+}
 
 const convertPath = (fullPath, prefixes) => {
     var uriRegex = /<[\w\d:.#_\-/#]+>?/gi
@@ -162,7 +166,14 @@ const defineGroup = (prop, previousProp, level, options) => {
         if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#date') {
             returnprops.category = 'datetime'
         } else if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#integer') {
-            returnprops.category = 'number'
+            let propName = getPropName(property.value)
+            if (propName.match(/year|date|birthday/gi) ||
+            propName === 'birth' ||
+            propName === 'death') {
+                returnprops.category = 'datetime'
+            } else {
+                returnprops.category = 'number'
+            }
         } else if (datatype) {
             if (avgcharlength && avgcharlength.value > maxChar) {
                 returnprops.category = 'ignore'
@@ -179,6 +190,7 @@ const defineGroup = (prop, previousProp, level, options) => {
     return {
         ...returnprops,
         entrypoint: previousProp.entrypoint,
+        endpoint: options.endpoint,
         property: property.value,
         fullPath,
         path,

@@ -81,17 +81,19 @@ const draw = (el, props) => {
             d.color = legend.info.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
             d.selection = {
                 selector: d.id,
-                props: [
+                /* props: [
                     { path: selectedConfig.properties[0].path, value: d.prop1 },
                     { path: selectedConfig.properties[1].path, value: d.prop2 },
                     { path: selectedConfig.properties[2].path, value: d.prop3 }
-                ]
+                ], */
+                query: '?entrypoint LIKE ' + d.entrypoint.value
             }
+            //console.log(d.selection)
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
         })
         .attr('id', d => d.id)
         .classed('selected', d => d.selected)
-        .attr('opacity', d => (selections.length > 0 && d.selected !== true) ? 0.4 : 1)
+       
         .attr('fill', d => d.color)
         .on('click', d => {
             selectElement(d.selection)
@@ -117,7 +119,7 @@ const resize = (el, props) => {
     const unitWidth = nestedProp1.reduce((acc, current) => {
         if (acc.prev) {
             let dif = xScale(Number(current.key)) - xScale(Number(acc.prev.key))
-            if (!acc.dif || dif < acc.dif) acc.dif = dif            
+            if (!acc.dif || dif < acc.dif) acc.dif = dif
         }
         acc.prev = current
         return acc
@@ -126,10 +128,14 @@ const resize = (el, props) => {
     d3.select(el).selectAll('g.time').selectAll('.elements')
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
     d3.select(el).selectAll('g.time').selectAll('.element')
-        .attr('x', 0)
-        .attr('width', unitWidth - 2)
+        .attr('x', d => (d.selected === true) ? 1.5 : 1)
+        .attr('width', d => (d.selected === true) ? unitWidth - 3 : unitWidth - 2)
         .attr('y', -unitHeight)
-        .attr('height', unitHeight - 1)
+        .attr('height', d => unitHeight)
+        .attr('stroke-width', d => (d.selected === true) ? 1 : 0)
+        .attr('stroke', '#000')
+
+  
         // .attr('stroke-width', )
 }
 

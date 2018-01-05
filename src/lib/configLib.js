@@ -159,12 +159,12 @@ const defineConfigs = (views, stats) => {
         if (view.entrypoint) {
             const { min, max, optimal } = view.entrypoint
             let addValue
-            if (!inRange(stats.total_instances, [min, max])) {
+            if (!inRange(stats.totalInstances, [min, max])) {
                 // will result in each score being 0, so discard the view
                 entrypointFactor = 0
             } else {
                 // will higher each score
-                entrypointFactor += getCost(stats.total_instances, min, max, optimal, 0.3)
+                entrypointFactor += getCost(stats.totalInstances, min, max, optimal, 0.3)
             }
         }
         // remove combinations where a mandatory prop is missing
