@@ -93,7 +93,6 @@ const draw = (el, props) => {
         })
         .attr('id', d => d.id)
         .classed('selected', d => d.selected)
-       
         .attr('fill', d => d.color)
         .on('click', d => {
             selectElement(d.selection)
@@ -105,7 +104,7 @@ const draw = (el, props) => {
 }
 
 const resize = (el, props) => {
-    const { nestedProp1, display } = props
+    const { nestedProp1, display, selections } = props
     const xScale = d3.scaleLinear()
         .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
         .range([0, display.viz.useful_width])
@@ -128,14 +127,13 @@ const resize = (el, props) => {
     d3.select(el).selectAll('g.time').selectAll('.elements')
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
     d3.select(el).selectAll('g.time').selectAll('.element')
-        .attr('x', d => (d.selected === true) ? 1.5 : 1)
-        .attr('width', d => (d.selected === true) ? unitWidth - 3 : unitWidth - 2)
+        .attr('x', d => 1)
+        .attr('width', d => unitWidth - 2)
         .attr('y', -unitHeight)
         .attr('height', d => unitHeight)
-        .attr('stroke-width', d => (d.selected === true) ? 1 : 0)
-        .attr('stroke', '#000')
-
-  
+        //.attr('stroke-width', 1 )
+        //.attr('stroke', d => (d.selected === true) ? '#000' : d.color)
+        .attr('opacity', d => (selections.length > 0 && d.selected !== true) ? 0.5 : 1)
         // .attr('stroke-width', )
 }
 
