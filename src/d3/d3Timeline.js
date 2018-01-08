@@ -24,7 +24,9 @@ const drawSelection = (el, props) => {
         .enter()
         .append('rect')
         .attr('class', 'selection')
-        .on('mouseup', props.handleMouseUp)
+        .on('mouseup', d => {
+            props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY })
+        })
 
     d3.select(el).select('rect.selection')
         .attr('width', selectedZone.x2 - selectedZone.x1)
@@ -135,7 +137,10 @@ const draw = (el, props) => {
             d.color = legend.info.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
             d.selection = {
                 selector: d.id,
-                query: '?entrypoint LIKE ' + d.entrypoint.value
+                query: {
+                    type: 'uri',
+                    value: d.entrypoint.value
+                }
             }
             //console.log(d.selection)
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
@@ -147,16 +152,13 @@ const draw = (el, props) => {
             // bug to be fixed console.log('what sup ', selections.length, d.selected, d.entrypoint )
             return (selections.length > 0 && d.selected !== true) ? 0.5 : 1
         })
-        
         .on('mousedown', d => {
-            d3.event.stopPropagation()
             selectElement(d.selection)
         })
-        .on('mouseup', props.handleMouseUp)
-    /*
-    .on('mouseenter', (d) => {
-        selectElement(d.selection)
-    }) */
+        .on('mouseup', d => {
+            // console.log(d3.event.pageX)
+            props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY })
+        })
 }
 
 const resize = (el, props) => {

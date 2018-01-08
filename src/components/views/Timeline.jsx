@@ -63,16 +63,13 @@ class Timeline extends React.PureComponent {
         this.customState = { ...this.customState, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2 }
     }
     handleMouseMove (e) {
-        const { selectedZone, viz } = this.props.display
-        if (selectedZone.x1 !== null) {
-            this.props.handleMouseMove(e)
-        }
+        if (this.props.display.selectedZone.x1 !== null) this.props.handleMouseMove(e)
     }
     handleMouseUp (e) {
-        const { display, select, zone, selections } = this.props
-        let elements = d3Timeline.getElementsInZone(this.refs.Timeline, this.props)
-        //console.log(elements)
-        if (elements.length > 0) select(elements, zone, selections)
+        const elements = d3Timeline.getElementsInZone(this.refs.Timeline, this.props)
+        if (elements.length > 0 &&
+            (Math.abs(e.pageX - this.props.display.selectedZone.x1) > 1 &&
+            Math.abs(e.pageY - this.props.display.selectedZone.y1) > 1)) this.props.select(elements, this.props.zone, this.props.selections)
         this.props.handleMouseUp(e)
     }
     render () {
@@ -92,8 +89,8 @@ class Timeline extends React.PureComponent {
                 transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
                 ref = "Timeline"
                 onMouseMove = { this.handleMouseMove }
+                onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.props.handleMouseDown }
-                onMouseUp = { this.props.handleMouseUp }
             >
             </g>
             <Header
