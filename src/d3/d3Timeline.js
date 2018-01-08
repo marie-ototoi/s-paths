@@ -24,10 +24,6 @@ const drawSelection = (el, props) => {
         .enter()
         .append('rect')
         .attr('class', 'selection')
-        .attr('strokeDasharray', '2, 2')
-        .attr('strokeWidth', '1')
-        .attr('fill', 'transparent')
-        .attr('stroke', '#000000')
         .on('mouseup', props.handleMouseUp)
 
     d3.select(el).select('rect.selection')
@@ -151,10 +147,12 @@ const draw = (el, props) => {
             // bug to be fixed console.log('what sup ', selections.length, d.selected, d.entrypoint )
             return (selections.length > 0 && d.selected !== true) ? 0.5 : 1
         })
-        .on('mouseup', props.handleMouseUp)
-        .on('click', d => {
+        
+        .on('mousedown', d => {
+            d3.event.stopPropagation()
             selectElement(d.selection)
         })
+        .on('mouseup', props.handleMouseUp)
     /*
     .on('mouseenter', (d) => {
         selectElement(d.selection)

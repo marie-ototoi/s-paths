@@ -9,5 +9,6 @@ module.exports = {
     axis: require('../styles/axis.css'),
     nav: require('../styles/nav.css'),
     tooltip: require('../styles/tooltip.css'),
-    propSelector: require('../styles/propSelector.css')
+    propSelector: require('../styles/propSelector.css'),
+    selection: require('../styles/selection.css')
 }
