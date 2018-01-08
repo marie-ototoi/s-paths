@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
-import d3Drag from 'd3-drag'
 import dataLib from '../lib/dataLib'
 import selectionLib from '../lib/selectionLib'
+import { parseSvg } from 'd3-interpolate/src/transform/parse'
 
 const create = (el, props) => {
     // console.log('create')
@@ -9,6 +9,58 @@ const create = (el, props) => {
         draw(el, props)
         resize(el, props)
     }
+}
+
+const drawSelection = (el, props) => {
+    const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone)
+    const selectedZone = {
+        x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
+        y1: zoneDimensions.y1 - props.display.viz.vertical_margin,
+        x2: zoneDimensions.x2 - props.display.viz.horizontal_margin,
+        y2: zoneDimensions.y2 - props.display.viz.vertical_margin
+    }
+    d3.select(el).selectAll('rect.selection')
+        .data([selectedZone])
+        .enter()
+        .append('rect')
+        .attr('class', 'selection')
+        .attr('strokeDasharray', '2, 2')
+        .attr('strokeWidth', '1')
+        .attr('fill', 'transparent')
+        .attr('stroke', '#000000')
+        .on('mouseup', props.handleMouseUp)
+
+    d3.select(el).select('rect.selection')
+        .attr('width', selectedZone.x2 - selectedZone.x1)
+        .attr('height', selectedZone.y2 - selectedZone.y1)
+        .attr('x', selectedZone.x1)
+        .attr('y', selectedZone.y1)
+}
+const getElementsInZone = (el, props) => {
+    const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone)
+    const selectedZone = {
+        x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
+        y1: zoneDimensions.y1 - props.display.viz.vertical_margin,
+        x2: zoneDimensions.x2 - props.display.viz.horizontal_margin,
+        y2: zoneDimensions.y2 - props.display.viz.vertical_margin
+    }
+    let selectedElements = []
+    d3.select(el).selectAll('.element')
+        .each(function (d, i) {
+            const width = Number(d3.select(this).attr('width'))
+            const height = Number(d3.select(this).attr('height'))
+            const x1 = Number(parseSvg(d3.select(this).node().parentNode.parentNode.getAttribute('transform')).translateX)
+            const y1 = Number(parseSvg(d3.select(this).node().parentNode.getAttribute('transform')).translateY)
+            const elementZone = {
+                x1,
+                y1,
+                x2: x1 + width,
+                y2: y1 + height
+            }
+            // console.log(selectedZone, elementZone, selectionLib.detectRectCollision(selectedZone, elementZone))
+            if (selectionLib.detectRectCollision(selectedZone, elementZone)) selectedElements.push(d.selection)
+        })
+    return selectedElements
 }
 
 const getElements = (el, propName, value, propCategory) => {
@@ -41,6 +93,12 @@ const update = (el, props) => {
     if (el && props.data) {
         draw(el, props)
         resize(el, props)
+        //
+        if (props.display.selectedZone.x1 !== null) {
+            drawSelection(el, props)
+        } else {
+            d3.select(el).selectAll('rect.selection').remove()
+        }
     }
 }
 
@@ -81,11 +139,6 @@ const draw = (el, props) => {
             d.color = legend.info.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
             d.selection = {
                 selector: d.id,
-                /* props: [
-                    { path: selectedConfig.properties[0].path, value: d.prop1 },
-                    { path: selectedConfig.properties[1].path, value: d.prop2 },
-                    { path: selectedConfig.properties[2].path, value: d.prop3 }
-                ], */
                 query: '?entrypoint LIKE ' + d.entrypoint.value
             }
             //console.log(d.selection)
@@ -94,13 +147,18 @@ const draw = (el, props) => {
         .attr('id', d => d.id)
         .classed('selected', d => d.selected)
         .attr('fill', d => d.color)
+        .attr('opacity', d => {
+            // bug to be fixed console.log('what sup ', selections.length, d.selected, d.entrypoint )
+            return (selections.length > 0 && d.selected !== true) ? 0.5 : 1
+        })
+        .on('mouseup', props.handleMouseUp)
         .on('click', d => {
             selectElement(d.selection)
         })
-        /*
-        .on('mouseenter', (d) => {
-            selectElement(d.selection)
-        }) */        
+    /*
+    .on('mouseenter', (d) => {
+        selectElement(d.selection)
+    }) */
 }
 
 const resize = (el, props) => {
@@ -131,13 +189,14 @@ const resize = (el, props) => {
         .attr('width', d => unitWidth - 2)
         .attr('y', -unitHeight)
         .attr('height', d => unitHeight)
-        //.attr('stroke-width', 1 )
-        //.attr('stroke', d => (d.selected === true) ? '#000' : d.color)
-        .attr('opacity', d => (selections.length > 0 && d.selected !== true) ? 0.5 : 1)
-        // .attr('stroke-width', )
+    //.attr('stroke-width', 1 )
+    //.attr('stroke', d => (d.selected === true) ? '#000' : d.color)
+    // .attr('stroke-width', )
 }
 
 exports.create = create
 exports.destroy = destroy
+exports.drawSelection = drawSelection
 exports.getElements = getElements
+exports.getElementsInZone = getElementsInZone
 exports.update = update

@@ -56,7 +56,7 @@ const getLegend = (nestedProps, colors, category) => {
 
 const getReadablePathsParts = (path, labels) => {
     const parts = path.split('/')
-    if (!labels) return parts.map(part => { return { label: part } })
+    // if (!labels) return parts.map(part => { return { label: part } })
     return parts
         .filter((part, index) => index !== 0 && part !== '*')
         .map(part => {

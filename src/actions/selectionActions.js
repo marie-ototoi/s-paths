@@ -19,6 +19,29 @@ const addSelection = (dispatch) => (selector, zone, props) => {
     })
 }
 
+const handleMouseDown = (dispatch) => (e) => {
+    // replace by select
+    return dispatch({
+        type: 'START_SELECTED_ZONE',
+        x1: e.pageX,
+        y1: e.pageY
+    })
+}
+const handleMouseUp = (dispatch) => (e) => {
+    // replace by select
+    return dispatch({
+        type: 'CLEAR_SELECTED_ZONE'
+    })
+}
+const handleMouseMove = (dispatch) => (e) => {
+    // replace by select
+    return dispatch({
+        type: 'MOVE_SELECTED_ZONE',
+        x2: e.pageX,
+        y2: e.pageY
+    })
+}
+
 const resetSelection = (dispatch) => (zone) => {
     // replace by select
     return dispatch({
@@ -48,3 +71,6 @@ const select = (dispatch) => (elements, zone, selections) => {
 exports.addSelection = addSelection
 exports.removeSelection = removeSelection
 exports.select = select
+exports.handleMouseDown = handleMouseDown
+exports.handleMouseMove = handleMouseMove
+exports.handleMouseUp = handleMouseUp

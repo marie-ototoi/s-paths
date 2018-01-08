@@ -8,23 +8,27 @@ import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import PlainAxis from '../elements/PlainAxis'
 import PropSelector from '../elements/PropSelector'
+import SelectionZone from '../elements/SelectionZone'
 import config from '../../lib/configLib'
 import dataLib from '../../lib/dataLib'
 import selectionLib from '../../lib/selectionLib'
 import scaleLib from '../../lib/scaleLib'
 import { getPropPalette } from '../../actions/palettesActions'
-import { select } from '../../actions/selectionActions'
+import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
 
 class Timeline extends React.PureComponent {
     constructor (props) {
         super(props)
+        this.handleMouseMove = this.handleMouseMove.bind(this)
+        this.handleMouseUp = this.handleMouseUp.bind(this)
         this.selectElement = this.selectElement.bind(this)
         this.selectElements = this.selectElements.bind(this)
         this.customState = {
             elementName: `Timeline_${props.zone}`,
             savedData: props.data,
             selectElement: this.selectElement,
-            selectElements: this.selectElements
+            selectElements: this.selectElements,
+            handleMouseUp: this.handleMouseUp
         }
     }
     componentWillMount () {
@@ -36,7 +40,7 @@ class Timeline extends React.PureComponent {
         }
     }
     shouldComponentUpdate (nextProps, nextState) {
-        return !shallowEqual(this.props, nextProps)
+        return !shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState)
     }
     prepareData (nextProps) {
         const { data, configs, palettes, getPropPalette, dataset } = nextProps
@@ -58,15 +62,39 @@ class Timeline extends React.PureComponent {
         // Save to reuse in render
         this.customState = { ...this.customState, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2 }
     }
+    handleMouseMove (e) {
+        const { selectedZone, viz } = this.props.display
+        if (selectedZone.x1 !== null) {
+            this.props.handleMouseMove(e)
+        }
+    }
+    handleMouseUp (e) {
+        const { display, select, zone, selections } = this.props
+        let elements = d3Timeline.getElementsInZone(this.refs.Timeline, this.props)
+        //console.log(elements)
+        if (elements.length > 0) select(elements, zone, selections)
+        this.props.handleMouseUp(e)
+    }
     render () {
         const { axisBottom, legend, listProp1, listProp2 } = this.customState
         const { configs, data, display, selections, zone } = this.props
         // display settings
         const classN = `Timeline ${this.customState.elementName}`
         return (<g className = { classN } >
+            <SelectionZone
+                zone = { zone }
+                dimensions = { display.zones[zone] }
+                handleMouseDown = { this.props.handleMouseDown }
+                handleMouseMove = { this.handleMouseMove }
+                handleMouseUp = { this.handleMouseUp }
+            />
             <g
                 transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
-                ref = "Timeline">
+                ref = "Timeline"
+                onMouseMove = { this.handleMouseMove }
+                onMouseDown = { this.props.handleMouseDown }
+                onMouseUp = { this.props.handleMouseUp }
+            >
             </g>
             <Header
                 zone = { zone }
@@ -146,7 +174,10 @@ function mapStateToProps (state) {
 function mapDispatchToProps (dispatch) {
     return {
         getPropPalette: getPropPalette(dispatch),
-        select: select(dispatch)
+        select: select(dispatch),
+        handleMouseDown: handleMouseDown(dispatch),
+        handleMouseUp: handleMouseUp(dispatch),
+        handleMouseMove: handleMouseMove(dispatch)
     }
 }
 

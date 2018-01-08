@@ -18,7 +18,29 @@ const areSelected = (elements, zone, selections) => {
     })
     return allSelected === elements.length
 }
+const detectRectCollision = (rect1, rect2) => {
+    return (rect1.x1 < rect2.x2 &&
+        rect1.x2 > rect2.x1 &&
+        rect1.y1 < rect2.y2 &&
+        rect1.y2 > rect2.y1)
+}
+
+const getRectSelection = (selection) => {
+    const { x1, y1, x2, y2 } = selection
+    const selectionX1 = (x1 < x2) ? x1 : x2
+    const selectionY1 = (y1 < y2) ? y1 : y2
+    const selectionX2 = (x1 < x2) ? x2 : x1
+    const selectionY2 = (y1 < y2) ? y2 : y1
+    return {
+        x1: selectionX1,
+        y1: selectionY1,
+        x2: selectionX2,
+        y2: selectionY2
+    }
+}
 
 exports.areSelected = areSelected
+exports.detectRectCollision = detectRectCollision
+exports.getRectSelection = getRectSelection
 exports.getSelections = getSelections
 exports.isSelected = isSelected

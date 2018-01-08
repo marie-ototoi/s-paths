@@ -2,12 +2,8 @@ const defaultState = []
 /* const exSelection = {
     zone: 'main',
     selector: '#toto',
-    props: [{
-        path: 'nobelLaureate/nobel:year/*',
-        value: [[0, 12], 2]  // valeur unique ou une liste de range ou de valeurs uniques
-    },
     {
-        uri: 'http:'
+        query: 'http:'
     }]
 } */
 

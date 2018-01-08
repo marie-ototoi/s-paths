@@ -16,6 +16,7 @@ class Header extends React.PureComponent {
             </text>
         </g>) */
         // console.log(dataset.labels)
+        // console.log(dataset.labels)
         return (<foreignObject
             transform = { `translate(${x}, ${y})` }
             width = { width }

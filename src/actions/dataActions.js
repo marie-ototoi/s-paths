@@ -61,6 +61,10 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
         .then((newData) => {
             // console.log('new data', newData)
             dispatch({
+                type: types.RESET_SELECTION,
+                zone
+            })
+            dispatch({
                 type: types.SET_DATA,
                 statements: {
                     ...newData,
@@ -68,10 +72,6 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
                         bindings: newData.results.bindings
                     }
                 },
-                zone
-            })
-            dispatch({
-                type: types.RESET_SELECTION,
                 zone
             })
         })

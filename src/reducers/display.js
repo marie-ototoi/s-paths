@@ -44,6 +44,12 @@ const defaultState = {
         useful_height: 10,
         vertical_margin: 10,
         horizontal_margin: 10
+    },
+    selectedZone: {
+        x1: null,
+        y1: null,
+        x2: null,
+        y2: null
     }
 }
 
@@ -59,6 +65,35 @@ const display = (state = defaultState, action) => {
             grid: action.grid || state.grid,
             zones: action.zones || state.zones,
             viz: action.viz || state.viz
+        }
+    case 'START_SELECTED_ZONE':
+        return {
+            ...state,
+            selectedZone: {
+                x1: action.x1,
+                y1: action.y1,
+                x2: action.x1,
+                y2: action.y1
+            }
+        }
+    case 'MOVE_SELECTED_ZONE':
+        return {
+            ...state,
+            selectedZone: {
+                ...state.selectedZone,
+                x2: action.x2,
+                y2: action.y2
+            }
+        }
+    case 'CLEAR_SELECTED_ZONE':
+        return {
+            ...state,
+            selectedZone: {
+                x1: null,
+                y1: null,
+                x2: null,
+                y2: null
+            }
         }
     default:
         return state
