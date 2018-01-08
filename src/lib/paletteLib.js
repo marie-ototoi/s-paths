@@ -26,8 +26,7 @@ const selectColorsInPalette = (colors, length) => {
     // return colors.slice(0, length)
     const step = Math.floor(colors.length / length)
     const rest = colors.length % length
-    const limit = rest > 0 ? rest - 1 : 0
-    return colors.filter((color, index) => (index % step === limit))
+    return colors.filter((color, index) => ((index + rest) % step === 0))
 }
 
 // create a patern equivalent to the string parameter (ex:lines) with the specified color,
