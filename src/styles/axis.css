@@ -9,7 +9,7 @@
     fill: #666;
 }
 .Axis rect{
-    fill: #fff;
+    fill: transparent;
 }
 .Axis select{
     width: 100px;

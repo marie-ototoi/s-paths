@@ -1,8 +1,24 @@
 import React from 'react'
 import pluralize from 'pluralize'
 import { connect } from 'react-redux'
+import { loadData } from '../../actions/dataActions'
+import queryLib from '../../lib/queryLib'
 
 class Nav extends React.PureComponent {
+    constructor (props) {
+        super(props)
+        this.exploreSelection = this.exploreSelection.bind(this)
+    }
+    exploreSelection () {
+        if (this.props.selections.length > 0) {
+            let newConstraints = queryLib.makeSelectionConstraints(this.props.selections)
+            let newDataset = {
+                ...this.props.dataset,
+                constraints: newConstraints
+            }
+            this.props.loadData(newDataset, this.props.views)
+        }
+    }
     render () {
         const { data, dataset, dimensions, displayedInstances, selections, zone } = this.props
         // console.log(dataset.stats)
@@ -34,25 +50,26 @@ class Nav extends React.PureComponent {
                     <text x = { maxBarWidth + margin * 3 + itemWidth } fill = "#666666" y = { 60 + margin + 10 + i * 16 }>{ option.total }</text>
                 </g>
             }) }
+            <text
+                y = { 200 }
+                className = "button"
+                onMouseUp = { this.exploreSelection }
+            >Explore Selection</text>
         </g>)
-    }
-    componentDidMount () {
-    }
-    componentDidUpdate () {
-    }
-    componentWillUnmount () {
     }
 }
 
 function mapStateToProps (state) {
     return {
         dataset: state.dataset.present,
-        data: state.data
+        data: state.data,
+        views: state.views
     }
 }
 
 function mapDispatchToProps (dispatch) {
     return {
+        loadData: loadData(dispatch)
     }
 }
 

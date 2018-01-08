@@ -2,3 +2,6 @@
     font-size: 0.7em;
     font-weight: bold;
 }
+.Nav text.button {
+    cursor: pointer
+}

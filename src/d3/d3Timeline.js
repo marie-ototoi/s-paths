@@ -133,7 +133,7 @@ const draw = (el, props) => {
         .selectAll('g.time g.elements')
         .each((d, i) => {
             // console.log(d, d.selection)
-            d.id = d.id || `timeline_element_${dataLib.guid()}`
+            d.id = `timeline_element_${dataLib.makeId(d.entrypoint.value)}`
             d.color = legend.info.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
             d.selection = {
                 selector: d.id,
@@ -142,7 +142,7 @@ const draw = (el, props) => {
                     value: d.entrypoint.value
                 }
             }
-            //console.log(d.selection)
+            //console.log(d])
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
         })
         .attr('id', d => d.id)

@@ -30,21 +30,21 @@ const receiveStats = (dispatch) => (stats) => {
     })
 }
 
-const exploreSelection = (dispatch) => (selection, zone, dataset, views) => {
-    // build query for selection
+const exploreSelection = (dispatch) => (selection, dataset, views) => {
 
-    // constraints = concat each selected element query
-    /* 
-    select distinct ?entrypoint 
-    FROM <http://localhost:8890/nobel> 
-    where { 
-    ?entrypoint rdf:type <http://data.nobelprize.org/terms/Laureate> . 
-    FILTER regex(?entrypoint, "http://data.nobelprize.org/resource/laureate/1$|http://data.nobelprize.org/resource/laureate/10$", "i") 
-    } */
-    // load data
-    // undo : get last configs do not load stats again / 
-    // how to synchronize all reducers for undo ? dataset, data config
-    // forget about selections when change data
+        // constraints = concat each selected element query
+        /* 
+        select distinct ?entrypoint 
+        FROM <http://localhost:8890/nobel> 
+        where { 
+        ?entrypoint rdf:type <http://data.nobelprize.org/terms/Laureate> . 
+        FILTER regex(?entrypoint, "http://data.nobelprize.org/resource/laureate/1$|http://data.nobelprize.org/resource/laureate/10$", "i") 
+        } */
+        // load data
+        // undo : get last configs do not load stats again / 
+        // how to synchronize all reducers for undo ? dataset, data config
+        // forget about selections when change data
+
 }
 
 const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) => {
@@ -81,30 +81,39 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
 }
 
 const loadData = (dispatch) => (dataset, views) => {
+    // console.log('salut ?',dispatch, dataset, views )
     let { endpoint, entrypoint, prefixes } = dataset
     getStats(dataset)
         .then(stats => {
-            if (stats.totalInstances === 0) return new Promise((resolve, reject) => reject(new Error('No such entity in the endpoint')))
-            dispatch({
-                type: types.SET_STATS,
-                stats
+            return new Promise((resolve, reject) => {
+                if (stats.totalInstances === 0) {
+                    reject(new Error('no_results'))
+                } else {
+                    dispatch({
+                        type: types.SET_STATS,
+                        stats
+                    })
+                    dispatch({
+                        type: types.RESET_SELECTION
+                    })
+                    dispatch({
+                        type: types.SET_PREFIXED_ENTRYPOINT,
+                        entrypoint: stats.options.entrypoint,
+                        prefixes: stats.options.prefixes,
+                        labels: stats.options.labels
+                    })
+                    entrypoint = stats.options.entrypoint
+                    prefixes = stats.options.prefixes
+                    // console.log('ici ?', stats.statements)
+                    // for each views, checks which properties ou sets of properties could match and evaluate
+                    let configs = configLib.activateDefaultConfigs(configLib.defineConfigs(views, stats))
+                    dispatch({
+                        type: types.SET_CONFIGS,
+                        configs
+                    })
+                    resolve(configs)
+                }
             })
-            dispatch({
-                type: types.SET_PREFIXED_ENTRYPOINT,
-                entrypoint: stats.options.entrypoint,
-                prefixes: stats.options.prefixes,
-                labels: stats.options.labels
-            })
-            entrypoint = stats.options.entrypoint
-            prefixes = stats.options.prefixes
-            // console.log('ici ?', stats.statements)
-            // for each views, checks which properties ou sets of properties could match and evaluate
-            let configs = configLib.activateDefaultConfigs(configLib.defineConfigs(views, stats))
-            dispatch({
-                type: types.SET_CONFIGS,
-                configs
-            })
-            return configs
         })
         .then(configs => {
             const configMain = configLib.getConfigs(configs, 'main')
@@ -113,10 +122,6 @@ const loadData = (dispatch) => (dataset, views) => {
             const queryAside = queryLib.makeQuery(entrypoint, configAside, dataset)
             // console.log('queryMain', queryMain)
             // console.log('queryaside', queryAside)
-            /* return Promise.all([
-                new Promise((resolve) => resolve(stats.load('Timeline'))),
-                new Promise((resolve) => resolve(stats.load('HeatMap')))
-            ]) */
             return Promise.all([
                 queryLib.getData(endpoint, queryMain, prefixes),
                 queryLib.getData(endpoint, queryAside, prefixes)
@@ -144,14 +149,17 @@ const loadData = (dispatch) => (dataset, views) => {
                         zone: 'aside'
                     })
                 })
+                .catch(error => {
+                    console.error('Error getting data main + aside', error)
+                })
         })
         .catch(error => {
+            if (error === 'no_results') return { statements: [] }
             console.error('Error getting data', error)
         })
 }
 
 exports.init = init
-exports.exploreSelection = exploreSelection
 exports.loadData = loadData
 exports.receiveStats = receiveStats
 exports.selectProperty = selectProperty

@@ -13,7 +13,7 @@ const selection = (state, action) => {
         return {
             selector: action.selector,
             zone: action.zone,
-            props: action.props
+            query: action.query
         }
     default:
         return state
@@ -29,7 +29,7 @@ const selections = (state = defaultState, action) => {
             ).length === 0
         })
         const elementsAdded = elements2Add.map(el => {
-            return selection(undefined, { ...action, props: el.props, selector: el.selector })
+            return selection(undefined, { ...action, query: el.query, selector: el.selector })
         })
         return [
             ...state,
@@ -42,7 +42,11 @@ const selections = (state = defaultState, action) => {
         })
     case 'RESET_SELECTION':
         return state.filter(sel => {
-            return !(sel.zone === action.zone)
+            if (action.zone) {
+                return !(sel.zone === action.zone)
+            } else {
+                return false
+            }
         })
     default:
         return state

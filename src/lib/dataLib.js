@@ -18,6 +18,12 @@ const guid = () => {
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
 }
 
+const makeId = (textstr) => {
+    return textstr.replace(/([/:#_\-.])/g, (match, p1) => {
+        if (p1) return ''
+    }).toLowerCase()
+}
+
 const areLoaded = (data, zone) => {
     return data.filter(d => d.zone === zone).length > 0 &&
         data.filter(d => d.zone === zone)[0].statements.results !== undefined &&
@@ -148,6 +154,7 @@ exports.areLoaded = areLoaded
 exports.getAxis = getAxis
 exports.getHeadings = getHeadings
 exports.getLegend = getLegend
+exports.makeId = makeId
 exports.getPropList = getPropList
 exports.getResults = getResults
 exports.groupTimeData = groupTimeData

@@ -17,6 +17,15 @@ ${char}
 }`
 }
 
+const makeSelectionConstraints = (selections) => {
+    const uriSelections = selections.filter(sel => sel.query.type === 'uri')
+    const uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
+    // add constraints for constrained groups of entities (heatmap)
+    // const constraintsSelections = selections.filter(sel => sel.query.type === 'constraints')
+    // to do
+    return `FILTER regex(?entrypoint, '${uriRegex}', 'i') .`
+}
+
 const makeTotalQuery = (entitiesClass, options) => {
     let { constraints, defaultGraph } = options
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
@@ -260,6 +269,7 @@ exports.getRoot = getRoot
 exports.makeQuery = makeQuery
 exports.makePropQuery = makePropQuery
 exports.makePropsQuery = makePropsQuery
+exports.makeSelectionConstraints = makeSelectionConstraints
 exports.makeTotalQuery = makeTotalQuery
 exports.mergeStatsWithProps = mergeStatsWithProps
 exports.prefixDefined = prefixDefined
