@@ -130,23 +130,8 @@ const loadData = (dispatch) => (dataset, views) => {
                     // console.log(dataMain, dataAside)
                     dispatch({
                         type: types.SET_DATA,
-                        statements: {
-                            ...dataMain,
-                            results: {
-                                bindings: dataMain.results.bindings
-                            }
-                        },
-                        zone: 'main'
-                    })
-                    dispatch({
-                        type: types.SET_DATA,
-                        statements: {
-                            ...dataAside,
-                            results: {
-                                bindings: dataAside.results.bindings
-                            }
-                        },
-                        zone: 'aside'
+                        main: { ...dataMain },
+                        aside: { ...dataAside }
                     })
                 })
                 .catch(error => {

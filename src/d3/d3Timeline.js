@@ -55,7 +55,7 @@ const getElementsInZone = (el, props) => {
                 x2: x1 + width,
                 y2: y1 + height
             }
-            // console.log(selectedZone, elementZone, selectionLib.detectRectCollision(selectedZone, elementZone))
+            // console.log(selectionLib.detectRectCollision(selectedZone, elementZone), d3.select(this).node().parentNode.getAttribute('id'), d.selection)
             if (selectionLib.detectRectCollision(selectedZone, elementZone)) selectedElements.push(d.selection)
         })
     return selectedElements
@@ -106,7 +106,7 @@ const destroy = (el) => {
 
 const draw = (el, props) => {
     const { nestedProp1, legend, selectedConfig, selectElement, selections, zone } = props
-    // console.log(nestedProp1)
+    //console.log(selections)
     const timeUnits = d3.select(el)
         .selectAll('g.time')
         .data(nestedProp1)
@@ -132,31 +132,26 @@ const draw = (el, props) => {
     d3.select(el)
         .selectAll('g.time g.elements')
         .each((d, i) => {
-            // console.log(d, d.selection)
-            d.id = `timeline_element_${dataLib.makeId(d.entrypoint.value)}`
             d.color = legend.info.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
             d.selection = {
-                selector: d.id,
+                selector: `timeline_element_${dataLib.makeId(d.entrypoint.value)}`,
                 query: {
                     type: 'uri',
                     value: d.entrypoint.value
                 }
             }
-            //console.log(d])
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
         })
-        .attr('id', d => d.id)
+        .attr('id', d => d.selection.selector) // only needed to better understand html source code
         .classed('selected', d => d.selected)
         .attr('fill', d => d.color)
         .attr('opacity', d => {
-            // bug to be fixed console.log('what sup ', selections.length, d.selected, d.entrypoint )
             return (selections.length > 0 && d.selected !== true) ? 0.5 : 1
         })
         .on('mousedown', d => {
             selectElement(d.selection)
         })
         .on('mouseup', d => {
-            // console.log(d3.event.pageX)
             props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY })
         })
 }

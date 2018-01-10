@@ -28,7 +28,7 @@ class App extends React.Component {
         this.props.loadData(dataset, views)
     }
     render () {
-        const { configs, display, env, mode, views, dataset, data } = this.props
+        const { configs, display, env, mode, views, dataset, data, selections } = this.props
         // console.log('env', env)
         // console.log('mode', mode)
         // console.log('display', display)
@@ -36,6 +36,7 @@ class App extends React.Component {
         // console.log('dataset', dataset)
         // console.log('configs', configs)
         // console.log('data', data)
+        // console.log('selections', selections)
         const componentIds = {
             'HeatMap': HeatMap,
             'Timeline': Timeline
@@ -61,9 +62,17 @@ class App extends React.Component {
                 { main && dataLib.areLoaded(this.props.data, 'main') &&
                     <MainComponent
                         zone = "main"
-                        data = { dataLib.getResults(this.props.data, 'main') }
-                        configs = { configLib.getConfigs(this.props.configs, 'main') }
-                        selections = { selectionLib.getSelections(this.props.selections, 'main') }
+                        data = { dataLib.getResults(this.props.data, 'main', 'active') }
+                        configs = { configLib.getConfigs(this.props.configs, 'main', 'active') }
+                        selections = { selectionLib.getSelections(this.props.selections, 'main', 'active') }
+                    />
+                }
+                { main && dataLib.areLoaded(this.props.data, 'main', 'new') && false &&
+                    <MainComponent
+                        zone = "main"
+                        data = { dataLib.getResults(this.props.data, 'main', 'new') }
+                        configs = { configLib.getConfigs(this.props.configs, 'main', 'new') }
+                        selections = { selectionLib.getSelections(this.props.selections, 'main', 'new') }
                     />
                 }
                 { aside && dataLib.areLoaded(this.props.data, 'aside') && false &&

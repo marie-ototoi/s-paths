@@ -1,23 +1,20 @@
-const initialZone = { zone: 'new', statements: {} }
 
 const initialState = [
-    { zone: 'main', statements: {} },
-    { zone: 'aside', statements: {} },
-    { zone: 'main-aside', statements: {} }
+    { zone: 'main', statements: [] },
+    { zone: 'aside', statements: [] },
+    { zone: 'main-aside', statements: [] }
 ]
 
-const datazone = (state = initialZone, action) => {
+const datazone = (state, action) => {
     switch (action.type) {
     case 'SET_DATA':
-        if (state.zone !== action.zone || !action.statements) return state
-        return {
-            ...state,
-            statements: action.statements
-        }
-    case 'ADD_DATAZONE':
-        return {
-            ...state,
-            zone: action.zone
+        if (action[state.zone] && action[state.zone].results) {
+            return {
+                ...state,
+                statements: action[state.zone]
+            }
+        } else {
+            return state
         }
     default:
         return state
@@ -28,11 +25,6 @@ const data = (state = initialState, action) => {
     switch (action.type) {
     case 'SET_DATA':
         return state.map(dz => datazone(dz, action))
-    case 'ADD_DATAZONE':
-        return [
-            ...state,
-            datazone(undefined, action)
-        ]
     default:
         return state
     }
