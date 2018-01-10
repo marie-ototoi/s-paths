@@ -2,6 +2,7 @@ import express from 'express'
 import fetch from 'rdf-fetch'
 import rdflib from 'rdflib'
 import promiseSettle from 'promise-settle'
+import pathModel from '../models/path'
 import propertyModel from '../models/property'
 import queryLib from '../src/lib/queryLib'
 // import { error } from 'util';
@@ -15,7 +16,7 @@ router.post('/', (req, res) => {
     } else {
         getStats(req.body)
             .then(props => {
-                console.log('API stats', props)
+                console.log('API stats', props.options.labels)
                 res.json(props)
                 res.end()
             })
@@ -41,7 +42,7 @@ const getStats = (opt) => {
         prefixes: opt.prefixes || {}
     }
     let { prefixes, entrypoint, forceUpdate, endpoint } = options
-    if (forceUpdate === true) propertyModel.deleteMany({ entrypoint: entrypoint })
+    if (forceUpdate === true) pathModel.deleteMany({ entrypoint: entrypoint, endpoint: endpoint })
     let totalInstances
     let selectionInstances
     let displayedInstances
@@ -128,66 +129,150 @@ const getLabels = (prefixes, props) => {
             prefUri: prop
         }
     })
+    let missingUris
     // create a local graph
     let graph = new rdflib.IndexedFormula()
-    // make an array of prefix object
-    let prefixesArray = []
-    for (let pref in prefixes) {
-        prefixesArray.push({ _id: prefixes[pref], prefix: pref })
-    }
-    return promiseSettle(
-        // try to load the ontology corresponding to each prefix
-        prefixesArray.map(prefix => {
-            return fetch(prefix._id, {}).then(response => {
-                if (response.ok) {
-                    // if succesful, parse it and add it to the graph
-                    let mediaType = response.headers.get('Content-type')
-                    // little hack to be removed -> warn hosts that the mime type is wrong
-                    if (mediaType === 'text/xml') mediaType = 'application/rdf+xml'
-                    // check for parsable ontologies type (to avoid app crash)
-                    if (mediaType &&
-                    (mediaType.indexOf('application/rdf+xml') >= 0 ||
-                    mediaType.indexOf('text/turtle') >= 0 ||
-                    mediaType.indexOf('text/n3') >= 0)) {
-                        return response.text().then(text => {
-                            return rdflib.parse(text, graph, prefix._id, mediaType)
-                        })
-                    }
+    // to add 
+    // try to get props labels and comments in database
+    // if already defined, do not keep in queried prefixes
+    // propertyModel.find({ uri: uri }).exec()
+    return Promise.all(urisToLabel.map(prop => {
+        return propertyModel.findOne({ uri: prop.uri }).exec()
+    }))
+        .then(propsInDatabase => {
+            propsInDatabase.forEach((prop, index) => {
+                if (prop) {
+                    urisToLabel[index].label = prop.label
+                    urisToLabel[index].comment = prop.comment
+                }
+            })
+            return true
+        })
+        .then(next => {
+            missingUris = urisToLabel.filter(prop => !prop.label)
+            // make an array of prefix object
+            let prefixesArray = []
+            for (let pref in prefixes) {
+                // check if needed for the missing props
+                const isNeeded = missingUris.filter(prop => prop.prefUri.indexOf(pref) === 0).length > 0
+                if (isNeeded) prefixesArray.push({ _id: prefixes[pref], prefix: pref })
+            }
+            // load ontologies corresponding to prefixes
+            return promiseSettle(
+                // try to load the ontology corresponding to each prefix
+                prefixesArray.map(prefix => {
+                    return loadOntology(prefix._id, graph)
+                })
+            )
+        })
+        .then(resp => {
+            return getLabelsFromGraph(missingUris, graph)
+        })
+        .then(missingUris => {
+            propertyModel.createOrUpdate(missingUris)
+            return urisToLabel.map(prop => {
+                if (prop.label) {
+                    return prop
                 } else {
-                    // nothing
-                    return response
+                    const missing = missingUris.filter(missingprop => missingprop.uri === prop.uri && missingprop.label)
+                    if (missing.length > 0) {
+                        return missing[0]
+                    } else {
+                        return prop
+                    }
                 }
             })
         })
-    ).then(resp => {
-        // get a rdfs:label for each prop
-        return promiseSettle(urisToLabel.map(prop => {
-            return graph.any(rdflib.sym(prop.uri), rdflib.sym('http://www.w3.org/2000/01/rdf-schema#label'))
-        })).then(labels => {
+        .then(urisToLabel => {
+            missingUris = urisToLabel.filter(prop => !prop.label)
+            return promiseSettle(
+                // try to load the ontology corresponding to each prefix
+                missingUris.map(prop => {
+                    return loadOntology(prop.uri, graph)
+                })
+            )
+        })
+        .then(resp => {
+            return getLabelsFromGraph(missingUris, graph)
+        })
+        .then(missingUris => {
+            propertyModel.createOrUpdate(missingUris)
+            return urisToLabel.map(prop => {
+                if (prop.label) {
+                    return prop
+                } else {
+                    const missing = missingUris.filter(missingprop => missingprop.uri === prop.uri && missingprop.label)
+                    if (missing.length > 0) {
+                        return missing[0]
+                    } else {
+                        return prop
+                    }
+                }
+            })
+        })
+        // to add => if some properties are still not labeled,
+        // try to load them one by one
+        // save all labels in the store (find or create)    
+}
+
+const getLabelsFromGraph = (uris, graph) => {
+    return promiseSettle(uris.map(prop => {
+        return graph.any(rdflib.sym(prop.uri), rdflib.sym('http://www.w3.org/2000/01/rdf-schema#label'))
+    }))
+        .then(labels => {
             labels.forEach((label, index) => {
                 if (label.isFulfilled() && label.value()) {
-                    urisToLabel[index].label = label.value().value
+                    // console.log('////', label.value())
+                    // to add : save in database
+                    uris[index].label = label.value().value
                 }
             })
-            return urisToLabel
+            return uris
         })
-    }).then(urisToLabel => {
-        // get a rdfs:comment for each prop 
-        return promiseSettle(urisToLabel.map(prop => {
-            return graph.any(rdflib.sym(prop.uri), rdflib.sym('http://www.w3.org/2000/01/rdf-schema#comment'))
-        })).then(labels => {
-            labels.forEach((label, index) => {
-                if (label.isFulfilled() && label.value()) {
-                    urisToLabel[index].comment = label.value().value
-                }
+        .then(uris => {
+            // get a rdfs:comment for each prop 
+            return promiseSettle(uris.map(prop => {
+                return graph.any(rdflib.sym(prop.uri), rdflib.sym('http://www.w3.org/2000/01/rdf-schema#comment'))
+            })).then(comments => {
+                comments.forEach((comment, index) => {
+                    if (comment.isFulfilled() && comment.value()) {
+                        // to add : save in database
+                        uris[index].comment = comment.value().value
+                    }
+                })
+                return uris
             })
-            return urisToLabel
         })
+}
+
+const loadOntology = (url, graph) => {
+    // console.log('load ontology', url)
+    return fetch(url, { redirect: 'follow', headers: { 'Accept': 'Accept: text/turtle, application/rdf+xml; q=0.7, text/ntriples; q=0.9, application/ld+json; q=0.8' } }).then(response => {
+        if (response.ok) {
+            // if succesful, parse it and add it to the graph
+            let mediaType = response.headers.get('Content-type')
+            // little hack to be removed -> warn hosts that the mime type is wrong
+            if (mediaType === 'text/xml') mediaType = 'application/rdf+xml'
+            // check for parsable ontologies type (to avoid app crash)    
+            if (mediaType &&
+            (mediaType.indexOf('application/rdf+xml') >= 0 ||
+            mediaType.indexOf('text/turtle') >= 0 ||
+            mediaType.indexOf('text/n3') >= 0)) {
+                return response.text().then(text => {
+                    // console.log('ICI',url, text)
+                    // console.log(prefix._id, mediaType, 'successfully parsed', graph)
+                    return rdflib.parse(text, graph, url, mediaType)
+                })
+            }
+        } else {
+            // nothing
+            return response
+        }
     })
 }
 
 const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQuery) => {
-    console.log(props)
+    // console.log(props)
     const queriedProps = props.filter(prop => {
         // check levels one after another 
         // except for first time exploration,
@@ -212,7 +297,7 @@ const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQu
             })
             .then(merged => {
                 // save all stats, only if they are relative to the whole ensemble
-                if (options.constraints === '') propertyModel.createOrUpdate(merged)
+                if (options.constraints === '') pathModel.createOrUpdate(merged)
                 // do not wait for success
                 // filter based on unique values, only if not first time
                 return merged.filter(prop => {
@@ -233,7 +318,7 @@ const getPropsLevel = (categorizedProps, level, options) => {
     let { entrypoint, endpoint, prefixes, maxLevel } = options
     let newCategorizedProps = []
     // look for savedProps in the database
-    return propertyModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level }).exec()
+    return pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level }).exec()
         .then(props => {
             if (props.length > 0) {
                 // console.log('////////////////////////// saved props')
@@ -295,7 +380,7 @@ const getPropsLevel = (categorizedProps, level, options) => {
                     })
                     if (newCategorizedProps.length > 0) {
                         // save in mongo database
-                        propertyModel.createOrUpdate(newCategorizedProps)
+                        pathModel.createOrUpdate(newCategorizedProps)
                     }
                     // do not wait for result to continue
                     return newCategorizedProps
