@@ -45,6 +45,7 @@ class App extends React.Component {
         const MainComponent = main ? componentIds[main.id] : ''
         const aside = configLib.getConfigs(configs, 'aside')
         const SideComponent = aside ? componentIds[aside.id] : ''
+        const status = dataLib.getCurrentState(data)
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
@@ -59,28 +60,32 @@ class App extends React.Component {
                 { env === 'dev' &&
                     <Debug />
                 }
-                { main && dataLib.areLoaded(this.props.data, 'main') &&
+                { main && status === 'transition' && dataLib.areLoaded(data, 'main', 'transition') &&
                     <MainComponent
+                        status = "transition"
                         zone = "main"
-                        data = { dataLib.getResults(this.props.data, 'main', 'active') }
-                        configs = { configLib.getConfigs(this.props.configs, 'main', 'active') }
-                        selections = { selectionLib.getSelections(this.props.selections, 'main', 'active') }
+                        data = { dataLib.getResults(data, 'main', 'transition') }
+                        configs = { configLib.getConfigs(configs, 'main', 'transition') }
+                        selections = { selectionLib.getSelections(selections, 'main', 'transition') }
+                        ref = "main"
                     />
                 }
-                { main && dataLib.areLoaded(this.props.data, 'main', 'new') && false &&
+                { main && dataLib.areLoaded(data, 'main', 'active') &&
                     <MainComponent
+                        status = "active"
                         zone = "main"
-                        data = { dataLib.getResults(this.props.data, 'main', 'new') }
-                        configs = { configLib.getConfigs(this.props.configs, 'main', 'new') }
-                        selections = { selectionLib.getSelections(this.props.selections, 'main', 'new') }
+                        data = { dataLib.getResults(data, 'main', 'active') }
+                        configs = { configLib.getConfigs(configs, 'main', 'active') }
+                        selections = { selectionLib.getSelections(selections, 'main', 'active') }
+                        ref = "transition"
                     />
                 }
-                { aside && dataLib.areLoaded(this.props.data, 'aside') && false &&
+                { aside && dataLib.areLoaded(this.props.data, 'aside', 'active') && false &&
                     <SideComponent
                         zone = "aside"
-                        data = { dataLib.getResults(this.props.data, 'aside') }
-                        configs = { configLib.getConfigs(this.props.configs, 'aside') }
-                        selections = { selectionLib.getSelections(this.props.selections, 'aside') }
+                        data = { dataLib.getResults(this.props.data, 'aside', 'active') }
+                        configs = { configLib.getConfigs(this.props.configs, 'aside', 'active') }
+                        selections = { selectionLib.getSelections(this.props.selections, 'aside', 'active') }
                     />
                 }
             </svg>

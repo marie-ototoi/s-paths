@@ -1,9 +1,34 @@
 import * as d3 from 'd3'
 import moment from 'moment'
 
-const getResults = (data, zone, transition) => {
-    return (areLoaded(data, zone))
-        ? data.filter(d => d.zone === zone)[0].statements.results.bindings : []
+const areLoaded = (data, zone, status) => {
+    data = getCurrentData(data, status)
+    const filtered = data.filter(d => (d.zone === zone && d.status === status))
+    return filtered.length > 0 &&
+        filtered[0].statements.results !== undefined &&
+        filtered[0].statements.results.bindings.length > 0
+}
+
+const getCurrentState = (data) => {
+    if (data.present[0].statements.length === 0) {
+        return 'loading'
+    } else {
+        return data.present[0].status
+    }
+}
+
+const getCurrentData = (data, status) => {
+    const currentState = getCurrentState(data)
+    if (currentState === 'transition' && status === 'active') {
+        return data.past[data.past.length - 1]
+    } else {
+        return data.present
+    }
+}
+
+const getResults = (data, zone, status) => {
+    data = getCurrentData(data, status)
+    return data.filter(d => (d.zone === zone && d.status === status))[0].statements.results.bindings
 }
 
 const getHeadings = (data, zone) => {
@@ -22,12 +47,6 @@ const makeId = (textstr) => {
     return textstr.replace(/([/:#_\-.])/g, (match, p1) => {
         if (p1) return ''
     }).toLowerCase()
-}
-
-const areLoaded = (data, zone) => {
-    return data.filter(d => d.zone === zone).length > 0 &&
-        data.filter(d => d.zone === zone)[0].statements.results !== undefined &&
-        data.filter(d => d.zone === zone)[0].statements.results.bindings.length > 0
 }
 
 const getPropList = (configs, propIndex, labels) => {
@@ -152,6 +171,7 @@ const groupTimeData = (data, propName, format, max, propsToAdd = [], forceGroup)
 
 exports.areLoaded = areLoaded
 exports.getAxis = getAxis
+exports.getCurrentState = getCurrentState
 exports.getHeadings = getHeadings
 exports.getLegend = getLegend
 exports.makeId = makeId

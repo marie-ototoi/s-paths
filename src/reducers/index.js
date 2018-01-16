@@ -12,7 +12,9 @@ const discoverApp = combineReducers({
     configs: undoable(configs, { filter: (action, currentState, previousState) => {
         return currentState !== previousState // only add to history if state changed 
     }}),
-    data,
+    data: undoable(data, { filter: (action, currentState, previousState) => {
+        return currentState !== previousState
+    }}),
     dataset: undoable(dataset, { filter: (action, currentState, previousState) => {
         return currentState !== previousState
     }}),

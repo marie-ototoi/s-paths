@@ -59,21 +59,11 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
     // console.log('new data', newQuery)
     queryLib.getData(endpoint, newQuery, prefixes)
         .then((newData) => {
-            // console.log('new data', newData)
-            dispatch({
-                type: types.RESET_SELECTION,
-                zone
-            })
-            dispatch({
-                type: types.SET_DATA,
-                statements: {
-                    ...newData,
-                    results: {
-                        bindings: newData.results.bindings
-                    }
-                },
-                zone
-            })
+            const action = {
+                type: types.SET_DATA
+            }
+            action[zone] = newData
+            dispatch(action)
         })
         .catch(error => {
             console.error('Error getting data after property update', error)

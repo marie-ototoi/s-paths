@@ -12,7 +12,8 @@ const datazone = (state, action) => {
         if (action[state.zone] && action[state.zone].results) {
             return {
                 ...state,
-                statements: action[state.zone]
+                statements: action[state.zone],
+                status: action.status
             }
         } else {
             return state
@@ -25,6 +26,8 @@ const datazone = (state, action) => {
 const data = (state = initialState, action) => {
     switch (action.type) {
     case types.SET_DATA:
+        // if data are already set, make a transition
+        action.status = (state[0].statements.results) ? 'transition' : 'active'
         return state.map(dz => datazone(dz, action))
     default:
         return state

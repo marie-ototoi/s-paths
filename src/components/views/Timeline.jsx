@@ -74,9 +74,9 @@ class Timeline extends React.PureComponent {
     }
     render () {
         const { axisBottom, legend, listProp1, listProp2 } = this.customState
-        const { configs, data, display, selections, zone } = this.props
+        const { configs, data, display, selections, status, zone } = this.props
         // display settings
-        const classN = `Timeline ${this.customState.elementName}`
+        const classN = `Timeline ${this.customState.elementName} status_${status}`
         return (<g className = { classN } >
             <SelectionZone
                 zone = { zone }
@@ -93,48 +93,52 @@ class Timeline extends React.PureComponent {
                 onMouseDown = { this.props.handleMouseDown }
             >
             </g>
-            <Header
-                zone = { zone }
-                dimensions = { scaleLib.getDimensions('header', display.zones[zone], display.viz, { x: 0, y: 0, width: 0, height: 0 }) }
-            />
-            <Nav
-                zone = { zone }
-                displayedInstances = { data.length }
-                selections = { selections }
-                dimensions = { scaleLib.getDimensions('nav', display.zones[zone], display.viz, { x: 0, y: 0, width: 0, height: 0 }) }
-            />
-            <Legend
-                type = "plain"
-                zone = { zone }
-                dimensions = { scaleLib.getDimensions('legend', display.zones[zone], display.viz, { x: 10, y: 23, width: -20, height: -30 }) }
-                legend = { legend }
-                selectElements = { this.selectElements }
-            />
-            <PlainAxis
-                type = "Bottom"
-                zone = { zone }
-                axis = { axisBottom }
-                dimensions = { scaleLib.getDimensions('axisBottom', display.zones[zone], display.viz) }
-                propIndex = { 0 }
-                selectElements = { this.selectElements }
-            />
-            <PropSelector
-                propList = { listProp2 }
-                configs = { configs }
-                dimensions = { scaleLib.getDimensions('propSelectorLegend', display.zones[zone], display.viz, { x: 10, y: 0, width: -40, height: 0 }) }
-                selectElements = { this.selectElements }
-                propIndex = { 1 }
-                zone = { zone }
-            />
-            <PropSelector
-                align = "right"
-                propList = { listProp1 }
-                configs = { configs }
-                dimensions = { scaleLib.getDimensions('propSelectorAxisBottom', display.zones[zone], display.viz, { x: 15, y: -14, width: -40, height: 0 }) }
-                selectElements = { this.selectElements }
-                propIndex = { 0 }
-                zone = { zone }
-            />
+            { status !== 'transition' &&
+            <g>
+                <Header
+                    zone = { zone }
+                    dimensions = { scaleLib.getDimensions('header', display.zones[zone], display.viz, { x: 0, y: 0, width: 0, height: 0 }) }
+                />
+                <Nav
+                    zone = { zone }
+                    displayedInstances = { data.length }
+                    selections = { selections }
+                    dimensions = { scaleLib.getDimensions('nav', display.zones[zone], display.viz, { x: 0, y: 0, width: 0, height: 0 }) }
+                />
+                <Legend
+                    type = "plain"
+                    zone = { zone }
+                    dimensions = { scaleLib.getDimensions('legend', display.zones[zone], display.viz, { x: 10, y: 23, width: -20, height: -30 }) }
+                    legend = { legend }
+                    selectElements = { this.selectElements }
+                />
+                <PlainAxis
+                    type = "Bottom"
+                    zone = { zone }
+                    axis = { axisBottom }
+                    dimensions = { scaleLib.getDimensions('axisBottom', display.zones[zone], display.viz) }
+                    propIndex = { 0 }
+                    selectElements = { this.selectElements }
+                />
+                <PropSelector
+                    propList = { listProp2 }
+                    configs = { configs }
+                    dimensions = { scaleLib.getDimensions('propSelectorLegend', display.zones[zone], display.viz, { x: 10, y: 0, width: -40, height: 0 }) }
+                    selectElements = { this.selectElements }
+                    propIndex = { 1 }
+                    zone = { zone }
+                />
+                <PropSelector
+                    align = "right"
+                    propList = { listProp1 }
+                    configs = { configs }
+                    dimensions = { scaleLib.getDimensions('propSelectorAxisBottom', display.zones[zone], display.viz, { x: 15, y: -14, width: -40, height: 0 }) }
+                    selectElements = { this.selectElements }
+                    propIndex = { 0 }
+                    zone = { zone }
+                />
+            </g>
+            }
         </g>)
     }
     selectElements (prop, value, category) {
