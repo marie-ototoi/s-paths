@@ -7,7 +7,7 @@ chai.use(chaiEnzyme())
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
-import { draw, resize, assignBehavior } from '../../src/d3/d3Timeline'
+import d3Timeline from '../../src/d3/d3Timeline'
 import { load, loadEmpty, loadError } from '../data/nobel'
 
 describe('d3Timeline', function () {

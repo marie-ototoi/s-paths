@@ -1,7 +1,6 @@
 import * as d3 from 'd3'
 import dataLib from '../lib/dataLib'
 import selectionLib from '../lib/selectionLib'
-import { parseSvg } from 'd3-interpolate/src/transform/parse'
 
 const create = (el, props) => {
     // console.log('create')
@@ -47,8 +46,10 @@ const getElementsInZone = (el, props) => {
         .each(function (d, i) {
             const width = Number(d3.select(this).attr('width'))
             const height = Number(d3.select(this).attr('height'))
-            const x1 = Number(parseSvg(d3.select(this).node().parentNode.parentNode.getAttribute('transform')).translateX)
-            const y1 = Number(parseSvg(d3.select(this).node().parentNode.getAttribute('transform')).translateY)
+            const trX = d3.select(this).node().parentNode.parentNode.getAttribute('transform')
+            const x1 = Number(trX.slice(10, -1).split(",")[0])
+            const trY = d3.select(this).node().parentNode.getAttribute('transform')
+            const y1 = Number(trY.slice(10, -1).split(",")[1])
             const elementZone = {
                 x1,
                 y1,
@@ -105,7 +106,7 @@ const destroy = (el) => {
 }
 
 const draw = (el, props) => {
-    const { nestedProp1, legend, selectedConfig, selectElement, selections, zone } = props
+    const { nestedProp1, legend, selectElement, selections, zone } = props
     //console.log(selections)
     const timeUnits = d3.select(el)
         .selectAll('g.time')

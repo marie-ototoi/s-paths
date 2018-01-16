@@ -6,10 +6,10 @@ import selections from '../../src/reducers/selections'
 chai.use(sinonChai)
 const newState = [{
     selector: '#toto',
-    props: [{
-        path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
-        value: 'female'
-    }],
+    query: {
+        type: 'uri', 
+        value: 'http://unique.com'
+    },
     zone: 'main'
 }]
 const initialState = []
@@ -25,10 +25,10 @@ describe('reducers/selections', () => {
             elements: [
                 {
                     selector: '#topic',
-                    props: [{
-                        path: 'nobel:LaureateAward/nobel:year/*', 
-                        value: '1945'
-                    }],
+                    query: {
+                        type: 'uri', 
+                        value: 'http://unique.com'
+                    },
                     zone: 'main'
                 }
             ],
@@ -38,10 +38,10 @@ describe('reducers/selections', () => {
             .to.deep.equal([
                 {
                     selector: '#topic',
-                    props: [{
-                        path: 'nobel:LaureateAward/nobel:year/*', 
-                        value: '1945'
-                    }],
+                    query: {
+                        type: 'uri', 
+                        value: 'http://unique.com'
+                    },
                     zone: 'main'
                 }
             ])
@@ -49,18 +49,18 @@ describe('reducers/selections', () => {
             .to.deep.equal([
                 {
                     selector: '#toto',
-                    props: [{
-                        path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
-                        value: 'female'
-                    }],
+                    query: {
+                        type: 'uri', 
+                        value: 'http://unique.com'
+                    },
                     zone: 'main'
                 },
                 {
                     selector: '#topic',
-                    props: [{
-                        path: 'nobel:LaureateAward/nobel:year/*', 
-                        value: '1945'
-                    }],
+                    query: {
+                        type: 'uri', 
+                        value: 'http://unique.com'
+                    },
                     zone: 'main'
                 }
             ])

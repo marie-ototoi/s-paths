@@ -21,14 +21,14 @@ const CORE_CONFIG = {
             { test: /\.(jsx|js)?/, loader: 'babel-loader', exclude: /node_modules/, options: { presets: ['react', 'env'] } },
             {
                 test: /\.css$/,
-                use: ExtractTextPlugin.extract({ fallback: "style-loader", use: "css-loader" })
+                use: ExtractTextPlugin.extract({ fallback: 'style-loader', use: 'css-loader' })
             },
             { test: /\.(eot|svg|ttf|woff|woff2)$/, loader: 'file-loader?name=fonts/[name].[ext]' }
         ]
     },
     plugins: [
         new webpack.NamedModulesPlugin(),
-        new ExtractTextPlugin("styles/discover.css")
+        new ExtractTextPlugin('styles/discover.css')
     ],
     resolve: {
         extensions: ['.js', '.jsx']
@@ -71,5 +71,4 @@ const prodConfig = () =>
         }
     ])
 
-module.exports = (env = process.env.NODE_ENV) => 
-    (env === 'production') ? prodConfig() : devConfig()
+module.exports = (env = process.env.NODE_ENV) => (env === 'production') ? prodConfig() : devConfig()

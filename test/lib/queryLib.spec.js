@@ -84,7 +84,8 @@ WHERE {
                 nobel: 'http://data.nobelprize.org/terms/',
                 dct: 'http://purl.org/dc/terms/'
             },
-            ignoreList: []
+            ignoreList: [],
+            endpoint: 'http://localhost:8890/sparql'
         }
         const prevProp = {
             fullPath: '<http://data.nobelprize.org/terms/LaureateAward>',
@@ -103,6 +104,7 @@ WHERE {
             .to.deep.equal({
                 property: stat.property.value,
                 category: 'uri',
+                endpoint: 'http://localhost:8890/sparql',
                 entrypoint: 'nobel:LaureateAward',
                 path: 'nobel:LaureateAward/dct:isPartOf/*',
                 level: 1,

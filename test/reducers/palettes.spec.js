@@ -17,7 +17,7 @@ const savedState = [
 
 describe('reducers/palettes', () => {
     it('should handle initial state', () => {
-        expect(palettes(undefined, { })[0].colors[0]).to.equal('#00441b')
+        expect(palettes(undefined, { })[0].colors[0]).to.equal('hsl(180, 100%, 45%)')
         expect(palettes(savedState, { })).to.deep.equal(savedState)
     })
     it('should handle SET_PROP_PALETTE', () => {
