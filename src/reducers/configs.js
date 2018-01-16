@@ -31,6 +31,7 @@ const configs = (state = [], action) => {
     case types.SELECT_CONFIG:
         return state.map(c => config(c, action))
     case types.SET_CONFIGS:
+    case types.SET_STATS:
         return action.configs.map(c => {
             return {
                 ...c,

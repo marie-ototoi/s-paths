@@ -1,3 +1,5 @@
+import * as types from '../constants/ActionTypes'
+
 const defaultState = [
     {
         id: 'Timeline',
@@ -53,14 +55,14 @@ const defaultState = [
 
 const view = (state = {}, action) => {
     switch (action.type) {
-    case 'SELECT_VIEWS':
+    case types.SELECT_VIEWS:
         // for each prop, check if it fits the constraints
         let relevantProps = state.stats
         return {
             ...state,
             relevantProps
         }
-    case 'DISPLAY_VIEWS':
+    case types.DISPLAY_VIEWS:
         return {
             ...state,
             displayed: action.ids.includes(state.id)
@@ -72,8 +74,8 @@ const view = (state = {}, action) => {
 
 const views = (state = defaultState, action) => {
     switch (action.type) {
-    case 'SELECT_VIEWS':
-    case 'DISPLAY_VIEWS':
+    case types.SELECT_VIEWS:
+    case types.DISPLAY_VIEWS:
         return state.map(v => view(v, action))
     default:
         return state

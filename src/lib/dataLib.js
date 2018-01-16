@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
 import moment from 'moment'
 
-const getResults = (data, zone) => {
+const getResults = (data, zone, transition) => {
     return (areLoaded(data, zone))
         ? data.filter(d => d.zone === zone)[0].statements.results.bindings : []
 }

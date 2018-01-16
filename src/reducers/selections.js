@@ -1,3 +1,5 @@
+import * as types from '../constants/ActionTypes'
+
 const defaultState = []
 /* const exSelection = {
     zone: 'main',
@@ -9,7 +11,7 @@ const defaultState = []
 
 const selection = (state, action) => {
     switch (action.type) {
-    case 'ADD_SELECTION':
+    case types.ADD_SELECTION:
         return {
             selector: action.selector,
             zone: action.zone,
@@ -22,7 +24,7 @@ const selection = (state, action) => {
 
 const selections = (state = defaultState, action) => {
     switch (action.type) {
-    case 'ADD_SELECTION':
+    case types.ADD_SELECTION:
         const elements2Add = action.elements.filter(el => {
             return state.filter(sel =>
                 (sel.selector === el.selector && sel.zone === action.zone)
@@ -35,12 +37,13 @@ const selections = (state = defaultState, action) => {
             ...state,
             ...elementsAdded
         ]
-    case 'REMOVE_SELECTION':
+    case types.REMOVE_SELECTION:
         const elements2Remove = action.elements.map(s => s.selector)
         return state.filter(sel => {
             return !(elements2Remove.includes(sel.selector) && sel.zone === action.zone)
         })
-    case 'RESET_SELECTION':
+    case types.RESET_SELECTION:
+    case types.SET_STATS:
         return state.filter(sel => {
             if (action.zone) {
                 return !(sel.zone === action.zone)

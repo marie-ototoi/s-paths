@@ -1,3 +1,5 @@
+import * as types from '../constants/ActionTypes'
+
 const defaultState = {
     screen: {
         width: 10,
@@ -56,7 +58,7 @@ const defaultState = {
 const display = (state = defaultState, action) => {
     // console.log(action, state)
     switch (action.type) {
-    case 'SET_DISPLAY':
+    case types.SET_DISPLAY:
         return {
             ...state,
             screen: action.screen || state.screen,
@@ -66,7 +68,7 @@ const display = (state = defaultState, action) => {
             zones: action.zones || state.zones,
             viz: action.viz || state.viz
         }
-    case 'START_SELECTED_ZONE':
+    case types.START_SELECTED_ZONE:
         return {
             ...state,
             selectedZone: {
@@ -76,7 +78,7 @@ const display = (state = defaultState, action) => {
                 y2: action.y1
             }
         }
-    case 'MOVE_SELECTED_ZONE':
+    case types.MOVE_SELECTED_ZONE:
         return {
             ...state,
             selectedZone: {
@@ -85,7 +87,7 @@ const display = (state = defaultState, action) => {
                 y2: action.y2
             }
         }
-    case 'CLEAR_SELECTED_ZONE':
+    case types.CLEAR_SELECTED_ZONE:
         return {
             ...state,
             selectedZone: {

@@ -95,7 +95,7 @@ const initialState = [
 
 const palette = (state, action) => {
     switch (action.type) {
-    case 'SET_PROP_PALETTE':
+    case types.SET_PROP_PALETTE:
         return {
             ...state,
             properties: [

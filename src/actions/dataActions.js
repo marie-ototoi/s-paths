@@ -89,26 +89,18 @@ const loadData = (dispatch) => (dataset, views) => {
                 if (stats.totalInstances === 0) {
                     reject(new Error('no_results'))
                 } else {
-                    dispatch({
-                        type: types.SET_STATS,
-                        stats
-                    })
-                    dispatch({
-                        type: types.RESET_SELECTION
-                    })
-                    dispatch({
-                        type: types.SET_PREFIXED_ENTRYPOINT,
-                        entrypoint: stats.options.entrypoint,
-                        prefixes: stats.options.prefixes,
-                        labels: stats.options.labels
-                    })
                     entrypoint = stats.options.entrypoint
                     prefixes = stats.options.prefixes
+                    
                     // console.log('ici ?', stats.statements)
                     // for each views, checks which properties ou sets of properties could match and evaluate
                     let configs = configLib.activateDefaultConfigs(configLib.defineConfigs(views, stats))
                     dispatch({
-                        type: types.SET_CONFIGS,
+                        type: types.SET_STATS,
+                        stats,
+                        entrypoint: stats.options.entrypoint,
+                        prefixes: stats.options.prefixes,
+                        labels: stats.options.labels,
                         configs
                     })
                     resolve(configs)

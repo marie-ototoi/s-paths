@@ -59,17 +59,13 @@ const dataset = (state = initialState, action) => {
         return {
             ...state
         }
-    case types.SET_PREFIXED_ENTRYPOINT:
-        return {
-            ...state,
-            entrypoint: action.entrypoint,
-            prefixes: action.prefixes,
-            labels: action.labels
-        }
     case types.SET_STATS:
         return {
             ...state,
-            stats: action.stats
+            stats: action.stats,
+            entrypoint: action.entrypoint,
+            prefixes: action.prefixes,
+            labels: action.labels
         }
     case types.SET_CONFIGS:
         return {
