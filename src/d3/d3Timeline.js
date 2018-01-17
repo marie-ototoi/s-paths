@@ -33,6 +33,16 @@ const drawSelection = (el, props) => {
         .attr('x', selectedZone.x1)
         .attr('y', selectedZone.y1)
 }
+
+const getElementsForTransition = (el, props) => {
+    let results = []
+    d3.select(el).selectAll('.elements').each(d => {
+        results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity })
+    })
+    // console.log(results)
+    return results
+}
+
 const getElementsInZone = (el, props) => {
     const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone)
     const selectedZone = {
@@ -44,20 +54,8 @@ const getElementsInZone = (el, props) => {
     let selectedElements = []
     d3.select(el).selectAll('.element')
         .each(function (d, i) {
-            const width = Number(d3.select(this).attr('width'))
-            const height = Number(d3.select(this).attr('height'))
-            const trX = d3.select(this).node().parentNode.parentNode.getAttribute('transform')
-            const x1 = Number(trX.slice(10, -1).split(",")[0])
-            const trY = d3.select(this).node().parentNode.getAttribute('transform')
-            const y1 = Number(trY.slice(10, -1).split(",")[1])
-            const elementZone = {
-                x1,
-                y1,
-                x2: x1 + width,
-                y2: y1 + height
-            }
             // console.log(selectionLib.detectRectCollision(selectedZone, elementZone), d3.select(this).node().parentNode.getAttribute('id'), d.selection)
-            if (selectionLib.detectRectCollision(selectedZone, elementZone)) selectedElements.push(d.selection)
+            if (selectionLib.detectRectCollision(selectedZone, d.zone)) selectedElements.push(d.selection)
         })
     return selectedElements
 }
@@ -141,13 +139,15 @@ const draw = (el, props) => {
                     value: d.entrypoint.value
                 }
             }
+            d.zone = {}
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
         })
         .attr('id', d => d.selection.selector) // only needed to better understand html source code
         .classed('selected', d => d.selected)
         .attr('fill', d => d.color)
         .attr('opacity', d => {
-            return (selections.length > 0 && d.selected !== true) ? 0.5 : 1
+            d.opacity = (selections.length > 0 && d.selected !== true) ? 0.5 : 1
+            return d.opacity
         })
         .on('mousedown', d => {
             selectElement(d.selection)
@@ -185,6 +185,17 @@ const resize = (el, props) => {
         .attr('width', d => unitWidth - 2)
         .attr('y', -unitHeight)
         .attr('height', d => unitHeight)
+        .each((d, i) => {
+            const x1 = xScale(Number(d[d.group]))
+            const y1 = display.viz.useful_height - (i * unitHeight)
+            d.zone = {
+                x1,
+                y1,
+                x2: x1 + unitWidth - 2,
+                y2: y1 + unitHeight
+            }
+        })
+
     //.attr('stroke-width', 1 )
     //.attr('stroke', d => (d.selected === true) ? '#000' : d.color)
     // .attr('stroke-width', )

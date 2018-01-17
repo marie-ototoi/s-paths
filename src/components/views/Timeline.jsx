@@ -74,7 +74,7 @@ class Timeline extends React.PureComponent {
     }
     render () {
         const { axisBottom, legend, listProp1, listProp2 } = this.customState
-        const { configs, data, display, selections, status, zone } = this.props
+        const { configs, data, display, role, selections, status, zone } = this.props
         // display settings
         const classN = `Timeline ${this.customState.elementName} status_${status}`
         return (<g className = { classN } >
@@ -93,7 +93,7 @@ class Timeline extends React.PureComponent {
                 onMouseDown = { this.props.handleMouseDown }
             >
             </g>
-            { status !== 'transition' &&
+            { role !== 'transition' &&
             <g>
                 <Header
                     zone = { zone }
@@ -154,6 +154,9 @@ class Timeline extends React.PureComponent {
     componentDidMount () {
         // console.log(this.props.data)
         d3Timeline.create(this.refs.Timeline, { ...this.props, ...this.customState })
+        if (this.props.role === 'transition') {
+            console.log('called once when transition data are loaded and displayed')   
+        }
     }
     componentDidUpdate () {
         // console.log('update', this.props.selections)
