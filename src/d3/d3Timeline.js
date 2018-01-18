@@ -7,6 +7,7 @@ const create = (el, props) => {
     if (el && props.data) {
         draw(el, props)
         resize(el, props)
+        props.handleTransition(props.zone, props.role, getElementsForTransition(el, props))
     }
 }
 
@@ -37,7 +38,7 @@ const drawSelection = (el, props) => {
 const getElementsForTransition = (el, props) => {
     let results = []
     d3.select(el).selectAll('.elements').each(d => {
-        results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity })
+        results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity, shape: d.shape })
     })
     // console.log(results)
     return results
@@ -96,6 +97,7 @@ const update = (el, props) => {
         } else {
             d3.select(el).selectAll('rect.selection').remove()
         }
+        props.handleTransition(props.zone, 'origin', getElementsForTransition(el, props))
     }
 }
 
@@ -139,6 +141,7 @@ const draw = (el, props) => {
                     value: d.entrypoint.value
                 }
             }
+            d.shape = 'rectangle'
             d.zone = {}
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
         })
@@ -158,7 +161,7 @@ const draw = (el, props) => {
 }
 
 const resize = (el, props) => {
-    const { nestedProp1, display, selections } = props
+    const { nestedProp1, display } = props
     const xScale = d3.scaleLinear()
         .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
         .range([0, display.viz.useful_width])
@@ -192,7 +195,9 @@ const resize = (el, props) => {
                 x1,
                 y1,
                 x2: x1 + unitWidth - 2,
-                y2: y1 + unitHeight
+                y2: y1 + unitHeight,
+                width: unitWidth - 2,
+                height: unitHeight
             }
         })
 

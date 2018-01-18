@@ -10,5 +10,6 @@ module.exports = {
     nav: require('../styles/nav.css'),
     tooltip: require('../styles/tooltip.css'),
     propSelector: require('../styles/propSelector.css'),
-    selection: require('../styles/selection.css')
+    selection: require('../styles/selection.css'),
+    transition: require('../styles/transition.css')
 }

@@ -2,17 +2,20 @@ import React from 'react'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 import * as d3 from 'd3'
-import d3Timeline from '../../d3/d3Timeline'
+// components
 import Header from '../elements/Header'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import PlainAxis from '../elements/PlainAxis'
 import PropSelector from '../elements/PropSelector'
 import SelectionZone from '../elements/SelectionZone'
+// d3
+import d3Timeline from '../../d3/d3Timeline'
+// libs
 import config from '../../lib/configLib'
 import dataLib from '../../lib/dataLib'
-import selectionLib from '../../lib/selectionLib'
 import scaleLib from '../../lib/scaleLib'
+// redux functions
 import { getPropPalette } from '../../actions/palettesActions'
 import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
 
@@ -74,9 +77,10 @@ class Timeline extends React.PureComponent {
     }
     render () {
         const { axisBottom, legend, listProp1, listProp2 } = this.customState
-        const { configs, data, display, role, selections, status, zone } = this.props
+        const { configs, data, display, role, selections, step, zone } = this.props
         // display settings
-        const classN = `Timeline ${this.customState.elementName} status_${status}`
+        // console.log(step)
+        const classN = `Timeline ${this.customState.elementName} role_${role}`
         return (<g className = { classN } >
             <SelectionZone
                 zone = { zone }
@@ -85,15 +89,16 @@ class Timeline extends React.PureComponent {
                 handleMouseMove = { this.handleMouseMove }
                 handleMouseUp = { this.handleMouseUp }
             />
+            { step !== 'launch' &&
             <g
                 transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
                 ref = "Timeline"
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.props.handleMouseDown }
-            >
-            </g>
-            { role !== 'transition' &&
+            ></g>
+            }
+            { role !== 'target' &&
             <g>
                 <Header
                     zone = { zone }
@@ -154,8 +159,9 @@ class Timeline extends React.PureComponent {
     componentDidMount () {
         // console.log(this.props.data)
         d3Timeline.create(this.refs.Timeline, { ...this.props, ...this.customState })
-        if (this.props.role === 'transition') {
-            console.log('called once when transition data are loaded and displayed')   
+        if (this.props.role === 'target') {
+            this.render()
+            // console.log('called once when transition data are loaded and displayed')
         }
     }
     componentDidUpdate () {
@@ -178,10 +184,10 @@ function mapStateToProps (state) {
 function mapDispatchToProps (dispatch) {
     return {
         getPropPalette: getPropPalette(dispatch),
-        select: select(dispatch),
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
-        handleMouseMove: handleMouseMove(dispatch)
+        handleMouseMove: handleMouseMove(dispatch),
+        select: select(dispatch)
     }
 }
 

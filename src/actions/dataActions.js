@@ -30,6 +30,12 @@ const receiveStats = (dispatch) => (stats) => {
     })
 }
 
+const endTransition = (dispatch) => () => {
+    return dispatch({
+        type: types.END_TRANSITION
+    })
+}
+
 const exploreSelection = (dispatch) => (selection, dataset, views) => {
 
         // constraints = concat each selected element query
@@ -127,6 +133,7 @@ const loadData = (dispatch) => (dataset, views) => {
 }
 
 exports.init = init
+exports.endTransition = endTransition
 exports.loadData = loadData
 exports.receiveStats = receiveStats
 exports.selectProperty = selectProperty

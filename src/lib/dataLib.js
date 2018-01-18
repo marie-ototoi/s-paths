@@ -93,6 +93,11 @@ const getReadablePathsParts = (path, labels) => {
         })
 }
 
+const getTransitionElements = (originElements, targetElements) => {
+    // 
+    return { origin: originElements, target: targetElements }
+}
+
 const getAxis = (nestedProps, propName, category) => {
     return {
         info: nestedProps.map(p => {
@@ -177,6 +182,7 @@ exports.getAxis = getAxis
 exports.getCurrentState = getCurrentState
 exports.getHeadings = getHeadings
 exports.getLegend = getLegend
+exports.getTransitionElements = getTransitionElements
 exports.makeId = makeId
 exports.getPropList = getPropList
 exports.getResults = getResults
