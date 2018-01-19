@@ -14,7 +14,7 @@ import d3Timeline from '../../d3/d3Timeline'
 // libs
 import config from '../../lib/configLib'
 import dataLib from '../../lib/dataLib'
-import scaleLib from '../../lib/scaleLib'
+import scaleLib, { getDimensions } from '../../lib/scaleLib'
 // redux functions
 import { getPropPalette } from '../../actions/palettesActions'
 import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
@@ -81,6 +81,7 @@ class Timeline extends React.PureComponent {
         // display settings
         // console.log(step)
         const classN = `Timeline ${this.customState.elementName} role_${role}`
+        const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
         return (<g className = { classN } >
             <SelectionZone
                 zone = { zone }
@@ -91,7 +92,7 @@ class Timeline extends React.PureComponent {
             />
             { step !== 'launch' &&
             <g
-                transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
+                transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
                 ref = "Timeline"
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
@@ -102,18 +103,16 @@ class Timeline extends React.PureComponent {
             <g>
                 <Header
                     zone = { zone }
-                    dimensions = { scaleLib.getDimensions('header', display.zones[zone], display.viz, { x: 0, y: 0, width: 0, height: 0 }) }
                 />
                 <Nav
                     zone = { zone }
-                    displayedInstances = { data.length }
+                    displayedInstances = { data.length } // to be fixed - works only for unit displays
                     selections = { selections }
-                    dimensions = { scaleLib.getDimensions('nav', display.zones[zone], display.viz, { x: 0, y: 0, width: 0, height: 0 }) }
                 />
                 <Legend
                     type = "plain"
                     zone = { zone }
-                    dimensions = { scaleLib.getDimensions('legend', display.zones[zone], display.viz, { x: 10, y: 23, width: -20, height: -30 }) }
+                    offset = { { x: 10, y: 23, width: -20, height: -30 } }
                     legend = { legend }
                     selectElements = { this.selectElements }
                 />
@@ -121,24 +120,23 @@ class Timeline extends React.PureComponent {
                     type = "Bottom"
                     zone = { zone }
                     axis = { axisBottom }
-                    dimensions = { scaleLib.getDimensions('axisBottom', display.zones[zone], display.viz) }
                     propIndex = { 0 }
                     selectElements = { this.selectElements }
                 />
                 <PropSelector
+                    type = "Legend"
                     propList = { listProp2 }
                     configs = { configs }
-                    dimensions = { scaleLib.getDimensions('propSelectorLegend', display.zones[zone], display.viz, { x: 10, y: 0, width: -40, height: 0 }) }
-                    selectElements = { this.selectElements }
+                    offset = { { x: 10, y: 0, width: -40, height: 0 } }
                     propIndex = { 1 }
                     zone = { zone }
                 />
                 <PropSelector
                     align = "right"
+                    type = "AxisBottom"
                     propList = { listProp1 }
                     configs = { configs }
-                    dimensions = { scaleLib.getDimensions('propSelectorAxisBottom', display.zones[zone], display.viz, { x: 15, y: -14, width: -40, height: 0 }) }
-                    selectElements = { this.selectElements }
+                    offset = { { x: 15, y: -14, width: -40, height: 0 } }
                     propIndex = { 0 }
                     zone = { zone }
                 />

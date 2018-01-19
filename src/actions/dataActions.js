@@ -17,12 +17,6 @@ const getStats = (options) => {
     // return rp('http://localhost:5000/stats/' + entrypoint)
 }
 
-const init = (dispatch) => () => {
-    return dispatch({
-        type: types.INIT
-    })
-}
-
 const receiveStats = (dispatch) => (stats) => {
     return dispatch({
         type: types.SET_STATS,
@@ -132,7 +126,6 @@ const loadData = (dispatch) => (dataset, views) => {
         })
 }
 
-exports.init = init
 exports.endTransition = endTransition
 exports.loadData = loadData
 exports.receiveStats = receiveStats

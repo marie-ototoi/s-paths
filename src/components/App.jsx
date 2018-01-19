@@ -1,12 +1,10 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import Main from './Main'
 // components
 import HeatMap from './views/HeatMap'
 import Timeline from './views/Timeline'
 import Map from './views/Map'
 import Transition from './elements/Transition'
-import Aside from './Aside'
 import Debug from './Debug'
 // libs
 import scale from '../lib/scaleLib'
@@ -15,15 +13,17 @@ import configLib from '../lib/configLib'
 import selectionLib from '../lib/selectionLib'
 // redux actions
 import { getScreen, setDisplay } from '../actions/displayActions'
-import { endTransition, init, loadData } from '../actions/dataActions'
+import { endTransition, loadData } from '../actions/dataActions'
 
 class App extends React.Component {
     constructor (props) {
         super(props)
+        // resize handled in the app component only: it updates display reducer that triggers rerender if needed
         this.onResize = this.onResize.bind(this)
+        window.addEventListener('resize', this.onResize)
+        // transition state is handled locally in the component, to avoid re-rendering
         this.handleTransition = this.handleTransition.bind(this)
         this.handleEndTransition = this.handleEndTransition.bind(this)
-        window.addEventListener('resize', this.onResize)
         this.customState = {
             main_target: [],
             main_origin: [],
@@ -33,32 +33,31 @@ class App extends React.Component {
     }
     componentDidMount () {
         this.onResize()
-        this.props.init()
         const { dataset, views } = this.props
+        // this is where it all starts
         this.props.loadData(dataset, views)
     }
     handleTransition (view, state, elements) {
         this.customState[`${view}_${state}`] = elements
-        // console.log('handle', view, state, elements)
+        // when both main and aside target are displayed
         if (this.customState.main_target.length > 0) { // && this.customState.aside_target.length > 0
             // launch transitions
             this.customState.step = 'launch'
             this.render()
-            // console.log('recommence ?', view)
         }
     }
     handleEndTransition (view) {
-        // console.log('ici ?', view)
         this.customState[`${view}_target`] = []
+        // when both main and aside transitions are done (could actually react to the first call since they are in the same timing)
         if (this.customState.main_target.length === 0) { // && this.customState.aside_target.length === 0
             // stop transitions
-            // console.log('fini !', view)
             this.customState.step = 'done'
             this.props.endTransition()
         }
     }
     render () {
         const { configs, display, env, data, selections } = this.props
+        // debug logs
         // console.log('env', env)
         // console.log('mode', mode)
         // console.log('display', display)
@@ -75,8 +74,8 @@ class App extends React.Component {
         const MainComponent = main ? componentIds[main.id] : ''
         const aside = configLib.getConfigs(configs, 'aside')
         const SideComponent = aside ? componentIds[aside.id] : ''
+        // relies data in the reducer to know if the current state is transition or active
         const status = dataLib.getCurrentState(data)
-        // console.log(status, this.customState.step)
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
@@ -161,7 +160,6 @@ function mapStateToProps (state) {
 function mapDispatchToProps (dispatch) {
     return {
         endTransition: endTransition(dispatch),
-        init: init(dispatch),
         loadData: loadData(dispatch),
         setDisplay: setDisplay(dispatch)
     }

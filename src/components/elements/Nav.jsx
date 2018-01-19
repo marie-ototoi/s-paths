@@ -1,8 +1,11 @@
 import React from 'react'
 import pluralize from 'pluralize'
 import { connect } from 'react-redux'
-import { loadData } from '../../actions/dataActions'
+
 import queryLib from '../../lib/queryLib'
+import { getDimensions } from '../../lib/scaleLib'
+
+import { loadData } from '../../actions/dataActions'
 
 class Nav extends React.PureComponent {
     constructor (props) {
@@ -20,7 +23,9 @@ class Nav extends React.PureComponent {
         }
     }
     render () {
-        const { data, dataset, dimensions, displayedInstances, selections, zone } = this.props
+        const { data, dataset, displayedInstances, display, offset, selections, zone } = this.props
+        const dimensions = getDimensions('nav', display.zones[zone], display.viz, offset)
+        const { x, y, width, height } = dimensions
         // console.log(dataset.stats)
         let options = [
             { label: 'endpoint', total: dataset.stats.totalInstances },
@@ -28,22 +33,22 @@ class Nav extends React.PureComponent {
             { label: 'displayed', total: displayedInstances },
             { label: 'selected', total: selections.length }
         ]
-        const itemWidth = this.props.dimensions.width / 6
+        const itemWidth = width / 6
         const itemHeight = itemWidth * 3 / 4
         const margin = itemWidth / 6
         const maxBarWidth = (itemWidth * 3) + (margin * 2)
 
         // console.log(dataset.labels)
         return (<g className = "Nav"
-            transform = { `translate(${dimensions.x}, ${dimensions.y})` }
+            transform = { `translate(${x}, ${y})` }
             ref = { `nav_${zone}` }
         >
             { [0, 1, 2, 3, 4].map((option, i) => {
-                return <rect key = { this.props.zone + '_thumb_' + i } width = { itemWidth } height = { itemHeight } y = { 60 - itemHeight } x = { (margin * (i + 1)) + (itemWidth * i) } fill = "#E0E0E0"></rect>
+                return <rect key = { zone + '_thumb_' + i } width = { itemWidth } height = { itemHeight } y = { 60 - itemHeight } x = { (margin * (i + 1)) + (itemWidth * i) } fill = "#E0E0E0"></rect>
             }) }
             { options.map((option, i) => {
                 const barWidth = maxBarWidth * option.total / options[0].total
-                return <g key = { this.props.zone + '_summary_' + i }>
+                return <g key = { zone + '_summary_' + i }>
                     <rect width = { maxBarWidth } height = { 12 } y = { 60 + margin + i * 16 } x = { margin * 2 + itemWidth } fill = "#E0E0E0"></rect>
                     <rect width = { barWidth } height = { 6 } y = { 63 + margin + i * 16 } x = { margin * 2 + itemWidth } fill = "#666666"></rect>
                     <text x = { margin } fill = "#666666" y = { 60 + margin + 10 + i * 16 }>{ option.label }</text>
@@ -63,6 +68,7 @@ function mapStateToProps (state) {
     return {
         dataset: state.dataset.present,
         data: state.data,
+        display: state.display,
         views: state.views
     }
 }

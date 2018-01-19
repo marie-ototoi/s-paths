@@ -1,5 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
+
+import { getDimensions } from '../../lib/scaleLib'
+
 import { selectProperty } from '../../actions/dataActions'
 
 class PropSelector extends React.PureComponent {
@@ -23,7 +26,8 @@ class PropSelector extends React.PureComponent {
         this.props.selectProperty(configs, zone, propIndex, e.target.value, dataset)
     }
     render () {
-        const { align, dimensions, propList } = this.props
+        const { align, display, offset, propList, type, zone } = this.props
+        const dimensions = getDimensions('propSelector' + type, display.zones[zone], display.viz, offset)
         const { x, y, width, height } = dimensions
         const alignClass = (align === 'right') ? 'right' : 'left'
         return (
@@ -69,7 +73,8 @@ class PropSelector extends React.PureComponent {
 
 function mapStateToProps (state) {
     return {
-        dataset: state.dataset.present
+        dataset: state.dataset.present,
+        display: state.display
     }
 }
 

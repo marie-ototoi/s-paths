@@ -1,12 +1,17 @@
 import React from 'react'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
+
 import d3PlainLegend from '../../d3/d3PlainLegend'
+
+import { getDimensions } from '../../lib/scaleLib'
+
 import { select } from '../../actions/selectionActions'
 
 class Legend extends React.PureComponent {
     render () {
-        const { zone, dimensions } = this.props
+        const { display, offset, zone } = this.props
+        const dimensions = getDimensions('legend', display.zones[zone], display.viz, offset)
         return (<g className = "Legend"
             transform = { `translate(${dimensions.x}, ${dimensions.y})` }
             ref = { `legend_${zone}` }

@@ -1,20 +1,24 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import d3PlainLegend from '../../d3/d3Axis/d3Axis'
+
+import d3PlainAxis from '../../d3/d3PlainAxis'
+
+import { getDimensions } from '../../lib/scaleLib'
+
 import { select } from '../../actions/selectionActions'
 import { selectProperty } from '../../actions/dataActions'
-import d3PlainAxis from '../../d3/d3PlainAxis'
 
 class PlainAxis extends React.Component {
     constructor (props) {
         super(props)
         this.state = {
-            elementName: `${this.props.zone}_axis_${this.props.type}`
+            elementName: `${props.zone}_axis_${props.type}`,
+            dimensions: getDimensions('axisBottom', props.display.zones[props.zone], props.display.viz, props.offset)
         }
     }
 
     render () {
-        const { x, y } = this.props.dimensions
+        const { x, y } = this.state.dimensions
         return (<g className = "Axis"
             transform = { `translate(${x}, ${y})` }
             ref = { this.state.elementName }
@@ -36,7 +40,6 @@ function mapStateToProps (state) {
     return {
         display: state.display,
         selections: state.selections,
-        
         dataset: state.dataset.present
     }
 }

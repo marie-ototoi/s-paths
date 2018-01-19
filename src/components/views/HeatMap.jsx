@@ -54,7 +54,7 @@ class HeatMap extends React.Component {
     }
 
     prepareData (nextProps) {
-        const { data, configs, palettes, getPropPalette } = nextProps
+        const { data, dataset, configs, palettes, getPropPalette } = nextProps
         // prepare the data for display
         const selectedConfig = config.getSelectedConfig(configs)
         const dataStat = statisticalOperator.computeStatisticalInformation(data, selectedConfig)
@@ -63,7 +63,7 @@ class HeatMap extends React.Component {
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format
         const nestedProp1 = dataLib.groupTimeData(data, 'prop1', formatProp1, 50)
         const axisBottom = dataLib.getAxis(nestedProp1, 'prop1', categoryProp1)
-        const listProp1 = dataLib.getPropList(configs, 0)
+        const listProp1 = dataLib.getPropList(configs, 0, dataset.labels)
 
         const paletteObj = []
         let nbColor = dataStat.max - dataStat.min + 1
@@ -92,7 +92,7 @@ class HeatMap extends React.Component {
         // Second prop to be displayed in the legend
         // const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         //  const legend = dataLib.getLegend(nestedProp2, colors, categoryProp2)
-        const listProp2 = dataLib.getPropList(configs, 1)
+        const listProp2 = dataLib.getPropList(configs, 1, dataset.labels)
 
         // Save to reuse in render
         this.customState = { ...this.customState, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2, dataStat }

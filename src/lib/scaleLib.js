@@ -47,6 +47,13 @@ const getGrid = (gridDef, stage) => {
 
 const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, height: 0 }) => {
     switch (element) {
+    case 'core':
+        return {
+            x: origin.x + viz.horizontal_margin + offset.x,
+            y: origin.y + viz.vertical_margin + offset.y,
+            width: viz.useful_width + offset.width,
+            height: viz.useful_height + offset.height
+        }
     case 'legend':
         return {
             x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
