@@ -7,12 +7,12 @@ import Map from './views/Map'
 import Transition from './elements/Transition'
 import Debug from './Debug'
 // libs
-import scale from '../lib/scaleLib'
+import { getScreen } from '../lib/scaleLib'
 import dataLib from '../lib/dataLib'
 import configLib from '../lib/configLib'
 import selectionLib from '../lib/selectionLib'
 // redux actions
-import { getScreen, setDisplay } from '../actions/displayActions'
+import { setDisplay } from '../actions/displayActions'
 import { endTransition, loadData } from '../actions/dataActions'
 
 class App extends React.Component {
@@ -38,6 +38,7 @@ class App extends React.Component {
         this.props.loadData(dataset, views)
     }
     handleTransition (view, state, elements) {
+        if(state === 'target') console.log('transition target laid out', view, state, elements)
         this.customState[`${view}_${state}`] = elements
         // when both main and aside target are displayed
         if (this.customState.main_target.length > 0) { // && this.customState.aside_target.length > 0
@@ -47,6 +48,7 @@ class App extends React.Component {
         }
     }
     handleEndTransition (view) {
+        console.log('transition ended', view)
         this.customState[`${view}_target`] = []
         // when both main and aside transitions are done (could actually react to the first call since they are in the same timing)
         if (this.customState.main_target.length === 0) { // && this.customState.aside_target.length === 0
@@ -56,6 +58,7 @@ class App extends React.Component {
         }
     }
     render () {
+        console.log('render app')
         const { configs, display, env, data, selections } = this.props
         // debug logs
         // console.log('env', env)

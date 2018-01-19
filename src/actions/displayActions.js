@@ -19,12 +19,4 @@ const setDisplay = (dispatch) => ({ env, mode, zonesDef, gridDef, screen, vizDef
     })
 }
 
-const getScreen = () => {
-    return {
-        height: window.innerHeight - 5,
-        width: window.innerWidth - 5
-    }
-}
-
-exports.getScreen = getScreen
 exports.setDisplay = setDisplay

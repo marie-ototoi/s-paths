@@ -22,6 +22,13 @@ const getZones = (zonesDef, stage) => {
     }
 }
 
+const getScreen = () => {
+    return {
+        height: window.innerHeight - 5,
+        width: window.innerWidth - 5
+    }
+}
+
 const getViz = (vizDef, stage) => {
     return {
         useful_width: scaleX(vizDef.useful_width, stage),
@@ -108,6 +115,7 @@ const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, he
 
 exports.getDimensions = getDimensions
 exports.getGrid = getGrid
+exports.getScreen = getScreen
 exports.getViz = getViz
 exports.getZones = getZones
 exports.scaleStage = scaleStage
