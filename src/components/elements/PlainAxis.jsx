@@ -16,9 +16,9 @@ class PlainAxis extends React.Component {
             dimensions: getDimensions('axisBottom', props.display.zones[props.zone], props.display.viz, props.offset)
         }
     }
-
     render () {
-        const { x, y } = this.state.dimensions
+        const { display, offset, zone } = this.props
+        const { x, y } = getDimensions('axisBottom', display.zones[zone], display.viz, offset)
         return (<g className = "Axis"
             transform = { `translate(${x}, ${y})` }
             ref = { this.state.elementName }
