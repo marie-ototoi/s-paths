@@ -189,13 +189,13 @@ const resize = (el, props) => {
         .attr('y', -unitHeight)
         .attr('height', d => unitHeight)
         .each((d, i) => {
-            const x1 = xScale(Number(d[d.group]))
+            const x1 = xScale(Number(d[d.group])) + 1
             const y1 = display.viz.useful_height - (i * unitHeight)
             d.zone = {
                 x1,
-                y1,
+                y1: y1 - unitHeight,
                 x2: x1 + unitWidth - 2,
-                y2: y1 + unitHeight,
+                y2: y1,
                 width: unitWidth - 2,
                 height: unitHeight
             }
