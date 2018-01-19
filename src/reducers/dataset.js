@@ -65,7 +65,8 @@ const dataset = (state = initialState, action) => {
             stats: action.stats,
             entrypoint: action.entrypoint,
             prefixes: action.prefixes,
-            labels: action.labels
+            labels: action.labels,
+            constraints: action.constraints
         }
     case types.SET_CONFIGS:
         return {

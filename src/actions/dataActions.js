@@ -48,6 +48,7 @@ const exploreSelection = (dispatch) => (selection, dataset, views) => {
 }
 
 const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) => {
+    console.log('select property')
     const { endpoint, entrypoint, prefixes } = dataset
     const updatedConfig = configLib.selectProperty(config, propIndex, path)
     dispatch({
@@ -55,6 +56,7 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
         config: updatedConfig,
         zone
     })
+
     const newQuery = queryLib.makeQuery(entrypoint, updatedConfig, dataset)
     // console.log('new data', newQuery)
     queryLib.getData(endpoint, newQuery, prefixes)
@@ -71,7 +73,7 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
 }
 
 const loadData = (dispatch) => (dataset, views) => {
-    // console.log('salut ?',dispatch, dataset, views )
+    console.log('load Data ')
     let { endpoint, entrypoint, prefixes } = dataset
     getStats(dataset)
         .then(stats => {
@@ -81,8 +83,6 @@ const loadData = (dispatch) => (dataset, views) => {
                 } else {
                     entrypoint = stats.options.entrypoint
                     prefixes = stats.options.prefixes
-                    
-                    // console.log('ici ?', stats.statements)
                     // for each views, checks which properties ou sets of properties could match and evaluate
                     let configs = configLib.activateDefaultConfigs(configLib.defineConfigs(views, stats))
                     dispatch({
@@ -91,6 +91,7 @@ const loadData = (dispatch) => (dataset, views) => {
                         entrypoint: stats.options.entrypoint,
                         prefixes: stats.options.prefixes,
                         labels: stats.options.labels,
+                        constraints: stats.options.constraints,
                         configs
                     })
                     resolve(configs)
