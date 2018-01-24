@@ -2,42 +2,36 @@ import React from 'react'
 import * as d3 from 'd3'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
-import d3HeatMap from '../../d3/d3HeatMap'
-import { select, addSelection, removeSelection } from '../../actions/selectionActions'
+// components
+import Header from '../elements/Header'
 import Legend from '../elements/Legend'
-import Axis from '../elements/Axis'
-import { getPropPalette } from '../../actions/palettesActions'
-import statisticalOperator from '../../lib/statLib'
-import {getQuantitativeColors} from '../../lib/paletteLib.js'
-import config from '../../lib/configLib'
-import scaleLib from '../../lib/scaleLib'
-import dataLib from '../../lib/dataLib'
+import Nav from '../elements/Nav'
 import PlainAxis from '../elements/PlainAxis'
 import PropSelector from '../elements/PropSelector'
+import SelectionZone from '../elements/SelectionZone'
+// d3
+import d3HeatMap from '../../d3/d3HeatMap'
+// libs
+import config from '../../lib/configLib'
+import dataLib from '../../lib/dataLib'
+import { getQuantitativeColors } from '../../lib/paletteLib'
+import scaleLib, { getDimensions } from '../../lib/scaleLib'
+// redux functions
+import { getPropPalette } from '../../actions/palettesActions'
+import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
 
 class HeatMap extends React.Component {
     constructor (props) {
         super(props)
-        /*
-        this.setLegend = this.setLegend.bind(this)
-        this.selectElements = this.selectElements.bind(this)
-        this.legendBehavior = this.legendBehavior.bind(this)
-        this.axisBehavior = this.axisBehavior.bind(this)
-        this.state = {
-            setLegend: this.setLegend,
-            selectElements: this.selectElements,
-            legendBehavior: this.legendBehavior,
-            axisBehavior: this.axisBehavior,
-            elementName: `HeatMap_${props.zone}`
-        }
-*/
+        this.handleMouseMove = this.handleMouseMove.bind(this)
+        this.handleMouseUp = this.handleMouseUp.bind(this)
         this.selectElement = this.selectElement.bind(this)
         this.selectElements = this.selectElements.bind(this)
         this.customState = {
             elementName: `HeatMap_${props.zone}`,
-            savedData: props.data,
             selectElement: this.selectElement,
-            selectElements: this.selectElements
+            selectElements: this.selectElements,
+            handleMouseUp: this.handleMouseUp
         }
     }
 
@@ -57,188 +51,127 @@ class HeatMap extends React.Component {
         const { data, dataset, configs, palettes, getPropPalette } = nextProps
         // prepare the data for display
         const selectedConfig = config.getSelectedConfig(configs)
-        const dataStat = statisticalOperator.computeStatisticalInformation(data, selectedConfig)
         // First prop to be displayed in the bottom axis
         const categoryProp1 = selectedConfig.properties[0].category
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format
-        const nestedProp1 = dataLib.groupTimeData(data, 'prop1', formatProp1, 50)
+        const nestedProp1 = dataLib.groupTimeData(data, 'prop1', {
+            format: formatProp1,
+            max: 50,
+            subgroup: 'prop2'
+        })
         const axisBottom = dataLib.getAxis(nestedProp1, 'prop1', categoryProp1)
         const listProp1 = dataLib.getPropList(configs, 0, dataset.labels)
-
-        const paletteObj = []
-        let nbColor = dataStat.max - dataStat.min + 1
-        const colors = getQuantitativeColors(nbColor)
-        let step = (dataStat.max - dataStat.min + 1) / colors.length
-        for (var i = 0; i < colors.length; i++) {
-            let key = (dataStat.min + ((i + 1) * step)).toFixed(0)
-            paletteObj.push({
-                key: key,
-                color: colors[i],
-                label: key,
-                category: colors[i],
-                propName: 'color'
-            })
-        }
-
-        for (i = 0; i < dataStat.data.length; i++) {
-            for (var j = 0; j < colors.length; j++) {
-                if (!(Number(dataStat.min) + ((j + 1) * step) < dataStat.data[i].value)) {
-                    dataStat.data[i].color = paletteObj.filter(p => (p.key === (dataStat.min + ((j + 1) * step)).toFixed(0)))[0].color
-                    break
-                }
-            }
-        }
-        const legend = { info: paletteObj }
-        // Second prop to be displayed in the legend
-        // const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
-        //  const legend = dataLib.getLegend(nestedProp2, colors, categoryProp2)
+        const categoryProp2 = selectedConfig.properties[1].category
+        const nestedProp2 = dataLib.groupTextData(data, 'prop2')
+        const axisLeft = dataLib.getAxis(nestedProp2, 'prop2', categoryProp2)
         const listProp2 = dataLib.getPropList(configs, 1, dataset.labels)
 
+        const colors = getQuantitativeColors()
+        const thresholds = dataLib.getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
+        const legend = dataLib.getLegend(thresholds, 'countprop2', colors, 'aggregate')
+
         // Save to reuse in render
-        this.customState = { ...this.customState, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2, dataStat }
+        this.customState = {
+            ...this.customState,
+            selectedConfig,
+            nestedProp1,
+            legend,
+            axisBottom,
+            axisLeft,
+            listProp1,
+            listProp2,
+            nestedProp2
+        }
     }
-
-    aaa (nextProps) {
-        const { data, zone } = this.props
-        const { configs } = this.props
-        const selectedConfig = config.getSelectedConfig(configs, zone)
-        const dataStat = statisticalOperator.computeStatisticalInformation(data, selectedConfig)
-        const paletteObj = []
-        let nbColor = dataStat.max - dataStat.min + 1
-        const colors = getQuantitativeColors(nbColor)
-        //        const colors = getPropPalette(palettes, prop2, prop2Data.length)
-        let step = (dataStat.max - dataStat.min + 1) / colors.length
-        for (var i = 0; i < colors.length; i++) {
-            let key = (dataStat.min + ((i + 1) * step)).toFixed(0)
-            paletteObj.push({
-                key: key,
-                color: colors[i],
-                label: key,
-                category: colors[i]
-            })
-        }
-        for (i = 0; i < dataStat.data.length; i++) {
-            for (var j = 0; j < colors.length; j++) {
-                if (!(Number(dataStat.min) + ((j + 1) * step) < dataStat.data[i].value)) {
-                    dataStat.data[i].color = paletteObj.filter(p => (p.key === (dataStat.min + ((j + 1) * step)).toFixed(0)))[0].color
-                    break
-                }
-            }
-        }
-        this.state = { ...this.state,
-            dataStat: dataStat,
-            palette: paletteObj,
-            selectedConfig: selectedConfig
-        }
-        this.state.setLegend(paletteObj)
+    handleMouseMove (e) {
+        if (this.props.display.selectedZone.x1 !== null) this.props.handleMouseMove(e)
     }
-
+    handleMouseUp (e) {
+        const elements = d3HeatMap.getElementsInZone(this.refs.HeatMap, this.props)
+        if (elements.length > 0) this.props.select(elements, this.props.zone, this.props.selections)
+        this.props.handleMouseUp(e)
+    }
     render () {
-        const { axisBottom, legend, listProp1, listProp2, dataStat } = this.customState
-        const { data, configs, display, zone } = this.props
+        const { axisBottom, axisLeft, dataStat, legend, listProp1, listProp2, role } = this.customState
+        const { data, configs, display, step, selections, zone } = this.props
+        const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
 
-        //  const { display, zone } = this.props
-        // const { dataStat, axisBehavior } = this.state
-
-        /*      let axisbehavior = d3HeatMap.heatMapAxisBehaviors()
-        for (var item in axisbehavior) {
-            for (var fun in axisbehavior[item]) {
-                axisbehavior[item][fun] = axisbehavior[item][fun].bind(this, this.state.selectElements)
-            }
-        }
-
-        let heatMapLegendBehavior = d3HeatMap.heatMapLegendBehavior() */
-        const classN = `HeatMap ${this.customState.elementName}`
-        return (<g className = { classN } >
+        return (<g className = { `HeatMap ${this.customState.elementName}` } >
+            <SelectionZone
+                zone = { zone }
+                dimensions = { display.zones[zone] }
+                handleMouseDown = { this.props.handleMouseDown }
+                handleMouseMove = { this.handleMouseMove }
+                handleMouseUp = { this.handleMouseUp }
+            />
+            { step !== 'launch' &&
             <g
-                transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
-                ref = "HeatMap">
-            </g>
-            <Legend
-                type = "plain"
-                zone = { zone }
-                dimensions = { scaleLib.getDimensions('legend', display.zones[zone], display.viz, { x: 10, y: 22, width: -20, height: -30 }) }
-                legend = { legend }
-                selectElements = { this.selectElements }
-            />
-            <PlainAxis
-                type = "Bottom"
-                zone = { zone }
-                axis = { axisBottom }
-                dimensions = { scaleLib.getDimensions('axisBottom', display.zones[zone], display.viz) }
-                propIndex = { 0 }
-                selectElements = { this.selectElements }
-            />
-            { dataStat &&
-                <Axis display = {display}
-                    type = "left"
+                transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
+                ref = "HeatMap"
+                onMouseMove = { this.handleMouseMove }
+                onMouseUp = { this.handleMouseUp }
+                onMouseDown = { this.props.handleMouseDown }
+            ></g>
+            }
+            { role !== 'target' &&
+            <g>
+                <Header
                     zone = { zone }
-                    keys = {d3.set(dataStat.data.map(item => item.prop2)).values()}
-                    keysDisplay = "simple"
-                    titles = {['Title', 'TEST']}
-                />}
-            <PropSelector
-                propList = { listProp2 }
-                configs = { configs }
-                dimensions = { scaleLib.getDimensions('propSelectorLegend', display.zones[zone], display.viz, { x: 10, y: -5, width: -80, height: 0 }) }
-                selectElements = { this.selectElements }
-                propIndex = { 1 }
-                zone = { zone }
-            />
-            <PropSelector
-                propList = { listProp1 }
-                configs = { configs }
-                dimensions = { scaleLib.getDimensions('propSelectorAxisBottom', display.zones[zone], display.viz, { x: 20, y: -20, width: -40, height: 0 }) }
-                selectElements = { this.selectElements }
-                propIndex = { 0 }
-                zone = { zone }
-            />
+                />
+                <Nav
+                    zone = { zone }
+                    displayedInstances = { data.length } // to be fixed - works only for unit displays
+                    selections = { selections }
+                />
+                <Legend
+                    type = "plain"
+                    zone = { zone }
+                    offset = { { x: 10, y: 0, width: -20, height: -30 } }
+                    legend = { legend }
+                    selectElements = { this.selectElements }
+                />
+                <PlainAxis
+                    type = "Bottom"
+                    zone = { zone }
+                    axis = { axisBottom }
+                    propIndex = { 0 }
+                    selectElements = { this.selectElements }
+                />
+                <PlainAxis
+                    type = "Left"
+                    zone = { zone }
+                    axis = { axisLeft }
+                    propIndex = { 1 }
+                    selectElements = { this.selectElements }
+                />
+                <PropSelector
+                    type = "AxisLeft"
+                    propList = { listProp2 }
+                    configs = { configs }
+                    align = "right"
+                    offset = { { x: 20, y: 30, width: -15, height: 0 } }
+                    selectElements = { this.selectElements }
+                    propIndex = { 1 }
+                    zone = { zone }
+                />
+                <PropSelector
+                    type = "AxisBottom"
+                    propList = { listProp1 }
+                    align = "right"
+                    configs = { configs }
+                    offset = { { x: 20, y: -15, width: -50, height: 0 } }
+                    selectElements = { this.selectElements }
+                    propIndex = { 0 }
+                    zone = { zone }
+                />
+            </g>
+            }
         </g>)
-        /*
-        { dataStat &&
-            <Axis display = {display}
-                type = "left"
-                zone = { zone }
-                keys = {d3.set(dataStat.data.map(item => item.prop2)).values()}
-                keysDisplay = "simple"
-                titles = {['Gender', 'TEST']}
-                behaviors = {axisBehavior}
-            />
-        }
-        */
     }
-    /*
-    setLegend (legend) {
-        this.setState({ legend })
-    }
-
-    legendBehavior (prop, value, category) {
-        const { select, zone, selections } = this.props
-        let elements = d3HeatMap.heatMapLegendBehavior(category)
-        select(elements, zone, selections)
-    }
-
-    axisBehavior (item, type, category) {
-        // console.log(item, type)
-        const { select, zone, selections } = this.props
-        if (item === 'key' && type === 'click') {
-            let elements = d3HeatMap.heatMapAxisBehaviors(category)
-            select(elements, zone, selections)
-        }
-    }
-
-    selectElements (elements) {
-        const { select, zone, selections } = this.props
-        select(elements, zone, selections)
-    }
-*/
 
     selectElements (prop, value, category) {
-        console.log(prop, value, category)
-        let elements = []
-        if (category === undefined && value === undefined) elements = prop
-        else if (prop === 'color') elements = d3HeatMap.getElements(this.refs.HeatMap, 'color', category)
-        else if (prop === 'prop1' || prop === 'prop2') elements = d3HeatMap.getElements(this.refs.HeatMap, prop, value)
+        const elements = d3HeatMap.getElements(this.refs.HeatMap, prop, value, category)
+        console.log(prop, value, elements, category)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }
@@ -247,26 +180,20 @@ class HeatMap extends React.Component {
         select([selection], zone, selections)
     }
 
-    addCallbackToProps () {
-        return {
-            ...this.props,
-            ...this.customState
-        }
-    }
-
     componentDidMount () {
-        d3HeatMap.create(this.refs.HeatMap, this.addCallbackToProps())
+        d3HeatMap.create(this.refs.HeatMap, { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3HeatMap.update(this.refs.HeatMap, this.addCallbackToProps())
+        d3HeatMap.update(this.refs.HeatMap, { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3HeatMap.destroy(this.refs.HeatMap)
+        d3HeatMap.destroy(this.refs.HeatMap, { ...this.props, ...this.customState })
     }
 }
 
 function mapStateToProps (state) {
     return {
+        dataset: state.dataset.present,
         display: state.display,
         palettes: state.palettes
     }
@@ -275,6 +202,9 @@ function mapStateToProps (state) {
 function mapDispatchToProps (dispatch) {
     return {
         getPropPalette: getPropPalette(dispatch),
+        handleMouseDown: handleMouseDown(dispatch),
+        handleMouseUp: handleMouseUp(dispatch),
+        handleMouseMove: handleMouseMove(dispatch),
         select: select(dispatch)
     }
 }

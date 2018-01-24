@@ -7,6 +7,9 @@
 .propSelector p.right {
     text-align: right;
 }
+.propSelector p.right span {
+    display: inline-block;
+}
 .propSelector select {
     font-size: 0.75em;
     outline: none;

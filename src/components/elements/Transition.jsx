@@ -13,6 +13,7 @@ class Transition extends React.PureComponent {
         </g>)
     }
     componentDidMount () {
+        // console.log('bonjour component Transition')
         const { zone } = this.props
         d3Transition.create(this.refs[`transition_${zone}`], this.props)
     }

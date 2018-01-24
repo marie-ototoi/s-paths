@@ -48,7 +48,7 @@ const exploreSelection = (dispatch) => (selection, dataset, views) => {
 }
 
 const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) => {
-    console.log('select property')
+    // console.log('select property')
     const { endpoint, entrypoint, prefixes } = dataset
     const updatedConfig = configLib.selectProperty(config, propIndex, path)
     dispatch({
@@ -73,7 +73,7 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
 }
 
 const loadData = (dispatch) => (dataset, views) => {
-    console.log('load Data ')
+    // console.log('load Data ')
     let { endpoint, entrypoint, prefixes } = dataset
     getStats(dataset)
         .then(stats => {

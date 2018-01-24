@@ -1,5 +1,6 @@
 import * as d3 from 'd3'
 import moment from 'moment'
+import { isNumber } from 'util';
 
 const areLoaded = (data, zone, status) => {
     data = getCurrentData(data, status)
@@ -17,6 +18,43 @@ const getCurrentState = (data) => {
     }
 }
 
+const getThresholdsForLegend = (nestedProps, propName, category, nbOfRanges) => {
+    const values = nestedProps.reduce((acc, curr) => {
+        curr.values.forEach(val => {
+            if (isNumber(val['count' + propName])) acc.push(val['count' + propName])
+        })
+        return acc
+    }, []).sort((a, b) => a - b)
+    const thresholds = getThresholds(values[0], values[values.length - 1], nbOfRanges)
+    return thresholds.map(t => {
+        return {
+            key: t,
+            category
+        }
+    })
+}
+
+const getThresholds = (minValue, maxValue, nbOfRanges) => {
+    const diff = maxValue - minValue
+    const part = Math.round(diff / nbOfRanges)
+    var roundUnit = Number('1e' + (String(part).length - 2))
+    var roundStart = Number('1e' + (String(part).length - 1))
+    let roundPart = Math.ceil(part / roundUnit)
+    let roundPartStr = String(roundPart)
+    if (Number(roundPartStr.substr(roundPartStr.length - 1, 1)) <= 5) {
+        roundPart = Number(roundPartStr.substr(0, roundPartStr.length - 1) + '5')
+    } else {
+        roundPart = Number(roundPartStr.substr(0, roundPartStr.length - 1) + '0') + 10
+    }
+    roundPart *= roundUnit
+    const start = Math.floor(minValue / roundStart) * roundStart
+    let ranges = Array.from(Array(nbOfRanges).keys())
+    // return [diff, part, roundUnit, roundStart, start, roundPartStr, roundPart]
+    return ranges.map((r) => [start + r * roundPart, start + (r + 1) * roundPart])
+}
+
+// const groupAggregateData
+
 const getCurrentData = (data, status) => {
     const currentState = getCurrentState(data)
     if (currentState === 'transition' && status === 'active') {
@@ -28,12 +66,14 @@ const getCurrentData = (data, status) => {
 
 const getResults = (data, zone, status) => {
     data = getCurrentData(data, status)
-    return data.filter(d => (d.zone === zone && d.status === status))[0].statements.results.bindings
+    const filtered = data.filter(d => (d.zone === zone && d.status === status))
+    return (filtered.length > 0) ? filtered[0].statements.results.bindings : []
 }
 
-const getHeadings = (data, zone) => {
-    return (areLoaded(data, zone))
-        ? data.filter(d => d.zone === zone)[0].statements.head.vars : []
+const getHeadings = (data, zone, status) => {
+    data = getCurrentData(data, status)
+    const filtered = data.filter(d => (d.zone === zone && d.status === status))
+    return (filtered.length > 0) ? filtered[0].statements.head.vars : []
 }
 
 const guid = () => {
@@ -44,7 +84,7 @@ const guid = () => {
 }
 
 const makeId = (textstr) => {
-    return textstr.replace(/([/:#_\-.])/g, (match, p1) => {
+    return textstr.replace(/([/:#_\-.\s])/g, (match, p1) => {
         if (p1) return ''
     }).toLowerCase()
 }
@@ -65,17 +105,25 @@ const getPropList = (configs, propIndex, labels) => {
     }, [])
 }
 
-const getLegend = (nestedProps, colors, category) => {
+const getLegend = (nestedProps, propName, colors, category) => {
     return {
         info: nestedProps.map((p, i) => {
+            let label = (p.values && p.values[0].labelprop2) ? p.values[0].labelprop2.value : p.key
+            if (Array.isArray(label)) label = label.join(' - ')
             return {
                 key: p.key,
                 color: colors[i],
-                propName: 'prop2',
-                label: p.values[0].labelprop2 ? p.values[0].labelprop2.value : p.key,
+                propName,
+                label,
                 category
             }
-        }).sort((a, b) => { return a.label.localeCompare(b.label) })
+        }).sort((a, b) => {
+            if (Array.isArray(a.key)) {
+                return a.key[0] - b.key[0]
+            } else {
+                return a.label.localeCompare(b.label)
+            }            
+        })
     }
 }
 
@@ -99,22 +147,38 @@ const getTransitionElements = (originElements, targetElements) => {
 }
 
 const getAxis = (nestedProps, propName, category) => {
+    /* let additionnalProp = { key: '', values: [], type: 'additionalValue' }
+    if (category === 'datetime') {
+        switch (nestedProps[0].group) {
+        case 'century':
+            additionnalProp.key = Number(nestedProps[nestedProps.length - 1].key) + 100
+            break
+        case 'decade':
+            additionnalProp.key = Number(nestedProps[nestedProps.length - 1].key) + 10
+            break
+        case 'year':
+        default:
+            additionnalProp.key = Number(nestedProps[nestedProps.length - 1].key) + 1
+        }
+    } */
     return {
         info: nestedProps.map(p => {
-            let values
+            let range
             if (p.values.length === 0) { // last value for scale only
-                values = null
+                range = null
+            } else if (category === 'text') {
+                range = p.key
             } else if (category === 'datetime') {
-                values = [d3.min(p.values, d => Number(d.year)), d3.max(p.values, d => Number(d.year))]
-            } else if (category === 'text' || category === 'uri') {
-                values = p.key
+                range = p.range
             } else if (category === 'number') {
-                values = [d3.min(p.values, d => Number(d.prop1.value)), d3.max(p.values, d => Number(d.prop1.value))]
+                range = [d3.min(p.values, d => Number(d.prop1.value)), d3.max(p.values, d => Number(d.prop1.value))]
+            } else if (category === 'aggregate') {
+                range = [d3.min(p.values, d => Number(d.prop1.value)), d3.max(p.values, d => Number(d.prop1.value))]
             }
             return {
-                key: p.key,
-                propName: 'prop1',
-                values,
+                ...p,
+                range,
+                propName,
                 category
             }
         }),
@@ -122,7 +186,14 @@ const getAxis = (nestedProps, propName, category) => {
     }
 }
 
-const groupTimeData = (data, propName, format, max, propsToAdd = [], forceGroup) => {
+const groupTextData = (data, propName, options) => {
+    return d3.nest().key(d => d[propName].value)
+        .entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
+        .concat([{ key: '', values: [], type: 'additionalValue' }])
+}
+
+const groupTimeData = (data, propName, options) => {
+    let { forceGroup, format, max, subgroup } = options
     // console.log(data, propName, format, max)
     let group
     let dataToNest = data.map(d => {
@@ -160,21 +231,38 @@ const groupTimeData = (data, propName, format, max, propsToAdd = [], forceGroup)
         additionalValue = Number(centuryNest[centuryNest.length - 1].key) + 100
     }
     return [...nest.map(keygroup => {
+        let yearStart = Number(keygroup.key)
+        let range
+        if (group === 'century') {
+            range = [yearStart, yearStart + 99]
+        } else if (group === 'decade') {
+            range = [yearStart, yearStart + 9]
+        } else {
+            range = [yearStart, yearStart]
+        }
         let groupWithAdd = {
             ...keygroup,
-            
-            values: keygroup.values
+            group,
+            range
+        }
+        if (subgroup) {
+            let groups = d3.nest().key(prop => prop[subgroup].value).entries(keygroup.values)
+            groupWithAdd.values = groups.map(group => {
+                group['count' + subgroup] = 0
+                group.parent = keygroup
+                group.values.forEach(groupElt => {
+                    // console.log(Number(groupElt['count' + subgroup].value))
+                    group['count' + subgroup] += Number(groupElt['count' + subgroup].value)
+                })
+                return group
+            }).sort((a, b) => a.key.localeCompare(b.key))
+        } else {
+            groupWithAdd.values = keygroup.values
                 .map(val => { return { ...val, group } })
                 .sort((a, b) => b.prop2.value.localeCompare(a.prop2.value))
         }
-        propsToAdd.forEach(prop => {
-            groupWithAdd[prop] = 0
-            keygroup.values.forEach(val => {
-                groupWithAdd[prop] += Number(val[prop]) || 1
-            })
-        })
         return groupWithAdd
-    }), { key: additionalValue, values: [], group }]
+    }), { key: additionalValue, values: [], type: 'additionalValue' }]
 }
 
 exports.areLoaded = areLoaded
@@ -185,6 +273,9 @@ exports.getLegend = getLegend
 exports.getTransitionElements = getTransitionElements
 exports.makeId = makeId
 exports.getPropList = getPropList
+exports.getThresholds = getThresholds
+exports.getThresholdsForLegend = getThresholdsForLegend
 exports.getResults = getResults
+exports.groupTextData = groupTextData
 exports.groupTimeData = groupTimeData
 exports.guid = guid

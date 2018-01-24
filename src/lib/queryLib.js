@@ -17,6 +17,24 @@ ${char}
 }`
 }
 
+const makeQueryFromConstraint = (constraint) => {
+    const { category, group, propName, value } = constraint
+    if (category === 'datetime') {
+        const startValue = Number(value)
+        if (group === 'century') {
+            return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${(startValue + 99)}-12-31")) . `
+        } else if (group === 'decade') {
+            return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${(startValue + 9)}-12-31")) . `
+        } else { // treats other case as year (should be refined to handle time)
+            return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${startValue}-12-31")) . `
+        }
+    } else if (category === 'text') {
+        return `FILTER regex(?${propName}, "${value}") . `
+    } else if (category === 'aggregate') {
+        return `FILTER (?${propName} >= ${value[0]} && ?${propName} < ${value[1]}) . `
+    }
+}
+
 const makeSelectionConstraints = (selections) => {
     const uriSelections = selections.filter(sel => sel.query.type === 'uri')
     const uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
@@ -267,6 +285,7 @@ exports.FSL2SPARQL = FSL2SPARQL
 exports.getData = getData
 exports.getRoot = getRoot
 exports.makeQuery = makeQuery
+exports.makeQueryFromConstraint = makeQueryFromConstraint
 exports.makePropQuery = makePropQuery
 exports.makePropsQuery = makePropsQuery
 exports.makeSelectionConstraints = makeSelectionConstraints

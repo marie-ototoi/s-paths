@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
 
 const create = (el, props) => {
-    // console.log('create')
+    // console.log('create', el, props)
     if (el && props) {
         draw(el, props)
     }
@@ -11,9 +11,9 @@ const draw = (el, props) => {
     const originRectangles = props.elements.origin.filter(el => el.shape === 'rectangle')
     const targetRectangles = props.elements.target.filter(el => el.shape === 'rectangle')
     drawRectangles(el, props, originRectangles)
-    //console.log('draw A')
+    // console.log('draw A', originRectangles)
     drawRectangles(el, props, targetRectangles)
-    //console.log('draw B')
+    // console.log('draw B', targetRectangles)
     //console.log('meoui', originRectangles)
 }
 
@@ -42,8 +42,8 @@ const drawRectangles = (el, props, rectangles) => {
             .transition(tRemove)
             .style('opacity', d => d.opacity)
             .remove()
-
-        rectanglesSelection
+        let called = 0
+        let changeRectangles = rectanglesSelection
             .transition(tChange)
             .attr('x', d => d.zone.x1)
             .attr('y', d => d.zone.y1)
@@ -53,7 +53,10 @@ const drawRectangles = (el, props, rectangles) => {
             .style('opacity', d => d.opacity)
             .on('end', (d, i) => {
                 // call only once
-                if (i === 0) props.endTransition(props.zone)
+                called++
+                if (called >= changeRectangles.size() - 2) {
+                    props.endTransition(props.zone)
+                }
             })
     }
     // console.log('drawn')

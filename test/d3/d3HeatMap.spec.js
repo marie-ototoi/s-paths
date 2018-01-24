@@ -12,7 +12,7 @@ import { load, loadEmpty, loadError } from '../data/nobel'
 
 import statisticalOperator from '../../src/lib/statLib'
 import dataLib from '../../src/lib/dataLib'
-
+/*
 const dataZone = dataLib.getResults([ { zone: 'main', statements: load() }, {zone: 'aside', statements: []} ], 'main')
 var el = d3.select('body').append('g').attr('class', 'HeatMap').attr('id', 'heatMap')._groups[0][0]
 var props = { zone: 'main',
@@ -45,4 +45,4 @@ describe('d3HeatMap', function () {
         // d3.select('#center').selectAll('rect').click()
         expect(d3.select('#center').selectAll('rect').size()).to.be.equals(23)
     })
-})
+})*/

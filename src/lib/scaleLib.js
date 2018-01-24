@@ -104,6 +104,7 @@ const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, he
             height: 20 + offset.height
         }
     case 'propSelectorAxisBottom':
+    case 'propSelectorAxisLeft':
         return {
             x: origin.x + offset.x,
             y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,

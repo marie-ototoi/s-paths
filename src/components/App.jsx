@@ -38,17 +38,18 @@ class App extends React.Component {
         this.props.loadData(dataset, views)
     }
     handleTransition (view, state, elements) {
-        if(state === 'target') console.log('transition target laid out', view, state, elements)
+        // if (state === 'target') console.log('transition target laid out', view, state, elements)
         this.customState[`${view}_${state}`] = elements
         // when both main and aside target are displayed
         if (this.customState.main_target.length > 0) { // && this.customState.aside_target.length > 0
             // launch transitions
+            // console.log('launch')
             this.customState.step = 'launch'
             this.render()
         }
     }
     handleEndTransition (view) {
-        console.log('transition ended', view)
+        // console.log('transition ended', view)
         this.customState[`${view}_target`] = []
         // when both main and aside transitions are done (could actually react to the first call since they are in the same timing)
         if (this.customState.main_target.length === 0) { // && this.customState.aside_target.length === 0
@@ -58,8 +59,7 @@ class App extends React.Component {
         }
     }
     render () {
-        console.log('render app')
-        const { configs, display, env, data, selections } = this.props
+        const { configs, data, dataset, display, env, selections } = this.props
         // debug logs
         // console.log('env', env)
         // console.log('mode', mode)
@@ -79,6 +79,8 @@ class App extends React.Component {
         const SideComponent = aside ? componentIds[aside.id] : ''
         // relies data in the reducer to know if the current state is transition or active
         const status = dataLib.getCurrentState(data)
+        const showTransition = (main && (status === 'transition') && (this.customState.step === 'launch'))
+        // console.log('status', showTransition, status, dataLib.areLoaded(data, 'main', 'transition'), this.customState.step, main)
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
@@ -93,24 +95,26 @@ class App extends React.Component {
                 { env === 'dev' &&
                     <Debug />
                 }
-                { main && status === 'transition' && dataLib.areLoaded(data, 'main', 'transition') &&
+
+                { main && (status === 'transition') && dataLib.areLoaded(data, 'main', 'transition') &&
                     <MainComponent
                         role = "target"
                         zone = "main"
                         data = { dataLib.getResults(data, 'main', 'transition') }
                         configs = { configLib.getConfigs(configs, 'main', 'transition') }
                         selections = { selectionLib.getSelections(selections, 'main', 'transition') }
-                        ref = "main"
+                        ref = "maintransition"
                         handleTransition = { this.handleTransition }
                     />
                 }
-                { main && status === 'transition' && this.customState.step === 'launch' &&
-                    <Transition
-                        zone = "main"
-                        elements = { dataLib.getTransitionElements(this.customState.main_origin, this.customState.main_target) }
-                        endTransition = { this.handleEndTransition }
-                    />
+
+                { (showTransition) && (<Transition
+                    zone = "main"
+                    elements = { dataLib.getTransitionElements(this.customState.main_origin, this.customState.main_target) }
+                    endTransition = { this.handleEndTransition }
+                />)
                 }
+
                 { main && dataLib.areLoaded(data, 'main', 'active') &&
                     <MainComponent
                         role = "origin"
@@ -119,16 +123,39 @@ class App extends React.Component {
                         data = { dataLib.getResults(data, 'main', 'active') }
                         configs = { configLib.getConfigs(configs, 'main', 'active') }
                         selections = { selectionLib.getSelections(selections, 'main', 'active') }
-                        ref = "transition"
+                        ref = "main"
                         handleTransition = { this.handleTransition }
                     />
                 }
-                { aside && dataLib.areLoaded(data, 'aside', 'active') && false &&
+
+                { aside && (status === 'transition') && dataLib.areLoaded(data, 'aside', 'transition') &&
+                    <MainComponent
+                        role = "target"
+                        zone = "aside"
+                        data = { dataLib.getResults(data, 'aside', 'transition') }
+                        configs = { configLib.getConfigs(configs, 'aside', 'transition') }
+                        selections = { selectionLib.getSelections(selections, 'aside', 'transition') }
+                        ref = "asidetransition"
+                        handleTransition = { this.handleTransition }
+                    />
+                }
+
+                { (showTransition) && (<Transition
+                    zone = "aside"
+                    elements = { dataLib.getTransitionElements(this.customState.aside_origin, this.customState.aside_target) }
+                    endTransition = { this.handleEndTransition }
+                />)
+                }
+                { aside && dataLib.areLoaded(data, 'aside', 'active') &&
                     <SideComponent
                         zone = "aside"
+                        role = "origin"
+                        step = { this.customState.step }
                         data = { dataLib.getResults(data, 'aside', 'active') }
                         configs = { configLib.getConfigs(configs, 'aside', 'active') }
                         selections = { selectionLib.getSelections(selections, 'aside', 'active') }
+                        ref = "aside"
+                        handleTransition = { this.handleTransition }
                     />
                 }
             </svg>

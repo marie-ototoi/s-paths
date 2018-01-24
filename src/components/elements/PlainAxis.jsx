@@ -11,28 +11,30 @@ import { selectProperty } from '../../actions/dataActions'
 class PlainAxis extends React.Component {
     constructor (props) {
         super(props)
-        this.state = {
+        this.customState = {
             elementName: `${props.zone}_axis_${props.type}`,
-            dimensions: getDimensions('axisBottom', props.display.zones[props.zone], props.display.viz, props.offset)
+            dimensions: getDimensions('axis' + props.type, props.display.zones[props.zone], props.display.viz, props.offset)
         }
     }
     render () {
-        const { display, offset, zone } = this.props
-        const { x, y } = getDimensions('axisBottom', display.zones[zone], display.viz, offset)
+        const { display, offset, type, zone } = this.props
+        this.customState.dimensions = getDimensions('axis' + type, display.zones[zone], display.viz, offset)
+        const { x, y, width, height } = this.customState.dimensions
+        const x1 = (type === 'Bottom') ? x : x + width
         return (<g className = "Axis"
-            transform = { `translate(${x}, ${y})` }
-            ref = { this.state.elementName }
+            transform = { `translate(${x1}, ${y})` }
+            ref = { this.customState.elementName }
         >
         </g>)
     }
     componentDidMount () {
-        d3PlainAxis.create(this.refs[this.state.elementName], { ...this.props, ...this.state })
+        d3PlainAxis.create(this.refs[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3PlainAxis.update(this.refs[this.state.elementName], { ...this.props, ...this.state })
+        d3PlainAxis.update(this.refs[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3PlainAxis.destroy(this.refs[this.state.elementName], { ...this.props, ...this.state })
+        d3PlainAxis.destroy(this.refs[this.customState.elementName], { ...this.props, ...this.customState })
     }
 }
 

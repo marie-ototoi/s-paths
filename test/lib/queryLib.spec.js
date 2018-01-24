@@ -177,4 +177,29 @@ WHERE {
         expect(queryLib.prefixDefined('http://xmlns.com/foaf/0.1/gender', prefixes))
             .to.equal(false)
     })
+
+    it('should build a query corresponding to selected spec', () => {
+        expect(queryLib.makeQueryFromConstraint({
+            value: '1930',
+            category: 'datetime',
+            group: 'decade',
+            propName: 'prop1'
+        })).to.equal('FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . ')
+        expect(queryLib.makeQueryFromConstraint({
+            value: '1948',
+            category: 'datetime',
+            group: 'year',
+            propName: 'prop2'
+        })).to.equal('FILTER (?prop2 >= xsd:date("1948-01-01") && ?prop2 < xsd:date("1948-12-31")) . ')
+        expect(queryLib.makeQueryFromConstraint({
+            value: 'Chemistry',
+            category: 'text',
+            propName: 'prop2'
+        })).to.equal('FILTER regex(?prop2, "Chemistry") . ')
+        expect(queryLib.makeQueryFromConstraint({
+            value: [15, 30],
+            category: 'aggregate',
+            propName: 'prop1'
+        })).to.equal('FILTER (?prop1 >= 15 && ?prop1 < 30) . ')
+    })
 })

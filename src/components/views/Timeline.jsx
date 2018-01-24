@@ -28,7 +28,6 @@ class Timeline extends React.PureComponent {
         this.selectElements = this.selectElements.bind(this)
         this.customState = {
             elementName: `Timeline_${props.zone}`,
-            savedData: props.data,
             selectElement: this.selectElement,
             selectElements: this.selectElements,
             handleMouseUp: this.handleMouseUp
@@ -43,7 +42,7 @@ class Timeline extends React.PureComponent {
         }
     }
     shouldComponentUpdate (nextProps, nextState) {
-        return !shallowEqual(this.props, nextProps) || !shallowEqual(this.state, nextState)
+        return !shallowEqual(this.props, nextProps)
     }
     prepareData (nextProps) {
         const { data, configs, palettes, getPropPalette, dataset } = nextProps
@@ -52,7 +51,7 @@ class Timeline extends React.PureComponent {
         // First prop to be displayed in the bottom axis
         const categoryProp1 = selectedConfig.properties[0].category
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format
-        const nestedProp1 = dataLib.groupTimeData(data, 'prop1', formatProp1, 50)
+        const nestedProp1 = dataLib.groupTimeData(data, 'prop1', { format: formatProp1, max: 50 })
         const axisBottom = dataLib.getAxis(nestedProp1, 'prop1', categoryProp1)
         const listProp1 = dataLib.getPropList(configs, 0, dataset.labels)
         // Second prop to be displayed in the legend
@@ -60,7 +59,7 @@ class Timeline extends React.PureComponent {
         const pathProp2 = selectedConfig.properties[1].path
         const categoryProp2 = selectedConfig.properties[1].category
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
-        const legend = dataLib.getLegend(nestedProp2, colors, categoryProp2)
+        const legend = dataLib.getLegend(nestedProp2, 'prop2', colors, categoryProp2)
         const listProp2 = dataLib.getPropList(configs, 1, dataset.labels)
         // Save to reuse in render
         this.customState = { ...this.customState, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2 }
@@ -70,9 +69,7 @@ class Timeline extends React.PureComponent {
     }
     handleMouseUp (e) {
         const elements = d3Timeline.getElementsInZone(this.refs.Timeline, this.props)
-        if (elements.length > 0 &&
-            (Math.abs(e.pageX - this.props.display.selectedZone.x1) > 1 &&
-            Math.abs(e.pageY - this.props.display.selectedZone.y1) > 1)) this.props.select(elements, this.props.zone, this.props.selections)
+        if (elements.length > 0) this.props.select(elements, this.props.zone, this.props.selections)
         this.props.handleMouseUp(e)
     }
     render () {

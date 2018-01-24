@@ -15,7 +15,7 @@ const getNextPaletteIndex = (palettes) => {
     return index
 }
 
-const getQuantitativeColors = (length) => {
+const getQuantitativeColors = (length = 6) => {
     const colors = [
         '#FDD835', '#FBC02D', '#FF8F00', '#FF6F00', '#E65100', '#BF360C'
     ]
