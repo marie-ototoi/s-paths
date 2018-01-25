@@ -43,8 +43,7 @@ const selections = (state = defaultState, action) => {
             return !(elements2Remove.includes(sel.selector) && sel.zone === action.zone)
         })
     case types.RESET_SELECTION:
-    case types.SET_DATA:
-    case types.SET_STATS:
+    case types.END_TRANSITION:
         return state.filter(sel => {
             if (action.zone) {
                 return !(sel.zone === action.zone)
