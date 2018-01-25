@@ -47,7 +47,7 @@ const draw = (el, props) => {
     d3.select(el)
         .selectAll('g.xUnits g.yUnits')
         .each((d, i) => {
-            d.color = legend.info.filter(p => (p.key[0] < Number(d.countprop2) && p.key[1] > Number(d.countprop2)))[0].color
+            d.color = legend.info.filter(p => (p.key[0] <= Number(d.countprop2) && p.key[1] > Number(d.countprop2)))[0].color
             d.selection = {
                 selector: `heatmap_element_p1_${dataLib.makeId(d.parent.key)}_p2_${dataLib.makeId(d.key)}`,
                 query: {
@@ -132,7 +132,7 @@ const getElements = (el, propName, value, propCategory) => {
 
 const getElementsForTransition = (el, props) => {
     let results = []
-    d3.select(el).selectAll('.elements').each(d => {
+    d3.select(el).selectAll('.yUnits').each(d => {
         results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity, shape: d.shape })
     })
     // console.log(results)
@@ -159,7 +159,11 @@ const getElementsInZone = (el, props) => {
 }
 
 const resize = (el, props) => {
-    const { nestedProp1, display } = props
+    const { nestedProp1, nestedProp2, display } = props
+    let mapY = {} 
+    nestedProp2.forEach((p, i) => {
+        mapY[p.key] = nestedProp2.length - 2 - i
+    })
     const xScale = d3.scaleLinear()
         .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
         .range([0, display.viz.useful_width])
@@ -173,7 +177,7 @@ const resize = (el, props) => {
     const unitWidth = Math.floor(display.viz.useful_width / (props.nestedProp1.length - 1))
     const unitHeight = Math.floor(display.viz.useful_height / (props.nestedProp2.length - 1))
     d3.select(el).selectAll('g.xUnits').selectAll('.yUnits')
-        .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
+        .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (mapY[d.key] * unitHeight)})`)
     d3.select(el).selectAll('g.xUnits').selectAll('.yUnit')
         .attr('x', d => 1)
         .attr('width', d => unitWidth - 1)

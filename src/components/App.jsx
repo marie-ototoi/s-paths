@@ -38,21 +38,21 @@ class App extends React.Component {
         this.props.loadData(dataset, views)
     }
     handleTransition (view, state, elements) {
-        // if (state === 'target') console.log('transition target laid out', view, state, elements)
+        if (state === 'target') console.log('transition target laid out', view, state, elements)
         this.customState[`${view}_${state}`] = elements
         // when both main and aside target are displayed
-        if (this.customState.main_target.length > 0) { // && this.customState.aside_target.length > 0
+        if (this.customState.main_target.length > 0 && this.customState.aside_target.length > 0) { // 
             // launch transitions
-            // console.log('launch')
+            console.log('launch')
             this.customState.step = 'launch'
             this.render()
         }
     }
     handleEndTransition (view) {
-        // console.log('transition ended', view)
+        console.log('transition ended', view)
         this.customState[`${view}_target`] = []
         // when both main and aside transitions are done (could actually react to the first call since they are in the same timing)
-        if (this.customState.main_target.length === 0) { // && this.customState.aside_target.length === 0
+        if (this.customState.main_target.length === 0 && this.customState.aside_target.length === 0) { // 
             // stop transitions
             this.customState.step = 'done'
             this.props.endTransition()
@@ -129,7 +129,7 @@ class App extends React.Component {
                 }
 
                 { aside && (status === 'transition') && dataLib.areLoaded(data, 'aside', 'transition') &&
-                    <MainComponent
+                    <SideComponent
                         role = "target"
                         zone = "aside"
                         data = { dataLib.getResults(data, 'aside', 'transition') }

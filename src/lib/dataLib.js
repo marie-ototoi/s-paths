@@ -50,7 +50,7 @@ const getThresholds = (minValue, maxValue, nbOfRanges) => {
     const start = Math.floor(minValue / roundStart) * roundStart
     let ranges = Array.from(Array(nbOfRanges).keys())
     // return [diff, part, roundUnit, roundStart, start, roundPartStr, roundPart]
-    return ranges.map((r) => [start + r * roundPart, start + (r + 1) * roundPart])
+    return ranges.map((r) => [start + r * roundPart, start + (r + 1) * roundPart]).filter(v => v[0] <= maxValue)
 }
 
 // const groupAggregateData
@@ -188,7 +188,7 @@ const getAxis = (nestedProps, propName, category) => {
 
 const groupTextData = (data, propName, options) => {
     return d3.nest().key(d => d[propName].value)
-        .entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
+        .entries(data).sort((a, b) => { return a.key.localeCompare(b.key) })
         .concat([{ key: '', values: [], type: 'additionalValue' }])
 }
 
@@ -251,7 +251,6 @@ const groupTimeData = (data, propName, options) => {
                 group['count' + subgroup] = 0
                 group.parent = keygroup
                 group.values.forEach(groupElt => {
-                    // console.log(Number(groupElt['count' + subgroup].value))
                     group['count' + subgroup] += Number(groupElt['count' + subgroup].value)
                 })
                 return group

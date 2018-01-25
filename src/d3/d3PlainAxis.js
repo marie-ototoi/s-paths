@@ -96,7 +96,7 @@ const resize = (el, props) => {
     const tickHeight = (type === 'Bottom') ? 7 : Math.floor(dimensions.height / (ticks.size() - 1))
     const tickX = (type === 'Bottom') ? 0 : -7
     const tickY = (type === 'Bottom') ? 2 : 0
-    console.log(dimensions.height, tickX, tickY, tickWidth, tickHeight)
+    // console.log(dimensions.height, tickX, tickY, tickWidth, tickHeight)
     ticks.append('rect')
         .classed('reactzone', true)
         .attr('width', tickWidth)

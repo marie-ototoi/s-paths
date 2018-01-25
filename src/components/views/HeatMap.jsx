@@ -69,7 +69,7 @@ class HeatMap extends React.Component {
         const colors = getQuantitativeColors()
         const thresholds = dataLib.getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
         const legend = dataLib.getLegend(thresholds, 'countprop2', colors, 'aggregate')
-
+        
         // Save to reuse in render
         this.customState = {
             ...this.customState,

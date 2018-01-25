@@ -31,7 +31,7 @@ const defaultState = {
     },
     zonesDefPercent: {
         dev: { x: 0, y: 0, width: 100, height: 100 },
-        full: { x: 35, y: 35, width: 40, height: 40 },
+        full: { x: 35, y: 35, width: 65, height: 30 },
         main: { x: 35, y: 35, width: 30, height: 30 },
         aside: { x: 70, y: 35, width: 30, height: 30 }
     },
