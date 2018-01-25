@@ -36,11 +36,11 @@ const drawRectangles = (el, props, rectangles) => {
             .attr('width', d => d.zone.width)
             .attr('height', d => d.zone.height)
             .attr('fill', d => d.color)
-            .style('opacity', d => d.opacity)
+            .attr('fill-opacity', d => d.opacity)
 
         rectanglesSelection.exit()
             .transition(tRemove)
-            .style('opacity', d => d.opacity)
+            .attr('fill-opacity', 0)
             .remove()
         let called = 0
         let changeRectangles = rectanglesSelection
@@ -50,7 +50,7 @@ const drawRectangles = (el, props, rectangles) => {
             .attr('width', d => d.zone.width)
             .attr('height', d => d.zone.height)
             .attr('fill', d => d.color)
-            .style('opacity', d => d.opacity)
+            .attr('fill-opacity', 1)
             .on('end', (d, i) => {
                 // call only once
                 called++

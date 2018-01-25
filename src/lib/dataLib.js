@@ -10,11 +10,12 @@ const areLoaded = (data, zone, status) => {
         filtered[0].statements.results.bindings.length > 0
 }
 
-const getCurrentState = (data) => {
-    if (data.present[0].statements.length === 0) {
+const getCurrentState = (data, zone) => {
+    const filtered = data.present.filter(d => (d.zone === zone))
+    if (filtered[0].statements.length === 0) {
         return 'loading'
     } else {
-        return data.present[0].status
+        return filtered[0].status
     }
 }
 
@@ -56,12 +57,24 @@ const getThresholds = (minValue, maxValue, nbOfRanges) => {
 // const groupAggregateData
 
 const getCurrentData = (data, status) => {
-    const currentState = getCurrentState(data)
-    if (currentState === 'transition' && status === 'active') {
-        return data.past[data.past.length - 1]
+    const currentStateMain = getCurrentState(data, 'main')
+    const currentStateAside = getCurrentState(data, 'aside')
+    let dataMain
+    let dataAside
+    if (currentStateMain === 'transition' && status === 'active') {
+        dataMain = data.past[data.past.length - 1].filter(d => d.zone === 'main')
     } else {
-        return data.present
+        dataMain = data.present.filter(d => d.zone === 'main')
     }
+    if (currentStateAside === 'transition' && status === 'active') {
+        dataAside = data.past[data.past.length - 1].filter(d => d.zone === 'aside')
+    } else {
+        dataAside = data.present.filter(d => d.zone === 'aside')
+    }
+    return [
+        ...dataMain,
+        ...dataAside
+    ]
 }
 
 const getResults = (data, zone, status) => {

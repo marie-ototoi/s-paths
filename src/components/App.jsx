@@ -38,21 +38,21 @@ class App extends React.Component {
         this.props.loadData(dataset, views)
     }
     handleTransition (view, state, elements) {
-        if (state === 'target') console.log('transition target laid out', view, state, elements)
+        // if (state === 'target') console.log('transition target laid out', view, state, elements)
         this.customState[`${view}_${state}`] = elements
         // when both main and aside target are displayed
-        if (this.customState.main_target.length > 0 && this.customState.aside_target.length > 0) { // 
+        if (this.customState.main_target.length > 0) { // && this.customState.aside_target.length > 0
             // launch transitions
-            console.log('launch')
+            // console.log('launch')
             this.customState.step = 'launch'
             this.render()
         }
     }
     handleEndTransition (view) {
-        console.log('transition ended', view)
+        // console.log('transition ended', view)
         this.customState[`${view}_target`] = []
         // when both main and aside transitions are done (could actually react to the first call since they are in the same timing)
-        if (this.customState.main_target.length === 0 && this.customState.aside_target.length === 0) { // 
+        if (this.customState.main_target.length === 0) { // && this.customState.aside_target.length === 0
             // stop transitions
             this.customState.step = 'done'
             this.props.endTransition()
@@ -68,7 +68,7 @@ class App extends React.Component {
         // console.log('dataset', dataset)
         // console.log('configs', configs)
         // console.log('data', data)
-        // console.log('selections', selections)
+        console.log('selections', selections)
         const componentIds = {
             'HeatMap': HeatMap,
             'Timeline': Timeline
@@ -78,8 +78,10 @@ class App extends React.Component {
         const aside = configLib.getConfigs(configs, 'aside')
         const SideComponent = aside ? componentIds[aside.id] : ''
         // relies data in the reducer to know if the current state is transition or active
-        const status = dataLib.getCurrentState(data)
-        const showTransition = (main && (status === 'transition') && (this.customState.step === 'launch'))
+        // console.log(data)
+        const statusMain = dataLib.getCurrentState(data, 'main')
+        const statusAside = dataLib.getCurrentState(data, 'aside')
+        const showTransition = (main && (statusMain === 'transition') && (this.customState.step === 'launch'))
         // console.log('status', showTransition, status, dataLib.areLoaded(data, 'main', 'transition'), this.customState.step, main)
         return (<div
             className = "view"
@@ -96,7 +98,7 @@ class App extends React.Component {
                     <Debug />
                 }
 
-                { main && (status === 'transition') && dataLib.areLoaded(data, 'main', 'transition') &&
+                { main && (statusMain === 'transition') && dataLib.areLoaded(data, 'main', 'transition') &&
                     <MainComponent
                         role = "target"
                         zone = "main"
@@ -128,7 +130,7 @@ class App extends React.Component {
                     />
                 }
 
-                { aside && (status === 'transition') && dataLib.areLoaded(data, 'aside', 'transition') &&
+                { aside && (statusAside === 'transition') && dataLib.areLoaded(data, 'aside', 'transition') &&
                     <SideComponent
                         role = "target"
                         zone = "aside"
