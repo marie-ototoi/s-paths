@@ -92,11 +92,11 @@ class HeatMap extends React.Component {
         this.props.handleMouseUp(e)
     }
     render () {
-        const { axisBottom, axisLeft, dataStat, legend, listProp1, listProp2, role } = this.customState
-        const { data, configs, display, step, selections, zone } = this.props
+        const { axisBottom, axisLeft, legend, listProp1, listProp2 } = this.customState
+        const { data, configs, display, step, role, selections, zone } = this.props
         const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
 
-        return (<g className = { `HeatMap ${this.customState.elementName}` } >
+        return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` } >
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
@@ -122,6 +122,7 @@ class HeatMap extends React.Component {
                     zone = { zone }
                     displayedInstances = { data.length } // to be fixed - works only for unit displays
                     selections = { selections }
+                    configs = { configs }
                 />
                 <Legend
                     type = "plain"
@@ -195,7 +196,8 @@ function mapStateToProps (state) {
     return {
         dataset: state.dataset.present,
         display: state.display,
-        palettes: state.palettes
+        palettes: state.palettes,
+        selections: state.selections
     }
 }
 

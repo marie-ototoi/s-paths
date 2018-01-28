@@ -41,10 +41,10 @@ class App extends React.Component {
         // if (state === 'target') console.log('transition target laid out', view, state, elements)
         this.customState[`${view}_${state}`] = elements
         // when both main and aside target are displayed
-        if (this.customState.main_target.length > 0) { // && this.customState.aside_target.length > 0
+        if (this.customState.main_target.length > 0 || this.customState.aside_target.length > 0) { // 
             // launch transitions
             // console.log('launch')
-            this.customState.step = 'launch'
+            this.customState[`${view}_step`] = 'launch'
             this.render()
         }
     }
@@ -52,9 +52,9 @@ class App extends React.Component {
         // console.log('transition ended', view)
         this.customState[`${view}_target`] = []
         // when both main and aside transitions are done (could actually react to the first call since they are in the same timing)
-        if (this.customState.main_target.length === 0) { // && this.customState.aside_target.length === 0
+        if (this.customState.main_target.length === 0 || this.customState.aside_target.length === 0) { // && 
             // stop transitions
-            this.customState.step = 'done'
+            this.customState[`${view}_step`] = 'done'
             this.props.endTransition()
         }
     }
@@ -81,7 +81,8 @@ class App extends React.Component {
         // console.log(data)
         const statusMain = dataLib.getCurrentState(data, 'main')
         const statusAside = dataLib.getCurrentState(data, 'aside')
-        const showTransition = (main && (statusMain === 'transition') && (this.customState.step === 'launch'))
+        const showMainTransition = (main && (statusMain === 'transition') && (this.customState.main_step === 'launch'))
+        const showAsideTransition = (main && (statusAside === 'transition') && (this.customState.aside_step === 'launch'))
         // console.log('status', showTransition, status, dataLib.areLoaded(data, 'main', 'transition'), this.customState.step, main)
         return (<div
             className = "view"
@@ -110,7 +111,7 @@ class App extends React.Component {
                     />
                 }
 
-                { (showTransition) && (<Transition
+                { (showMainTransition) && (<Transition
                     zone = "main"
                     elements = { dataLib.getTransitionElements(this.customState.main_origin, this.customState.main_target) }
                     endTransition = { this.handleEndTransition }
@@ -142,7 +143,7 @@ class App extends React.Component {
                     />
                 }
 
-                { (showTransition) && (<Transition
+                { (showAsideTransition) && (<Transition
                     zone = "aside"
                     elements = { dataLib.getTransitionElements(this.customState.aside_origin, this.customState.aside_target) }
                     endTransition = { this.handleEndTransition }

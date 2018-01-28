@@ -24,6 +24,11 @@ const dataSet1 = {
             zone: 'main',
             statements: {},
             status: 'transition'
+        },
+        {
+            zone: 'aside',
+            statements: {},
+            status: 'active'
         }
     ]
 }
@@ -54,8 +59,7 @@ describe('lib/data', () => {
     })*/
 
     it('should return specified number of rounded ranges between two values', () => {
-        expect(data.getThresholds(116, 145380, 6)).to.deep.equal([[0, 25000], [25000, 50000], [50000, 75000], [75000, 100000], [100000, 125000], [125000, 150000]])
-        expect(data.getThresholds(43500, 145380, 6)).to.deep.equal([[40000, 60000], [60000, 80000], [80000, 100000], [100000, 120000], [120000, 140000], [140000, 160000]])
+        expect(data.getThresholds(116, 145380, 6)).to.deep.equal([[1, 25000], [25001, 50000], [50001, 75000], [75001, 100000], [100001, 125000], [125001, 150000]])
+        expect(data.getThresholds(43500, 145380, 6)).to.deep.equal([[40001, 60000], [60001, 80000], [80001, 100000], [100001, 120000], [120001, 140000], [140001, 160000]])
     })
-    
 })

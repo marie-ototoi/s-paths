@@ -73,7 +73,7 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
 }
 
 const loadData = (dispatch) => (dataset, views) => {
-    // console.log('load Data ')
+    console.log('load Data ', dataset, views)
     let { endpoint, entrypoint, prefixes } = dataset
     getStats(dataset)
         .then(stats => {
@@ -99,18 +99,19 @@ const loadData = (dispatch) => (dataset, views) => {
             })
         })
         .then(configs => {
+            console.log(configs)
             const configMain = configLib.getConfigs(configs, 'main')
             const queryMain = queryLib.makeQuery(entrypoint, configMain, dataset)
             const configAside = configLib.getConfigs(configs, 'aside')
             const queryAside = queryLib.makeQuery(entrypoint, configAside, dataset)
-            // console.log('queryMain', queryMain)
-            // console.log('queryaside', queryAside)
+            console.log('queryMain', queryMain)
+            console.log('queryaside', queryAside)
             return Promise.all([
                 queryLib.getData(endpoint, queryMain, prefixes),
                 queryLib.getData(endpoint, queryAside, prefixes)
             ])
                 .then(([dataMain, dataAside]) => {
-                    // console.log(dataMain, dataAside)
+                    console.log(dataMain, dataAside)
                     dispatch({
                         type: types.SET_DATA,
                         main: { ...dataMain },

@@ -33,6 +33,10 @@ WHERE {
     })
     it('should make a valid SPARQL query with given entrypoint and props', () => {
         const config1 = {
+            constraints: [
+                [{}],
+                [{}]
+            ],
             matches: [
                 {
                     properties: [
@@ -104,6 +108,7 @@ WHERE {
             .to.deep.equal({
                 property: stat.property.value,
                 category: 'uri',
+                datatype: '',
                 endpoint: 'http://localhost:8890/sparql',
                 entrypoint: 'nobel:LaureateAward',
                 path: 'nobel:LaureateAward/dct:isPartOf/*',
@@ -201,5 +206,6 @@ WHERE {
             category: 'aggregate',
             propName: 'prop1'
         })).to.equal('FILTER (?prop1 >= 15 && ?prop1 < 30) . ')
+        
     })
 })

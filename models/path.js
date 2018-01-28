@@ -4,6 +4,7 @@ const pathSchema = new mongoose.Schema({
     fullPath: { type: String, required: true },
     property: { type: String, required: true },
     category: { type: String, required: true },
+    datatype: { type: String, required: true },
     entrypoint: { type: String, required: true },
     endpoint: { type: String, required: true },
     level: { type: Number, required: true },
@@ -37,6 +38,7 @@ pathSchema.statics = {
                         createdAt: Date.now(),
                         property: prop.property,
                         fullPath: prop.fullPath,
+                        datatype: prop.datatype,
                         level: prop.level
                     }
                 },

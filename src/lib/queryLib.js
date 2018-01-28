@@ -35,13 +35,31 @@ const makeQueryFromConstraint = (constraint) => {
     }
 }
 
-const makeSelectionConstraints = (selections) => {
+const makeSelectionConstraints = (selections, selectedConfig) => {
     const uriSelections = selections.filter(sel => sel.query.type === 'uri')
     const uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
     // add constraints for constrained groups of entities (heatmap)
-    // const constraintsSelections = selections.filter(sel => sel.query.type === 'constraints')
-    // to do
-    return `FILTER regex(?entrypoint, '${uriRegex}', 'i') .`
+    const setSelection = selections.filter(sel => sel.query.type === 'set')
+    let paths = ''
+    const setConstraints = setSelection.map((sel, iS) => {
+        return '(' + sel.query.value.map((constraint, iC) => {
+            const propName = 'contraint' + constraint.propName
+            if (iS === 0) paths += FSL2SPARQL(selectedConfig.properties[iC].path, propName)
+            if (constraint.category === 'datetime') {
+                const conditions = constraint.value.map((r, iR) => {
+                    const cast = (selectedConfig.properties[iC].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? `xsd:dateTime("${r}")` : `xsd:integer("${r}")`
+                    return `?${propName} ${(iR === 0) ? '>=' : '<'} ${cast}`
+                }).join(' && ')
+                return `(${conditions})`
+            } else if (constraint.category === 'text') {
+                return ` regex(?${propName}, '${constraint.value}', 'i')`
+            }
+        }).join(' && ') + ')'
+    }).join(' || ')
+    let totalQuery = ''
+    if (uriRegex !== '') totalQuery += `FILTER regex(?entrypoint, '${uriRegex}', 'i') .`
+    if (setConstraints !== '') totalQuery += `${paths} FILTER (${setConstraints}) . `
+    return totalQuery
 }
 
 const makeTotalQuery = (entitiesClass, options) => {
@@ -219,6 +237,7 @@ const defineGroup = (prop, previousProp, level, options) => {
         entrypoint: previousProp.entrypoint,
         endpoint: options.endpoint,
         property: property.value,
+        datatype: (datatype) ? datatype.value : '',
         fullPath,
         path,
         level
@@ -234,7 +253,6 @@ const makeQuery = (entrypoint, configZone, options) => {
     let groupList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
     let defList = ``
     let orderList = ``
-    // console.log(selectedConfig)
     selectedConfig.properties.forEach((prop, index) => {
         index += 1
         propList = propList.concat(`?prop${index} ?labelprop${index} `)
@@ -244,14 +262,9 @@ const makeQuery = (entrypoint, configZone, options) => {
             orderList = orderList.concat(`?countprop${index} `)
         }
         groupList = groupList.concat(`?prop${index} ?labelprop${index} `)
-        defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`, 'entrypoint', (index === 1)))
+        const optional = configZone.constraints[index - 1] && configZone.constraints[index - 1][0].optional
+        defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`, 'entrypoint', (index === 1), optional))
     })
-    /* console.log(`SELECT DISTINCT ${propList}${graph}
-    WHERE {
-        OPTIONAL {
-        ${defList}
-        }
-        } GROUP BY ${groupList}ORDER BY ${orderList}`) */
     return `SELECT DISTINCT ${propList}${graph}
 WHERE {
 ${constraints}
@@ -259,7 +272,7 @@ ${defList}
 } GROUP BY ${groupList}ORDER BY ${orderList}`
 }
 
-const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', entrypointType = true) => {
+const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', entrypointType = true, optional = false) => {
     let pathParts = FSLpath.split('/')
     let query = (entrypointType) ? `?${entrypointName} rdf:type ${pathParts[0]} . ` : ``
     let levels = Math.floor(pathParts.length / 2)
@@ -270,12 +283,12 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
         let thisSubject = (level === 1) ? entrypointName : `${propName}inter${(level - 1)}`
         let thisObject = (level === levels) ? propName : `${propName}inter${level}`
         query = query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
-        if (level === levels) query = query.concat(`OPTIONAL { ?${thisObject} rdfs:label ?label${propName} } . `)
+        if (level === levels) query = query.concat(`${!optional ? 'OPTIONAL { ' : ''}?${thisObject} rdfs:label ?label${propName}${!optional ? ' } .' : ''} `)
         if (objectType !== '*') {
             query = query.concat(`?${thisObject} rdf:type ${objectType} . `)
         }
     }
-    return query
+    return `${optional ? 'OPTIONAL { ' : ''}${query}${optional ? '} . ' : ''}`
 }
 
 exports.convertPath = convertPath

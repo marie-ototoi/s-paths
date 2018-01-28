@@ -36,10 +36,11 @@ const getThresholdsForLegend = (nestedProps, propName, category, nbOfRanges) => 
 }
 
 const getThresholds = (minValue, maxValue, nbOfRanges) => {
-    const diff = maxValue - minValue
-    const part = Math.round(diff / nbOfRanges)
-    var roundUnit = Number('1e' + (String(part).length - 2))
-    var roundStart = Number('1e' + (String(part).length - 1))
+    let diff = maxValue - minValue
+    let part = Math.ceil(diff / nbOfRanges)
+    // console.log()
+    console.log('minValue', minValue, 'maxValue', maxValue, 'diff', diff, 'part', part, 'roundStart', roundStart, 'diff', diff)
+    const roundUnit = Math.ceil(Number('1e' + (String(part).length - 2)))
     let roundPart = Math.ceil(part / roundUnit)
     let roundPartStr = String(roundPart)
     if (Number(roundPartStr.substr(roundPartStr.length - 1, 1)) <= 5) {
@@ -48,13 +49,30 @@ const getThresholds = (minValue, maxValue, nbOfRanges) => {
         roundPart = Number(roundPartStr.substr(0, roundPartStr.length - 1) + '0') + 10
     }
     roundPart *= roundUnit
-    const start = Math.floor(minValue / roundStart) * roundStart
+    let roundStart
+    let index = nbOfRanges
+    do {
+        roundStart = roundPart * index
+        index--
+    }
+    while (roundStart > minValue)    
+    // console.log('roundPart', roundPart, 'roundUnit', roundUnit)
     let ranges = Array.from(Array(nbOfRanges).keys())
     // return [diff, part, roundUnit, roundStart, start, roundPartStr, roundPart]
-    return ranges.map((r) => [start + r * roundPart, start + (r + 1) * roundPart]).filter(v => v[0] <= maxValue)
+    return ranges.map((r) => [roundStart + r * roundPart + 1, (roundStart + (r + 1) * roundPart)]).filter(v => v[0] <= maxValue)
 }
 
 // const groupAggregateData
+const getDateRange = (key, group) => {
+    key = Number(key)
+    if (group === 'century') {
+        return [key, key + 99] 
+    } else if (group === 'decade') {
+        return [key, key + 9]
+    } else {
+        return [key, key]
+    }
+}
 
 const getCurrentData = (data, status) => {
     const currentStateMain = getCurrentState(data, 'main')
@@ -80,13 +98,13 @@ const getCurrentData = (data, status) => {
 const getResults = (data, zone, status) => {
     data = getCurrentData(data, status)
     const filtered = data.filter(d => (d.zone === zone && d.status === status))
-    return (filtered.length > 0) ? filtered[0].statements.results.bindings : []
+    return (filtered.length > 0 && filtered[0].statements.results) ? filtered[0].statements.results.bindings : []
 }
 
 const getHeadings = (data, zone, status) => {
     data = getCurrentData(data, status)
     const filtered = data.filter(d => (d.zone === zone && d.status === status))
-    return (filtered.length > 0) ? filtered[0].statements.head.vars : []
+    return (filtered.length > 0 && filtered[0].statements.head) ? filtered[0].statements.head.vars : []
 }
 
 const guid = () => {
@@ -135,7 +153,7 @@ const getLegend = (nestedProps, propName, colors, category) => {
                 return a.key[0] - b.key[0]
             } else {
                 return a.label.localeCompare(b.label)
-            }            
+            }
         })
     }
 }
@@ -160,20 +178,6 @@ const getTransitionElements = (originElements, targetElements) => {
 }
 
 const getAxis = (nestedProps, propName, category) => {
-    /* let additionnalProp = { key: '', values: [], type: 'additionalValue' }
-    if (category === 'datetime') {
-        switch (nestedProps[0].group) {
-        case 'century':
-            additionnalProp.key = Number(nestedProps[nestedProps.length - 1].key) + 100
-            break
-        case 'decade':
-            additionnalProp.key = Number(nestedProps[nestedProps.length - 1].key) + 10
-            break
-        case 'year':
-        default:
-            additionnalProp.key = Number(nestedProps[nestedProps.length - 1].key) + 1
-        }
-    } */
     return {
         info: nestedProps.map(p => {
             let range
@@ -245,14 +249,7 @@ const groupTimeData = (data, propName, options) => {
     }
     return [...nest.map(keygroup => {
         let yearStart = Number(keygroup.key)
-        let range
-        if (group === 'century') {
-            range = [yearStart, yearStart + 99]
-        } else if (group === 'decade') {
-            range = [yearStart, yearStart + 9]
-        } else {
-            range = [yearStart, yearStart]
-        }
+        let range = getDateRange(yearStart, group)
         let groupWithAdd = {
             ...keygroup,
             group,
@@ -264,7 +261,7 @@ const groupTimeData = (data, propName, options) => {
                 group['count' + subgroup] = 0
                 group.parent = keygroup
                 group.values.forEach(groupElt => {
-                    group['count' + subgroup] += Number(groupElt['count' + subgroup].value)
+                    group['count' + subgroup] += Number(groupElt['count' + subgroup].value) || 1
                 })
                 return group
             }).sort((a, b) => a.key.localeCompare(b.key))
@@ -280,6 +277,7 @@ const groupTimeData = (data, propName, options) => {
 exports.areLoaded = areLoaded
 exports.getAxis = getAxis
 exports.getCurrentState = getCurrentState
+exports.getDateRange = getDateRange
 exports.getHeadings = getHeadings
 exports.getLegend = getLegend
 exports.getTransitionElements = getTransitionElements

@@ -57,6 +57,7 @@ const getStats = (opt) => {
     let totalQuery = queryLib.makeTotalQuery(entrypoint, { ...options, constraints: '' })
     // number of entities of the set of entrypoint class limited by given constraints
     let selectionQuery = queryLib.makeTotalQuery(entrypoint, options)
+    console.log(selectionQuery)
     // retrieve number of entities
     return queryLib.getData(endpoint, totalQuery, prefixes)
         .then(totalcount => {

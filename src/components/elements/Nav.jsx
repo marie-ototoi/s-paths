@@ -2,6 +2,7 @@ import React from 'react'
 import pluralize from 'pluralize'
 import { connect } from 'react-redux'
 
+import configLib from '../../lib/configLib'
 import queryLib from '../../lib/queryLib'
 import { getDimensions } from '../../lib/scaleLib'
 
@@ -14,7 +15,8 @@ class Nav extends React.PureComponent {
     }
     exploreSelection () {
         if (this.props.selections.length > 0) {
-            let newConstraints = queryLib.makeSelectionConstraints(this.props.selections)
+            const selectedConfig = configLib.getSelectedConfig(this.props.configs)
+            let newConstraints = queryLib.makeSelectionConstraints(this.props.selections, selectedConfig)
             let newDataset = {
                 ...this.props.dataset,
                 constraints: newConstraints

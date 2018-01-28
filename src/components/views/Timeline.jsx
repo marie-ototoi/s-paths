@@ -105,6 +105,7 @@ class Timeline extends React.PureComponent {
                     zone = { zone }
                     displayedInstances = { data.length } // to be fixed - works only for unit displays
                     selections = { selections }
+                    configs = { configs }
                 />
                 <Legend
                     type = "plain"

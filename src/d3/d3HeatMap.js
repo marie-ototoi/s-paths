@@ -21,7 +21,7 @@ const destroy = (el) => {
 
 const draw = (el, props) => {
     const { nestedProp1, legend, selectedConfig, selectElement, selections, zone } = props
-    //console.log(selections)
+    // console.log(nestedProp1)
     const xUnits = d3.select(el)
         .selectAll('g.xUnits')
         .data(nestedProp1)
@@ -47,15 +47,15 @@ const draw = (el, props) => {
     d3.select(el)
         .selectAll('g.xUnits g.yUnits')
         .each((d, i) => {
-            d.color = legend.info.filter(p => (p.key[0] <= Number(d.countprop2) && p.key[1] > Number(d.countprop2)))[0].color
+            console.log(legend, d)
+            d.color = legend.info.filter(p => (p.key[0] <= Number(d.countprop2) && p.key[1] >= Number(d.countprop2)))[0].color
             d.selection = {
                 selector: `heatmap_element_p1_${dataLib.makeId(d.parent.key)}_p2_${dataLib.makeId(d.key)}`,
                 query: {
                     type: 'set',
                     value: [{
                         category: selectedConfig.properties[0].category,
-                        group: d.parent.group || null,
-                        value: d.parent.key,
+                        value: dataLib.getDateRange(d.parent.key, nestedProp1[0].group),
                         propName: 'prop1'
                     }, {
                         category: selectedConfig.properties[1].category,
