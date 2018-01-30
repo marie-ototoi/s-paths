@@ -206,6 +206,54 @@ WHERE {
             category: 'aggregate',
             propName: 'prop1'
         })).to.equal('FILTER (?prop1 >= 15 && ?prop1 < 30) . ')
-        
+    })
+    it('should build a query corresponding to a transition between two configs', () => {
+        const config = {
+            constraints: [
+                [{}],
+                [{}]
+            ],
+            matches: [
+                {
+                    properties: [
+                        { path: 'nobel:LaureateAward/nobel:year/*' },
+                        { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
+                    ],
+                    selected: true
+                }
+            ]
+        }
+        const options = {
+            constraints: 'FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . '
+        }
+        const newConfig = {
+            constraints: [
+                [{}],
+                [{}]
+            ],
+            matches: [
+                {
+                    properties: [
+                        { path: 'nobel:LaureateAward/nobel:university/*' },
+                        { path: 'nobel:LaureateAward/dct:isPartOf/*' }
+                    ],
+                    selected: true
+                }
+            ]
+        }
+        const newOptions = {
+            constraints: 'FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . '
+        }
+        expect(queryLib.makeTransitionQuery(newConfig, newOptions, config, options))
+            .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) ?prop2 (COUNT(?prop2) as ?countprop2) ?newprop1 (COUNT(?newprop1) as ?newcountprop1) ?newprop2 (COUNT(?newprop2) as ?newcountprop2) 
+    WHERE {
+        FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . 
+        ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label ?labelprop2 } . 
+        OPTIONAL {
+            ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:university ?newprop1 . OPTIONAL { ?newprop1 rdfs:label ?labelnewprop1 } . ?entrypoint dct:isPartOf ?newprop2 . OPTIONAL { ?newprop2 rdfs:label ?labelnewprop2 } . 
+        }
+    } 
+    GROUP BY ?prop1 ?prop2 ?newprop1 ?newprop2 
+    ORDER BY ?prop1 ?countprop1 ?prop2 ?countprop2 ?newprop1 ?newcountprop1 ?newprop2 ?newcountprop2 `)
     })
 })

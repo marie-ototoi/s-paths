@@ -272,6 +272,57 @@ ${defList}
 } GROUP BY ${groupList}ORDER BY ${orderList}`
 }
 
+const makeTransitionQuery = (newConfig, newOptions, config, options) => {
+    let newConstraints = newOptions.constraints
+    newConstraints = newConstraints.replace('?', '?new')
+    const { defaultGraph, constraints } = options
+    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    //
+    let selectedConfig = configLib.getSelectedConfig(config)
+    let propList = (config.entrypoint === undefined) ? `` : `?entrypoint `
+    let groupList = (config.entrypoint === undefined) ? `` : `?entrypoint `
+    let defList = ``
+    let orderList = ``
+    selectedConfig.properties.forEach((prop, index) => {
+        index += 1
+        propList = propList.concat(`?prop${index} `)
+        orderList = orderList.concat(`?prop${index} `)
+        if (config.entrypoint === undefined) {
+            propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
+            orderList = orderList.concat(`?countprop${index} `)
+        }
+        groupList = groupList.concat(`?prop${index} `)
+        const optional = config.constraints[index - 1] && config.constraints[index - 1][0].optional
+        defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`, 'entrypoint', (index === 1), optional))
+    })
+    //
+    let newdefList = ``
+    let newSelectedConfig = configLib.getSelectedConfig(newConfig)
+    propList.concat((newConfig.entrypoint === undefined) ? `` : `?entrypoint `)
+    groupList.concat((newConfig.entrypoint === undefined) ? `` : `?entrypoint `)
+    newSelectedConfig.properties.forEach((prop, index) => {
+        index += 1
+        propList = propList.concat(`?newprop${index} `)
+        orderList = orderList.concat(`?newprop${index} `)
+        if (config.entrypoint === undefined) {
+            propList = propList.concat(`(COUNT(?newprop${index}) as ?newcountprop${index}) `)
+            orderList = orderList.concat(`?newcountprop${index} `)
+        }
+        groupList = groupList.concat(`?newprop${index} `)
+        newdefList = newdefList.concat(FSL2SPARQL(prop.path, `newprop${index}`, 'entrypoint', (index === 1), false))
+    })
+    return `SELECT DISTINCT ${propList}${graph}
+    WHERE {
+        ${constraints}
+        ${defList}
+        OPTIONAL {
+            ${newdefList}
+        }
+    } 
+    GROUP BY ${groupList}
+    ORDER BY ${orderList}`
+}
+
 const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', entrypointType = true, optional = false) => {
     let pathParts = FSLpath.split('/')
     let query = (entrypointType) ? `?${entrypointName} rdf:type ${pathParts[0]} . ` : ``
@@ -303,6 +354,7 @@ exports.makePropQuery = makePropQuery
 exports.makePropsQuery = makePropsQuery
 exports.makeSelectionConstraints = makeSelectionConstraints
 exports.makeTotalQuery = makeTotalQuery
+exports.makeTransitionQuery = makeTransitionQuery
 exports.mergeStatsWithProps = mergeStatsWithProps
 exports.prefixDefined = prefixDefined
 exports.addSmallestPrefix = addSmallestPrefix
