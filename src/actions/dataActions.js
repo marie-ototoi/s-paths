@@ -72,9 +72,10 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
         })
 }
 
-const loadData = (dispatch) => (dataset, views) => {
-    console.log('load Data ', dataset, views)
+const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
+    // console.log('load Data ', dataset, views)
     let { endpoint, entrypoint, prefixes } = dataset
+    let newOptions
     getStats(dataset)
         .then(stats => {
             return new Promise((resolve, reject) => {
@@ -94,28 +95,53 @@ const loadData = (dispatch) => (dataset, views) => {
                         constraints: stats.options.constraints,
                         configs
                     })
+                    newOptions = {
+                        ...dataset,
+                        entrypoint: stats.options.entrypoint,
+                        prefixes: stats.options.prefixes,
+                        constraints: stats.options.constraints
+                    }
                     resolve(configs)
                 }
             })
         })
         .then(configs => {
-            console.log(configs)
+            // console.log(configs)
             const configMain = configLib.getConfigs(configs, 'main')
             const queryMain = queryLib.makeQuery(entrypoint, configMain, dataset)
             const configAside = configLib.getConfigs(configs, 'aside')
             const queryAside = queryLib.makeQuery(entrypoint, configAside, dataset)
-            console.log('queryMain', queryMain)
-            console.log('queryaside', queryAside)
+            let deltaMain
+            let deltaAside
+            if (previousConfigs.length > 0) {
+                const previousConfigMain = configLib.getConfigs(previousConfigs, 'main')
+                const previousConfigAside = configLib.getConfigs(previousConfigs, 'aside')
+                let queryTransitionMain = queryLib.makeTransitionQuery(configMain, newOptions, previousConfigMain, previousOptions)
+                deltaMain = queryLib.getData(endpoint, queryTransitionMain, prefixes)
+                let queryTransitionAside = queryLib.makeTransitionQuery(configAside, newOptions, previousConfigAside, previousOptions)
+                deltaAside = queryLib.getData(endpoint, queryTransitionAside, prefixes)
+            } else {
+                deltaMain = []
+                deltaAside = []
+            }
+            // console.log('queryMain', queryMain)
+            // console.log('queryaside', queryAside)
             return Promise.all([
                 queryLib.getData(endpoint, queryMain, prefixes),
-                queryLib.getData(endpoint, queryAside, prefixes)
+                queryLib.getData(endpoint, queryAside, prefixes),
+                deltaMain,
+                deltaAside
             ])
-                .then(([dataMain, dataAside]) => {
-                    console.log(dataMain, dataAside)
+                .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside]) => {
+                    // console.log(dataMain, dataAside)
+                    // console.log('dataTransitionMain', dataTransitionMain)
+                    // console.log('dataTransitionAside', dataTransitionAside)
                     dispatch({
                         type: types.SET_DATA,
                         main: { ...dataMain },
-                        aside: { ...dataAside }
+                        aside: { ...dataAside },
+                        deltaMain: dataDeltaMain,
+                        deltaAside: dataDeltaAside
                     })
                 })
                 .catch(error => {

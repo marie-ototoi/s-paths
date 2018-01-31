@@ -1,6 +1,7 @@
 import * as d3 from 'd3'
+import { nest } from 'd3'
 import moment from 'moment'
-import { isNumber } from 'util';
+import { isNumber } from 'util'
 
 const areLoaded = (data, zone, status) => {
     data = getCurrentData(data, status)
@@ -39,7 +40,7 @@ const getThresholds = (minValue, maxValue, nbOfRanges) => {
     let diff = maxValue - minValue
     let part = Math.ceil(diff / nbOfRanges)
     // console.log()
-    console.log('minValue', minValue, 'maxValue', maxValue, 'diff', diff, 'part', part, 'roundStart', roundStart, 'diff', diff)
+    // console.log('minValue', minValue, 'maxValue', maxValue, 'diff', diff, 'part', part, 'roundStart', roundStart, 'diff', diff)
     const roundUnit = Math.ceil(Number('1e' + (String(part).length - 2)))
     let roundPart = Math.ceil(part / roundUnit)
     let roundPartStr = String(roundPart)
@@ -66,12 +67,22 @@ const getThresholds = (minValue, maxValue, nbOfRanges) => {
 const getDateRange = (key, group) => {
     key = Number(key)
     if (group === 'century') {
-        return [key, key + 99] 
+        return [key, key + 99]
     } else if (group === 'decade') {
         return [key, key + 9]
     } else {
         return [key, key]
     }
+}
+
+const getNumberOfTimeUnits = (nestedData) => {
+    let dif = Number(nestedData[nestedData.length - 1].key) - Number(nestedData[0].key)
+    if (nestedData[0].group === 'decade') {
+        dif = dif / 10
+    } else if (nestedData[0].group === 'century') {
+        dif = dif / 100
+    }
+    return dif
 }
 
 const getCurrentData = (data, status) => {
@@ -261,7 +272,11 @@ const groupTimeData = (data, propName, options) => {
                 group['count' + subgroup] = 0
                 group.parent = keygroup
                 group.values.forEach(groupElt => {
-                    group['count' + subgroup] += Number(groupElt['count' + subgroup].value) || 1
+                    if (groupElt['count' + subgroup]) {
+                        group['count' + subgroup] += Number(groupElt['count' + subgroup].value)
+                    } else {
+                        group['count' + subgroup] += 1
+                    }
                 })
                 return group
             }).sort((a, b) => a.key.localeCompare(b.key))
@@ -280,6 +295,7 @@ exports.getCurrentState = getCurrentState
 exports.getDateRange = getDateRange
 exports.getHeadings = getHeadings
 exports.getLegend = getLegend
+exports.getNumberOfTimeUnits = getNumberOfTimeUnits
 exports.getTransitionElements = getTransitionElements
 exports.makeId = makeId
 exports.getPropList = getPropList

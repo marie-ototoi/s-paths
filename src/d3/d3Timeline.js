@@ -157,20 +157,13 @@ const resize = (el, props) => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
         // Math.floor(display.viz.useful_width / (props.nestedProp1.length - 1))
-    const unitWidth = nestedProp1.reduce((acc, current) => {
-        if (acc.prev) {
-            let dif = xScale(Number(current.key)) - xScale(Number(acc.prev.key))
-            if (!acc.dif || dif < acc.dif) acc.dif = dif
-        }
-        acc.prev = current
-        return acc
-    }, {}).dif
+    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfTimeUnits(nestedProp1))
     const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
     d3.select(el).selectAll('g.time').selectAll('.elements')
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
     d3.select(el).selectAll('g.time').selectAll('.element')
         .attr('x', d => 1)
-        .attr('width', d => unitWidth - 2)
+        .attr('width', d => unitWidth - 1)
         .attr('y', -unitHeight)
         .attr('height', d => unitHeight)
         .each((d, i) => {

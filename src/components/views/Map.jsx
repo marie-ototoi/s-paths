@@ -76,7 +76,6 @@ function mapStateToProps (state) {
     return {
         display: state.display,
         data: state.data,
-        configs: state.configs.present,
         palettes: state.palettes,
         selections: state.selections
     }

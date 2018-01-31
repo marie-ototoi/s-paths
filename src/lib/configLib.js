@@ -1,4 +1,5 @@
 const getSelectedConfig = (config) => {
+    console.log(config, config.matches)
     return config.matches.filter(m => m.selected === true)[0]
 }
 const getConfigs = (configs, zone) => {

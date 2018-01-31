@@ -47,7 +47,7 @@ const draw = (el, props) => {
     d3.select(el)
         .selectAll('g.xUnits g.yUnits')
         .each((d, i) => {
-            console.log(legend, d)
+            //console.log(legend, d)
             d.color = legend.info.filter(p => (p.key[0] <= Number(d.countprop2) && p.key[1] >= Number(d.countprop2)))[0].color
             d.selection = {
                 selector: `heatmap_element_p1_${dataLib.makeId(d.parent.key)}_p2_${dataLib.makeId(d.key)}`,
@@ -174,7 +174,7 @@ const resize = (el, props) => {
         .each(d => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
-    const unitWidth = Math.floor(display.viz.useful_width / (props.nestedProp1.length - 1))
+    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfTimeUnits(nestedProp1))
     const unitHeight = Math.floor(display.viz.useful_height / (props.nestedProp2.length - 1))
     d3.select(el).selectAll('g.xUnits').selectAll('.yUnits')
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (mapY[d.key] * unitHeight)})`)

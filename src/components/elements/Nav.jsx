@@ -15,13 +15,13 @@ class Nav extends React.PureComponent {
     }
     exploreSelection () {
         if (this.props.selections.length > 0) {
-            const selectedConfig = configLib.getSelectedConfig(this.props.configs)
+            const selectedConfig = configLib.getSelectedConfig(this.props.config)
             let newConstraints = queryLib.makeSelectionConstraints(this.props.selections, selectedConfig)
             let newDataset = {
                 ...this.props.dataset,
                 constraints: newConstraints
             }
-            this.props.loadData(newDataset, this.props.views)
+            this.props.loadData(newDataset, this.props.views, this.props.configs, this.props.dataset)
         }
     }
     render () {
@@ -68,6 +68,7 @@ class Nav extends React.PureComponent {
 
 function mapStateToProps (state) {
     return {
+        configs: state.configs.present,
         dataset: state.dataset.present,
         data: state.data,
         display: state.display,

@@ -17,13 +17,13 @@ class PropSelector extends React.PureComponent {
         }
     }
     handleSelect (e) {
-        const { configs, dataset, propIndex, propList, zone } = this.props
+        const { config, dataset, propIndex, propList, zone } = this.props
         this.setState({
             selected: false,
             selectedPath: e.target.value,
             selectedLabel: propList[e.target.options.selectedIndex].readablePath
         })
-        this.props.selectProperty(configs, zone, propIndex, e.target.value, dataset)
+        this.props.selectProperty(config, zone, propIndex, e.target.value, dataset)
     }
     render () {
         const { align, display, offset, propList, type, zone } = this.props

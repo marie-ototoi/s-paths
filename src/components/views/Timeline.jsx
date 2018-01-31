@@ -12,7 +12,7 @@ import SelectionZone from '../elements/SelectionZone'
 // d3
 import d3Timeline from '../../d3/d3Timeline'
 // libs
-import config from '../../lib/configLib'
+import configLib from '../../lib/configLib'
 import dataLib from '../../lib/dataLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
 // redux functions
@@ -45,22 +45,22 @@ class Timeline extends React.PureComponent {
         return !shallowEqual(this.props, nextProps)
     }
     prepareData (nextProps) {
-        const { data, configs, palettes, getPropPalette, dataset } = nextProps
+        const { data, config, palettes, getPropPalette, dataset } = nextProps
         // prepare the data for display
-        const selectedConfig = config.getSelectedConfig(configs)
+        const selectedConfig = configLib.getSelectedConfig(config)
         // First prop to be displayed in the bottom axis
         const categoryProp1 = selectedConfig.properties[0].category
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format
         const nestedProp1 = dataLib.groupTimeData(data, 'prop1', { format: formatProp1, max: 50 })
         const axisBottom = dataLib.getAxis(nestedProp1, 'prop1', categoryProp1)
-        const listProp1 = dataLib.getPropList(configs, 0, dataset.labels)
+        const listProp1 = dataLib.getPropList(config, 0, dataset.labels)
         // Second prop to be displayed in the legend
         const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
         const pathProp2 = selectedConfig.properties[1].path
         const categoryProp2 = selectedConfig.properties[1].category
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         const legend = dataLib.getLegend(nestedProp2, 'prop2', colors, categoryProp2)
-        const listProp2 = dataLib.getPropList(configs, 1, dataset.labels)
+        const listProp2 = dataLib.getPropList(config, 1, dataset.labels)
         // Save to reuse in render
         this.customState = { ...this.customState, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2 }
     }
@@ -74,7 +74,7 @@ class Timeline extends React.PureComponent {
     }
     render () {
         const { axisBottom, legend, listProp1, listProp2 } = this.customState
-        const { configs, data, display, role, selections, step, zone } = this.props
+        const { config, data, display, role, selections, step, zone } = this.props
         // display settings
         // console.log(step)
         const classN = `Timeline ${this.customState.elementName} role_${role}`
@@ -105,7 +105,7 @@ class Timeline extends React.PureComponent {
                     zone = { zone }
                     displayedInstances = { data.length } // to be fixed - works only for unit displays
                     selections = { selections }
-                    configs = { configs }
+                    config = { config }
                 />
                 <Legend
                     type = "plain"
@@ -124,7 +124,7 @@ class Timeline extends React.PureComponent {
                 <PropSelector
                     type = "Legend"
                     propList = { listProp2 }
-                    configs = { configs }
+                    config = { config }
                     offset = { { x: 10, y: 0, width: -40, height: 0 } }
                     propIndex = { 1 }
                     zone = { zone }
@@ -133,7 +133,7 @@ class Timeline extends React.PureComponent {
                     align = "right"
                     type = "AxisBottom"
                     propList = { listProp1 }
-                    configs = { configs }
+                    config = { config }
                     offset = { { x: 15, y: -14, width: -40, height: 0 } }
                     propIndex = { 0 }
                     zone = { zone }

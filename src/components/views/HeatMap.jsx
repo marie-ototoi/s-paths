@@ -12,7 +12,7 @@ import SelectionZone from '../elements/SelectionZone'
 // d3
 import d3HeatMap from '../../d3/d3HeatMap'
 // libs
-import config from '../../lib/configLib'
+import configLib from '../../lib/configLib'
 import dataLib from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
@@ -48,9 +48,9 @@ class HeatMap extends React.Component {
     }
 
     prepareData (nextProps) {
-        const { data, dataset, configs, palettes, getPropPalette } = nextProps
+        const { data, dataset, config, palettes, getPropPalette } = nextProps
         // prepare the data for display
-        const selectedConfig = config.getSelectedConfig(configs)
+        const selectedConfig = configLib.getSelectedConfig(config)
         // First prop to be displayed in the bottom axis
         const categoryProp1 = selectedConfig.properties[0].category
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format
@@ -60,11 +60,11 @@ class HeatMap extends React.Component {
             subgroup: 'prop2'
         })
         const axisBottom = dataLib.getAxis(nestedProp1, 'prop1', categoryProp1)
-        const listProp1 = dataLib.getPropList(configs, 0, dataset.labels)
+        const listProp1 = dataLib.getPropList(config, 0, dataset.labels)
         const categoryProp2 = selectedConfig.properties[1].category
         const nestedProp2 = dataLib.groupTextData(data, 'prop2')
         const axisLeft = dataLib.getAxis(nestedProp2, 'prop2', categoryProp2)
-        const listProp2 = dataLib.getPropList(configs, 1, dataset.labels)
+        const listProp2 = dataLib.getPropList(config, 1, dataset.labels)
 
         const colors = getQuantitativeColors()
         const thresholds = dataLib.getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
@@ -93,7 +93,7 @@ class HeatMap extends React.Component {
     }
     render () {
         const { axisBottom, axisLeft, legend, listProp1, listProp2 } = this.customState
-        const { data, configs, display, step, role, selections, zone } = this.props
+        const { data, config, display, step, role, selections, zone } = this.props
         const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
 
         return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` } >
@@ -122,7 +122,7 @@ class HeatMap extends React.Component {
                     zone = { zone }
                     displayedInstances = { data.length } // to be fixed - works only for unit displays
                     selections = { selections }
-                    configs = { configs }
+                    config = { config }
                 />
                 <Legend
                     type = "plain"
@@ -148,7 +148,7 @@ class HeatMap extends React.Component {
                 <PropSelector
                     type = "AxisLeft"
                     propList = { listProp2 }
-                    configs = { configs }
+                    config = { config }
                     align = "right"
                     offset = { { x: 20, y: 30, width: -15, height: 0 } }
                     selectElements = { this.selectElements }
@@ -159,7 +159,7 @@ class HeatMap extends React.Component {
                     type = "AxisBottom"
                     propList = { listProp1 }
                     align = "right"
-                    configs = { configs }
+                    config = { config }
                     offset = { { x: 20, y: -15, width: -50, height: 0 } }
                     selectElements = { this.selectElements }
                     propIndex = { 0 }
