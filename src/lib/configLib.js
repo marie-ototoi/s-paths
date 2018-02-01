@@ -1,5 +1,5 @@
 const getSelectedConfig = (config) => {
-    console.log(config, config.matches)
+    // console.log(config, config.matches)
     return config.matches.filter(m => m.selected === true)[0]
 }
 const getConfigs = (configs, zone) => {
@@ -66,8 +66,8 @@ const scoreProp = (prop, constraint) => {
 const scoreMatch = (match) => {
     match = match.filter(m => m.score >= 0)
     // mean of each property's score
-    let score = match.map(m => m.score).reduce((a, b) => a + b , 0) / match.length
-    let coverage = match.map(m => m.coverage).reduce((a, b) => a + b , 0) / match.length
+    let score = match.map(m => m.score).reduce((a, b) => a + b, 0) / match.length
+    let coverage = match.map(m => m.coverage).reduce((a, b) => a + b, 0) / match.length
     // bonus for each property represented
     score += 0.3 * match.length
     score *= coverage / 10
@@ -159,7 +159,6 @@ const defineConfigs = (views, stats) => {
         let entrypointFactor = 1
         if (view.entrypoint) {
             const { min, max, optimal } = view.entrypoint
-            let addValue
             if (!inRange(stats.totalInstances, [min, max])) {
                 // will result in each score being 0, so discard the view
                 entrypointFactor = 0

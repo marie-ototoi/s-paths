@@ -1,5 +1,4 @@
 import React from 'react'
-import pluralize from 'pluralize'
 import { connect } from 'react-redux'
 
 import configLib from '../../lib/configLib'
@@ -25,9 +24,9 @@ class Nav extends React.PureComponent {
         }
     }
     render () {
-        const { data, dataset, displayedInstances, display, offset, selections, zone } = this.props
+        const { dataset, displayedInstances, display, offset, selections, zone } = this.props
         const dimensions = getDimensions('nav', display.zones[zone], display.viz, offset)
-        const { x, y, width, height } = dimensions
+        const { x, y, width } = dimensions
         // console.log(dataset.stats)
         let options = [
             { label: 'endpoint', total: dataset.stats.totalInstances },

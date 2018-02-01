@@ -1,5 +1,4 @@
 import chai, {expect} from 'chai'
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import selections from '../../src/reducers/selections'
 
@@ -7,7 +6,7 @@ chai.use(sinonChai)
 const newState = [{
     selector: '#toto',
     query: {
-        type: 'uri', 
+        type: 'uri',
         value: 'http://unique.com'
     },
     zone: 'main'
@@ -26,7 +25,7 @@ describe('reducers/selections', () => {
                 {
                     selector: '#topic',
                     query: {
-                        type: 'uri', 
+                        type: 'uri',
                         value: 'http://unique.com'
                     },
                     zone: 'main'
@@ -39,7 +38,7 @@ describe('reducers/selections', () => {
                 {
                     selector: '#topic',
                     query: {
-                        type: 'uri', 
+                        type: 'uri',
                         value: 'http://unique.com'
                     },
                     zone: 'main'
@@ -50,7 +49,7 @@ describe('reducers/selections', () => {
                 {
                     selector: '#toto',
                     query: {
-                        type: 'uri', 
+                        type: 'uri',
                         value: 'http://unique.com'
                     },
                     zone: 'main'
@@ -58,7 +57,7 @@ describe('reducers/selections', () => {
                 {
                     selector: '#topic',
                     query: {
-                        type: 'uri', 
+                        type: 'uri',
                         value: 'http://unique.com'
                     },
                     zone: 'main'
@@ -72,7 +71,7 @@ describe('reducers/selections', () => {
             zone: 'main'
         }
         let state = [
-            { 
+            {
                 selector: '#toto',
                 props: [{
                     path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',

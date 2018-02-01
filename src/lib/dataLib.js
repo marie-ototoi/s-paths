@@ -1,7 +1,6 @@
 import * as d3 from 'd3'
 import { nest } from 'd3'
 import moment from 'moment'
-import { isNumber } from 'util'
 
 const areLoaded = (data, zone, status) => {
     data = getCurrentData(data, status)
@@ -23,7 +22,7 @@ const getCurrentState = (data, zone) => {
 const getThresholdsForLegend = (nestedProps, propName, category, nbOfRanges) => {
     const values = nestedProps.reduce((acc, curr) => {
         curr.values.forEach(val => {
-            if (isNumber(val['count' + propName])) acc.push(val['count' + propName])
+            if (Number.isInteger(val['count' + propName])) acc.push(val['count' + propName])
         })
         return acc
     }, []).sort((a, b) => a - b)
@@ -56,7 +55,7 @@ const getThresholds = (minValue, maxValue, nbOfRanges) => {
         roundStart = roundPart * index
         index--
     }
-    while (roundStart > minValue)    
+    while (roundStart > minValue)
     // console.log('roundPart', roundPart, 'roundUnit', roundUnit)
     let ranges = Array.from(Array(nbOfRanges).keys())
     // return [diff, part, roundUnit, roundStart, start, roundPartStr, roundPart]
@@ -240,11 +239,10 @@ const groupTimeData = (data, propName, options) => {
     let decadeNest = d3.nest().key(prop => prop.decade).entries(dataToNest)
     let decadeNumber = (Number(decadeNest[decadeNest.length - 1].key) - Number(decadeNest[0].key)) / 10
     let centuryNest = d3.nest().key(prop => prop.century).entries(dataToNest)
-    let centuryNumber = (Number(centuryNest[centuryNest.length - 1].key) - Number(centuryNest[0].key)) / 100
+    // let centuryNumber = (Number(centuryNest[centuryNest.length - 1].key) - Number(centuryNest[0].key)) / 100
     // console.log(yearNest.length, yearNumber, decadeNest.length, decadeNumber, centuryNest.length, centuryNumber)
     let nest
     let additionalValue
-    let keyFormat
     if (forceGroup === 'year' || yearNumber < max) {
         nest = yearNest
         group = 'year'

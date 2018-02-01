@@ -33,7 +33,7 @@ class App extends React.Component {
     }
     componentDidMount () {
         this.onResize()
-        const { configs, dataset, views } = this.props
+        const { dataset, views } = this.props
         // this is where it all starts
         this.props.loadData(dataset, views, [], {})
     }
