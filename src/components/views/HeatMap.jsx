@@ -60,11 +60,11 @@ class HeatMap extends React.Component {
             subgroup: 'prop2'
         })
         const axisBottom = dataLib.getAxis(nestedProp1, 'prop1', categoryProp1)
-        const listProp1 = dataLib.getPropList(config, 0, dataset.labels)
+        const listProp1 = dataLib.getPropList(config, zone, 0, dataset.labels)
         const categoryProp2 = selectedConfig.properties[1].category
         const nestedProp2 = dataLib.groupTextData(data, 'prop2')
         const axisLeft = dataLib.getAxis(nestedProp2, 'prop2', categoryProp2)
-        const listProp2 = dataLib.getPropList(config, 1, dataset.labels)
+        const listProp2 = dataLib.getPropList(config, zone, 1, dataset.labels)
 
         const colors = getQuantitativeColors()
         const thresholds = dataLib.getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)

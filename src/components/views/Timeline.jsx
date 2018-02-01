@@ -53,14 +53,14 @@ class Timeline extends React.PureComponent {
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format
         const nestedProp1 = dataLib.groupTimeData(data, 'prop1', { format: formatProp1, max: 50 })
         const axisBottom = dataLib.getAxis(nestedProp1, 'prop1', categoryProp1)
-        const listProp1 = dataLib.getPropList(config, 0, dataset.labels)
+        const listProp1 = dataLib.getPropList(config, zone, 0, dataset.labels)
         // Second prop to be displayed in the legend
         const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
         const pathProp2 = selectedConfig.properties[1].path
         const categoryProp2 = selectedConfig.properties[1].category
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         const legend = dataLib.getLegend(nestedProp2, 'prop2', colors, categoryProp2)
-        const listProp2 = dataLib.getPropList(config, 1, dataset.labels)
+        const listProp2 = dataLib.getPropList(config, zone, 1, dataset.labels)
         // Save to reuse in render
         this.customState = { ...this.customState, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2 }
     }

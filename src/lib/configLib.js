@@ -213,7 +213,7 @@ const activateDefaultConfigs = (configs) => {
 }
 const selectProperty = (config, zone, propIndex, path) => {
     let selectedMatch = getSelectedConfig(config, zone)
-    console.log(config, zone, selectedMatch)
+    // console.log(config, zone, selectedMatch)
     let possibleConfigs = config.matches.map((match, index) => {
         let score
         if (match.properties[propIndex].path !== path) {

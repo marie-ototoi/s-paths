@@ -43,17 +43,17 @@ WHERE {
                         { path: 'nobel:LaureateAward/nobel:year/*' },
                         { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
                     ],
-                    selected: true
+                    mainSelected: true
                 }
             ]
         }
-        expect(queryLib.makeQuery('nobel:LaureateAward', config1, { defaultGraph: 'http://localhost:8890/nobel', constraints: '' }))
+        expect(queryLib.makeQuery('nobel:LaureateAward', config1, 'main', { defaultGraph: 'http://localhost:8890/nobel', constraints: '' }))
             .to.equal(`SELECT DISTINCT ?prop1 ?labelprop1 (COUNT(?prop1) as ?countprop1) ?prop2 ?labelprop2 (COUNT(?prop2) as ?countprop2) FROM <http://localhost:8890/nobel> 
 WHERE {
 
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label ?labelprop2 } . 
 } GROUP BY ?prop1 ?labelprop1 ?prop2 ?labelprop2 ORDER BY ?prop1 ?countprop1 ?prop2 ?countprop2 `)
-        expect(queryLib.makeQuery('nobel:LaureateAward', { ...config1, entrypoint: {} }, { constraints: '' }))
+        expect(queryLib.makeQuery('nobel:LaureateAward', { ...config1, entrypoint: {} }, 'main', { constraints: '' }))
             .to.equal(`SELECT DISTINCT ?entrypoint ?prop1 ?labelprop1 ?prop2 ?labelprop2 
 WHERE {
 
@@ -200,7 +200,7 @@ WHERE {
             value: 'Chemistry',
             category: 'text',
             propName: 'prop2'
-        })).to.equal('FILTER regex(?prop2, "Chemistry") . ')
+        })).to.equal('FILTER regex(?prop2, "^Chemistry$") . ')
         expect(queryLib.makeQueryFromConstraint({
             value: [15, 30],
             category: 'aggregate',
@@ -219,7 +219,7 @@ WHERE {
                         { path: 'nobel:LaureateAward/nobel:year/*' },
                         { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
                     ],
-                    selected: true
+                    mainSelected: true
                 }
             ]
         }
@@ -237,14 +237,14 @@ WHERE {
                         { path: 'nobel:LaureateAward/nobel:university/*' },
                         { path: 'nobel:LaureateAward/dct:isPartOf/*' }
                     ],
-                    selected: true
+                    mainSelected: true
                 }
             ]
         }
         const newOptions = {
             constraints: 'FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . '
         }
-        expect(queryLib.makeTransitionQuery(newConfig, newOptions, config, options))
+        expect(queryLib.makeTransitionQuery(newConfig, newOptions, config, options, 'main'))
             .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) ?prop2 (COUNT(?prop2) as ?countprop2) ?newprop1 (COUNT(?newprop1) as ?newcountprop1) ?newprop2 (COUNT(?newprop2) as ?newcountprop2) 
     WHERE {
         FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . 

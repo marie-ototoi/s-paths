@@ -130,12 +130,12 @@ const makeId = (textstr) => {
     }).toLowerCase()
 }
 
-const getPropList = (configs, propIndex, labels) => {
+const getPropList = (configs, zone, propIndex, labels) => {
     return configs.matches.map(config => {
         return {
             path: config.properties[propIndex].path,
             readablePath: getReadablePathsParts(config.properties[propIndex].path, labels),
-            selected: config.selected
+            selected: config[zone + 'Selected']
         }
     }).reduce((configAcc, config) => {
         const exists = configAcc.filter(c => c.path === config.path).length > 0

@@ -55,7 +55,6 @@ describe('lib/config', () => {
     })
     it('should change selected config for a given zone', () => {
         let formerConfig = {
-            zone: 'main',
             matches: [
                 {
                     properties: [
@@ -63,7 +62,7 @@ describe('lib/config', () => {
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
                         { path: 'nobel:LaureateAward/nobel:share/*' }
                     ],
-                    selected: false
+                    mainSelected: false
                 },
                 {
                     properties: [
@@ -71,7 +70,7 @@ describe('lib/config', () => {
                         { path: 'nobel:LaureateAward/nobel:category/*' },
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' }
                     ],
-                    selected: true
+                    mainSelected: true
                 },
                 {
                     properties: [
@@ -79,7 +78,7 @@ describe('lib/config', () => {
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' }
                     ],
-                    selected: false
+                    mainSelected: false
                 },
                 {
                     properties: [
@@ -87,14 +86,14 @@ describe('lib/config', () => {
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' },
                         { path: 'nobel:LaureateAward/nobel:share/*' }
                     ],
-                    selected: false
+                    mainSelected: false
                 }
             ]
         }
-        let newConfig = config.selectProperty(formerConfig, 1, 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*')
-        expect(newConfig.matches[0].selected).to.be.false
-        expect(newConfig.matches[1].selected).to.be.false
-        expect(newConfig.matches[2].selected).to.be.true
-        expect(newConfig.matches[3].selected).to.be.false
+        let newConfig = config.selectProperty(formerConfig, 'main', 1, 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*')
+        expect(newConfig.matches[0].mainSelected).to.be.false
+        expect(newConfig.matches[1].mainSelected).to.be.false
+        expect(newConfig.matches[2].mainSelected).to.be.true
+        expect(newConfig.matches[3].mainSelected).to.be.false
     })
 })
