@@ -45,9 +45,9 @@ class Timeline extends React.PureComponent {
         return !shallowEqual(this.props, nextProps)
     }
     prepareData (nextProps) {
-        const { data, config, palettes, getPropPalette, dataset } = nextProps
+        const { data, config, palettes, getPropPalette, dataset, zone } = nextProps
         // prepare the data for display
-        const selectedConfig = configLib.getSelectedConfig(config)
+        const selectedConfig = configLib.getSelectedConfig(config, zone)
         // First prop to be displayed in the bottom axis
         const categoryProp1 = selectedConfig.properties[0].category
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format

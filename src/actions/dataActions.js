@@ -30,23 +30,6 @@ const endTransition = (dispatch) => () => {
     })
 }
 
-const exploreSelection = (dispatch) => (selection, dataset, views) => {
-
-        // constraints = concat each selected element query
-        /* 
-        select distinct ?entrypoint 
-        FROM <http://localhost:8890/nobel> 
-        where { 
-        ?entrypoint rdf:type <http://data.nobelprize.org/terms/Laureate> . 
-        FILTER regex(?entrypoint, "http://data.nobelprize.org/resource/laureate/1$|http://data.nobelprize.org/resource/laureate/10$", "i") 
-        } */
-        // load data
-        // undo : get last configs do not load stats again / 
-        // how to synchronize all reducers for undo ? dataset, data config
-        // forget about selections when change data
-
-}
-
 const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) => {
     // console.log('select property')
     const { endpoint, entrypoint, prefixes } = dataset
@@ -57,7 +40,7 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
         zone
     })
 
-    const newQuery = queryLib.makeQuery(entrypoint, updatedConfig, dataset)
+    const newQuery = queryLib.makeQuery(entrypoint, updatedConfig, zone, dataset)
     // console.log('new data', newQuery)
     queryLib.getData(endpoint, newQuery, prefixes)
         .then((newData) => {
@@ -108,17 +91,17 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
         .then(configs => {
             // console.log(configs)
             const configMain = configLib.getConfigs(configs, 'main')
-            const queryMain = queryLib.makeQuery(entrypoint, configMain, dataset)
+            const queryMain = queryLib.makeQuery(entrypoint, configMain, 'main', dataset)
             const configAside = configLib.getConfigs(configs, 'aside')
-            const queryAside = queryLib.makeQuery(entrypoint, configAside, dataset)
+            const queryAside = queryLib.makeQuery(entrypoint, configAside, 'aside', dataset)
             let deltaMain
             let deltaAside
             if (previousConfigs.length > 0) {
                 const previousConfigMain = configLib.getConfigs(previousConfigs, 'main')
                 const previousConfigAside = configLib.getConfigs(previousConfigs, 'aside')
-                let queryTransitionMain = queryLib.makeTransitionQuery(configMain, newOptions, previousConfigMain, previousOptions)
+                let queryTransitionMain = queryLib.makeTransitionQuery(configMain, newOptions, previousConfigMain, previousOptions, 'main')
                 deltaMain = queryLib.getData(endpoint, queryTransitionMain, prefixes)
-                let queryTransitionAside = queryLib.makeTransitionQuery(configAside, newOptions, previousConfigAside, previousOptions)
+                let queryTransitionAside = queryLib.makeTransitionQuery(configAside, newOptions, previousConfigAside, previousOptions, 'aside')
                 deltaAside = queryLib.getData(endpoint, queryTransitionAside, prefixes)
             } else {
                 deltaMain = []

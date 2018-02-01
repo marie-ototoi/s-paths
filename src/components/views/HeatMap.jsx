@@ -48,9 +48,9 @@ class HeatMap extends React.Component {
     }
 
     prepareData (nextProps) {
-        const { data, dataset, config, palettes, getPropPalette } = nextProps
+        const { data, dataset, config, palettes, getPropPalette, zone } = nextProps
         // prepare the data for display
-        const selectedConfig = configLib.getSelectedConfig(config)
+        const selectedConfig = configLib.getSelectedConfig(config, zone)
         // First prop to be displayed in the bottom axis
         const categoryProp1 = selectedConfig.properties[0].category
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format
@@ -69,7 +69,6 @@ class HeatMap extends React.Component {
         const colors = getQuantitativeColors()
         const thresholds = dataLib.getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
         const legend = dataLib.getLegend(thresholds, 'countprop2', colors, 'aggregate')
-        
         // Save to reuse in render
         this.customState = {
             ...this.customState,
@@ -172,7 +171,7 @@ class HeatMap extends React.Component {
 
     selectElements (prop, value, category) {
         const elements = d3HeatMap.getElements(this.refs.HeatMap, prop, value, category)
-        console.log(prop, value, elements, category)
+        // console.log(prop, value, elements, category)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }

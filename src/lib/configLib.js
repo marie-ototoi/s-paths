@@ -1,9 +1,8 @@
-const getSelectedConfig = (config) => {
-    // console.log(config, config.matches)
-    return config.matches.filter(m => m.selected === true)[0]
+const getSelectedConfig = (config, zone) => {
+    return config.matches.filter(m => m[zone + 'Selected'] === true)[0]
 }
 const getConfigs = (configs, zone) => {
-    return configs.filter(c => c.zone === zone)[0]
+    return configs.filter(c => c.matches.filter(m => m[zone + 'Selected'] === true).length > 0)[0]
 }
 const getViewDef = (views, id) => {
     // console.log(views, id)
@@ -180,12 +179,12 @@ const defineConfigs = (views, stats) => {
             ...view,
             matches: scoredMatches.sort((a, b) => {
                 return b.score - a.score
-            }).map((match, index) => {
+            })/*.map((match, index) => {
                 return {
                     ...match,
                     selected: (index === 0)
                 }
-            })
+            })*/
         }
     })
         .filter(view => view.matches.length > 0)
@@ -194,14 +193,21 @@ const defineConfigs = (views, stats) => {
         })
 }
 const activateDefaultConfigs = (configs) => {
-    // temporary : select the first 2 ones
-    return configs.map((vc, index) => {
-        let zone
-        if (index === 0) zone = 'main'
-        if (index === 1) zone = 'aside'
+    return configs.map((vc, cIndex) => {
         return {
             ...vc,
-            zone: (index <= 1) ? zone : null
+            matches: vc.matches.map((match, mIndex) => {
+                // if (cIndex === 0 && mIndex === 0) storeFirst = match
+                let shouldSelectSecond = ((configs.length === 1 && cIndex === 0 && mIndex === 1) ||
+                    (configs.length > 1 && cIndex === 1 && mIndex === 0))
+                // would be interesting to check that properties for the seco nd choice are different, 
+                // if possible, from those of the first choice 
+                return {
+                    ...match,
+                    mainSelected: (cIndex === 0 && mIndex === 0),
+                    asideSelected: shouldSelectSecond
+                }
+            })
         }
     })
 }

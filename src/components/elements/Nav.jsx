@@ -14,7 +14,7 @@ class Nav extends React.PureComponent {
     }
     exploreSelection () {
         if (this.props.selections.length > 0) {
-            const selectedConfig = configLib.getSelectedConfig(this.props.config)
+            const selectedConfig = configLib.getSelectedConfig(this.props.config, this.props.zone)
             let newConstraints = queryLib.makeSelectionConstraints(this.props.selections, selectedConfig)
             let newDataset = {
                 ...this.props.dataset,

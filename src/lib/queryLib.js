@@ -245,9 +245,9 @@ const defineGroup = (prop, previousProp, level, options) => {
 }
 
 // to do : take constraints into account
-const makeQuery = (entrypoint, configZone, options) => {
+const makeQuery = (entrypoint, configZone, zone, options) => {
     const { defaultGraph, constraints } = options
-    let selectedConfig = configLib.getSelectedConfig(configZone)
+    let selectedConfig = configLib.getSelectedConfig(configZone, zone)
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     let propList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
     let groupList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
@@ -272,13 +272,13 @@ ${defList}
 } GROUP BY ${groupList}ORDER BY ${orderList}`
 }
 
-const makeTransitionQuery = (newConfig, newOptions, config, options) => {
+const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
     let newConstraints = newOptions.constraints
     newConstraints = newConstraints.replace('?', '?new')
     const { defaultGraph, constraints } = options
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     //
-    let selectedConfig = configLib.getSelectedConfig(config)
+    let selectedConfig = configLib.getSelectedConfig(config, zone)
     let propList = (config.entrypoint === undefined) ? `` : `?entrypoint `
     let groupList = (config.entrypoint === undefined) ? `` : `?entrypoint `
     let defList = ``
@@ -297,7 +297,7 @@ const makeTransitionQuery = (newConfig, newOptions, config, options) => {
     })
     //
     let newdefList = ``
-    let newSelectedConfig = configLib.getSelectedConfig(newConfig)
+    let newSelectedConfig = configLib.getSelectedConfig(newConfig, zone)
     propList.concat((newConfig.entrypoint === undefined) ? `` : `?entrypoint `)
     groupList.concat((newConfig.entrypoint === undefined) ? `` : `?entrypoint `)
     newSelectedConfig.properties.forEach((prop, index) => {
