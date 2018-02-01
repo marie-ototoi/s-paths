@@ -211,8 +211,9 @@ const activateDefaultConfigs = (configs) => {
         }
     })
 }
-const selectProperty = (config, propIndex, path) => {
-    let selectedMatch = config.matches.filter(match => match.selected === true)[0]
+const selectProperty = (config, zone, propIndex, path) => {
+    let selectedMatch = getSelectedConfig(config, zone)
+    console.log(config, zone, selectedMatch)
     let possibleConfigs = config.matches.map((match, index) => {
         let score
         if (match.properties[propIndex].path !== path) {
@@ -242,7 +243,7 @@ const selectProperty = (config, propIndex, path) => {
         matches: config.matches.map((match, index) => {
             return {
                 ...match,
-                selected: (index === bestConfigIndex)
+                [zone + 'Selected']: (index === bestConfigIndex)
             }
         })
     }

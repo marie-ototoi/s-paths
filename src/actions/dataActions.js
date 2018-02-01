@@ -33,7 +33,7 @@ const endTransition = (dispatch) => () => {
 const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) => {
     // console.log('select property')
     const { endpoint, entrypoint, prefixes } = dataset
-    const updatedConfig = configLib.selectProperty(config, propIndex, path)
+    const updatedConfig = configLib.selectProperty(config, zone, propIndex, path)
     dispatch({
         type: types.SET_CONFIG,
         config: updatedConfig,
