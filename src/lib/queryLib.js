@@ -29,7 +29,7 @@ const makeQueryFromConstraint = (constraint) => {
             return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${startValue}-12-31")) . `
         }
     } else if (category === 'text') {
-        return `FILTER regex(?${propName}, "${value}") . `
+        return `FILTER regex(?${propName}, "^${value}$") . `
     } else if (category === 'aggregate') {
         return `FILTER (?${propName} >= ${value[0]} && ?${propName} < ${value[1]}) . `
     }
@@ -52,12 +52,12 @@ const makeSelectionConstraints = (selections, selectedConfig) => {
                 }).join(' && ')
                 return `(${conditions})`
             } else if (constraint.category === 'text') {
-                return ` regex(?${propName}, '${constraint.value}', 'i')`
+                return ` regex(?${propName}, '^${constraint.value}$', 'i')`
             }
         }).join(' && ') + ')'
     }).join(' || ')
     let totalQuery = ''
-    if (uriRegex !== '') totalQuery += `FILTER regex(?entrypoint, '${uriRegex}', 'i') .`
+    if (uriRegex !== '') totalQuery += `FILTER regex(?entrypoint, '^${uriRegex}$', 'i') .`
     if (setConstraints !== '') totalQuery += `${paths} FILTER (${setConstraints}) . `
     return totalQuery
 }
