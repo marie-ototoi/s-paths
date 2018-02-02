@@ -25,9 +25,13 @@ const datazone = (state, action) => {
 const datastatus = (state, action) => {
     switch (action.type) {
     case types.END_TRANSITION:
-        return {
-            ...state,
-            status: 'active'
+        if (action.zone === state.zone) {
+            return {
+                ...state,
+                status: 'active'
+            }
+        } else {
+            return state
         }
     default:
         return state

@@ -38,7 +38,7 @@ class App extends React.Component {
         this.props.loadData(dataset, views, [], {})
     }
     handleTransition (view, state, elements) {
-        // if (state === 'target') console.log('transition target laid out', view, state, elements)
+        if (state === 'target') console.log('transition target laid out', view, state, elements)
         this.customState[`${view}_${state}`] = elements
         // when both main and aside target are displayed
         if (this.customState.main_target.length > 0 || this.customState.aside_target.length > 0) { // 
@@ -49,14 +49,10 @@ class App extends React.Component {
         }
     }
     handleEndTransition (view) {
-        // console.log('transition ended', view)
+        console.log('transition ended', view)
         this.customState[`${view}_target`] = []
-        // when both main and aside transitions are done (could actually react to the first call since they are in the same timing)
-        if (this.customState.main_target.length === 0 || this.customState.aside_target.length === 0) { // && 
-            // stop transitions
-            this.customState[`${view}_step`] = 'done'
-            this.props.endTransition()
-        }
+        this.customState[`${view}_step`] = 'done'
+        this.props.endTransition(view)
     }
     render () {
         const { configs, data, dataset, display, env, selections } = this.props
@@ -81,9 +77,15 @@ class App extends React.Component {
         // console.log(data)
         const statusMain = dataLib.getCurrentState(data, 'main')
         const statusAside = dataLib.getCurrentState(data, 'aside')
-        const showMainTransition = (main && (statusMain === 'transition') && (this.customState.main_step === 'launch'))
-        const showAsideTransition = (main && (statusAside === 'transition') && (this.customState.aside_step === 'launch'))
-        // console.log('status', showTransition, status, dataLib.areLoaded(data, 'main', 'transition'), this.customState.step, main)
+        const showMainTransition = (main &&
+            statusMain === 'transition' &&
+            this.customState.main_step === 'launch' &&
+            this.customState.main_target.length > 0)
+        const showAsideTransition = (main &&
+            statusAside === 'transition' &&
+            this.customState.aside_step === 'launch' &&
+            this.customState.aside_target.length > 0)
+        // console.log('status', dataLib.getResults(data, 'main', 'active'), statusMain, showMainTransition, this.customState.main_step, statusAside, showAsideTransition, this.customState.aside_step)
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}

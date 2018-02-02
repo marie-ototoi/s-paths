@@ -24,8 +24,9 @@ const receiveStats = (dispatch) => (stats) => {
     })
 }
 
-const endTransition = (dispatch) => () => {
+const endTransition = (dispatch) => (zone) => {
     return dispatch({
+        zone,
         type: types.END_TRANSITION
     })
 }
@@ -116,7 +117,7 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                 deltaAside
             ])
                 .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside]) => {
-                    // console.log(dataMain, dataAside)
+                     console.log(dataMain, dataAside)
                     // console.log('dataTransitionMain', dataTransitionMain)
                     // console.log('dataTransitionAside', dataTransitionAside)
                     dispatch({

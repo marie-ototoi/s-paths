@@ -14,7 +14,7 @@ const draw = (el, props) => {
     // console.log('draw A', originRectangles)
     drawRectangles(el, props, targetRectangles)
     // console.log('draw B', targetRectangles)
-    //console.log('meoui', originRectangles)
+    // console.log('meoui', originRectangles)
 }
 
 const drawRectangles = (el, props, rectangles) => {
