@@ -193,6 +193,7 @@ const defineConfigs = (views, stats) => {
         })
 }
 const activateDefaultConfigs = (configs) => {
+    // console.log('activateDefaultConfigs', configs)
     return configs.map((vc, cIndex) => {
         return {
             ...vc,

@@ -92,7 +92,7 @@ class HeatMap extends React.Component {
     }
     render () {
         const { axisBottom, axisLeft, legend, listProp1, listProp2 } = this.customState
-        const { data, config, display, step, role, selections, zone } = this.props
+        const { data, config, display, role, selections, step, zone } = this.props
         const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
 
         return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` } >

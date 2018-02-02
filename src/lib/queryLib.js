@@ -47,8 +47,8 @@ const makeSelectionConstraints = (selections, selectedConfig) => {
             if (iS === 0) paths += FSL2SPARQL(selectedConfig.properties[iC].path, propName)
             if (constraint.category === 'datetime') {
                 const conditions = constraint.value.map((r, iR) => {
-                    const cast = (selectedConfig.properties[iC].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? `xsd:dateTime("${r}")` : `xsd:integer("${r}")`
-                    return `?${propName} ${(iR === 0) ? '>=' : '<'} ${cast}`
+                    const cast = (selectedConfig.properties[iC].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? `xsd:date("${r}-${(iR === 0) ? '01-01' : '12-31'}")` : `xsd:integer("${r}")`
+                    return `?${propName} ${(iR === 0) ? '>=' : '<='} ${cast}`
                 }).join(' && ')
                 return `(${conditions})`
             } else if (constraint.category === 'text') {

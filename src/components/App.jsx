@@ -38,10 +38,10 @@ class App extends React.Component {
         this.props.loadData(dataset, views, [], {})
     }
     handleTransition (view, state, elements) {
-        if (state === 'target') console.log('transition target laid out', view, state, elements)
+        // if (state === 'target') console.log('transition target laid out', view, state, elements)
         this.customState[`${view}_${state}`] = elements
         // when both main and aside target are displayed
-        if (this.customState.main_target.length > 0 || this.customState.aside_target.length > 0) { // 
+        if (this.customState[`${view}_target`].length > 0) { // 
             // launch transitions
             // console.log('launch')
             this.customState[`${view}_step`] = 'launch'
@@ -49,7 +49,7 @@ class App extends React.Component {
         }
     }
     handleEndTransition (view) {
-        console.log('transition ended', view)
+        // console.log('transition ended', view)
         this.customState[`${view}_target`] = []
         this.customState[`${view}_step`] = 'done'
         this.props.endTransition(view)
@@ -101,7 +101,7 @@ class App extends React.Component {
                     <Debug />
                 }
 
-                { main && (statusMain === 'transition') && dataLib.areLoaded(data, 'main', 'transition') &&
+                { main && (statusMain === 'transition') && this.customState.main_step !== 'launch' &&
                     <MainComponent
                         role = "target"
                         zone = "main"
@@ -120,11 +120,11 @@ class App extends React.Component {
                 />)
                 }
 
-                { main && dataLib.areLoaded(data, 'main', 'active') && !showMainTransition &&
+                { main && dataLib.areLoaded(data, 'main', 'active') &&
                     <MainComponent
                         role = "origin"
                         zone = "main"
-                        step = { this.customState.step }
+                        step = { this.customState.main_step }
                         data = { dataLib.getResults(data, 'main', 'active') }
                         config = { configLib.getConfigs(configs, 'main', 'active') }
                         selections = { selectionLib.getSelections(selections, 'main', 'active') }
@@ -133,7 +133,7 @@ class App extends React.Component {
                     />
                 }
 
-                { aside && (statusAside === 'transition') && dataLib.areLoaded(data, 'aside', 'transition') &&
+                { aside && (statusAside === 'transition') && this.customState.aside_step !== 'launch' &&
                     <SideComponent
                         role = "target"
                         zone = "aside"
@@ -151,11 +151,12 @@ class App extends React.Component {
                     endTransition = { this.handleEndTransition }
                 />)
                 }
-                { aside && dataLib.areLoaded(data, 'aside', 'active') && !showAsideTransition &&
+                { aside && dataLib.areLoaded(data, 'aside', 'active') &&
                     <SideComponent
                         zone = "aside"
                         role = "origin"
-                        step = { this.customState.step }
+                        step = { this.customState.aside_step }
+                        transition = { showAsideTransition }
                         data = { dataLib.getResults(data, 'aside', 'active') }
                         config = { configLib.getConfigs(configs, 'aside', 'active') }
                         selections = { selectionLib.getSelections(selections, 'aside', 'active') }

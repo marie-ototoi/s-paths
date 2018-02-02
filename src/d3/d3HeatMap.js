@@ -47,7 +47,7 @@ const draw = (el, props) => {
     d3.select(el)
         .selectAll('g.xUnits g.yUnits')
         .each((d, i) => {
-            //console.log(legend, d)
+            // console.log(legend, d)
             d.color = legend.info.filter(p => (p.key[0] <= Number(d.countprop2) && p.key[1] >= Number(d.countprop2)))[0].color
             d.selection = {
                 selector: `heatmap_element_p1_${dataLib.makeId(d.parent.key)}_p2_${dataLib.makeId(d.key)}`,

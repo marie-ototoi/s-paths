@@ -57,7 +57,7 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
 }
 
 const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
-    // console.log('load Data ', dataset, views)
+    // console.log('load Data ', dataset.constraints)
     let { endpoint, entrypoint, prefixes } = dataset
     let newOptions
     getStats(dataset)
@@ -68,8 +68,10 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                 } else {
                     entrypoint = stats.options.entrypoint
                     prefixes = stats.options.prefixes
+                    // console.log(configLib.defineConfigs(views, stats))
                     // for each views, checks which properties ou sets of properties could match and evaluate
                     let configs = configLib.activateDefaultConfigs(configLib.defineConfigs(views, stats))
+                    // console.log(configs)
                     dispatch({
                         type: types.SET_STATS,
                         stats,
@@ -117,7 +119,7 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                 deltaAside
             ])
                 .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside]) => {
-                     console.log(dataMain, dataAside)
+                    // console.log(dataMain, dataAside)
                     // console.log('dataTransitionMain', dataTransitionMain)
                     // console.log('dataTransitionAside', dataTransitionAside)
                     dispatch({

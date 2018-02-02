@@ -54,7 +54,7 @@ const drawRectangles = (el, props, rectangles) => {
             .on('end', (d, i) => {
                 // call only once
                 called++
-                if (called >= changeRectangles.size() - 2) {
+                if (called >= changeRectangles.size()) {
                     props.endTransition(props.zone)
                 }
             })

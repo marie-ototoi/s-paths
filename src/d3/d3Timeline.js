@@ -44,6 +44,7 @@ const draw = (el, props) => {
         .selectAll('g.time g.elements')
         .each((d, i) => {
             d.color = legend.info.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
+            // console.log(zone, d)
             d.selection = {
                 selector: `timeline_element_${dataLib.makeId(d.entrypoint.value)}`,
                 query: {
