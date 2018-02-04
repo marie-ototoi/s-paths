@@ -17,6 +17,10 @@ class Transition extends React.PureComponent {
         const { zone } = this.props
         d3Transition.create(this.refs[`transition_${zone}`], this.props)
     }
+    componentWillUnMount () {
+        const { zone } = this.props
+        d3Transition.destroy(this.refs[`transition_${zone}`], this.props)
+    }
 }
 
 function mapStateToProps (state) {

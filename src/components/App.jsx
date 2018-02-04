@@ -1,5 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
+import shallowEqual from 'shallowequal'
 // components
 import HeatMap from './views/HeatMap'
 import Timeline from './views/Timeline'
@@ -24,7 +25,13 @@ class App extends React.Component {
         // transition state is handled locally in the component, to avoid re-rendering
         this.handleTransition = this.handleTransition.bind(this)
         this.handleEndTransition = this.handleEndTransition.bind(this)
-        this.customState = {
+        /* this.customState = {
+            main_target: [], // these info might change often and are updated after each render
+            main_origin: [] // putting them in the regular state would result in a infinite loop
+        } */
+        this.state = {
+            main_step: 'active',
+            aside_step: 'active',
             main_target: [],
             main_origin: [],
             aside_target: [],
@@ -37,22 +44,39 @@ class App extends React.Component {
         // this is where it all starts
         this.props.loadData(dataset, views, [], {})
     }
-    handleTransition (view, state, elements) {
-        // if (state === 'target') console.log('transition target laid out', view, state, elements)
-        this.customState[`${view}_${state}`] = elements
-        // when both main and aside target are displayed
-        if (this.customState[`${view}_target`].length > 0) { // 
-            // launch transitions
-            // console.log('launch')
-            this.customState[`${view}_step`] = 'launch'
-            this.render()
+    handleTransition (props, elements) {
+        const { role, status, zone } = props
+        // console.log(role, status, zone, elements)
+        if (role === 'origin') {
+            if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_origin`])) {
+                this.setState({ [`${zone}_origin`]: elements })
+            }
+            if (this.state[`${zone}_step`] === 'done' && status === 'active') {
+                // console.log('on peut faire un reset ?', zone, this.state)
+                this.setState({ [`${zone}_step`]: 'active' })
+            }
+        } else if (role === 'target' && elements.length > 0) {
+            // console.log('transition target laid out', zone, role, elements)
+            if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_target`])) {
+                // console.log('2 - ON CHANGE ', zone)
+                this.setState({ [`${zone}_target`]: elements, [`${zone}_step`]: 'changing' })
+            }
         }
     }
-    handleEndTransition (view) {
-        // console.log('transition ended', view)
-        this.customState[`${view}_target`] = []
-        this.customState[`${view}_step`] = 'done'
-        this.props.endTransition(view)
+    handleEndTransition (zone) {
+        // console.log('transition ended', zone)
+        this.setState({ [`${zone}_step`]: 'done', [`${zone}_target`]: [] })
+        this.props.endTransition(zone)
+    }
+    componentWillUpdate (nextProps, nextState) {
+        if (dataLib.getCurrentState(this.props.data, 'main') === 'active' && dataLib.getCurrentState(nextProps.data, 'main') === 'transition') {
+            // console.log('1 - ON LANCE main')
+            this.setState({ [`main_step`]: 'launch' })
+        }
+        if (dataLib.getCurrentState(this.props.data, 'aside') === 'active' && dataLib.getCurrentState(nextProps.data, 'aside') === 'transition') {
+            // console.log('1 - ON LANCE aside')
+            this.setState({ [`aside_step`]: 'launch' })
+        }
     }
     render () {
         const { configs, data, dataset, display, env, selections } = this.props
@@ -75,17 +99,10 @@ class App extends React.Component {
         const SideComponent = aside ? componentIds[aside.id] : ''
         // relies data in the reducer to know if the current state is transition or active
         // console.log(data)
-        const statusMain = dataLib.getCurrentState(data, 'main')
-        const statusAside = dataLib.getCurrentState(data, 'aside')
-        const showMainTransition = (main &&
-            statusMain === 'transition' &&
-            this.customState.main_step === 'launch' &&
-            this.customState.main_target.length > 0)
-        const showAsideTransition = (main &&
-            statusAside === 'transition' &&
-            this.customState.aside_step === 'launch' &&
-            this.customState.aside_target.length > 0)
-        // console.log('status', dataLib.getResults(data, 'main', 'active'), statusMain, showMainTransition, this.customState.main_step, statusAside, showAsideTransition, this.customState.aside_step)
+        // console.log('?????', this.state.main_step, this.state.main_origin, this.state.main_target, dataLib.getTransitionElements(this.state.main_origin, this.state.main_target))
+        const statusMain = dataLib.getCurrentState(this.props.data, 'main')
+        const statusAside = dataLib.getCurrentState(this.props.data, 'aside')
+        // console.log('status', this.state.main_step, this.state.aside_step)
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
@@ -101,10 +118,11 @@ class App extends React.Component {
                     <Debug />
                 }
 
-                { main && (statusMain === 'transition') && this.customState.main_step !== 'launch' &&
+                { main && this.state.main_step === 'launch' &&
                     <MainComponent
                         role = "target"
                         zone = "main"
+                        status = { statusMain }
                         data = { dataLib.getResults(data, 'main', 'transition') }
                         config = { configLib.getConfigs(configs, 'main', 'transition') }
                         selections = { selectionLib.getSelections(selections, 'main', 'transition') }
@@ -113,18 +131,20 @@ class App extends React.Component {
                     />
                 }
 
-                { (showMainTransition) && (<Transition
-                    zone = "main"
-                    elements = { dataLib.getTransitionElements(this.customState.main_origin, this.customState.main_target) }
-                    endTransition = { this.handleEndTransition }
-                />)
+                { main && this.state.main_step === 'changing' &&
+                    <Transition
+                        zone = "main"
+                        elements = { dataLib.getTransitionElements(this.state.main_origin, this.state.main_target) }
+                        endTransition = { this.handleEndTransition }
+                    />
                 }
 
                 { main && dataLib.areLoaded(data, 'main', 'active') &&
                     <MainComponent
                         role = "origin"
                         zone = "main"
-                        step = { this.customState.main_step }
+                        step = { this.state.main_step }
+                        status = { statusMain }
                         data = { dataLib.getResults(data, 'main', 'active') }
                         config = { configLib.getConfigs(configs, 'main', 'active') }
                         selections = { selectionLib.getSelections(selections, 'main', 'active') }
@@ -133,10 +153,11 @@ class App extends React.Component {
                     />
                 }
 
-                { aside && (statusAside === 'transition') && this.customState.aside_step !== 'launch' &&
+                { aside && this.state.aside_step === 'launch' &&
                     <SideComponent
                         role = "target"
                         zone = "aside"
+                        status = { statusAside }
                         data = { dataLib.getResults(data, 'aside', 'transition') }
                         config = { configLib.getConfigs(configs, 'aside', 'transition') }
                         selections = { selectionLib.getSelections(selections, 'aside', 'transition') }
@@ -145,18 +166,19 @@ class App extends React.Component {
                     />
                 }
 
-                { (showAsideTransition) && (<Transition
-                    zone = "aside"
-                    elements = { dataLib.getTransitionElements(this.customState.aside_origin, this.customState.aside_target) }
-                    endTransition = { this.handleEndTransition }
-                />)
+                { aside && this.state.aside_step === 'changing' &&
+                    <Transition
+                        zone = "aside"
+                        elements = { dataLib.getTransitionElements(this.state.aside_origin, this.state.aside_target) }
+                        endTransition = { this.handleEndTransition }
+                    />
                 }
                 { aside && dataLib.areLoaded(data, 'aside', 'active') &&
                     <SideComponent
                         zone = "aside"
                         role = "origin"
-                        step = { this.customState.aside_step }
-                        transition = { showAsideTransition }
+                        step = { this.state.aside_step }
+                        status = { statusAside }
                         data = { dataLib.getResults(data, 'aside', 'active') }
                         config = { configLib.getConfigs(configs, 'aside', 'active') }
                         selections = { selectionLib.getSelections(selections, 'aside', 'active') }

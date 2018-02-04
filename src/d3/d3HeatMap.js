@@ -11,7 +11,7 @@ const create = (el, props) => {
     if (el && props.data) {
         draw(el, props)
         resize(el, props)
-        props.handleTransition(props.zone, props.role, getElementsForTransition(el, props))
+        // props.handleTransition(props, getElementsForTransition(el, props))
     }
 }
 
@@ -160,7 +160,7 @@ const getElementsInZone = (el, props) => {
 
 const resize = (el, props) => {
     const { nestedProp1, nestedProp2, display } = props
-    let mapY = {} 
+    let mapY = {}
     nestedProp2.forEach((p, i) => {
         mapY[p.key] = nestedProp2.length - 2 - i
     })
@@ -178,11 +178,6 @@ const resize = (el, props) => {
     const unitHeight = Math.floor(display.viz.useful_height / (props.nestedProp2.length - 1))
     d3.select(el).selectAll('g.xUnits').selectAll('.yUnits')
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (mapY[d.key] * unitHeight)})`)
-    d3.select(el).selectAll('g.xUnits').selectAll('.yUnit')
-        .attr('x', d => 1)
-        .attr('width', d => unitWidth - 1)
-        .attr('y', -unitHeight)
-        .attr('height', d => unitHeight - 1)
         .each((d, i) => {
             const x1 = xScale(Number(d.parent.key)) + 1
             const y1 = display.viz.useful_height - (mapY[d.key] * unitHeight)
@@ -195,6 +190,12 @@ const resize = (el, props) => {
                 height: unitHeight - 1
             }
         })
+    d3.select(el).selectAll('g.xUnits').selectAll('.yUnit')
+        .attr('x', d => 1)
+        .attr('width', d => unitWidth - 1)
+        .attr('y', -unitHeight)
+        .attr('height', d => unitHeight - 1)
+    props.handleTransition(props, getElementsForTransition(el, props))
 }
 
 const update = (el, props) => {
@@ -206,7 +207,6 @@ const update = (el, props) => {
         } else {
             d3.select(el).selectAll('rect.selection').remove()
         }
-        props.handleTransition(props.zone, 'origin', getElementsForTransition(el, props))
     }
 }
 

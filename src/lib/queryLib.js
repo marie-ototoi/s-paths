@@ -35,11 +35,11 @@ const makeQueryFromConstraint = (constraint) => {
     }
 }
 
-const makeSelectionConstraints = (selections, selectedConfig) => {
-    const uriSelections = selections.filter(sel => sel.query.type === 'uri')
+const makeSelectionConstraints = (selections, selectedConfig, zone) => {
+    const uriSelections = selections.filter(sel => sel.query.type === 'uri' && sel.zone === zone)
     const uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
     // add constraints for constrained groups of entities (heatmap)
-    const setSelection = selections.filter(sel => sel.query.type === 'set')
+    const setSelection = selections.filter(sel => sel.query.type === 'set' && sel.zone === zone)
     let paths = ''
     const setConstraints = setSelection.map((sel, iS) => {
         return '(' + sel.query.value.map((constraint, iC) => {

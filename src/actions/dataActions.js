@@ -57,7 +57,7 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
 }
 
 const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
-    // console.log('load Data ', dataset.constraints)
+     console.log('load Data ', dataset.constraints)
     let { endpoint, entrypoint, prefixes } = dataset
     let newOptions
     getStats(dataset)

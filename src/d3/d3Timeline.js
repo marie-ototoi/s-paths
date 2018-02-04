@@ -5,14 +5,17 @@ import selectionLib from '../lib/selectionLib'
 const create = (el, props) => {
     // console.log('create')
     if (el && props.data) {
+        // console.log('||||||||||||||||||||||||', props.role, props.nestedProp1)
         draw(el, props)
         resize(el, props)
-        props.handleTransition(props.zone, props.role, getElementsForTransition(el, props))
     }
 }
 
 const destroy = (el) => {
     //
+    d3.select(el)
+        .selectAll('g.time')
+        .remove()
 }
 
 const draw = (el, props) => {
@@ -41,7 +44,7 @@ const draw = (el, props) => {
         .remove()
 
     d3.select(el)
-        .selectAll('g.time g.elements')
+        .selectAll('g.time .elements')
         .each((d, i) => {
             d.color = legend.info.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
             // console.log(zone, d)
@@ -162,12 +165,9 @@ const resize = (el, props) => {
     const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
     d3.select(el).selectAll('g.time').selectAll('.elements')
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
-    d3.select(el).selectAll('g.time').selectAll('.element')
-        .attr('x', d => 1)
-        .attr('width', d => unitWidth - 1)
-        .attr('y', -unitHeight)
-        .attr('height', d => unitHeight)
+    d3.select(el).selectAll('g.time').selectAll('.elements')
         .each((d, i) => {
+            // console.log(d.group, d[d.group])
             const x1 = xScale(Number(d[d.group])) + 1
             const y1 = display.viz.useful_height - (i * unitHeight)
             d.zone = {
@@ -179,10 +179,13 @@ const resize = (el, props) => {
                 height: unitHeight
             }
         })
-
-    //.attr('stroke-width', 1 )
-    //.attr('stroke', d => (d.selected === true) ? '#000' : d.color)
-    // .attr('stroke-width', )
+    d3.select(el).selectAll('g.time').selectAll('.element')
+        .attr('x', d => 1)
+        .attr('width', d => unitWidth - 1)
+        .attr('y', -unitHeight)
+        .attr('height', d => unitHeight)
+    // console.log('||||', props.role, props.zone, getElementsForTransition(el, props))
+    props.handleTransition(props, getElementsForTransition(el, props))
 }
 
 const update = (el, props) => {
@@ -196,7 +199,6 @@ const update = (el, props) => {
         } else {
             d3.select(el).selectAll('rect.selection').remove()
         }
-        props.handleTransition(props.zone, 'origin', getElementsForTransition(el, props))
     }
 }
 

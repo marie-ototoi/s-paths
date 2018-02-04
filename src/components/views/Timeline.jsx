@@ -87,7 +87,7 @@ class Timeline extends React.PureComponent {
                 handleMouseMove = { this.handleMouseMove }
                 handleMouseUp = { this.handleMouseUp }
             />
-            { step !== 'launch' &&
+            { step !== 'changing' &&
             <g
                 transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
                 ref = "Timeline"

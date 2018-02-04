@@ -103,7 +103,6 @@ class HeatMap extends React.Component {
                 handleMouseMove = { this.handleMouseMove }
                 handleMouseUp = { this.handleMouseUp }
             />
-            { step !== 'launch' &&
             <g
                 transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
                 ref = "HeatMap"
@@ -111,7 +110,6 @@ class HeatMap extends React.Component {
                 onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.props.handleMouseDown }
             ></g>
-            }
             { role !== 'target' &&
             <g>
                 <Header
