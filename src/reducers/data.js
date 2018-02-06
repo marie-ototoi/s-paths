@@ -1,9 +1,9 @@
 import * as types from '../constants/ActionTypes'
 
 const initialState = [
-    { zone: 'main', statements: [] },
-    { zone: 'aside', statements: [] },
-    { zone: 'main-aside', statements: [] }
+    { zone: 'main', statements: {}, deltaStatements: {} },
+    { zone: 'aside', statements: {}, deltaStatements: {} },
+    { zone: 'main-aside', statements: {} }
 ]
 
 const datazone = (state, action) => {
@@ -13,7 +13,8 @@ const datazone = (state, action) => {
             return {
                 ...state,
                 statements: action[state.zone],
-                status: action.status
+                status: action.status,
+                deltaStatements: action[state.zone + 'Delta']
             }
         } else {
             return state

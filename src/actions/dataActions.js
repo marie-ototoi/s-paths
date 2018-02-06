@@ -126,8 +126,8 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                         type: types.SET_DATA,
                         main: { ...dataMain },
                         aside: { ...dataAside },
-                        deltaMain: dataDeltaMain,
-                        deltaAside: dataDeltaAside
+                        mainDelta: dataDeltaMain,
+                        asideDelta: dataDeltaAside
                     })
                 })
                 .catch(error => {
