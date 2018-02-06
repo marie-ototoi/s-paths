@@ -106,7 +106,7 @@ const resize = (el, props) => {
     // console.log(axis.info)
     d3.select(el).selectAll('.tick')
         .on('click', (d, indexD) => {
-            let data = axis.info.filter((i, indexI) => indexD === indexI)
+            let data = axis.info.filter(i => i.key === String(d))
             if (data.length > 0) {
                 // console.log(data[0].range)
                 selectElements(data[0].propName, data[0].range, data[0].category)
