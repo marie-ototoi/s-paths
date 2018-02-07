@@ -134,7 +134,7 @@ class App extends React.Component {
                 { main && this.state.main_step === 'changing' &&
                     <Transition
                         zone = "main"
-                        elements = { dataLib.getTransitionElements(this.state.main_origin, this.state.main_target) }
+                        elements = { dataLib.getTransitionElements(this.state.main_origin, this.state.main_target, configLib.getConfigs(configs, 'main', 'active'), configLib.getConfigs(configs, 'main', 'transition'), dataLib.getResults(data, 'main', 'delta')) }
                         endTransition = { this.handleEndTransition }
                     />
                 }
@@ -169,7 +169,7 @@ class App extends React.Component {
                 { aside && this.state.aside_step === 'changing' &&
                     <Transition
                         zone = "aside"
-                        elements = { dataLib.getTransitionElements(this.state.aside_origin, this.state.aside_target) }
+                        elements = { dataLib.getTransitionElements(this.state.aside_origin, this.state.aside_target, configLib.getConfigs(configs, 'aside', 'active'), configLib.getConfigs(configs, 'aside', 'transition'), dataLib.getResults(data, 'aside', 'delta')) }
                         endTransition = { this.handleEndTransition }
                     />
                 }

@@ -284,16 +284,18 @@ const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
     let defList = ``
     let orderList = ``
     selectedConfig.properties.forEach((prop, index) => {
-        index += 1
-        propList = propList.concat(`?prop${index} `)
-        orderList = orderList.concat(`?prop${index} `)
-        if (config.entrypoint === undefined) {
-            propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
-            orderList = orderList.concat(`?countprop${index} `)
+        if (prop.path !== '') {
+            index += 1
+            propList = propList.concat(`?prop${index} `)
+            orderList = orderList.concat(`?prop${index} `)
+            if (config.entrypoint === undefined) {
+                propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
+                orderList = orderList.concat(`?countprop${index} `)
+            }
+            groupList = groupList.concat(`?prop${index} `)
+            const optional = config.constraints[index - 1] && config.constraints[index - 1][0].optional
+            defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`, 'entrypoint', (index === 1), optional))
         }
-        groupList = groupList.concat(`?prop${index} `)
-        const optional = config.constraints[index - 1] && config.constraints[index - 1][0].optional
-        defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`, 'entrypoint', (index === 1), optional))
     })
     //
     let newdefList = ``
@@ -301,15 +303,17 @@ const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
     propList.concat((newConfig.entrypoint === undefined) ? `` : `?entrypoint `)
     groupList.concat((newConfig.entrypoint === undefined) ? `` : `?entrypoint `)
     newSelectedConfig.properties.forEach((prop, index) => {
-        index += 1
-        propList = propList.concat(`?newprop${index} `)
-        orderList = orderList.concat(`?newprop${index} `)
-        if (config.entrypoint === undefined) {
-            propList = propList.concat(`(COUNT(?newprop${index}) as ?newcountprop${index}) `)
-            orderList = orderList.concat(`?newcountprop${index} `)
+        if (prop.path !== '') {
+            index += 1
+            propList = propList.concat(`?newprop${index} `)
+            orderList = orderList.concat(`?newprop${index} `)
+            if (config.entrypoint === undefined) {
+                propList = propList.concat(`(COUNT(?newprop${index}) as ?newcountprop${index}) `)
+                orderList = orderList.concat(`?newcountprop${index} `)
+            }
+            groupList = groupList.concat(`?newprop${index} `)
+            newdefList = newdefList.concat(FSL2SPARQL(prop.path, `newprop${index}`, 'entrypoint', (index === 1), false))
         }
-        groupList = groupList.concat(`?newprop${index} `)
-        newdefList = newdefList.concat(FSL2SPARQL(prop.path, `newprop${index}`, 'entrypoint', (index === 1), false))
     })
     return `SELECT DISTINCT ${propList}${graph}
     WHERE {

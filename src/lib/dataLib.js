@@ -107,8 +107,15 @@ const getCurrentData = (data, status) => {
 
 const getResults = (data, zone, status) => {
     data = getCurrentData(data, status)
+    let statementsType
+    if (status === 'delta') {
+        status = 'transition'
+        statementsType = 'deltaStatements'
+    } else {
+        statementsType = 'statements'
+    }
     const filtered = data.filter(d => (d.zone === zone && d.status === status))
-    return (filtered.length > 0 && filtered[0].statements.results) ? filtered[0].statements.results.bindings : []
+    return (filtered.length > 0 && filtered[0][statementsType].results) ? filtered[0][statementsType].results.bindings : []
 }
 
 const getHeadings = (data, zone, status) => {
@@ -182,8 +189,8 @@ const getReadablePathsParts = (path, labels) => {
         })
 }
 
-const getTransitionElements = (originElements, targetElements) => {
-    // 
+const getTransitionElements = (originElements, targetElements, originConfig, targetConfig, deltaData) => {
+    console.log(originConfig, targetConfig, deltaData)
     return { origin: originElements, target: targetElements }
 }
 

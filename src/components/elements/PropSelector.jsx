@@ -23,7 +23,7 @@ class PropSelector extends React.PureComponent {
             selectedPath: e.target.value,
             selectedLabel: propList[e.target.options.selectedIndex].readablePath
         })
-        this.props.selectProperty(config, zone, propIndex, e.target.value, dataset)
+        this.props.selectProperty(propIndex, e.target.value, config, dataset, zone)
     }
     render () {
         const { align, display, offset, propList, type, zone } = this.props

@@ -31,7 +31,7 @@ const endTransition = (dispatch) => (zone) => {
     })
 }
 
-const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) => {
+const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) => {
     // console.log('select property')
     const { endpoint, entrypoint, prefixes } = dataset
     const updatedConfig = configLib.selectProperty(config, zone, propIndex, path)
@@ -42,13 +42,20 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
     })
 
     const newQuery = queryLib.makeQuery(entrypoint, updatedConfig, zone, dataset)
-    // console.log('new data', newQuery)
-    queryLib.getData(endpoint, newQuery, prefixes)
-        .then((newData) => {
+    const queryTransition = queryLib.makeTransitionQuery(updatedConfig, dataset, config, dataset, zone)
+
+    console.log('test', queryTransition)
+    Promise.all([
+        queryLib.getData(endpoint, newQuery, prefixes),
+        queryLib.getData(endpoint, queryTransition, prefixes)
+    ])
+        .then(([newData, newDelta]) => {
+            console.log(newData, newDelta)
             const action = {
                 type: types.SET_DATA
             }
             action[zone] = newData
+            action[zone + 'Delta'] = newDelta
             dispatch(action)
         })
         .catch(error => {
@@ -57,7 +64,7 @@ const selectProperty = (dispatch) => (config, zone, propIndex, path, dataset) =>
 }
 
 const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
-     console.log('load Data ', dataset.constraints)
+    console.log('load Data ', dataset.constraints)
     let { endpoint, entrypoint, prefixes } = dataset
     let newOptions
     getStats(dataset)
@@ -107,8 +114,8 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                 let queryTransitionAside = queryLib.makeTransitionQuery(configAside, newOptions, previousConfigAside, previousOptions, 'aside')
                 deltaAside = queryLib.getData(endpoint, queryTransitionAside, prefixes)
             } else {
-                deltaMain = []
-                deltaAside = []
+                deltaMain = {}
+                deltaAside = {}
             }
             // console.log('queryMain', queryMain)
             // console.log('queryaside', queryAside)
