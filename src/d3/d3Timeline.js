@@ -140,7 +140,7 @@ const getElementsInZone = (el, props) => {
         y2: zoneDimensions.y2 - props.display.viz.vertical_margin
     }
     let selectedElements = []
-    d3.select(el).selectAll('.element')
+    d3.select(el).selectAll('.elements')
         .each(function (d, i) {
             // console.log(selectionLib.detectRectCollision(selectedZone, elementZone), d3.select(this).node().parentNode.getAttribute('id'), d.selection)
             if (selectionLib.detectRectCollision(selectedZone, d.zone)) selectedElements.push(d.selection)

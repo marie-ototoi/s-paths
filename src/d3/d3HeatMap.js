@@ -148,7 +148,7 @@ const getElementsInZone = (el, props) => {
         y2: zoneDimensions.y2 - props.display.viz.vertical_margin
     }
     let selectedElements = []
-    d3.select(el).selectAll('.yUnit')
+    d3.select(el).selectAll('.yUnits')
         .each(function (d, i) {
             // console.log(d.zone)
             // console.log(selectionLib.detectRectCollision(selectedZone, elementZone), d3.select(this).node().parentNode.getAttribute('id'), d.selection)
