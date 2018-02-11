@@ -1,6 +1,7 @@
 import * as d3 from 'd3'
 import { nest } from 'd3'
 import moment from 'moment'
+import shallowEqual from 'shallowequal'
 
 const areLoaded = (data, zone, status) => {
     data = getCurrentData(data, status)
@@ -138,19 +139,21 @@ const makeId = (textstr) => {
 }
 
 const getPropList = (configs, zone, propIndex, labels) => {
-    return configs.matches.map(config => {
-        return {
-            path: config.properties[propIndex].path,
-            readablePath: getReadablePathsParts(config.properties[propIndex].path, labels),
-            selected: config[zone + 'Selected']
-        }
-    }).reduce((configAcc, config) => {
-        const exists = configAcc.filter(c => c.path === config.path).length > 0
-        if (!exists) {
-            configAcc.push(config)
-        }
-        return configAcc
-    }, [])
+    return configs.matches
+        .filter(config => config.properties[propIndex].path !== '')
+        .map(config => {
+            return {
+                path: config.properties[propIndex].path,
+                readablePath: getReadablePathsParts(config.properties[propIndex].path, labels),
+                selected: config[zone + 'Selected']
+            }
+        }).reduce((configAcc, config) => {
+            const exists = configAcc.filter(c => c.path === config.path).length > 0
+            if (!exists) {
+                configAcc.push(config)
+            }
+            return configAcc
+        }, [])
 }
 
 const getLegend = (nestedProps, propName, colors, category) => {
@@ -183,14 +186,135 @@ const getReadablePathsParts = (path, labels) => {
         .map(part => {
             let prop = labels.filter(l => l.prefUri === part)
             return {
-                label: prop[0].label || part,
-                comment: prop[0].comment || undefined
+                label: (prop[0] && prop[0].label) ? prop[0].label : part,
+                comment: (prop[0] && prop[0].comment) ? prop[0].comment : undefined
             }
         })
 }
 
-const getTransitionElements = (originElements, targetElements, originConfig, targetConfig, deltaData) => {
-    console.log(originConfig, targetConfig, deltaData)
+const splitRectangle = (zone, parts) => {
+    parts = {
+        name: 'main',
+        children: parts
+    }
+    //if (!zone.x0 && zone.x1) zone.x0 = zone.x1
+    //if (!zone.y0 && zone.y1) zone.y0 = zone.y1
+    let hierarchy = d3.hierarchy(parts)
+    let treemap = d3.treemap()
+        .size([zone.width, zone.height])
+        .round(true)
+        .paddingInner(1)
+    let tree = treemap(hierarchy.sum(d => d.size))
+    return tree.children.map(part => {
+        return {
+            ...part.data,
+            zone: {
+                x1: zone.x1 + part.x0,
+                y1: zone.y1 + part.y0,
+                x2: zone.x1 + part.x1,
+                y2: zone.y1 + part.y1,
+                width: part.x1 - part.x0,
+                height: part.y1 - part.y0
+            }
+        }
+    })
+}
+
+const getDeltaIndex = (dataPiece, elements, options) => {
+    let { entrypoint, isTarget } = options
+    let indexElement
+    elements.forEach((el, indexEl) => {
+        if (entrypoint) {
+            if (el.query.value === dataPiece.entrypoint.value) indexElement = indexEl
+        } else {
+            let conditions = el.query.value.map((condition, index) => {
+                const propIndex = index + 1
+                const propName = `${isTarget ? 'new' : ''}prop${propIndex}`
+                //console.log('||||||||||||', dataPiece[propName], condition.category)
+                if (dataPiece[propName]) {
+                    if (condition.category === 'datetime') {
+                        const cast = (dataPiece[propName].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? Number(dataPiece[propName].value.substr(0,4)) : Number(dataPiece[propName].value)
+                        return cast >= condition.value[0] && cast <= condition.value[1]
+                    } else if (condition.category === 'number') {
+                        if (Array.isArray(condition.value)) {
+                            return Number(dataPiece[propName].value) >= condition.value[0] && Number(dataPiece[propName].value) <= condition.value[1]
+                        } else {
+                            return Number(dataPiece[propName].value) === condition.value
+                        }
+                    } else {
+                        // text or uri
+                        return dataPiece[propName].value === condition.value
+                    }
+                // to add : geographical info
+                } else {
+                    return false
+                }
+            })
+            // if all conditions were true
+            if (conditions.filter(c => c === false).length === 0) indexElement = indexEl
+        }
+    })
+    return indexElement
+}
+
+const splitTransitionElements = (elements, type, zone, deltaData) => {
+    let typeA = (type === 'origin') ? 'Origin' : 'Target'
+    let typeB = (type === 'origin') ? 'Target' : 'Origin'
+    return elements.reduce((accElements, element, indexElement) => {
+        let allDelta = deltaData.filter(dp => dp['index' + typeA] === indexElement)
+        if (allDelta.length >= 1) {
+            allDelta = allDelta.reduce((acc, cur) => {
+                let exists = false
+                acc = acc.map((dp) => {
+                    // if collaboration already registered for this year add an occurence
+                    if (dp['index' + typeB] === cur['index' + typeB]) {
+                        exists = true
+                        dp.size = dp.size + 1
+                    }
+                    return dp
+                })
+                // else creates the entry
+                if (!exists) {
+                    acc.push({
+                        shape: element.shape,
+                        color: element.color,
+                        indexOrigin: cur.indexOrigin,
+                        indexTarget: cur.indexTarget,
+                        signature: `${zone}_origin${cur.indexOrigin}_target${cur.indexTarget}`,
+                        size: (cur.countprop1 || cur.countprop2) ? d3.max([Number(cur.countprop1.value), Number(cur.countprop2.value)]) : 1 
+                    })
+                }
+                return acc
+            }, [])
+            allDelta = splitRectangle(element.zone, allDelta)
+            accElements = accElements.concat(allDelta)
+        }
+        return accElements
+    }, [])
+}
+
+const getTransitionElements = (originElements, targetElements, originConfig, targetConfig, deltaData, zone) => {
+    console.log('before', originElements, targetElements, originConfig, targetConfig, deltaData)
+    deltaData = deltaData.map(data => {
+        let indexOrigin = getDeltaIndex(data, originElements, { entrypoint: originConfig.entrypoint, isTarget: false })
+        let indexTarget = getDeltaIndex(data, targetElements, { entrypoint: targetConfig.entrypoint, isTarget: true })
+        return {
+            indexOrigin,
+            indexTarget,
+            ...data
+        }
+    })
+    // console.log(deltaData)
+    if (!originConfig.entrypoint) {
+        originElements = splitTransitionElements(originElements, 'origin', zone, deltaData)
+    }
+    if (!targetConfig.entrypoint) {
+        targetElements = splitTransitionElements(targetElements, 'target', zone, deltaData)
+    }
+    console.log('after', originElements, targetElements)
+    // pour chaque zone d'arrivée identifier tous les points de départ
+    // diviser la zone d'arrivée et la remplacer par le nombre de zones nécessaires 
+    // en donnant le nom de la zone de départ 
     return { origin: originElements, target: targetElements }
 }
 
@@ -298,6 +422,7 @@ exports.areLoaded = areLoaded
 exports.getAxis = getAxis
 exports.getCurrentState = getCurrentState
 exports.getDateRange = getDateRange
+exports.getDeltaIndex = getDeltaIndex
 exports.getHeadings = getHeadings
 exports.getLegend = getLegend
 exports.getNumberOfTimeUnits = getNumberOfTimeUnits
@@ -309,4 +434,5 @@ exports.getThresholdsForLegend = getThresholdsForLegend
 exports.getResults = getResults
 exports.groupTextData = groupTextData
 exports.groupTimeData = groupTimeData
+exports.splitRectangle = splitRectangle
 exports.guid = guid

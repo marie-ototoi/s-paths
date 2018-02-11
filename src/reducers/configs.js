@@ -1,6 +1,6 @@
 import * as types from '../constants/ActionTypes'
 
-const initialConfig = { properties: [], score: 0, zone: null }
+const initialConfig = { matches: [] }
 
 const config = (state = initialConfig, action) => {
     switch (action.type) {
@@ -21,6 +21,18 @@ const config = (state = initialConfig, action) => {
     }
 }
 
+const configstatus = (state, action) => {
+    switch (action.type) {
+    case types.END_TRANSITION:
+        return {
+            ...state,
+            status: 'active'
+        }
+    default:
+        return state
+    }
+}
+
 const configs = (state = [], action) => {
     switch (action.type) {
     case types.ADD_CONFIG:
@@ -35,6 +47,8 @@ const configs = (state = [], action) => {
         return action.configs.map(c => {
             return {
                 ...c,
+                // except at first load a new config is always a transition
+                status: (state[0] && state[0].matches.length > 0) ? 'transition' : 'active',
                 matches: c.matches.sort((a, b) => {
                     return b.score - a.score
                 })
@@ -53,6 +67,8 @@ const configs = (state = [], action) => {
                 return c
             }
         })
+    case types.END_TRANSITION:
+        return state.map(dz => configstatus(dz, action))
     default:
         return state
     }

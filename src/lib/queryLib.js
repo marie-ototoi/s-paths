@@ -231,6 +231,7 @@ const defineGroup = (prop, previousProp, level, options) => {
     } else {
         returnprops.category = 'ovni'
     }
+    // to add : geographical info
     if (language && language.value) returnprops.language = language.value
     return {
         ...returnprops,

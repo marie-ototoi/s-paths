@@ -4,6 +4,13 @@ const getSelectedConfig = (config, zone) => {
 const getConfigs = (configs, zone) => {
     return configs.filter(c => c.matches.filter(m => m[zone + 'Selected'] === true).length > 0)[0]
 }
+const getCurrentConfigs = (configs, status) => {
+    if (configs.present.length > 0 && configs.present[0].status === 'transition') {
+        return (status === 'active') ? configs.past[configs.past.length - 1] : configs.present
+    } else {
+        return (status === 'active') ? configs.present : configs.past[configs.past.length - 1]
+    }
+}
 const getViewDef = (views, id) => {
     // console.log(views, id)
     return views.filter(c => c.id === id)[0] || {}
@@ -254,6 +261,7 @@ exports.selectProperty = selectProperty
 exports.findAllMatches = findAllMatches
 exports.defineConfigs = defineConfigs
 exports.getConfigs = getConfigs
+exports.getCurrentConfigs = getCurrentConfigs
 exports.getDeviationCost = getDeviationCost
 exports.getViewDef = getViewDef
 exports.inRange = inRange

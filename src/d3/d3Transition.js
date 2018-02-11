@@ -25,7 +25,9 @@ const drawRectangles = (el, props, rectangles, type) => {
     // console.log(`|||||drawRectangles`, props.zone, type)
     if (rectangles.length > 0) {
         const rectanglesSelection = d3.select(el).selectAll('rect')
-            .data(rectangles, (d) => d.query.value)
+            .data(rectangles, (d) => {
+                return (d.signature) ? d.signature : d.query.value
+            })
 
         const tChange = d3.transition()
             .duration(750)
