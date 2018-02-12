@@ -48,10 +48,18 @@ const defaultState = {
         horizontal_margin: 10
     },
     selectedZone: {
-        x1: null,
-        y1: null,
-        x2: null,
-        y2: null
+        main: {
+            x1: null,
+            y1: null,
+            x2: null,
+            y2: null
+        },
+        aside: {
+            x1: null,
+            y1: null,
+            x2: null,
+            y2: null
+        }
     }
 }
 
@@ -69,33 +77,36 @@ const display = (state = defaultState, action) => {
             viz: action.viz || state.viz
         }
     case types.START_SELECTED_ZONE:
+        let newSelectedZoneStart = state.selectedZone
+        newSelectedZoneStart[action.zone] = {
+            x1: action.x1,
+            y1: action.y1,
+            x2: action.x1,
+            y2: action.y1
+        }
         return {
             ...state,
-            selectedZone: {
-                x1: action.x1,
-                y1: action.y1,
-                x2: action.x1,
-                y2: action.y1
-            }
+            selectedZone: newSelectedZoneStart
         }
     case types.MOVE_SELECTED_ZONE:
+        let newSelectedZoneMove = state.selectedZone
+        newSelectedZoneMove[action.zone].x2 = action.x2
+        newSelectedZoneMove[action.zone].y2 = action.y2
         return {
             ...state,
-            selectedZone: {
-                ...state.selectedZone,
-                x2: action.x2,
-                y2: action.y2
-            }
+            selectedZone: newSelectedZoneMove
         }
     case types.CLEAR_SELECTED_ZONE:
+        let newSelectedZoneClear = state.selectedZone
+        newSelectedZoneClear[action.zone] = {
+            x1: null,
+            y1: null,
+            x2: null,
+            y2: null
+        }
         return {
             ...state,
-            selectedZone: {
-                x1: null,
-                y1: null,
-                x2: null,
-                y2: null
-            }
+            selectedZone: newSelectedZoneClear
         }
     default:
         return state

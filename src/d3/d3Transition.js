@@ -38,10 +38,7 @@ const drawRectangles = (el, props, rectangles, type) => {
         rectanglesSelection
             .enter()
             .append('rect')
-            .attr('x', d => {
-                //console.log('|||', props.zone, type, d.query.value, d.zone)
-                return d.zone.x1
-            })
+            .attr('x', d => d.zone.x1)
             .attr('y', d => d.zone.y1)
             .attr('width', d => d.zone.width)
             .attr('height', d => d.zone.height)

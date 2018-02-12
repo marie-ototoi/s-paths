@@ -23,6 +23,7 @@ import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../a
 class HeatMap extends React.Component {
     constructor (props) {
         super(props)
+        this.handleMouseDown = this.handleMouseDown.bind(this)
         this.handleMouseMove = this.handleMouseMove.bind(this)
         this.handleMouseUp = this.handleMouseUp.bind(this)
         this.selectElement = this.selectElement.bind(this)
@@ -82,13 +83,16 @@ class HeatMap extends React.Component {
             nestedProp2
         }
     }
+    handleMouseDown (e) {
+        this.props.handleMouseDown(e, this.props.zone)
+    }
     handleMouseMove (e) {
-        if (this.props.display.selectedZone.x1 !== null) this.props.handleMouseMove(e)
+        if (this.props.display.selectedZone[this.props.zone].x1 !== null) this.props.handleMouseMove(e, this.props.zone)
     }
     handleMouseUp (e) {
         const elements = d3HeatMap.getElementsInZone(this.refs.HeatMap, this.props)
         if (elements.length > 0) this.props.select(elements, this.props.zone, this.props.selections)
-        this.props.handleMouseUp(e)
+        this.props.handleMouseUp(e, this.props.zone)
     }
     render () {
         const { axisBottom, axisLeft, legend, listProp1, listProp2 } = this.customState
@@ -99,7 +103,7 @@ class HeatMap extends React.Component {
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
-                handleMouseDown = { this.props.handleMouseDown }
+                handleMouseDown = { this.handleMouseDown }
                 handleMouseMove = { this.handleMouseMove }
                 handleMouseUp = { this.handleMouseUp }
             />
@@ -109,7 +113,7 @@ class HeatMap extends React.Component {
                 ref = "HeatMap"
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
-                onMouseDown = { this.props.handleMouseDown }
+                onMouseDown = { this.handleMouseDown }
             ></g>
             }
             { role !== 'target' &&

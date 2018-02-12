@@ -77,12 +77,12 @@ const draw = (el, props) => {
             return d.opacity
         })
         .on('mouseup', d => {
-            props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY })
+            props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, zone)
         })
 }
 
 const drawSelection = (el, props) => {
-    const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone)
+    const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
     const selectedZone = {
         x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
         y1: zoneDimensions.y1 - props.display.viz.vertical_margin,
@@ -95,7 +95,7 @@ const drawSelection = (el, props) => {
         .append('rect')
         .attr('class', 'selection')
         .on('mouseup', d => {
-            props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY })
+            props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, props.zone)
         })
 
     d3.select(el).select('rect.selection')
@@ -140,7 +140,7 @@ const getElementsForTransition = (el, props) => {
 }
 
 const getElementsInZone = (el, props) => {
-    const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone)
+    const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
     const selectedZone = {
         x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
         y1: zoneDimensions.y1 - props.display.viz.vertical_margin,

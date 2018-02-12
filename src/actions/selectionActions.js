@@ -19,26 +19,29 @@ const addSelection = (dispatch) => (selector, zone, props) => {
     })
 }
 
-const handleMouseDown = (dispatch) => (e) => {
+const handleMouseDown = (dispatch) => (e, zone) => {
     // replace by select
     return dispatch({
         type: 'START_SELECTED_ZONE',
         x1: e.pageX,
-        y1: e.pageY
+        y1: e.pageY,
+        zone
     })
 }
-const handleMouseUp = (dispatch) => (e) => {
+const handleMouseUp = (dispatch) => (e, zone) => {
     // replace by select
     return dispatch({
-        type: 'CLEAR_SELECTED_ZONE'
+        type: 'CLEAR_SELECTED_ZONE',
+        zone
     })
 }
-const handleMouseMove = (dispatch) => (e) => {
+const handleMouseMove = (dispatch) => (e, zone) => {
     // replace by select
     return dispatch({
         type: 'MOVE_SELECTED_ZONE',
         x2: e.pageX,
-        y2: e.pageY
+        y2: e.pageY,
+        zone
     })
 }
 

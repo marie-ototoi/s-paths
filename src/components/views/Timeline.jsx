@@ -22,6 +22,7 @@ import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../a
 class Timeline extends React.PureComponent {
     constructor (props) {
         super(props)
+        this.handleMouseDown = this.handleMouseDown.bind(this)
         this.handleMouseMove = this.handleMouseMove.bind(this)
         this.handleMouseUp = this.handleMouseUp.bind(this)
         this.selectElement = this.selectElement.bind(this)
@@ -65,12 +66,15 @@ class Timeline extends React.PureComponent {
         this.customState = { ...this.customState, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2 }
     }
     handleMouseMove (e) {
-        if (this.props.display.selectedZone.x1 !== null) this.props.handleMouseMove(e)
+        if (this.props.display.selectedZone[this.props.zone].x1 !== null) this.props.handleMouseMove(e, this.props.zone)
+    }
+    handleMouseDown (e) {
+        this.props.handleMouseDown(e, this.props.zone)
     }
     handleMouseUp (e) {
         const elements = d3Timeline.getElementsInZone(this.refs.Timeline, this.props)
         if (elements.length > 0) this.props.select(elements, this.props.zone, this.props.selections)
-        this.props.handleMouseUp(e)
+        this.props.handleMouseUp(e, this.props.zone)
     }
     render () {
         const { axisBottom, legend, listProp1, listProp2 } = this.customState
@@ -83,7 +87,7 @@ class Timeline extends React.PureComponent {
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
-                handleMouseDown = { this.props.handleMouseDown }
+                handleMouseDown = { this.handleMouseDown }
                 handleMouseMove = { this.handleMouseMove }
                 handleMouseUp = { this.handleMouseUp }
             />
@@ -93,7 +97,7 @@ class Timeline extends React.PureComponent {
                 ref = "Timeline"
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
-                onMouseDown = { this.props.handleMouseDown }
+                onMouseDown = { this.handleMouseDown }
             ></g>
             }
             { role !== 'target' &&
