@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
 
 const create = (el, props) => {
-    console.log('create', props.elements)
+    // console.log('create', props.elements)
     if (el && props) {
         draw(el, props)
     }

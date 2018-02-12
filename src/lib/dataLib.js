@@ -294,7 +294,7 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
 }
 
 const getTransitionElements = (originElements, targetElements, originConfig, targetConfig, deltaData, zone) => {
-    console.log('before', originElements, targetElements, originConfig, targetConfig, deltaData)
+    // console.log('before', zone, originElements, targetElements, originConfig, targetConfig, deltaData)
     deltaData = deltaData.map(data => {
         let indexOrigin = getDeltaIndex(data, originElements, { entrypoint: originConfig.entrypoint, isTarget: false })
         let indexTarget = getDeltaIndex(data, targetElements, { entrypoint: targetConfig.entrypoint, isTarget: true })
@@ -307,11 +307,27 @@ const getTransitionElements = (originElements, targetElements, originConfig, tar
     // console.log(deltaData)
     if (!originConfig.entrypoint) {
         originElements = splitTransitionElements(originElements, 'origin', zone, deltaData)
+    } else {
+        originElements = originElements.map(el => {
+            let cur = deltaData.filter(dp => dp.entrypoint.value === el.query.value)[0]
+            return {
+                ...el,
+                signature: cur ? `${zone}_origin${cur.indexOrigin}_target${cur.indexTarget}` : ''
+            }
+        })
     }
     if (!targetConfig.entrypoint) {
         targetElements = splitTransitionElements(targetElements, 'target', zone, deltaData)
+    } else {
+        targetElements = targetElements.map(el => {
+            let cur = deltaData.filter(dp => dp.entrypoint.value === el.query.value)[0]
+            return {
+                ...el,
+                signature: cur ? `${zone}_origin${cur.indexOrigin}_target${cur.indexTarget}` : ''
+            }
+        })
     }
-    console.log('after', originElements, targetElements)
+    // console.log('after', originElements, targetElements)
     // pour chaque zone d'arrivée identifier tous les points de départ
     // diviser la zone d'arrivée et la remplacer par le nombre de zones nécessaires 
     // en donnant le nom de la zone de départ 

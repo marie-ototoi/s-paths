@@ -96,13 +96,16 @@ class App extends React.Component {
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')
         const statusAside = getCurrentState(this.props.data, 'aside')
-
-        const statusConfigs = (statusMain === 'transition' || statusAside === 'transition') ? 'transition' : 'active'
-        const main = getConfigs(getCurrentConfigs(configs, statusConfigs), 'main')
-        const MainComponent = main ? componentIds[main.id] : ''
-        const aside = getConfigs(getCurrentConfigs(configs, statusConfigs), 'aside')
-        const SideComponent = aside ? componentIds[aside.id] : ''
         
+        const statusConfigs = (statusMain === 'transition' || statusAside === 'transition') ? 'transition' : 'active'
+        const mainConfig = getConfigs(getCurrentConfigs(configs, 'active'), 'main')
+        const mainTransitionConfig = getConfigs(getCurrentConfigs(configs, 'transition'), 'main')
+        const MainComponent = mainConfig ? componentIds[mainConfig.id] : ''
+        const MainTransitionComponent = mainTransitionConfig ? componentIds[mainTransitionConfig.id] : ''
+        const asideConfig = getConfigs(getCurrentConfigs(configs, 'active'), 'aside')
+        const asideTransitionConfig = getConfigs(getCurrentConfigs(configs, 'transition'), 'aside')
+        const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
+        const SideTransitionComponent = asideConfig ? componentIds[asideTransitionConfig.id] : ''
         // to do : avoid recalculate transition data at each render
 
         return (<div
@@ -121,8 +124,8 @@ class App extends React.Component {
                     <Debug />
                 }
 
-                { main && this.state.main_step === 'launch' &&
-                    <MainComponent
+                { mainConfig && this.state.main_step === 'launch' &&
+                    <MainTransitionComponent
                         role = "target"
                         zone = "main"
                         status = { statusMain }
@@ -134,7 +137,7 @@ class App extends React.Component {
                     />
                 }
 
-                { main && this.state.main_step === 'changing' &&
+                { mainConfig && this.state.main_step === 'changing' &&
                     <Transition
                         zone = "main"
                         elements = { getTransitionElements(this.state.main_origin, this.state.main_target, getConfigs(getCurrentConfigs(configs, 'active'), 'main'), getConfigs(getCurrentConfigs(configs, 'transition'), 'main'), getResults(data, 'main', 'delta'), 'main') }
@@ -142,22 +145,22 @@ class App extends React.Component {
                     />
                 }
 
-                { main && areLoaded(data, 'main', 'active') &&
+                { mainConfig && areLoaded(data, 'main', 'active') &&
                     <MainComponent
                         role = "origin"
                         zone = "main"
                         step = { this.state.main_step }
                         status = { statusMain }
                         data = { getResults(data, 'main', 'active') }
-                        config = { getConfigs(getCurrentConfigs(configs, 'active'), 'main') }
+                        config = { mainConfig }
                         selections = { selectionLib.getSelections(selections, 'main', 'active') }
                         ref = "main"
                         handleTransition = { this.handleTransition }
                     />
                 }
 
-                { aside && this.state.aside_step === 'launch' &&
-                    <SideComponent
+                { asideConfig && this.state.aside_step === 'launch' &&
+                    <SideTransitionComponent
                         role = "target"
                         zone = "aside"
                         status = { statusAside }
@@ -169,7 +172,7 @@ class App extends React.Component {
                     />
                 }
 
-                { aside && this.state.aside_step === 'changing' &&
+                { asideConfig && this.state.aside_step === 'changing' &&
                     <Transition
                         zone = "aside"
                         elements = { getTransitionElements(this.state.aside_origin, this.state.aside_target, getConfigs(getCurrentConfigs(configs, 'active'), 'aside'), getConfigs(getCurrentConfigs(configs, 'transition'), 'aside'), getResults(data, 'aside', 'delta'), 'aside') }
@@ -177,14 +180,14 @@ class App extends React.Component {
                     />
                 }
 
-                { aside && areLoaded(data, 'aside', 'active') &&
+                { asideConfig && areLoaded(data, 'aside', 'active') &&
                     <SideComponent
                         zone = "aside"
                         role = "origin"
                         step = { this.state.aside_step }
                         status = { statusAside }
                         data = { getResults(data, 'aside', 'active') }
-                        config = { getConfigs(getCurrentConfigs(configs, 'active'), 'aside') }
+                        config = { asideConfig }
                         selections = { selectionLib.getSelections(selections, 'aside', 'active') }
                         ref = "aside"
                         handleTransition = { this.handleTransition }

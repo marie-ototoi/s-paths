@@ -8,7 +8,7 @@ const getCurrentConfigs = (configs, status) => {
     if (configs.present.length > 0 && configs.present[0].status === 'transition') {
         return (status === 'active') ? configs.past[configs.past.length - 1] : configs.present
     } else {
-        return (status === 'active') ? configs.present : configs.past[configs.past.length - 1]
+        return configs.present
     }
 }
 const getViewDef = (views, id) => {
