@@ -24,7 +24,7 @@ class Nav extends React.PureComponent {
         }
     }
     render () {
-        const { dataset, displayedInstances, display, offset, selections, zone } = this.props
+        const { configs, dataset, displayedInstances, display, offset, selections, zone } = this.props
         const dimensions = getDimensions('nav', display.zones[zone], display.viz, offset)
         const { x, y, width } = dimensions
         // console.log(dataset.stats)
@@ -39,13 +39,23 @@ class Nav extends React.PureComponent {
         const margin = itemWidth / 6
         const maxBarWidth = (itemWidth * 3) + (margin * 2)
 
-        // console.log(dataset.labels)
+        // console.log(configs)
         return (<g className = "Nav"
             transform = { `translate(${x}, ${y})` }
             ref = { `nav_${zone}` }
         >
-            { [0, 1, 2, 3, 4].map((option, i) => {
-                return <rect key = { zone + '_thumb_' + i } width = { itemWidth } height = { itemHeight } y = { 60 - itemHeight } x = { (margin * (i + 1)) + (itemWidth * i) } fill = "#E0E0E0"></rect>
+            { configs.map((option, i) => {
+                return <g
+                    key = { zone + '_thumb_' + i }
+                    transform = { `translate(${(margin * (i + 1)) + (itemWidth * i)}, ${60 - itemHeight})` }
+                >
+                    <rect                       
+                        width = { itemWidth }
+                        height = { itemHeight }
+                        fill = "#E0E0E0">
+                    </rect>
+                    <text y = "10" x = "4">{ option.id.substr(0, 1) }</text>
+                </g>
             }) }
             { options.map((option, i) => {
                 const barWidth = maxBarWidth * option.total / options[0].total
