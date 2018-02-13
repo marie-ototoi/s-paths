@@ -83,6 +83,7 @@ const draw = (el, props) => {
 
 const drawSelection = (el, props) => {
     const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
+    // console.log(zoneDimensions)
     const selectedZone = {
         x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
         y1: zoneDimensions.y1 - props.display.viz.vertical_margin,

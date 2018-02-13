@@ -38,6 +38,19 @@ const getViz = (vizDef, stage) => {
     }
 }
 
+const getZoneCoord = (zone, mode, zonesDefPercent, screen) => {
+    // find top left of the zone
+    let factorX = zonesDefPercent[mode].width
+    let factorY = zonesDefPercent[mode].height
+    let offsetXPercent = (zonesDefPercent[zone].x - zonesDefPercent[mode].x) * 100 / factorX
+    let offsetYPercent = (zonesDefPercent[zone].y - zonesDefPercent[mode].y) * 100 / factorY
+    let offsetX = Math.floor(offsetXPercent * screen.width / 100)
+    let offsetY = Math.floor(offsetYPercent * screen.height / 100)
+    console.log(factorX, factorY, offsetX, offsetY)
+
+    return { x: offsetX, y: offsetY }
+}
+
 const scaleX = (xPoint, stage) => {
     return Math.floor(stage.width * xPoint / 100)
 }
@@ -118,6 +131,7 @@ exports.getDimensions = getDimensions
 exports.getGrid = getGrid
 exports.getScreen = getScreen
 exports.getViz = getViz
+exports.getZoneCoord = getZoneCoord
 exports.getZones = getZones
 exports.scaleStage = scaleStage
 exports.scaleViewBox = scaleViewBox

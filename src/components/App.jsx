@@ -79,7 +79,7 @@ class App extends React.Component {
         }
     }
     render () {
-        const { configs, data, dataset, display, env, selections } = this.props
+        const { configs, data, dataset, display, mode, selections } = this.props
         // debug logs
         // console.log('env', env)
         // console.log('mode', mode)
@@ -120,7 +120,7 @@ class App extends React.Component {
                 preserveAspectRatio = "xMinYMin meet"
             >
             
-                { env === 'dev' &&
+                { mode === 'dev' &&
                     <Debug />
                 }
 
@@ -198,10 +198,9 @@ class App extends React.Component {
     }
 
     onResize () {
-        const { display, env, mode } = this.props
+        const { display, mode } = this.props
         // change this for an action function
         this.props.setDisplay({
-            env,
             mode,
             zonesDef: display.zonesDefPercent,
             gridDef: display.gridDefPercent,

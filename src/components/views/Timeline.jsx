@@ -66,15 +66,18 @@ class Timeline extends React.PureComponent {
         this.customState = { ...this.customState, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2 }
     }
     handleMouseMove (e) {
-        if (this.props.display.selectedZone[this.props.zone].x1 !== null) this.props.handleMouseMove(e, this.props.zone)
+        const { display, zone } = this.props
+        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
     }
     handleMouseDown (e) {
-        this.props.handleMouseDown(e, this.props.zone)
+        const { display, zone } = this.props
+        this.props.handleMouseDown(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
     }
     handleMouseUp (e) {
+        const { selections, zone } = this.props
         const elements = d3Timeline.getElementsInZone(this.refs.Timeline, this.props)
-        if (elements.length > 0) this.props.select(elements, this.props.zone, this.props.selections)
-        this.props.handleMouseUp(e, this.props.zone)
+        if (elements.length > 0) this.props.select(elements, zone, selections)
+        this.props.handleMouseUp(e, zone)
     }
     render () {
         const { axisBottom, legend, listProp1, listProp2 } = this.customState

@@ -15,10 +15,9 @@ if (module.hot) {
     })
 }
 
-// mode = main ou aside
-// env = dev overwrites mode and shows debug component
+// mode = main / aside / full / dev
 const init = () => {
-    ReactDOM.render(<Provider store = { store }><App mode = "aside" env = ""/></Provider>, document.getElementById('discover'))
+    ReactDOM.render(<Provider store = { store }><App mode = "full" /></Provider>, document.getElementById('discover'))
 }
 init()
 

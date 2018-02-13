@@ -69,6 +69,7 @@ const display = (state = defaultState, action) => {
     case types.SET_DISPLAY:
         return {
             ...state,
+            mode: action.mode || state.mode,
             screen: action.screen || state.screen,
             viewBox: action.viewBox || state.viewBox,
             stage: action.stage || state.stage,

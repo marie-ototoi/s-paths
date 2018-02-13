@@ -11,6 +11,7 @@ const setDisplay = (dispatch) => ({ env, mode, zonesDef, gridDef, screen, vizDef
     return dispatch({
         type: types.SET_DISPLAY,
         screen,
+        mode,
         viewBox,
         stage,
         grid,

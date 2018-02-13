@@ -6,7 +6,7 @@ import scale from '../../src/lib/scaleLib'
 
 const displayDef = {
     dev: { x: 0, y: 0, width: 100, height: 100 },
-    full: { x: 35, y: 35, width: 40, height: 40 },
+    full: { x: 35, y: 35, width: 65, height: 30 },
     main: { x: 35, y: 35, width: 30, height: 30 },
     aside: { x: 70, y: 35, width: 30, height: 30 }
 }
@@ -30,7 +30,7 @@ describe('lib/scale', () => {
         let stage2 = scale.scaleStage(displayDef.full, screens[0])
         let stage3 = scale.scaleStage(displayDef.main, screens[0])
         expect(stage1).to.deep.equal({ width: 1400, height: 700 })
-        expect(stage2).to.deep.equal({ width: 3500, height: 1750 })
+        expect(stage2).to.deep.equal({ width: 2153, height: 2333 })
         expect(stage3).to.deep.equal({ width: 4666, height: 2333 })
     })
 
@@ -41,7 +41,7 @@ describe('lib/scale', () => {
         let vb3 = scale.scaleViewBox(displayDef.main, stages[1])
         let vb4 = scale.scaleViewBox(displayDef.aside, stages[2])
         expect(vb1).to.deep.equal({ width: 4666, height: 2333, x: 0, y: 0 })
-        expect(vb2).to.deep.equal({ width: 1866, height: 933, x: 1633, y: 816 })
+        expect(vb2).to.deep.equal({ width: 3032, height: 699, x: 1633, y: 816 })
         expect(vb3).to.deep.equal({ width: 420, height: 210, x: 490, y: 245 })
         expect(vb4).to.deep.equal({ width: 1050, height: 525, x: 2450, y: 612 })
     })
@@ -58,5 +58,10 @@ describe('lib/scale', () => {
             xPoints: [0, 420, 490, 910, 980, 1190, 1400],
             yPoints: [0, 210, 245, 455, 490, 595, 700]
         })
+    })
+    it('should return the coords of a point relative to its zone', () => {
+        expect(scale.getZoneCoord('aside', 'full', displayDef, screens[0])).to.deep.equal({ x: 753, y: 0 })
+        expect(scale.getZoneCoord('aside', 'aside', displayDef, screens[0])).to.deep.equal({ x: 0, y: 0 })
+        expect(scale.getZoneCoord('aside', 'dev', displayDef, screens[0])).to.deep.equal({ x: 753, y: 400 })
     })
 })
