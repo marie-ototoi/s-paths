@@ -280,8 +280,8 @@ const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     //
     let selectedConfig = configLib.getSelectedConfig(config, zone)
-    let propList = (config.entrypoint === undefined) ? `` : `?entrypoint `
-    let groupList = (config.entrypoint === undefined) ? `` : `?entrypoint `
+    let propList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``
+    let groupList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``
     let defList = ``
     let orderList = ``
     selectedConfig.properties.forEach((prop, index) => {

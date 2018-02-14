@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import * as types from '../constants/ActionTypes'
 // import stats from '../../test/data/nobel'
-import configLib from '../lib/configLib'
+import configLib, { getSelectedConfig } from '../lib/configLib'
 // import dataLib from '../lib/dataLib'
 import queryLib from '../lib/queryLib'
 
@@ -31,20 +31,49 @@ const endTransition = (dispatch) => (zone) => {
     })
 }
 
+const selectView = (dispatch) => (id, zone, configs, dataset) => {
+    const { endpoint, entrypoint, prefixes } = dataset
+    const updatedConfigs = configLib.selectView(id, zone, configs)
+    dispatch({
+        type: types.SET_CONFIGS,
+        configs: updatedConfigs
+    })
+    const selectedConfig = configLib.getConfigs(configs, zone)
+    const updatedConfig = configLib.getConfigs(updatedConfigs, zone)
+    const newQuery = queryLib.makeQuery(entrypoint, updatedConfig, zone, dataset)
+    const queryTransition = queryLib.makeTransitionQuery(updatedConfig, dataset, selectedConfig, dataset, zone)
+    // console.log('test', queryTransition)
+    Promise.all([
+        queryLib.getData(endpoint, newQuery, prefixes),
+        queryLib.getData(endpoint, queryTransition, prefixes)
+    ])
+        .then(([newData, newDelta]) => {
+            // console.log(newData, newDelta)
+            const action = {
+                type: types.SET_DATA
+            }
+            action[zone] = newData
+            action[zone + 'Delta'] = newDelta
+            dispatch(action)
+        })
+        .catch(error => {
+            console.error('Error getting data after view update', error)
+        })
+}
+
 const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) => {
     // console.log('select property')
     const { endpoint, entrypoint, prefixes } = dataset
     const updatedConfig = configLib.selectProperty(config, zone, propIndex, path)
     dispatch({
         type: types.SET_CONFIG,
-        config: updatedConfig,
-        zone
+        config: updatedConfig
     })
 
     const newQuery = queryLib.makeQuery(entrypoint, updatedConfig, zone, dataset)
     const queryTransition = queryLib.makeTransitionQuery(updatedConfig, dataset, config, dataset, zone)
 
-    console.log('test', queryTransition)
+    // console.log('test', queryTransition)
     Promise.all([
         queryLib.getData(endpoint, newQuery, prefixes),
         queryLib.getData(endpoint, queryTransition, prefixes)
@@ -151,3 +180,4 @@ exports.endTransition = endTransition
 exports.loadData = loadData
 exports.receiveStats = receiveStats
 exports.selectProperty = selectProperty
+exports.selectView = selectView

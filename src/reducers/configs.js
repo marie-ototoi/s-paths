@@ -56,7 +56,7 @@ const configs = (state = [], action) => {
         })
     case types.SET_CONFIG:
         return state.map(c => {
-            if (c.zone === action.zone) {
+            if (c.id === action.config.id) {
                 return {
                     ...action.config,
                     matches: action.config.matches.sort((a, b) => {

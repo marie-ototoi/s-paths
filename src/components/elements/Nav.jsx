@@ -1,11 +1,11 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import configLib from '../../lib/configLib'
+import { getCurrentConfigs, getSelectedConfig } from '../../lib/configLib'
 import queryLib from '../../lib/queryLib'
 import { getDimensions } from '../../lib/scaleLib'
 
-import { loadData } from '../../actions/dataActions'
+import { loadData, selectView } from '../../actions/dataActions'
 
 class Nav extends React.PureComponent {
     constructor (props) {
@@ -13,18 +13,21 @@ class Nav extends React.PureComponent {
         this.exploreSelection = this.exploreSelection.bind(this)
     }
     exploreSelection () {
-        if (this.props.selections.length > 0) {
-            const selectedConfig = configLib.getSelectedConfig(this.props.config, this.props.zone)
-            let newConstraints = queryLib.makeSelectionConstraints(this.props.selections, selectedConfig, this.props.zone)
+        const { config, configs, dataset, selections, views, zone } = this.props
+        const activeConfigs = getCurrentConfigs(configs, 'active')
+        if (selections.length > 0) {
+            const selectedConfig = getSelectedConfig(config, zone)
+            let newConstraints = queryLib.makeSelectionConstraints(selections, selectedConfig, zone)
             let newDataset = {
-                ...this.props.dataset,
+                ...dataset,
                 constraints: newConstraints
             }
-            this.props.loadData(newDataset, this.props.views, this.props.configs, this.props.dataset)
+            this.props.loadData(newDataset, views, activeConfigs, dataset)
         }
     }
     render () {
-        const { configs, dataset, displayedInstances, display, offset, selections, zone } = this.props
+        const { config, configs, dataset, displayedInstances, display, offset, selections, zone } = this.props
+        const activeConfigs = getCurrentConfigs(configs, 'active')
         const dimensions = getDimensions('nav', display.zones[zone], display.viz, offset)
         const { x, y, width } = dimensions
         // console.log(dataset.stats)
@@ -44,17 +47,23 @@ class Nav extends React.PureComponent {
             transform = { `translate(${x}, ${y})` }
             ref = { `nav_${zone}` }
         >
-            { configs.map((option, i) => {
+            { activeConfigs.map((option, i) => {
+                let selected = (config.id === option.id)
                 return <g
                     key = { zone + '_thumb_' + i }
                     transform = { `translate(${(margin * (i + 1)) + (itemWidth * i)}, ${60 - itemHeight})` }
+                    onClick = { e => this.props.selectView(option.id, zone, activeConfigs, dataset) }
                 >
-                    <rect                       
+                    <rect
                         width = { itemWidth }
                         height = { itemHeight }
-                        fill = "#E0E0E0">
+                        fill = { selected ? '#333333' : '#E0E0E0' }>
                     </rect>
-                    <text y = "10" x = "4">{ option.id.substr(0, 1) }</text>
+                    <text
+                        y = "10"
+                        x = "4"
+                        fill = { selected ? '#E0E0E0' : '#333333' }
+                    >{ option.id.substr(0, 1) }</text>
                 </g>
             }) }
             { options.map((option, i) => {
@@ -77,7 +86,7 @@ class Nav extends React.PureComponent {
 
 function mapStateToProps (state) {
     return {
-        configs: state.configs.present,
+        configs: state.configs,
         dataset: state.dataset.present,
         data: state.data,
         display: state.display,
@@ -87,7 +96,8 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
-        loadData: loadData(dispatch)
+        loadData: loadData(dispatch),
+        selectView: selectView(dispatch)
     }
 }
 

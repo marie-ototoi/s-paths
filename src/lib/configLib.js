@@ -256,15 +256,31 @@ const selectProperty = (config, zone, propIndex, path) => {
         })
     }
 }
+
+const selectView = (id, zone, configs) => {
+    return configs.map(config => {
+        return {
+            ...config,
+            matches: config.matches.map((match, index) => {
+                return {
+                    ...match,
+                    [zone + 'Selected']: (config.id === id && index === 0)
+                }
+            })
+        }
+    })
+}
+
 exports.activateDefaultConfigs = activateDefaultConfigs
-exports.selectProperty = selectProperty
-exports.findAllMatches = findAllMatches
 exports.defineConfigs = defineConfigs
+exports.findAllMatches = findAllMatches
 exports.getConfigs = getConfigs
 exports.getCurrentConfigs = getCurrentConfigs
 exports.getDeviationCost = getDeviationCost
+exports.getSelectedConfig = getSelectedConfig
 exports.getViewDef = getViewDef
 exports.inRange = inRange
 exports.overRange = overRange
-exports.getSelectedConfig = getSelectedConfig
+exports.selectProperty = selectProperty
+exports.selectView = selectView
 exports.underRange = underRange
