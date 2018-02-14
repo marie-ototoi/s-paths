@@ -176,7 +176,7 @@ const resize = (el, props) => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
     const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfTimeUnits(nestedProp1))
-    const unitHeight = Math.floor(display.viz.useful_height / (props.nestedProp2.length - 1))
+    const unitHeight = Math.round(display.viz.useful_height / (props.nestedProp2.length - 1))
     d3.select(el).selectAll('g.xUnits').selectAll('.yUnits')
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (mapY[d.key] * unitHeight)})`)
         .each((d, i) => {
