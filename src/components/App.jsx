@@ -35,7 +35,9 @@ class App extends React.Component {
             main_target: [],
             main_origin: [],
             aside_target: [],
-            aside_origin: []
+            aside_origin: [],
+            main_transition: [],
+            aside_transition: []
         }
     }
     componentDidMount () {
@@ -46,6 +48,7 @@ class App extends React.Component {
     }
     handleTransition (props, elements) {
         const { role, status, zone } = props
+        const { data, configs } = this.props
         // console.log(role, status, zone, elements)
         if (role === 'origin') {
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_origin`])) {
@@ -59,7 +62,8 @@ class App extends React.Component {
             // console.log('transition target laid out', zone, role, elements)
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_target`])) {
                 // console.log('2 - ON CHANGE ', zone)
-                this.setState({ [`${zone}_target`]: elements, [`${zone}_step`]: 'changing' })
+                let transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getConfigs(getCurrentConfigs(configs, 'active'), zone), getConfigs(getCurrentConfigs(configs, 'transition'), zone), getResults(data, zone, 'delta'), zone)
+                this.setState({ [`${zone}_target`]: elements, [`${zone}_transition`]: transitionElements, [`${zone}_step`]: 'changing' })
             }
         }
     }
@@ -140,7 +144,7 @@ class App extends React.Component {
                 { mainConfig && this.state.main_step === 'changing' &&
                     <Transition
                         zone = "main"
-                        elements = { getTransitionElements(this.state.main_origin, this.state.main_target, getConfigs(getCurrentConfigs(configs, 'active'), 'main'), getConfigs(getCurrentConfigs(configs, 'transition'), 'main'), getResults(data, 'main', 'delta'), 'main') }
+                        elements = { this.state.main_transition }
                         endTransition = { this.handleEndTransition }
                     />
                 }
@@ -175,7 +179,7 @@ class App extends React.Component {
                 { asideConfig && this.state.aside_step === 'changing' &&
                     <Transition
                         zone = "aside"
-                        elements = { getTransitionElements(this.state.aside_origin, this.state.aside_target, getConfigs(getCurrentConfigs(configs, 'active'), 'aside'), getConfigs(getCurrentConfigs(configs, 'transition'), 'aside'), getResults(data, 'aside', 'delta'), 'aside') }
+                        elements = { this.state.aside_transition }
                         endTransition = { this.handleEndTransition }
                     />
                 }

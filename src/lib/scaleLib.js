@@ -46,8 +46,7 @@ const getZoneCoord = (zone, mode, zonesDefPercent, screen) => {
     let offsetYPercent = (zonesDefPercent[zone].y - zonesDefPercent[mode].y) * 100 / factorY
     let offsetX = Math.floor(offsetXPercent * screen.width / 100)
     let offsetY = Math.floor(offsetYPercent * screen.height / 100)
-    console.log(factorX, factorY, offsetX, offsetY)
-
+    // console.log(factorX, factorY, offsetX, offsetY)
     return { x: offsetX, y: offsetY }
 }
 

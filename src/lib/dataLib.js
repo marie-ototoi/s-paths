@@ -227,6 +227,7 @@ const getDeltaIndex = (dataPiece, elements, options) => {
         if (entrypoint) {
             if (el.query.value === dataPiece.entrypoint.value) indexElement = indexEl
         } else {
+            //console.log(el)
             let conditions = el.query.value.map((condition, index) => {
                 const propIndex = index + 1
                 const propName = `${isTarget ? 'new' : ''}prop${propIndex}`

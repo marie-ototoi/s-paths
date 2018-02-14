@@ -79,7 +79,7 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
         queryLib.getData(endpoint, queryTransition, prefixes)
     ])
         .then(([newData, newDelta]) => {
-            console.log(newData, newDelta)
+            // console.log(newData, newDelta)
             const action = {
                 type: types.SET_DATA
             }
@@ -93,7 +93,7 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
 }
 
 const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
-    console.log('load Data ', dataset.constraints)
+    // console.log('load Data ', dataset.constraints)
     let { endpoint, entrypoint, prefixes } = dataset
     let newOptions
     getStats(dataset)
