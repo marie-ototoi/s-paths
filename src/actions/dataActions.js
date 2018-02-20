@@ -50,7 +50,9 @@ const selectView = (dispatch) => (id, zone, configs, dataset) => {
         .then(([newData, newDelta]) => {
             // console.log(newData, newDelta)
             const action = {
-                type: types.SET_DATA
+                type: types.SET_DATA,
+                resetUnitDimensions: 'zone',
+                zone: zone
             }
             action[zone] = newData
             action[zone + 'Delta'] = newDelta
@@ -81,7 +83,9 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
         .then(([newData, newDelta]) => {
             // console.log(newData, newDelta)
             const action = {
-                type: types.SET_DATA
+                type: types.SET_DATA,
+                resetUnitDimensions: (propIndex === 0) ? 'zone' : null,
+                zone: zone
             }
             action[zone] = newData
             action[zone + 'Delta'] = newDelta
@@ -90,6 +94,17 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
         .catch(error => {
             console.error('Error getting data after property update', error)
         })
+}
+
+const setUnitDimensions = (dispatch) => (dimensions, zone, configId, role) => {
+    // console.log(dimensions, zone, configId, role)
+    dispatch({
+        type: types.SET_UNIT_DIMENSIONS,
+        unitDimensions: dimensions,
+        configId,
+        zone,
+        role
+    })
 }
 
 const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
@@ -163,7 +178,8 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                         main: { ...dataMain },
                         aside: { ...dataAside },
                         mainDelta: dataDeltaMain,
-                        asideDelta: dataDeltaAside
+                        asideDelta: dataDeltaAside,
+                        resetUnitDimensions: 'all'
                     })
                 })
                 .catch(error => {
@@ -181,3 +197,4 @@ exports.loadData = loadData
 exports.receiveStats = receiveStats
 exports.selectProperty = selectProperty
 exports.selectView = selectView
+exports.setUnitDimensions = setUnitDimensions

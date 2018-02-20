@@ -60,6 +60,16 @@ const defaultState = {
             x2: null,
             y2: null
         }
+    },
+    unitDimensions: {
+        main: {
+            origin: null,
+            target: null
+        },
+        aside: {
+            origin: null,
+            target: null
+        }
     }
 }
 
@@ -108,6 +118,47 @@ const display = (state = defaultState, action) => {
         return {
             ...state,
             selectedZone: newSelectedZoneClear
+        }
+    case types.SET_UNIT_DIMENSIONS:
+        return {
+            ...state,
+            unitDimensions: {
+                ...state.unitDimensions,
+                [action.zone]: {
+                    ...state.unitDimensions[action.zone],
+                    [action.role]: action.unitDimensions
+                }
+            }
+        }
+    case types.SET_DATA:
+        let unitDimensions = {
+            main: {
+                origin: state.unitDimensions.main.origin,
+                target: (action.resetUnitDimensions === 'all') ? null : state.unitDimensions.main.target
+            },
+            aside: {
+                origin: state.unitDimensions.aside.origin,
+                target: (action.resetUnitDimensions === 'all') ? null : state.unitDimensions.aside.target
+            }
+        }
+        if (action.resetUnitDimensions === 'zone') unitDimensions[action.zone].target = null
+        return {
+            ...state,
+            unitDimensions
+        }
+    case types.END_TRANSITION:
+        return {
+            ...state,
+            unitDimensions: {
+                main: {
+                    origin: state.unitDimensions.main.target ? state.unitDimensions.main.target : state.unitDimensions.main.origin,
+                    target: state.unitDimensions.main.target
+                },
+                aside: {
+                    origin: state.unitDimensions.aside.target ? state.unitDimensions.aside.target : state.unitDimensions.aside.origin,
+                    target: state.unitDimensions.aside.target
+                }
+            }
         }
     default:
         return state

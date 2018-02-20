@@ -149,7 +149,7 @@ const getElementsInZone = (el, props) => {
 }
 
 const resize = (el, props) => {
-    const { nestedProp1, display } = props
+    const { config, configs, nestedProp1, display, setUnitDimensions, role, status, zone } = props
     const xScale = d3.scaleLinear()
         .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
         .range([0, display.viz.useful_width])
@@ -160,9 +160,21 @@ const resize = (el, props) => {
         .each(d => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
-        // Math.floor(display.viz.useful_width / (props.nestedProp1.length - 1))
+    // Math.floor(display.viz.useful_width / (props.nestedProp1.length - 1))
     const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfTimeUnits(nestedProp1))
-    const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
+    let unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
+    // console.log('role', unitHeight  )
+    if (display.unitDimensions[zone][role] &&
+        display.unitDimensions[zone][role].unitHeight &&
+        unitHeight >= display.unitDimensions[zone][role].unitHeight) {
+        // console.log('recup', display.unitDimensions[zone][role].unitHeight)
+        unitHeight = display.unitDimensions[zone][role].unitHeight
+    } else {
+        // console.log('recommence', role, status, configs.past, configs.past.length)
+        setUnitDimensions({ unitHeight }, zone, config.id, role)
+        if (configs.past.length === 1) setUnitDimensions({ unitHeight }, zone, config.id, 'target')
+    }
+
     d3.select(el).selectAll('g.time').selectAll('.elements')
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
     d3.select(el).selectAll('g.time').selectAll('.elements')

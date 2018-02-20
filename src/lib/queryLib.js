@@ -123,6 +123,7 @@ const getRoot = (uri) => {
         return splitHash.slice(0, -1).join('#').concat('#')
     }
 }
+
 const getPropName = (uri) => {
     const root = getRoot(uri)
     return uri.replace(root, '')

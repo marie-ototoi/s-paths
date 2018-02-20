@@ -16,6 +16,7 @@ import configLib from '../../lib/configLib'
 import dataLib from '../../lib/dataLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
 // redux functions
+import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
 import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
 
@@ -179,6 +180,7 @@ class Timeline extends React.PureComponent {
 function mapStateToProps (state) {
     return {
         dataset: state.dataset.present,
+        configs: state.configs,
         display: state.display,
         palettes: state.palettes
     }
@@ -190,7 +192,8 @@ function mapDispatchToProps (dispatch) {
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
         handleMouseMove: handleMouseMove(dispatch),
-        select: select(dispatch)
+        select: select(dispatch),
+        setUnitDimensions: setUnitDimensions(dispatch)
     }
 }
 

@@ -4,18 +4,24 @@ const initialConfig = { matches: [] }
 
 const config = (state = initialConfig, action) => {
     switch (action.type) {
-    case types.ADD_CONFIG:
+    /*case types.SET_DATA:
+        let unitDimensions = {
+            main: (action.resetUnitDimensions === 'all') ? null : state.unitDimensions.main,
+            aside: (action.resetUnitDimensions === 'all') ? null : state.unitDimensions.aside
+        }
+        if (action.resetUnitDimensions === 'zone') unitDimensions[action.zone] = null
         return {
             ...state,
-            properties: action.properties,
-            score: action.score,
-            view: action.view
+            unitDimensions
         }
-    case types.SELECT_CONFIG:
+    case types.SET_UNIT_DIMENSIONS:
         return {
             ...state,
-            zone: (state.view === action.view) ? action.zone : null
-        }
+            unitDimensions: {
+                main: (state.id === action.configId && action.zone === 'main') ? action.unitDimensions : state.unitDimensions.main,
+                aside: (state.id === action.configId && action.zone === 'aside') ? action.unitDimensions : state.unitDimensions.aside
+            }
+        }*/
     default:
         return state
     }
@@ -35,13 +41,6 @@ const configstatus = (state, action) => {
 
 const configs = (state = [], action) => {
     switch (action.type) {
-    case types.ADD_CONFIG:
-        return [
-            ...state,
-            config(undefined, action)
-        ]
-    case types.SELECT_CONFIG:
-        return state.map(c => config(c, action))
     case types.SET_CONFIGS:
     case types.SET_STATS:
         return action.configs.map(c => {
@@ -69,6 +68,11 @@ const configs = (state = [], action) => {
         })
     case types.END_TRANSITION:
         return state.map(dz => configstatus(dz, action))
+    /*case types.SET_DATA:
+        return state.map(v => config(v, action))
+    case types.SET_UNIT_DIMENSIONS:
+        return state.map(v => config(v, action))
+        // to do*/
     default:
         return state
     }
