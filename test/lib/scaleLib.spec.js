@@ -62,6 +62,6 @@ describe('lib/scale', () => {
     it('should return the coords of a point relative to its zone', () => {
         expect(scale.getZoneCoord('aside', 'full', displayDef, screens[0])).to.deep.equal({ x: 753, y: 0 })
         expect(scale.getZoneCoord('aside', 'aside', displayDef, screens[0])).to.deep.equal({ x: 0, y: 0 })
-        expect(scale.getZoneCoord('aside', 'dev', displayDef, screens[0])).to.deep.equal({ x: 753, y: 400 })
+        expect(scale.getZoneCoord('aside', 'dev', displayDef, screens[0])).to.deep.equal({ x: 980, y: 245 })
     })
 })
