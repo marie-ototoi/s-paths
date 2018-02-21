@@ -126,7 +126,10 @@ const display = (state = defaultState, action) => {
                 ...state.unitDimensions,
                 [action.zone]: {
                     ...state.unitDimensions[action.zone],
-                    [action.role]: action.unitDimensions
+                    [action.role]: {
+                        ...state.unitDimensions[action.zone][action.role],
+                        ...action.unitDimensions
+                    }
                 }
             }
         }

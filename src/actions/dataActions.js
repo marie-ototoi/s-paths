@@ -96,7 +96,7 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
         })
 }
 
-const setUnitDimensions = (dispatch) => (dimensions, zone, configId, role) => {
+const setUnitDimensions = (dispatch) => (dimensions, zone, configId, role, setTarget) => {
     // console.log(dimensions, zone, configId, role)
     dispatch({
         type: types.SET_UNIT_DIMENSIONS,
@@ -105,6 +105,15 @@ const setUnitDimensions = (dispatch) => (dimensions, zone, configId, role) => {
         zone,
         role
     })
+    if (setTarget) {
+        dispatch({
+            type: types.SET_UNIT_DIMENSIONS,
+            unitDimensions: dimensions,
+            configId,
+            zone,
+            role: 'target'
+        })
+    }
 }
 
 const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
