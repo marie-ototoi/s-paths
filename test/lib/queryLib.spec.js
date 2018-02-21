@@ -59,6 +59,12 @@ WHERE {
 
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label ?labelprop2 } . 
 } GROUP BY ?entrypoint ?prop1 ?labelprop1 ?prop2 ?labelprop2 ORDER BY ?prop1 ?prop2 `)
+        expect(queryLib.makeQuery('nobel:LaureateAward', config1, 'main', { defaultGraph: 'http://localhost:8890/nobel', constraints: '', prop1only: true }))
+.to.equal(`SELECT DISTINCT ?prop1 ?labelprop1 (COUNT(?prop1) as ?countprop1) FROM <http://localhost:8890/nobel> 
+WHERE {
+
+?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . 
+} GROUP BY ?prop1 ?labelprop1 ORDER BY ?prop1 ?countprop1 `)
     })
     it('should make a valid SPARQL to get stats for a prop', () => {
         expect(queryLib.makePropsQuery('nobel:LaureateAward', { constraints: '' }, 1))

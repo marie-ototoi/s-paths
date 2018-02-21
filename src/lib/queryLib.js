@@ -2,6 +2,7 @@
 // import moment from 'moment'
 import { SparqlClient } from 'sparql-client-2'
 import configLib from './configLib'
+import { select } from '../actions/selectionActions';
 
 const makePropQuery = (prop, options, firstTimeQuery) => {
     const { constraints, defaultGraph } = options
@@ -248,8 +249,9 @@ const defineGroup = (prop, previousProp, level, options) => {
 
 // to do : take constraints into account
 const makeQuery = (entrypoint, configZone, zone, options) => {
-    const { defaultGraph, constraints } = options
+    const { defaultGraph, constraints, prop1only } = options
     let selectedConfig = configLib.getSelectedConfig(configZone, zone)
+    if (prop1only === true) selectedConfig.properties = [selectedConfig.properties[0]]
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     let propList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
     let groupList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
