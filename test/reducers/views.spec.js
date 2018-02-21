@@ -30,9 +30,9 @@ describe('reducers/views', () => {
                 { id: 'Chord', selected: true},
                 { id: 'Heatmap', selected: false}
             ])
-    }) */
+    })
     it('should handle DISPLAY_VIEWS', () => {
-        let action =  {
+        let action = {
             type: 'DISPLAY_VIEWS',
             ids: ['Timeline']
         }
@@ -43,5 +43,5 @@ describe('reducers/views', () => {
                 { id: 'Chord', displayed: false },
                 { id: 'Heatmap', displayed: false }
             ])
-    })
+    }) */
 })
