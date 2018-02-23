@@ -294,6 +294,21 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
     }, [])
 }
 
+const deduplicate = (data, props) => {
+    return data.reduce((acc, cur) => {
+        let alreadyIn = acc.filter(dt => {
+            let conditions = props.map(prop => {
+                return cur[prop].value === dt[prop].value
+            })
+            return !conditions.includes(false)
+        })
+        if (alreadyIn.length === 0) {
+            acc.push(cur)
+        }
+        return acc
+    }, [])
+}
+
 const getTransitionElements = (originElements, targetElements, originConfig, targetConfig, deltaData, zone) => {
     // console.log('before', zone, originElements, targetElements, originConfig, targetConfig, deltaData)
     deltaData = deltaData.map(data => {
@@ -436,6 +451,7 @@ const groupTimeData = (data, propName, options) => {
 }
 
 exports.areLoaded = areLoaded
+exports.deduplicate = deduplicate
 exports.getAxis = getAxis
 exports.getCurrentState = getCurrentState
 exports.getDateRange = getDateRange

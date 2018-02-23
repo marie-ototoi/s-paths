@@ -63,17 +63,49 @@ describe('lib/data', () => {
         expect(data.getThresholds(43500, 145380, 6)).to.deep.equal([[40001, 60000], [60001, 80000], [80001, 100000], [100001, 120000], [120001, 140000], [140001, 160000]])
     })
 
+    it('should return a string that can be used as id', () => {
+        expect(data.makeId('http://data.nobelprize.org/resource/laureate/571')).to.equal('httpdatanobelprizeorgresourcelaureate571')
+        expect(data.makeId('http://data.nobelprize.org/resource/laureate/210')).to.equal('httpdatanobelprizeorgresourcelaureate210')
+    })
+
+    it('should deduplicate data based on specified prop()', () => {
+        let input = [
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/571"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1817-11-30"},"prop2":{"type":"literal","value":"2"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/463"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1822-05-20"},"prop2":{"type":"literal","value":"2"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/466"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1828-03-18"},"prop2":{"type":"literal","value":"1"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/571"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1828-05-08"},"prop2":{"type":"literal","value":"2"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/580"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1830-03-15"},"prop2":{"type":"literal","value":"1"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/580"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1829-07-26"},"prop2":{"type":"literal","value":"2"}}
+        ]
+        let output1 = [
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/571"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1817-11-30"},"prop2":{"type":"literal","value":"2"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/463"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1822-05-20"},"prop2":{"type":"literal","value":"2"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/466"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1828-03-18"},"prop2":{"type":"literal","value":"1"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/580"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1830-03-15"},"prop2":{"type":"literal","value":"1"}}
+        ]
+        let output2 = [
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/571"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1817-11-30"},"prop2":{"type":"literal","value":"2"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/463"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1822-05-20"},"prop2":{"type":"literal","value":"2"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/466"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1828-03-18"},"prop2":{"type":"literal","value":"1"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/580"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1830-03-15"},"prop2":{"type":"literal","value":"1"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/580"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1829-07-26"},"prop2":{"type":"literal","value":"2"}}
+        ]
+        expect(data.deduplicate(input, ['entrypoint'])).to.deep.equal(output1)
+        expect(data.deduplicate(input, ['entrypoint', 'prop2'])).to.deep.equal(output2)
+    })
+
     it('should split a rectangle in required number of parts', () => {
-        let originalRectangle = { x: 10, y: 15, width: 100, height: 200 }
+        let originalRectangle = { x1: 10, y1: 15, width: 100, height: 200 }
         let parts = [
             { name: 'a', size: 10 },
             { name: 'b', size: 5 },
             { name: 'c', size: 2 }
         ]
         let tree = data.splitRectangle(originalRectangle, parts)
-        expect([tree.children[0].x0, tree.children[0].y0, tree.children[0].x1, tree.children[0].y1]).to.deep.equal([0, 0, 100, 117])
-        expect([tree.children[1].x0, tree.children[1].y0, tree.children[1].x1, tree.children[1].y1]).to.deep.equal([0, 118, 71, 200])
-        expect([tree.children[2].x0, tree.children[2].y0, tree.children[2].x1, tree.children[2].y1]).to.deep.equal([72, 118, 100, 200])        
+        // console.log(tree)
+        expect([tree[0].zone.x1, tree[0].zone.y1, tree[0].zone.x2, tree[0].zone.y2]).to.deep.equal([10, 15, 110, 132])
+        expect([tree[1].zone.x1, tree[1].zone.y1, tree[1].zone.x2, tree[1].zone.y2]).to.deep.equal([10, 133, 81, 215])
+        expect([tree[2].zone.x1, tree[2].zone.y1, tree[2].zone.x2, tree[2].zone.y2]).to.deep.equal([82, 133, 110, 215])
     })
 
     it('should identify the origin and target groups of each piece of delta data', () => {
@@ -118,37 +150,6 @@ describe('lib/data', () => {
             {"zone":{"x1":480.20000000000005,"y1":195,"x2":507.20000000000005,"y2":389,"width":27,"height":194},"selector":"heatmap_element_p1_1846_p2_male","query":{"type":"set","value":[{"category":"datetime","value":[1846,1846],"propName":"prop1"},{"category":"text","value":"male","propName":"prop2"}]},"color":"#FDD835","opacity":0.5,"shape":"rectangle"},
             {"zone":{"x1":510.15,"y1":195,"x2":537.15,"y2":389,"width":27,"height":194},"selector":"heatmap_element_p1_1847_p2_male","query":{"type":"set","value":[{"category":"datetime","value":[1847,1847],"propName":"prop1"},{"category":"text","value":"male","propName":"prop2"}]},"color":"#FDD835","opacity":0.5,"shape":"rectangle"},
             {"zone":{"x1":570.05,"y1":195,"x2":597.05,"y2":389,"width":27,"height":194},"selector":"heatmap_element_p1_1849_p2_male","query":{"type":"set","value":[{"category":"datetime","value":[1849,1849],"propName":"prop1"},{"category":"text","value":"male","propName":"prop2"}]},"color":"#FDD835","opacity":0.5,"shape":"rectangle"}
-            /* {"zone":{"x1":1,"y1":216,"x2":22,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate580","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/580"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":1,"y1":173,"x2":22,"y2":216,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate573","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/573"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":47.300000000000004,"y1":216,"x2":68.30000000000001,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate572","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/572"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":47.300000000000004,"y1":173,"x2":68.30000000000001,"y2":216,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate574","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/574"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":70.45,"y1":216,"x2":91.45,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate471","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/471"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":70.45,"y1":173,"x2":91.45,"y2":216,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate464","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/464"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":116.75,"y1":216,"x2":137.75,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate576","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/576"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":116.75,"y1":173,"x2":137.75,"y2":216,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate164","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/164"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":163.04999999999998,"y1":216,"x2":184.04999999999998,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate474","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/474"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":163.04999999999998,"y1":173,"x2":184.04999999999998,"y2":216,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate15","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/15"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":186.20000000000002,"y1":216,"x2":207.20000000000002,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate478","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/478"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":209.35,"y1":216,"x2":230.35,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate569","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/569"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":255.65000000000003,"y1":216,"x2":276.65000000000003,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate303","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/303"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":255.65000000000003,"y1":173,"x2":276.65000000000003,"y2":216,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate492","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/492"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":278.8,"y1":216,"x2":299.8,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate8","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/8"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":301.95,"y1":216,"x2":322.95,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate465","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/465"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":301.95,"y1":173,"x2":322.95,"y2":216,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate472","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/472"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":301.95,"y1":130,"x2":322.95,"y2":173,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate298","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/298"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":301.95,"y1":87,"x2":322.95,"y2":130,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate297","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/297"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":301.95,"y1":44,"x2":322.95,"y2":87,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate468","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/468"},"color":"hsl(340, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":325.09999999999997,"y1":216,"x2":346.09999999999997,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate590","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/590"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":325.09999999999997,"y1":173,"x2":346.09999999999997,"y2":216,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate473","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/473"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":348.25,"y1":216,"x2":369.25,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate480","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/480"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":348.25,"y1":173,"x2":369.25,"y2":216,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate1","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/1"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},{"zone":{"x1":348.25,"y1":130,"x2":369.25,"y2":173,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate588","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/588"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":348.25,"y1":87,"x2":369.25,"y2":130,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate301","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/301"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":348.25,"y1":44,"x2":369.25,"y2":87,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate300","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/300"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":348.25,"y1":1,"x2":369.25,"y2":44,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate12","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/12"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":371.40000000000003,"y1":216,"x2":392.40000000000003,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate578","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/578"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":371.40000000000003,"y1":173,"x2":392.40000000000003,"y2":216,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate575","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/575"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":394.55,"y1":216,"x2":415.55,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate169","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/169"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"},
-            {"zone":{"x1":440.84999999999997,"y1":216,"x2":461.84999999999997,"y2":259,"width":21,"height":43},"selector":"timeline_element_httpdatanobelprizeorgresourcelaureate296","query":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/296"},"color":"hsl(280, 100%, 30%)","opacity":1,"shape":"rectangle"} */
         ]
         let deltaData = [
             {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/571"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#date","value":"1817-11-30"},"prop2":{"type":"literal","value":"male"}},
