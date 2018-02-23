@@ -12,9 +12,9 @@ import SelectionZone from '../elements/SelectionZone'
 // d3
 import d3Timeline from '../../d3/d3Timeline'
 // libs
-import configLib from '../../lib/configLib'
-import dataLib from '../../lib/dataLib'
-import scaleLib, { getDimensions } from '../../lib/scaleLib'
+import { getSelectedConfig } from '../../lib/configLib'
+import { deduplicate, getAxis, getLegend, getPropList, groupTimeData } from '../../lib/dataLib'
+import { getDimensions, getZoneCoord } from '../../lib/scaleLib'
 // redux functions
 import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
@@ -49,30 +49,31 @@ class Timeline extends React.PureComponent {
     prepareData (nextProps) {
         const { data, config, palettes, getPropPalette, dataset, zone } = nextProps
         // prepare the data for display
-        const selectedConfig = configLib.getSelectedConfig(config, zone)
+        const selectedConfig = getSelectedConfig(config, zone)
         // First prop to be displayed in the bottom axis
         const categoryProp1 = selectedConfig.properties[0].category
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format
-        const nestedProp1 = dataLib.groupTimeData(data, 'prop1', { format: formatProp1, max: 50 })
-        const axisBottom = dataLib.getAxis(nestedProp1, 'prop1', categoryProp1)
-        const listProp1 = dataLib.getPropList(config, zone, 0, dataset.labels)
+        
+        const nestedProp1 = groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', { format: formatProp1, max: 50 })
+        const axisBottom = getAxis(nestedProp1, 'prop1', categoryProp1)
+        const listProp1 = getPropList(config, zone, 0, dataset.labels)
         // Second prop to be displayed in the legend
         const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
         const pathProp2 = selectedConfig.properties[1].path
         const categoryProp2 = selectedConfig.properties[1].category
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
-        const legend = dataLib.getLegend(nestedProp2, 'prop2', colors, categoryProp2)
-        const listProp2 = dataLib.getPropList(config, zone, 1, dataset.labels)
+        const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
+        const listProp2 = getPropList(config, zone, 1, dataset.labels)
         // Save to reuse in render
         this.customState = { ...this.customState, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2 }
     }
     handleMouseMove (e) {
         const { display, zone } = this.props
-        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
+        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
     }
     handleMouseDown (e) {
         const { display, zone } = this.props
-        this.props.handleMouseDown(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
+        this.props.handleMouseDown(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
