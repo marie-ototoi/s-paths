@@ -32,8 +32,8 @@ class Nav extends React.PureComponent {
         const { x, y, width } = dimensions
         // console.log(dataset.stats)
         let options = [
-            { label: 'endpoint', total: dataset.stats.totalInstances },
-            { label: 'query', total: dataset.stats.selectionInstances },
+            { label: 'dataset', total: dataset.stats.totalInstances },
+            { label: 'queried', total: dataset.stats.selectionInstances },
             { label: 'displayed', total: displayedInstances },
             { label: 'selected', total: selections.length }
         ]
