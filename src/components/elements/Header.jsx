@@ -19,11 +19,12 @@ class Header extends React.PureComponent {
                     title = { dataset.labels[0].comment || '' }
                 >
                     { pluralize(dataset.labels[0].label || dataset.labels[0].prefUri, data.length) }
-                </strong>
-                <span> in </span>
-                { this.props.dataset.endpoint }
+                </strong><br />
+                <span>{ dataset.labels[0].comment }</span>
             </h1>
         </foreignObject>)
+        // <span> in </span>
+        // { this.props.dataset.endpoint }
     }
     componentDidMount () {
     }
