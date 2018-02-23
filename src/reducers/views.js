@@ -62,11 +62,6 @@ const view = (state = {}, action) => {
             ...state,
             relevantProps
         }
-    case types.DISPLAY_VIEWS:
-        return {
-            ...state,
-            displayed: action.ids.includes(state.id)
-        }
     default:
         return state
     }
@@ -75,7 +70,6 @@ const view = (state = {}, action) => {
 const views = (state = defaultState, action) => {
     switch (action.type) {
     case types.SELECT_VIEWS:
-    case types.DISPLAY_VIEWS:
         return state.map(v => view(v, action))
     default:
         return state
