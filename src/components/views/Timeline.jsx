@@ -47,15 +47,33 @@ class Timeline extends React.PureComponent {
         return !shallowEqual(this.props, nextProps)
     }
     prepareData (nextProps) {
-        const { data, config, palettes, getPropPalette, dataset, zone } = nextProps
+        const { data, config, configs, coverage, dataset, display, getPropPalette, palettes, role, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
         // First prop to be displayed in the bottom axis
+
+        let coverageFormatProp1
+        let nestedCoverage1
+        if (display.unitDimensions[zone][role] &&
+            display.unitDimensions[zone][role].nestedCoverage1) {
+            nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
+        } else {
+            coverageFormatProp1 = config.matches[0].properties[0].format || 'YYYY-MM-DD'
+            nestedCoverage1 = groupTimeData(deduplicate(coverage, ['entrypoint']), 'prop1', { format: coverageFormatProp1, max: 50 })
+            let maxUnitsPerYear = 1
+            nestedCoverage1.forEach(d => {
+                if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
+            })
+            this.props.setUnitDimensions({ maxUnitsPerYear, nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
+        }
+        const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD'
+        const nestedProp1 = groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', {
+            format: formatProp1,
+            max: 50,
+            forceGroup: nestedCoverage1[0].group
+        })
         const categoryProp1 = selectedConfig.properties[0].category
-        const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format
-        
-        const nestedProp1 = groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', { format: formatProp1, max: 50 })
-        const axisBottom = getAxis(nestedProp1, 'prop1', categoryProp1)
+        const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
         const listProp1 = getPropList(config, zone, 0, dataset.labels)
         // Second prop to be displayed in the legend
         const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
@@ -65,7 +83,7 @@ class Timeline extends React.PureComponent {
         const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
         const listProp2 = getPropList(config, zone, 1, dataset.labels)
         // Save to reuse in render
-        this.customState = { ...this.customState, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2 }
+        this.customState = { ...this.customState, selectedConfig, nestedProp1, nestedCoverage1, legend, axisBottom, listProp1, listProp2 }
     }
     handleMouseMove (e) {
         const { display, zone } = this.props

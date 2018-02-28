@@ -40,12 +40,14 @@ const selectView = (dispatch) => (id, zone, configs, dataset) => {
     const updatedConfig = getConfigs(updatedConfigs, zone)
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, selectedConfig, dataset, zone)
+    const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
     // console.log('test', queryTransition)
     Promise.all([
         getData(endpoint, newQuery, prefixes),
-        getData(endpoint, queryTransition, prefixes)
+        getData(endpoint, queryTransition, prefixes),
+        getData(endpoint, coverageQuery, prefixes)
     ])
-        .then(([newData, newDelta]) => {
+        .then(([newData, newDelta, newCoverage]) => {
             // console.log(newData, newDelta)
             const action = {
                 type: types.SET_DATA,
@@ -54,6 +56,7 @@ const selectView = (dispatch) => (id, zone, configs, dataset) => {
             }
             action[zone] = newData
             action[zone + 'Delta'] = newDelta
+            action[zone + 'Coverage'] = newCoverage
             dispatch(action)
         })
         .catch(error => {
@@ -69,16 +72,15 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
         type: types.SET_CONFIG,
         config: updatedConfig
     })
-
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, config, dataset, zone)
-
-    // console.log('test', queryTransition)
+    const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
     Promise.all([
         getData(endpoint, newQuery, prefixes),
-        getData(endpoint, queryTransition, prefixes)
+        getData(endpoint, queryTransition, prefixes),
+        (propIndex === 0) ? getData(endpoint, coverageQuery, prefixes) : {}
     ])
-        .then(([newData, newDelta]) => {
+        .then(([newData, newDelta, newCoverage]) => {
             // console.log(newData, newDelta)
             const action = {
                 type: types.SET_DATA,
@@ -87,6 +89,7 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
             }
             action[zone] = newData
             action[zone + 'Delta'] = newDelta
+            action[zone + 'Coverage'] = newCoverage
             dispatch(action)
         })
         .catch(error => {
@@ -153,8 +156,10 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
             // console.log(configs)
             const configMain = getConfigs(configs, 'main')
             const queryMain = makeQuery(entrypoint, configMain, 'main', dataset)
+            const coverageQueryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, prop1only: true })
             const configAside = getConfigs(configs, 'aside')
             const queryAside = makeQuery(entrypoint, configAside, 'aside', dataset)
+            const coverageQueryAside = makeQuery(entrypoint, configAside, 'aside', { ...dataset, prop1only: true })
             let deltaMain
             let deltaAside
             if (previousConfigs.length > 0) {
@@ -174,9 +179,11 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                 getData(endpoint, queryMain, prefixes),
                 getData(endpoint, queryAside, prefixes),
                 deltaMain,
-                deltaAside
+                deltaAside,
+                getData(endpoint, coverageQueryMain, prefixes),
+                getData(endpoint, coverageQueryAside, prefixes),
             ])
-                .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside]) => {
+                .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside, coverageMain, coverageAside]) => {
                     // console.log(dataMain, dataAside)
                     // console.log('dataTransitionMain', dataTransitionMain)
                     // console.log('dataTransitionAside', dataTransitionAside)
@@ -186,6 +193,8 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                         aside: { ...dataAside },
                         mainDelta: dataDeltaMain,
                         asideDelta: dataDeltaAside,
+                        mainCoverage: coverageMain,
+                        asideCoverage: coverageAside,
                         resetUnitDimensions: 'all'
                     })
                 })

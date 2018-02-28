@@ -151,31 +151,31 @@ const getElementsInZone = (el, props) => {
 // const retrieveValues
 
 const resize = (el, props) => {
-    const { config, configs, nestedProp1, display, setUnitDimensions, role, status, zone } = props
+    const { config, configs, nestedCoverage1, nestedProp1, display, role, zone } = props
+    // todo : get Saved Data
+    // todo : if none use coverage data and save it
+    let maxUnitsPerYear
+    if (display.unitDimensions[zone][role] &&
+        display.unitDimensions[zone][role].maxUnitsPerYear) {
+        maxUnitsPerYear = display.unitDimensions[zone][role].maxUnitsPerYear
+    } else {
+        maxUnitsPerYear = 1
+        d3.select(el)
+            .selectAll('g.time')
+            .each(d => {
+                if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
+            })
+    }
 
     const xScale = d3.scaleLinear()
-        .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
+        .domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
         .range([0, display.viz.useful_width])
 
-    let maxUnitsPerYear = 1
     d3.select(el)
         .selectAll('g.time')
         .attr('transform', d => `translate(${xScale(Number(d.key))}, 0)`)
-        .each(d => {
-            if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
-        })
 
-    if (display.unitDimensions[zone][role] &&
-        display.unitDimensions[zone][role].maxUnitsPerYear &&
-        display.unitDimensions[zone][role].maxUnitsPerYear >= maxUnitsPerYear) {
-        console.log('recup', display.unitDimensions[zone][role].maxUnitsPerYear)
-        maxUnitsPerYear = display.unitDimensions[zone][role].maxUnitsPerYear
-    } else {
-        console.log('recommence', role, status, configs.past, configs.past.length)
-        setUnitDimensions({ maxUnitsPerYear }, zone, config.id, role, (configs.past.length === 1))
-    }
-
-    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfTimeUnits(nestedProp1))
+    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfTimeUnits(nestedCoverage1))
     const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
 
     d3.select(el).selectAll('g.time').selectAll('.elements')

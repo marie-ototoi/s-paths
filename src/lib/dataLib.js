@@ -108,14 +108,19 @@ const getCurrentData = (data, status) => {
 
 const getResults = (data, zone, status) => {
     data = getCurrentData(data, status)
+    data = data.filter(d => d.zone === zone)
     let statementsType
-    if (status === 'delta') {
+    if (status === 'coverage') {
+        status = data[0].status
+        statementsType = 'coverageStatements'
+    } else if (status === 'delta') {
         status = 'transition'
         statementsType = 'deltaStatements'
     } else {
         statementsType = 'statements'
     }
-    const filtered = data.filter(d => (d.zone === zone && d.status === status))
+    // console.log(data, status, statementsType)
+    const filtered = data.filter(d => (d.status === status))
     return (filtered.length > 0 && filtered[0][statementsType].results) ? filtered[0][statementsType].results.bindings : []
 }
 
@@ -444,7 +449,7 @@ const groupTimeData = (data, propName, options) => {
         } else {
             groupWithAdd.values = keygroup.values
                 .map(val => { return { ...val, group } })
-                .sort((a, b) => b.prop2.value.localeCompare(a.prop2.value))
+                .sort((a, b) => b.prop2 ? b.prop2.value.localeCompare(a.prop2.value) : 0)
         }
         return groupWithAdd
     }), { key: additionalValue, values: [], type: 'additionalValue' }]

@@ -14,7 +14,8 @@ const datazone = (state, action) => {
                 ...state,
                 statements: action[state.zone],
                 status: action.status,
-                deltaStatements: action[state.zone + 'Delta']
+                deltaStatements: action[state.zone + 'Delta'],
+                coverageStatements: action[state.zone + 'Coverage']
             }
         } else {
             return state

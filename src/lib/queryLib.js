@@ -251,13 +251,14 @@ const defineGroup = (prop, previousProp, level, options) => {
 const makeQuery = (entrypoint, configZone, zone, options) => {
     const { defaultGraph, constraints, prop1only } = options
     let selectedConfig = configLib.getSelectedConfig(configZone, zone)
-    if (prop1only === true) selectedConfig.properties = [selectedConfig.properties[0]]
+    let properties = selectedConfig.properties
+    if (prop1only === true) properties = [properties[0]]
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     let propList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
     let groupList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
     let defList = ``
     let orderList = ``
-    selectedConfig.properties.forEach((prop, index) => {
+    properties.forEach((prop, index) => {
         index += 1
         propList = propList.concat(`?prop${index} ?labelprop${index} `)
         orderList = orderList.concat(`?prop${index} `)
