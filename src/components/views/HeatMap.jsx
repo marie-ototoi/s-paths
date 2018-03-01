@@ -17,6 +17,7 @@ import dataLib from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
 // redux functions
+import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
 import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
 
@@ -49,18 +50,31 @@ class HeatMap extends React.Component {
     }
 
     prepareData (nextProps) {
-        const { data, dataset, config, palettes, getPropPalette, zone } = nextProps
+        const { config, configs, coverage, data, dataset, display, getPropPalette, palettes, role, zone } = nextProps
         // prepare the data for display
         const selectedConfig = configLib.getSelectedConfig(config, zone)
+
+        let coverageFormatProp1
+        let nestedCoverage1
+        if (display.unitDimensions[zone][role] &&
+            display.unitDimensions[zone][role].nestedCoverage1) {
+            nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
+        } else {
+            coverageFormatProp1 = config.matches[0].properties[0].format || 'YYYY-MM-DD'
+            nestedCoverage1 = dataLib.groupTimeData(coverage, 'prop1', { format: coverageFormatProp1, max: 50 })
+            this.props.setUnitDimensions({ nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
+        }
+
         // First prop to be displayed in the bottom axis
         const categoryProp1 = selectedConfig.properties[0].category
-        const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD' // change to selectedConfig.properties[0].format when stats will send format
+        const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD'
         const nestedProp1 = dataLib.groupTimeData(data, 'prop1', {
             format: formatProp1,
             max: 50,
-            subgroup: 'prop2'
+            subgroup: 'prop2',
+            forceGroup: nestedCoverage1[0].group
         })
-        const axisBottom = dataLib.getAxis(nestedProp1, 'prop1', categoryProp1)
+        const axisBottom = dataLib.getAxis(nestedCoverage1, 'prop1', categoryProp1)
         const listProp1 = dataLib.getPropList(config, zone, 0, dataset.labels)
         const categoryProp2 = selectedConfig.properties[1].category
         const nestedProp2 = dataLib.groupTextData(data, 'prop2')
@@ -200,6 +214,7 @@ class HeatMap extends React.Component {
 
 function mapStateToProps (state) {
     return {
+        configs: state.configs,
         dataset: state.dataset.present,
         display: state.display,
         palettes: state.palettes,
@@ -213,7 +228,8 @@ function mapDispatchToProps (dispatch) {
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
         handleMouseMove: handleMouseMove(dispatch),
-        select: select(dispatch)
+        select: select(dispatch),
+        setUnitDimensions: setUnitDimensions(dispatch)
     }
 }
 

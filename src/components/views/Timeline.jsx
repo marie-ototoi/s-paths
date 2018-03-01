@@ -80,7 +80,7 @@ class Timeline extends React.PureComponent {
         const pathProp2 = selectedConfig.properties[1].path
         const categoryProp2 = selectedConfig.properties[1].category
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
-        const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
+        const legend = getLegend(nestedProp2, 'prop1', colors, categoryProp2)
         const listProp2 = getPropList(config, zone, 1, dataset.labels)
         // Save to reuse in render
         this.customState = { ...this.customState, selectedConfig, nestedProp1, nestedCoverage1, legend, axisBottom, listProp1, listProp2 }
