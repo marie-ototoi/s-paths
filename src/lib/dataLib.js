@@ -232,11 +232,11 @@ const getDeltaIndex = (dataPiece, elements, options) => {
         if (entrypoint) {
             if (el.query.value === dataPiece.entrypoint.value) indexElement = indexEl
         } else {
-            //console.log(el)
+            // console.log(el)
             let conditions = el.query.value.map((condition, index) => {
                 const propIndex = index + 1
                 const propName = `${isTarget ? 'new' : ''}prop${propIndex}`
-                //console.log('||||||||||||', dataPiece[propName], condition.category)
+                // console.log('||||||||||||', dataPiece[propName], condition.category)
                 if (dataPiece[propName]) {
                     if (condition.category === 'datetime') {
                         const cast = (dataPiece[propName].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? Number(dataPiece[propName].value.substr(0,4)) : Number(dataPiece[propName].value)
@@ -411,7 +411,7 @@ const groupTimeData = (data, propName, options) => {
     // console.log(yearNest.length, yearNumber, decadeNest.length, decadeNumber, centuryNest.length, centuryNumber)
     let nest
     let additionalValue
-    if (forceGroup === 'year' || yearNumber < max) {
+    if (forceGroup === 'year' || (!forceGroup && yearNumber < max)) {
         nest = yearNest
         group = 'year'
         additionalValue = Number(yearNest[yearNest.length - 1].key) + 1
