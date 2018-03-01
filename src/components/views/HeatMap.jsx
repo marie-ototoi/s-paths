@@ -12,8 +12,8 @@ import SelectionZone from '../elements/SelectionZone'
 // d3
 import d3HeatMap from '../../d3/d3HeatMap'
 // libs
-import configLib from '../../lib/configLib'
-import dataLib from '../../lib/dataLib'
+import { getSelectedConfig } from '../../lib/configLib'
+import { getAxis, getLegend, getPropList, getThresholdsForLegend, groupTextData, groupTimeData } from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
 // redux functions
@@ -52,7 +52,7 @@ class HeatMap extends React.Component {
     prepareData (nextProps) {
         const { config, configs, coverage, data, dataset, display, getPropPalette, palettes, role, zone } = nextProps
         // prepare the data for display
-        const selectedConfig = configLib.getSelectedConfig(config, zone)
+        const selectedConfig = getSelectedConfig(config, zone)
 
         let coverageFormatProp1
         let nestedCoverage1
@@ -61,29 +61,29 @@ class HeatMap extends React.Component {
             nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
         } else {
             coverageFormatProp1 = config.matches[0].properties[0].format || 'YYYY-MM-DD'
-            nestedCoverage1 = dataLib.groupTimeData(coverage, 'prop1', { format: coverageFormatProp1, max: 50 })
+            nestedCoverage1 = groupTimeData(coverage, 'prop1', { format: coverageFormatProp1, max: 50 })
             this.props.setUnitDimensions({ nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
         }
 
         // First prop to be displayed in the bottom axis
         const categoryProp1 = selectedConfig.properties[0].category
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD'
-        const nestedProp1 = dataLib.groupTimeData(data, 'prop1', {
+        const nestedProp1 = groupTimeData(data, 'prop1', {
             format: formatProp1,
             max: 50,
             subgroup: 'prop2',
             forceGroup: nestedCoverage1[0].group
         })
-        const axisBottom = dataLib.getAxis(nestedCoverage1, 'prop1', categoryProp1)
-        const listProp1 = dataLib.getPropList(config, zone, 0, dataset.labels)
+        const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
+        const listProp1 = getPropList(config, zone, 0, dataset.labels)
         const categoryProp2 = selectedConfig.properties[1].category
-        const nestedProp2 = dataLib.groupTextData(data, 'prop2')
-        const axisLeft = dataLib.getAxis(nestedProp2, 'prop2', categoryProp2)
-        const listProp2 = dataLib.getPropList(config, zone, 1, dataset.labels)
+        const nestedProp2 = groupTextData(data, 'prop2')
+        const axisLeft = getAxis(nestedProp2, 'prop2', categoryProp2)
+        const listProp2 = getPropList(config, zone, 1, dataset.labels)
 
         const colors = getQuantitativeColors()
-        const thresholds = dataLib.getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
-        const legend = dataLib.getLegend(thresholds, 'countprop2', colors, 'aggregate')
+        const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
+        const legend = getLegend(thresholds, 'countprop2', colors, 'aggregate')
         // Save to reuse in render
         this.customState = {
             ...this.customState,
