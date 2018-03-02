@@ -3,11 +3,11 @@ import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 import * as d3 from 'd3'
 // components
+import Coverage from '../elements/Coverage'
 import Header from '../elements/Header'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import PlainAxis from '../elements/PlainAxis'
-import PropSelector from '../elements/PropSelector'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 import d3Timeline from '../../d3/d3Timeline'
@@ -51,16 +51,17 @@ class Timeline extends React.PureComponent {
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
         // First prop to be displayed in the bottom axis
-
+        
         let coverageFormatProp1
         let nestedCoverage1
+        let maxUnitsPerYear
         if (display.unitDimensions[zone][role] &&
             display.unitDimensions[zone][role].nestedCoverage1) {
             nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
         } else {
             coverageFormatProp1 = config.matches[0].properties[0].format || 'YYYY-MM-DD'
             nestedCoverage1 = groupTimeData(deduplicate(coverage, ['entrypoint']), 'prop1', { format: coverageFormatProp1, max: 50 })
-            let maxUnitsPerYear = 1
+            maxUnitsPerYear = 1
             nestedCoverage1.forEach(d => {
                 if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
             })
@@ -76,14 +77,15 @@ class Timeline extends React.PureComponent {
         const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
         const listProp1 = getPropList(config, zone, 0, dataset.labels)
         // Second prop to be displayed in the legend
+
         const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
         const pathProp2 = selectedConfig.properties[1].path
         const categoryProp2 = selectedConfig.properties[1].category
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
-        const legend = getLegend(nestedProp2, 'prop1', colors, categoryProp2)
+        const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
         const listProp2 = getPropList(config, zone, 1, dataset.labels)
         // Save to reuse in render
-        this.customState = { ...this.customState, selectedConfig, nestedProp1, nestedCoverage1, legend, axisBottom, listProp1, listProp2 }
+        this.customState = { ...this.customState, maxUnitsPerYear, nestedCoverage1, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2 }
     }
     handleMouseMove (e) {
         const { display, zone } = this.props
@@ -101,7 +103,7 @@ class Timeline extends React.PureComponent {
     }
     render () {
         const { axisBottom, legend, listProp1, listProp2 } = this.customState
-        const { config, data, display, role, selections, step, zone } = this.props
+        const { config, data, dataset, display, role, selections, step, zone } = this.props
         // display settings
         // console.log(step)
         const classN = `Timeline ${this.customState.elementName} role_${role}`
@@ -128,17 +130,23 @@ class Timeline extends React.PureComponent {
                 <Header
                     zone = { zone }
                 />
+                <Coverage
+                    zone = { zone }
+                    displayedInstances = { deduplicate(data, ['entrypoint']).length } // to be fixed - works only for unit displays
+                    selectedInstances = { selections.length }
+                    selections = { selections }
+                    config = { config }
+                />
                 <Nav
                     zone = { zone }
-                    displayedInstances = { data.length } // to be fixed - works only for unit displays
-                    selections = { selections }
                     config = { config }
                 />
                 <Legend
                     type = "plain"
                     zone = { zone }
-                    offset = { { x: 10, y: 23, width: -20, height: -30 } }
+                    offset = { { x: 10, y: 0, width: -20, height: 0 } }
                     legend = { legend }
+                    propList = { getPropList(config, zone, 1, dataset.labels) }
                     selectElements = { this.selectElements }
                 />
                 <PlainAxis
@@ -146,24 +154,8 @@ class Timeline extends React.PureComponent {
                     zone = { zone }
                     axis = { axisBottom }
                     propIndex = { 0 }
+                    propList = { getPropList(config, zone, 0, dataset.labels) }
                     selectElements = { this.selectElements }
-                />
-                <PropSelector
-                    type = "Legend"
-                    propList = { listProp2 }
-                    config = { config }
-                    offset = { { x: 10, y: 0, width: -40, height: 0 } }
-                    propIndex = { 1 }
-                    zone = { zone }
-                />
-                <PropSelector
-                    align = "right"
-                    type = "AxisBottom"
-                    propList = { listProp1 }
-                    config = { config }
-                    offset = { { x: 15, y: -14, width: -40, height: 0 } }
-                    propIndex = { 0 }
-                    zone = { zone }
                 />
             </g>
             }

@@ -9,9 +9,14 @@ import { getDimensions } from '../../lib/scaleLib'
 import { select } from '../../actions/selectionActions'
 
 class Legend extends React.PureComponent {
+    constructor (props) {
+        super(props)
+        this.customState = { }
+    }
     render () {
         const { display, offset, zone } = this.props
         const dimensions = getDimensions('legend', display.zones[zone], display.viz, offset)
+        this.customState.dimensions = dimensions
         return (<g className = "Legend"
             transform = { `translate(${dimensions.x}, ${dimensions.y})` }
             ref = { `legend_${zone}` }
@@ -24,14 +29,14 @@ class Legend extends React.PureComponent {
     componentDidMount () {
         const { zone, type } = this.props
         if (type === 'plain') {
-            d3PlainLegend.create(this.refs[`legend_${zone}`], this.props)
+            d3PlainLegend.create(this.refs[`legend_${zone}`], { ...this.props, ...this.customState })
         }
     }
     componentDidUpdate () {
         // console.log('upd')
         const { zone, type } = this.props
         if (type === 'plain') {
-            d3PlainLegend.update(this.refs[`legend_${zone}`], this.props)
+            d3PlainLegend.update(this.refs[`legend_${zone}`], { ...this.props, ...this.customState })
         }
     }
     componentWillUnmount () {

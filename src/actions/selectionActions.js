@@ -1,24 +1,6 @@
 import * as types from '../constants/ActionTypes'
 import selectionLib from '../lib/selectionLib'
 
-const removeSelection = (dispatch) => (selector, zone) => {
-    return dispatch({
-        type: 'REMOVE_SELECTION',
-        selector,
-        zone
-    })
-}
-
-const addSelection = (dispatch) => (selector, zone, props) => {
-    // replace by select
-    return dispatch({
-        type: 'ADD_SELECTION',
-        selector,
-        zone,
-        props
-    })
-}
-
 const handleMouseDown = (dispatch) => (e, zone, offset) => {
     // console.log(e.pageX, e.pageY, zone, offset)
     // replace by select
@@ -72,8 +54,6 @@ const select = (dispatch) => (elements, zone, selections) => {
     // console.log(selections)
 }
 
-exports.addSelection = addSelection
-exports.removeSelection = removeSelection
 exports.select = select
 exports.handleMouseDown = handleMouseDown
 exports.handleMouseMove = handleMouseMove

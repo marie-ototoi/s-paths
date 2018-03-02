@@ -7,6 +7,7 @@ module.exports = {
     timeline: require('../styles/timeline.css'),
     heatmap: require('../styles/heatmap.css'),
     axis: require('../styles/axis.css'),
+    coverage: require('../styles/coverage.css'),
     nav: require('../styles/nav.css'),
     tooltip: require('../styles/tooltip.css'),
     propSelector: require('../styles/propSelector.css'),

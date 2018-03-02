@@ -78,7 +78,7 @@ const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, he
             x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
             y: origin.y + viz.vertical_margin + offset.y,
             width: viz.horizontal_margin + offset.width,
-            height: viz.vertical_margin + offset.height
+            height: viz.useful_height + offset.height
         }
     case 'header':
         return {
@@ -87,9 +87,16 @@ const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, he
             width: viz.useful_width + offset.width,
             height: viz.vertical_margin + offset.height
         }
-    case 'nav':
+    case 'coverage':
         return {
             x: origin.x + offset.x,
+            y: origin.y + offset.y,
+            width: viz.horizontal_margin + offset.width,
+            height: viz.vertical_margin + offset.height
+        }
+    case 'nav':
+        return {
+            x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
             y: origin.y + offset.y,
             width: viz.horizontal_margin + offset.width,
             height: viz.vertical_margin + offset.height

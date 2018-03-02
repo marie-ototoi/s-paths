@@ -151,13 +151,13 @@ const getElementsInZone = (el, props) => {
 // const retrieveValues
 
 const resize = (el, props) => {
-    const { config, configs, nestedCoverage1, nestedProp1, display, role, zone } = props
-    // todo : get Saved Data
-    // todo : if none use coverage data and save it
+    const { nestedCoverage1, display, role, zone } = props
     let maxUnitsPerYear
     if (display.unitDimensions[zone][role] &&
         display.unitDimensions[zone][role].maxUnitsPerYear) {
         maxUnitsPerYear = display.unitDimensions[zone][role].maxUnitsPerYear
+    } else if (props.maxUnitsPerYear) {
+        maxUnitsPerYear = props.maxUnitsPerYear
     } else {
         maxUnitsPerYear = 1
         d3.select(el)
@@ -174,7 +174,7 @@ const resize = (el, props) => {
     d3.select(el)
         .selectAll('g.time')
         .attr('transform', d => `translate(${xScale(Number(d.key))}, 0)`)
-
+    //console.log(maxUnitsPerYear, zone, role)
     const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfTimeUnits(nestedCoverage1))
     const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
 

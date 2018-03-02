@@ -51,6 +51,7 @@ const draw = (el, props) => {
             d.color = legend.info.filter(p => (p.key[0] <= Number(d.countprop2) && p.key[1] >= Number(d.countprop2)))[0].color
             d.selection = {
                 selector: `heatmap_element_p1_${dataLib.makeId(d.parent.key)}_p2_${dataLib.makeId(d.key)}`,
+                count: Number(d.countprop2),
                 query: {
                     type: 'set',
                     value: [{
@@ -160,13 +161,13 @@ const getElementsInZone = (el, props) => {
 }
 
 const resize = (el, props) => {
-    const { nestedProp1, nestedProp2, display } = props
+    const { nestedCoverage1, nestedProp2, display } = props
     let mapY = {}
     nestedProp2.forEach((p, i) => {
         mapY[p.key] = nestedProp2.length - 2 - i
     })
     const xScale = d3.scaleLinear()
-        .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
+        .domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
         .range([0, display.viz.useful_width])
     let maxUnitsPerYear = 1
     d3.select(el)
@@ -175,7 +176,7 @@ const resize = (el, props) => {
         .each(d => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
-    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfTimeUnits(nestedProp1))
+    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfTimeUnits(nestedCoverage1))
     const unitHeight = Math.round(display.viz.useful_height / (props.nestedProp2.length - 1))
     // todo : s'il n'y a pas de unitHeigth sauvé pour cette config on recalcule
 

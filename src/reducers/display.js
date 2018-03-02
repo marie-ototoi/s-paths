@@ -132,19 +132,19 @@ const display = (state = defaultState, action) => {
                     }
                 }
             }
+            
         }
     case types.SET_DATA:
         let unitDimensions = {
             main: {
                 origin: state.unitDimensions.main.origin,
-                target: (action.resetUnitDimensions === 'all') ? null : state.unitDimensions.main.target
+                target: (action.resetUnitDimensions === 'all' || (action.resetUnitDimensions === 'zone' && action.zone === 'main')) ? null : state.unitDimensions.main.target
             },
             aside: {
                 origin: state.unitDimensions.aside.origin,
-                target: (action.resetUnitDimensions === 'all') ? null : state.unitDimensions.aside.target
+                target: (action.resetUnitDimensions === 'all' || (action.resetUnitDimensions === 'zone' && action.zone === 'aside')) ? null : state.unitDimensions.aside.target
             }
         }
-        if (action.resetUnitDimensions === 'zone') unitDimensions[action.zone].target = null
         return {
             ...state,
             unitDimensions

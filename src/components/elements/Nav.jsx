@@ -1,48 +1,26 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
+import PropSelector from '../elements/PropSelector'
+
 import { getCurrentConfigs, getSelectedConfig } from '../../lib/configLib'
+import { getPropList } from '../../lib/dataLib'
 import queryLib from '../../lib/queryLib'
 import { getDimensions } from '../../lib/scaleLib'
 
 import { loadData, selectView } from '../../actions/dataActions'
 
 class Nav extends React.PureComponent {
-    constructor (props) {
-        super(props)
-        this.exploreSelection = this.exploreSelection.bind(this)
-    }
-    exploreSelection () {
-        const { config, configs, dataset, selections, views, zone } = this.props
-        const activeConfigs = getCurrentConfigs(configs, 'active')
-        if (selections.length > 0) {
-            const selectedConfig = getSelectedConfig(config, zone)
-            let newConstraints = queryLib.makeSelectionConstraints(selections, selectedConfig, zone)
-            let newDataset = {
-                ...dataset,
-                constraints: newConstraints
-            }
-            this.props.loadData(newDataset, views, activeConfigs, dataset)
-        }
-    }
     render () {
         const { config, configs, dataset, displayedInstances, display, offset, selections, zone } = this.props
         const activeConfigs = getCurrentConfigs(configs, 'active')
         const dimensions = getDimensions('nav', display.zones[zone], display.viz, offset)
         const { x, y, width } = dimensions
         // console.log(dataset.stats)
-        let options = [
-            { label: 'dataset', total: dataset.stats.totalInstances },
-            { label: 'queried', total: dataset.stats.selectionInstances },
-            { label: 'displayed', total: displayedInstances },
-            { label: 'selected', total: selections.length }
-        ]
         const itemWidth = width / 6
         const itemHeight = itemWidth * 3 / 4
         const margin = itemWidth / 6
-        const maxBarWidth = (itemWidth * 3) + (margin * 2)
 
-        // console.log(configs)
         return (<g className = "Nav"
             transform = { `translate(${x}, ${y})` }
             ref = { `nav_${zone}` }
@@ -51,7 +29,7 @@ class Nav extends React.PureComponent {
                 let selected = (config.id === option.id)
                 return <g
                     key = { zone + '_thumb_' + i }
-                    transform = { `translate(${(margin * (i + 1)) + (itemWidth * i)}, ${60 - itemHeight})` }
+                    transform = { `translate(${(margin * (i)) + (itemWidth * i)}, ${50 - itemHeight})` }
                     onClick = { e => this.props.selectView(option.id, zone, activeConfigs, dataset) }
                 >
                     <rect
@@ -66,20 +44,17 @@ class Nav extends React.PureComponent {
                     >{ option.id.substr(0, 1) }</text>
                 </g>
             }) }
-            { options.map((option, i) => {
-                const barWidth = maxBarWidth * option.total / options[0].total
-                return <g key = { zone + '_summary_' + i }>
-                    <rect width = { maxBarWidth } height = { 12 } y = { 60 + margin + i * 16 } x = { margin * 2 + itemWidth } fill = "#E0E0E0"></rect>
-                    <rect width = { barWidth } height = { 6 } y = { 63 + margin + i * 16 } x = { margin * 2 + itemWidth } fill = "#666666"></rect>
-                    <text x = { margin } fill = "#666666" y = { 60 + margin + 10 + i * 16 }>{ option.label }</text>
-                    <text x = { maxBarWidth + margin * 3 + itemWidth } fill = "#666666" y = { 60 + margin + 10 + i * 16 }>{ option.total }</text>
-                </g>
+            { config.constraints.map((prop, i) => {
+                return <PropSelector
+                    selected = { true }
+                    key = { zone + '_propselector_' + i }
+                    propList = { getPropList(config, zone, i, dataset.labels) }
+                    config = { config }
+                    dimensions = { { x: 0, y: 60 + (i * 25), width: width - 20, height: 50 } }
+                    propIndex = { i }
+                    zone = { zone }
+                />
             }) }
-            <text
-                y = { 200 }
-                className = "button"
-                onMouseUp = { this.exploreSelection }
-            >Explore Selection</text>
         </g>)
     }
 }

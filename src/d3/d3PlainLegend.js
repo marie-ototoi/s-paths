@@ -42,14 +42,15 @@ const destroy = (el) => {
 }
 
 const resize = (el, props) => {
-    d3.select(el).selectAll('g.legenditem ').select('rect')
+    let total = d3.select(el).selectAll('g.legenditem').size() * 13
+    d3.select(el).selectAll('g.legenditem').select('rect')
         .attr('width', (d, i) => 15)
         .attr('height', (d, i) => 10)
-        .attr('y', (d, i) => Math.ceil(i * 13))
+        .attr('y', (d, i) => props.dimensions.height - total + Math.ceil(i * 13))
         .attr('fill', d => d.color)
     d3.select(el).selectAll('g.legenditem').select('text')
         .attr('x', 20)
-        .attr('y', (d, i) => 9 + Math.ceil(i * 13))
+        .attr('y', (d, i) => props.dimensions.height - total + Math.ceil(i * 13) + 9)
         .text(d => d.label)
 }
 

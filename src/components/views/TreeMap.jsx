@@ -3,11 +3,11 @@ import * as d3 from 'd3'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 // components
-import Coverage from '../elements/Coverage'
 import Header from '../elements/Header'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import PlainAxis from '../elements/PlainAxis'
+import PropSelector from '../elements/PropSelector'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 import d3HeatMap from '../../d3/d3HeatMap'
@@ -50,7 +50,7 @@ class HeatMap extends React.Component {
     }
 
     prepareData (nextProps) {
-        const { config, configs, coverage, data, dataset, display, getPropPalette, palettes, role, selections, zone } = nextProps
+        const { config, configs, coverage, data, dataset, display, getPropPalette, palettes, role, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
 
@@ -84,20 +84,11 @@ class HeatMap extends React.Component {
         const colors = getQuantitativeColors()
         const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
         const legend = getLegend(thresholds, 'countprop2', colors, 'aggregate')
-
-        const displayedInstances = data.reduce((acc, cur) => {
-            // console.log(cur)
-            acc += Number(cur.countprop2.value)
-            return acc
-        }, 0)
-
         // Save to reuse in render
         this.customState = {
             ...this.customState,
-            displayedInstances,
             selectedConfig,
             nestedProp1,
-            nestedCoverage1,
             legend,
             axisBottom,
             axisLeft,
@@ -147,24 +138,16 @@ class HeatMap extends React.Component {
                 <Header
                     zone = { zone }
                 />
-                <Coverage
-                    zone = { zone }
-                    displayedInstances = { this.customState.displayedInstances } // to be fixed - works only for unit displays
-                    selectedInstances = { selections.reduce((acc, cur) => {
-                        acc += Number(cur.count)
-                        return acc
-                    }, 0) }
-                    selections = { selections }
-                    config = { config }
-                />
                 <Nav
                     zone = { zone }
+                    displayedInstances = { data.length } // to be fixed - works only for unit displays
+                    selections = { selections }
                     config = { config }
                 />
                 <Legend
                     type = "plain"
                     zone = { zone }
-                    offset = { { x: 10, y: 0, width: -20, height: 0 } }
+                    offset = { { x: 10, y: 0, width: -20, height: -30 } }
                     legend = { legend }
                     selectElements = { this.selectElements }
                 />
@@ -181,6 +164,26 @@ class HeatMap extends React.Component {
                     axis = { axisLeft }
                     propIndex = { 1 }
                     selectElements = { this.selectElements }
+                />
+                <PropSelector
+                    type = "AxisLeft"
+                    propList = { listProp2 }
+                    config = { config }
+                    align = "right"
+                    offset = { { x: 20, y: 30, width: -15, height: 0 } }
+                    selectElements = { this.selectElements }
+                    propIndex = { 1 }
+                    zone = { zone }
+                />
+                <PropSelector
+                    type = "AxisBottom"
+                    propList = { listProp1 }
+                    align = "right"
+                    config = { config }
+                    offset = { { x: 20, y: -15, width: -50, height: 0 } }
+                    selectElements = { this.selectElements }
+                    propIndex = { 0 }
+                    zone = { zone }
                 />
             </g>
             }

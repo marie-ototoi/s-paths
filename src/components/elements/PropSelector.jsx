@@ -26,8 +26,8 @@ class PropSelector extends React.PureComponent {
         this.props.selectProperty(propIndex, e.target.value, config, dataset, zone)
     }
     render () {
-        const { align, display, offset, propList, type, zone } = this.props
-        const dimensions = getDimensions('propSelector' + type, display.zones[zone], display.viz, offset)
+        const { align, dimensions, display, offset, propList, type, zone } = this.props
+        // const dimensions = getDimensions('propSelector' + type, display.zones[zone], display.viz, offset)
         const { x, y, width, height } = dimensions
         const alignClass = (align === 'right') ? 'right' : 'left'
         return (
@@ -37,10 +37,9 @@ class PropSelector extends React.PureComponent {
                 width = { width }
                 height = { height }
             >
-                { (!this.state.selected) &&
+                { (!this.props.selected) &&
                     <p
                         className = { alignClass }
-                        onClick = { (e) => this.setState({ selected: true }) }
                     >
                         { this.state.selectedLabel.map((part, index) => {
                             return <span key = {`${this.state.elementName}_path_${index}`}>
@@ -49,7 +48,7 @@ class PropSelector extends React.PureComponent {
                         }) }
                     </p>
                 }
-                { (this.state.selected) &&
+                { (this.props.selected) &&
                 <select
                     className = { alignClass }
                     value = { this.state.selectedPath }
@@ -65,7 +64,7 @@ class PropSelector extends React.PureComponent {
                         </option>
                     }) }
                 </select>
-                }
+            }
             </foreignObject>
         )
     }

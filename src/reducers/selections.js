@@ -15,7 +15,8 @@ const selection = (state, action) => {
         return {
             selector: action.selector,
             zone: action.zone,
-            query: action.query
+            query: action.query,
+            count: action.count || 0
         }
     default:
         return state
@@ -31,7 +32,7 @@ const selections = (state = defaultState, action) => {
             ).length === 0
         })
         const elementsAdded = elements2Add.map(el => {
-            return selection(undefined, { ...action, query: el.query, selector: el.selector })
+            return selection(undefined, { ...action, query: el.query, selector: el.selector, count: el.count })
         })
         return [
             ...state,
