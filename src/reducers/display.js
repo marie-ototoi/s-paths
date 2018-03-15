@@ -132,7 +132,6 @@ const display = (state = defaultState, action) => {
                     }
                 }
             }
-            
         }
     case types.SET_DATA:
         let unitDimensions = {

@@ -12,7 +12,8 @@ import { loadData, selectView } from '../../actions/dataActions'
 
 class Nav extends React.PureComponent {
     render () {
-        const { config, configs, dataset, displayedInstances, display, offset, selections, zone } = this.props
+        const { config, configs, dataset, displayedInstances, display, offset, propsLists, selections, zone } = this.props
+        // console.log(propsLists)
         const activeConfigs = getCurrentConfigs(configs, 'active')
         const dimensions = getDimensions('nav', display.zones[zone], display.viz, offset)
         const { x, y, width } = dimensions
@@ -48,7 +49,7 @@ class Nav extends React.PureComponent {
                 return <PropSelector
                     selected = { true }
                     key = { zone + '_propselector_' + i }
-                    propList = { getPropList(config, zone, i, dataset.labels) }
+                    propList = { this.props.propsLists[i] }
                     config = { config }
                     dimensions = { { x: 0, y: 60 + (i * 25), width: width - 20, height: 50 } }
                     propIndex = { i }

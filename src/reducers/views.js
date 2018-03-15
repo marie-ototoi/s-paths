@@ -20,7 +20,7 @@ const defaultState = [
                     category: 'text',
                     unique: { min: 2, max: 10, optimal: [4, 6] }
                 }
-            ],
+            ]/* ,
             [
                 {
                     category: 'uri',
@@ -31,7 +31,7 @@ const defaultState = [
                     category: 'text',
                     unique: { min: 2, max: 10, optimal: [4, 6] }
                 }
-            ]
+            ] */
         ]
     },
     {

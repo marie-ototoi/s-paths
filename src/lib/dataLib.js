@@ -143,7 +143,7 @@ const makeId = (textstr) => {
     }).toLowerCase()
 }
 
-const getPropList = (configs, zone, propIndex, labels) => {
+const getPropList = (configs, zone, propIndex, labels, selectedOnly) => {
     return configs.matches
         .filter(config => config.properties[propIndex].path !== '')
         .map(config => {
@@ -159,6 +159,9 @@ const getPropList = (configs, zone, propIndex, labels) => {
             }
             return configAcc
         }, [])
+        .filter(prop => {
+            return selectedOnly ? prop.selected : true
+        })
 }
 
 const getLegend = (nestedProps, propName, colors, category) => {
@@ -464,6 +467,7 @@ exports.getDeltaIndex = getDeltaIndex
 exports.getHeadings = getHeadings
 exports.getLegend = getLegend
 exports.getNumberOfTimeUnits = getNumberOfTimeUnits
+exports.getReadablePathsParts = getReadablePathsParts
 exports.getTransitionElements = getTransitionElements
 exports.makeId = makeId
 exports.getPropList = getPropList

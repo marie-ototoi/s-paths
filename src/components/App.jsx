@@ -100,7 +100,6 @@ class App extends React.Component {
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')
         const statusAside = getCurrentState(this.props.data, 'aside')
-        
         const statusConfigs = (statusMain === 'transition' || statusAside === 'transition') ? 'transition' : 'active'
         const mainConfig = getConfigs(getCurrentConfigs(configs, 'active'), 'main')
         const mainTransitionConfig = getConfigs(getCurrentConfigs(configs, 'transition'), 'main')
@@ -123,7 +122,7 @@ class App extends React.Component {
                 viewBox = { `${display.viewBox.x}, ${display.viewBox.y}, ${display.viewBox.width}, ${display.viewBox.height}` }
                 preserveAspectRatio = "xMinYMin meet"
             >
-            
+
                 { mode === 'dev' &&
                     <Debug />
                 }

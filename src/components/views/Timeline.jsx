@@ -7,12 +7,13 @@ import Coverage from '../elements/Coverage'
 import Header from '../elements/Header'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
+import PropSelector from '../elements/PropSelector'
 import PlainAxis from '../elements/PlainAxis'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 import d3Timeline from '../../d3/d3Timeline'
 // libs
-import { getSelectedConfig } from '../../lib/configLib'
+import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
 import { deduplicate, getAxis, getLegend, getPropList, groupTimeData } from '../../lib/dataLib'
 import { getDimensions, getZoneCoord } from '../../lib/scaleLib'
 // redux functions
@@ -75,7 +76,6 @@ class Timeline extends React.PureComponent {
         })
         const categoryProp1 = selectedConfig.properties[0].category
         const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
-        const listProp1 = getPropList(config, zone, 0, dataset.labels)
         // Second prop to be displayed in the legend
 
         const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
@@ -83,9 +83,10 @@ class Timeline extends React.PureComponent {
         const categoryProp2 = selectedConfig.properties[1].category
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
-        const listProp2 = getPropList(config, zone, 1, dataset.labels)
+        const propsLists = getPropsLists(config, zone, dataset.labels)
+
         // Save to reuse in render
-        this.customState = { ...this.customState, maxUnitsPerYear, nestedCoverage1, selectedConfig, nestedProp1, legend, axisBottom, listProp1, listProp2 }
+        this.customState = { ...this.customState, propsLists, maxUnitsPerYear, nestedCoverage1, selectedConfig, nestedProp1, legend, axisBottom }
     }
     handleMouseMove (e) {
         const { display, zone } = this.props
@@ -102,10 +103,10 @@ class Timeline extends React.PureComponent {
         this.props.handleMouseUp(e, zone)
     }
     render () {
-        const { axisBottom, legend, listProp1, listProp2 } = this.customState
+        const { axisBottom, legend } = this.customState
         const { config, data, dataset, display, role, selections, step, zone } = this.props
         // display settings
-        // console.log(step)
+        // console.log(getPropList(config, zone, 1, dataset.labels, true))
         const classN = `Timeline ${this.customState.elementName} role_${role}`
         const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
         return (<g className = { classN } >
@@ -140,13 +141,13 @@ class Timeline extends React.PureComponent {
                 <Nav
                     zone = { zone }
                     config = { config }
+                    propsLists = { this.customState.propsLists }
                 />
                 <Legend
                     type = "plain"
                     zone = { zone }
                     offset = { { x: 10, y: 0, width: -20, height: 0 } }
                     legend = { legend }
-                    propList = { getPropList(config, zone, 1, dataset.labels) }
                     selectElements = { this.selectElements }
                 />
                 <PlainAxis
@@ -154,8 +155,27 @@ class Timeline extends React.PureComponent {
                     zone = { zone }
                     axis = { axisBottom }
                     propIndex = { 0 }
-                    propList = { getPropList(config, zone, 0, dataset.labels) }
+                    propList = { this.customState.propsLists[0] }
                     selectElements = { this.selectElements }
+                />
+                <PropSelector
+                    selected = { false }
+                    key = { zone + '_propselector_21' }
+                    propList = { this.customState.propsLists[0] }
+                    config = { config }
+                    align = "right"
+                    dimensions = { getDimensions('legendAxisBottom', display.zones[zone], display.viz, { x: 0, y: -15, width: -35, height: 0 }) }
+                    propIndex = { 0 }
+                    zone = { zone }
+                />
+                <PropSelector
+                    selected = { false }
+                    key = { zone + '_propselector_22' }
+                    propList = { this.customState.propsLists[1] }
+                    config = { config }
+                    dimensions = { getDimensions('legendLegend', display.zones[zone], display.viz, { x: 0, y: 0, width: -35, height: 0 }) }
+                    propIndex = { 1 }
+                    zone = { zone }
                 />
             </g>
             }

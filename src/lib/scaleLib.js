@@ -115,18 +115,24 @@ const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, he
             width: viz.horizontal_margin + offset.width,
             height: viz.useful_height + offset.height
         }
-    case 'propSelectorLegend':
-        return {
-            x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
-            y: origin.y + viz.vertical_margin + offset.y,
-            width: viz.horizontal_margin + offset.width,
-            height: 20 + offset.height
-        }
-    case 'propSelectorAxisBottom':
-    case 'propSelectorAxisLeft':
+    case 'legendAxisBottom':
         return {
             x: origin.x + offset.x,
             y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
+            width: viz.horizontal_margin + offset.width,
+            height: 20 + offset.height
+        }
+    case 'legendAxisLeft':
+        return {
+            x: origin.x + viz.horizontal_margin + offset.x,
+            y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
+            width: viz.horizontal_margin + offset.width,
+            height: 20 + offset.height
+        }
+    case 'legendLegend':
+        return {
+            x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
+            y: origin.y + (viz.useful_height * 3 / 4) + viz.vertical_margin + offset.y,
             width: viz.horizontal_margin + offset.width,
             height: 20 + offset.height
         }

@@ -96,4 +96,75 @@ describe('lib/config', () => {
         expect(newConfig.matches[2].mainSelected).to.be.true
         expect(newConfig.matches[3].mainSelected).to.be.false
     })
+
+    it('should return lists of props available for each propIndex in a config', () => {
+        let configEx = {
+            matches: [
+                {
+                    properties: [
+                        { path: 'nobel:LaureateAward/nobel:category/*' },
+                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
+                        { path: 'nobel:LaureateAward/nobel:share/*' }
+                    ],
+                    mainSelected: false
+                },
+                {
+                    properties: [
+                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
+                        { path: 'nobel:LaureateAward/nobel:category/*' },
+                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' }
+                    ],
+                    mainSelected: true
+                },
+                {
+                    properties: [
+                        { path: 'nobel:LaureateAward/nobel:category/*' },
+                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
+                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' }
+                    ],
+                    mainSelected: false
+                },
+                {
+                    properties: [
+                        { path: 'nobel:LaureateAward/nobel:category/*' },
+                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' },
+                        { path: 'nobel:LaureateAward/nobel:share/*' }
+                    ],
+                    mainSelected: false
+                }
+            ]
+        }
+        let prop1 = {
+            path: 'nobel:LaureateAward/nobel:category/*',
+            readablePath: [ { comment: undefined, label: 'nobel:category' } ]
+        }
+        let prop2 = {
+            path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*',
+            readablePath: [ { 'comment': undefined, label: 'nobel:laureate' }, { comment: undefined, label: 'dbpprop:dateOfBirth' } ]
+        }
+        let prop3 = {
+            path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*',
+            readablePath: [ { 'comment': undefined, label: 'nobel:laureate' }, { comment: undefined, label: 'dbpprop:dateOfDeath' } ]
+        }
+        let prop4 = {
+            path: 'nobel:LaureateAward/nobel:share/*',
+            readablePath: [ { 'comment': undefined, label: 'nobel:share' } ]
+        }
+        let propsLists = config.getPropsLists(configEx, 'main', [])
+        expect(propsLists).to.deep.equal([
+            [
+                { ...prop1, selected: false },
+                { ...prop2, selected: true }
+            ],
+            [
+                { ...prop2, selected: false },
+                { ...prop1, selected: true },
+                { ...prop3, selected: false }
+            ],
+            [
+                { ...prop4, selected: false },
+                { ...prop3, selected: true }
+            ]
+        ])
+    })
 })

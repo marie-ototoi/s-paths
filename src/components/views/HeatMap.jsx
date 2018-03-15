@@ -8,11 +8,12 @@ import Header from '../elements/Header'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import PlainAxis from '../elements/PlainAxis'
+import PropSelector from '../elements/PropSelector'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 import d3HeatMap from '../../d3/d3HeatMap'
 // libs
-import { getSelectedConfig } from '../../lib/configLib'
+import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
 import { getAxis, getLegend, getPropList, getThresholdsForLegend, groupTextData, groupTimeData } from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
@@ -75,16 +76,14 @@ class HeatMap extends React.Component {
             forceGroup: nestedCoverage1[0].group
         })
         const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
-        const listProp1 = getPropList(config, zone, 0, dataset.labels)
         const categoryProp2 = selectedConfig.properties[1].category
         const nestedProp2 = groupTextData(data, 'prop2')
         const axisLeft = getAxis(nestedProp2, 'prop2', categoryProp2)
-        const listProp2 = getPropList(config, zone, 1, dataset.labels)
 
         const colors = getQuantitativeColors()
         const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
         const legend = getLegend(thresholds, 'countprop2', colors, 'aggregate')
-
+        const propsLists = getPropsLists(config, zone, dataset.labels)
         const displayedInstances = data.reduce((acc, cur) => {
             // console.log(cur)
             acc += Number(cur.countprop2.value)
@@ -94,6 +93,7 @@ class HeatMap extends React.Component {
         // Save to reuse in render
         this.customState = {
             ...this.customState,
+            propsLists,
             displayedInstances,
             selectedConfig,
             nestedProp1,
@@ -101,8 +101,6 @@ class HeatMap extends React.Component {
             legend,
             axisBottom,
             axisLeft,
-            listProp1,
-            listProp2,
             nestedProp2
         }
     }
@@ -121,8 +119,8 @@ class HeatMap extends React.Component {
         this.props.handleMouseUp(e, zone)
     }
     render () {
-        const { axisBottom, axisLeft, legend, listProp1, listProp2 } = this.customState
-        const { data, config, display, role, selections, step, zone } = this.props
+        const { axisBottom, axisLeft, legend } = this.customState
+        const { data, dataset, config, display, role, selections, step, zone } = this.props
         const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
 
         return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` } >
@@ -160,6 +158,7 @@ class HeatMap extends React.Component {
                 <Nav
                     zone = { zone }
                     config = { config }
+                    propsLists = { this.customState.propsLists }
                 />
                 <Legend
                     type = "plain"
@@ -181,6 +180,25 @@ class HeatMap extends React.Component {
                     axis = { axisLeft }
                     propIndex = { 1 }
                     selectElements = { this.selectElements }
+                />
+                <PropSelector
+                    selected = { false }
+                    key = { zone + '_propselector_21' }
+                    propList = { this.customState.propsLists[0] }
+                    config = { config }
+                    align = "right"
+                    dimensions = { getDimensions('legendAxisBottom', display.zones[zone], display.viz, { x: 0, y: -15, width: -35, height: 0 }) }
+                    propIndex = { 0 }
+                    zone = { zone }
+                />
+                <PropSelector
+                    selected = { false }
+                    key = { zone + '_propselector_22' }
+                    propList = { this.customState.propsLists[1] }
+                    config = { config }
+                    dimensions = { getDimensions('legendAxisLeft', display.zones[zone], display.viz, { x: 0, y: 30, width: 0, height: 0 }) }
+                    propIndex = { 1 }
+                    zone = { zone }
                 />
             </g>
             }

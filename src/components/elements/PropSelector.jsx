@@ -11,15 +11,13 @@ class PropSelector extends React.PureComponent {
         this.handleSelect = this.handleSelect.bind(this)
         this.state = {
             elementName: `${props.zone}_selector_${props.propIndex} propSelector`,
-            selected: false,
-            selectedPath: '',
-            selectedLabel: props.propList[0].readablePath
+            selected: props.selected
         }
     }
     handleSelect (e) {
         const { config, dataset, propIndex, propList, zone } = this.props
         this.setState({
-            selected: false,
+            selected: this.props.selected,
             selectedPath: e.target.value,
             selectedLabel: propList[e.target.options.selectedIndex].readablePath
         })
@@ -30,6 +28,7 @@ class PropSelector extends React.PureComponent {
         // const dimensions = getDimensions('propSelector' + type, display.zones[zone], display.viz, offset)
         const { x, y, width, height } = dimensions
         const alignClass = (align === 'right') ? 'right' : 'left'
+        const selectedProp = propList.filter(p => p.selected)[0]
         return (
             <foreignObject className = {this.state.elementName}
                 transform = { `translate(${x}, ${y})` }
@@ -37,34 +36,35 @@ class PropSelector extends React.PureComponent {
                 width = { width }
                 height = { height }
             >
-                { (!this.props.selected) &&
+                { (!this.state.selected) &&
                     <p
                         className = { alignClass }
+                        onClick = { (e) => this.setState({ selected: true }) }
                     >
-                        { this.state.selectedLabel.map((part, index) => {
-                            return <span key = {`${this.state.elementName}_path_${index}`}>
-                                <span title = { part.comment}>{part.label}</span> { (index < this.state.selectedLabel.length - 1) ? ' / ' : '' }
+                        { selectedProp && selectedProp.readablePath.map((part, index) => {
+                            return <span key = { `${this.state.elementName}_path_${index}` }>
+                                <span title = { part.comment }>{part.label}</span> { (index < selectedProp.readablePath.length - 1) ? ' / ' : '' }
                             </span>
                         }) }
                     </p>
                 }
-                { (this.props.selected) &&
+                { (this.state.selected) &&
                 <select
                     className = { alignClass }
-                    value = { this.state.selectedPath }
                     style = { { width: width + `px` } }
                     onChange = { this.handleSelect }
+                    value = { selectedProp.path }
                 >
                     { propList.map((config, i) => {
                         return <option
                             value = { config.path }
-                            key = { this.state.elementName + i }
+                            key = { this.state.elementName + i }                            
                         >
                             { config.readablePath.map(part => part.label).join(' / ') }
                         </option>
                     }) }
                 </select>
-            }
+                }
             </foreignObject>
         )
     }

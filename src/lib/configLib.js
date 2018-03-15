@@ -1,3 +1,6 @@
+import * as d3 from 'd3'
+import dataLib from './dataLib'
+
 const getSelectedConfig = (config, zone) => {
     return config.matches.filter(m => m[zone + 'Selected'] === true)[0]
 }
@@ -219,6 +222,34 @@ const activateDefaultConfigs = (configs) => {
         }
     })
 }
+
+const getPropsLists = (configs, zone, labels) => {
+    const maxPropIndex = d3.max(configs.matches.map(m => m.properties.length))
+    return Array.from(Array(maxPropIndex).keys()).map(propIndex => {
+        return configs.matches
+            .filter(config => config.properties[propIndex].path !== '')
+            .map(config => {
+                return {
+                    path: config.properties[propIndex].path,
+                    readablePath: dataLib.getReadablePathsParts(config.properties[propIndex].path, labels),
+                    selected: config[zone + 'Selected']
+                }
+            }).reduce((configAcc, config) => {
+                let existsIndex
+                const exists = configAcc.filter((c, i) => {
+                    if (c.path === config.path) existsIndex = i
+                    return c.path === config.path
+                })
+                if (!exists.length > 0) {
+                    configAcc.push(config)
+                } else {
+                    if (config.selected) configAcc[existsIndex].selected = true
+                }
+                return configAcc
+            }, [])
+    })
+}
+
 const selectProperty = (config, zone, propIndex, path) => {
     let selectedMatch = getSelectedConfig(config, zone)
     // console.log(config, zone, selectedMatch)
@@ -277,6 +308,7 @@ exports.findAllMatches = findAllMatches
 exports.getConfigs = getConfigs
 exports.getCurrentConfigs = getCurrentConfigs
 exports.getDeviationCost = getDeviationCost
+exports.getPropsLists = getPropsLists
 exports.getSelectedConfig = getSelectedConfig
 exports.getViewDef = getViewDef
 exports.inRange = inRange
