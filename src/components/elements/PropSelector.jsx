@@ -17,9 +17,7 @@ class PropSelector extends React.PureComponent {
     handleSelect (e) {
         const { config, dataset, propIndex, propList, zone } = this.props
         this.setState({
-            selected: this.props.selected,
-            selectedPath: e.target.value,
-            selectedLabel: propList[e.target.options.selectedIndex].readablePath
+            selected: this.props.selected
         })
         this.props.selectProperty(propIndex, e.target.value, config, dataset, zone)
     }
@@ -58,7 +56,7 @@ class PropSelector extends React.PureComponent {
                     { propList.map((config, i) => {
                         return <option
                             value = { config.path }
-                            key = { this.state.elementName + i }                            
+                            key = { this.state.elementName + i }
                         >
                             { config.readablePath.map(part => part.label).join(' / ') }
                         </option>
