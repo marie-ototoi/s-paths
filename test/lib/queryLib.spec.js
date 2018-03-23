@@ -43,7 +43,7 @@ WHERE {
                         { path: 'nobel:LaureateAward/nobel:year/*' },
                         { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
                     ],
-                    mainSelected: true
+                    selected: true
                 }
             ]
         }
@@ -225,7 +225,7 @@ WHERE {
                         { path: 'nobel:LaureateAward/nobel:year/*' },
                         { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
                     ],
-                    mainSelected: true
+                    selected: true
                 }
             ]
         }
@@ -243,7 +243,7 @@ WHERE {
                         { path: 'nobel:LaureateAward/nobel:university/*' },
                         { path: 'nobel:LaureateAward/dct:isPartOf/*' }
                     ],
-                    mainSelected: true
+                    selected: true
                 }
             ]
         }

@@ -14,7 +14,7 @@ import SelectionZone from '../elements/SelectionZone'
 import d3HeatMap from '../../d3/d3HeatMap'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
-import { getAxis, getLegend, getPropList, getThresholdsForLegend, groupTextData, groupTimeData } from '../../lib/dataLib'
+import { getAxis, getLegend, getThresholdsForLegend, groupTextData, groupTimeData } from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
 // redux functions

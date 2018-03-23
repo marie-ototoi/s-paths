@@ -14,7 +14,7 @@ import SelectionZone from '../elements/SelectionZone'
 import d3Timeline from '../../d3/d3Timeline'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
-import { deduplicate, getAxis, getLegend, getPropList, groupTimeData } from '../../lib/dataLib'
+import { deduplicate, getAxis, getLegend, groupTimeData } from '../../lib/dataLib'
 import { getDimensions, getZoneCoord } from '../../lib/scaleLib'
 // redux functions
 import { setUnitDimensions } from '../../actions/dataActions'
@@ -52,7 +52,6 @@ class Timeline extends React.PureComponent {
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
         // First prop to be displayed in the bottom axis
-        
         let coverageFormatProp1
         let nestedCoverage1
         let maxUnitsPerYear
@@ -84,7 +83,7 @@ class Timeline extends React.PureComponent {
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
         const propsLists = getPropsLists(config, zone, dataset.labels)
-
+        console.log(propsLists)
         // Save to reuse in render
         this.customState = { ...this.customState, propsLists, maxUnitsPerYear, nestedCoverage1, selectedConfig, nestedProp1, legend, axisBottom }
     }
@@ -106,7 +105,6 @@ class Timeline extends React.PureComponent {
         const { axisBottom, legend } = this.customState
         const { config, data, dataset, display, role, selections, step, zone } = this.props
         // display settings
-        // console.log(getPropList(config, zone, 1, dataset.labels, true))
         const classN = `Timeline ${this.customState.elementName} role_${role}`
         const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
         return (<g className = { classN } >

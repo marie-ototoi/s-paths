@@ -2,13 +2,16 @@ import * as d3 from 'd3'
 import dataLib from './dataLib'
 
 const getSelectedConfig = (config, zone) => {
-    return config.matches.filter(m => m[zone + 'Selected'] === true)[0]
+    return config.matches.filter(m => m.selected === true)[0]
 }
 const getConfigs = (configs, zone) => {
-    return configs.filter(c => c.matches.filter(m => m[zone + 'Selected'] === true).length > 0)[0]
+    return configs.filter(c => c.zone === zone)[0].views
+}
+const getConfig = (configs, zone) => {
+    return configs.filter(c => c.zone === zone)[0].views.filter(v => v.selected)[0]
 }
 const getCurrentConfigs = (configs, status) => {
-    if (configs.present.length > 0 && configs.present[0].status === 'transition') {
+    if (configs.present[0].status === 'transition') {
         return (status === 'active') ? configs.past[configs.past.length - 1] : configs.present
     } else {
         return configs.present
@@ -98,7 +101,7 @@ const findAllMatches = (inputList, addList) => {
     }, [])
 }
 const defineConfigs = (views, stats) => {
-    return views.map(view => {
+    const configSetUp = views.map(view => {
         let propList = []
         // make a list of all possible properties for each constrained prop zone
         view.constraints.forEach(constraintSet => {
@@ -189,34 +192,47 @@ const defineConfigs = (views, stats) => {
             ...view,
             matches: scoredMatches.sort((a, b) => {
                 return b.score - a.score
-            })/*.map((match, index) => {
-                return {
-                    ...match,
-                    selected: (index === 0)
-                }
-            })*/
+            })
         }
     })
         .filter(view => view.matches.length > 0)
         .sort((a, b) => {
             return b.matches[0].score - a.matches[0].score
         })
+    return [
+        { zone: 'main', views: [...configSetUp] },
+        { zone: 'aside', views: [...configSetUp] }
+    ]
+
 }
 const activateDefaultConfigs = (configs) => {
     // console.log('activateDefaultConfigs', configs)
-    return configs.map((vc, cIndex) => {
+    return configs.map((config, cIndex) => {
         return {
-            ...vc,
-            matches: vc.matches.map((match, mIndex) => {
-                // if (cIndex === 0 && mIndex === 0) storeFirst = match
-                let shouldSelectSecond = ((configs.length === 1 && cIndex === 0 && mIndex === 1) ||
-                    (configs.length > 1 && cIndex === 1 && mIndex === 0))
-                // would be interesting to check that properties for the seco nd choice are different, 
-                // if possible, from those of the first choice 
+            ...config,
+            views: config.views.map((view, vIndex) => {
+                let selected = ((cIndex === 0 && vIndex === 0) ||
+                    (cIndex === 1 && vIndex === 1) ||
+                    (cIndex === 1 && vIndex === 0 && config.views.length === 1))
+                let selectedMatchIndex
+                if (selected) {
+                    if (cIndex === 0 || (cIndex === 1 && config.views.length === 1) || cIndex === 1) {
+                        selectedMatchIndex = 0
+                    } else {
+                        selectedMatchIndex = 1
+                        // would be interesting to check that properties for the second choice are different, 
+                        // if possible, from those of the first choice 
+                    }
+                }
                 return {
-                    ...match,
-                    mainSelected: (cIndex === 0 && mIndex === 0),
-                    asideSelected: shouldSelectSecond
+                    ...view,
+                    selected,
+                    matches: view.matches.map((match, mIndex) => {
+                        return {
+                            ...match,
+                            selected: selectedMatchIndex === mIndex
+                        }
+                    })
                 }
             })
         }
@@ -232,7 +248,7 @@ const getPropsLists = (configs, zone, labels) => {
                 return {
                     path: config.properties[propIndex].path,
                     readablePath: dataLib.getReadablePathsParts(config.properties[propIndex].path, labels),
-                    selected: config[zone + 'Selected']
+                    selected: config.selected
                 }
             }).reduce((configAcc, config) => {
                 let existsIndex
@@ -251,6 +267,7 @@ const getPropsLists = (configs, zone, labels) => {
 }
 
 const selectProperty = (config, zone, propIndex, path) => {
+    console.log('select property bonjour')
     let selectedMatch = getSelectedConfig(config, zone)
     // console.log(config, zone, selectedMatch)
     let possibleConfigs = config.matches.map((match, index) => {
@@ -277,12 +294,13 @@ const selectProperty = (config, zone, propIndex, path) => {
         return b.score - a.score
     })
     let bestConfigIndex = possibleConfigs[0].index
+    console.log('bestConfigIndex', bestConfigIndex)
     return {
         ...config,
         matches: config.matches.map((match, index) => {
             return {
                 ...match,
-                [zone + 'Selected']: (index === bestConfigIndex)
+                selected: (index === bestConfigIndex)
             }
         })
     }
@@ -295,7 +313,7 @@ const selectView = (id, zone, configs) => {
             matches: config.matches.map((match, index) => {
                 return {
                     ...match,
-                    [zone + 'Selected']: (config.id === id && index === 0)
+                    selected: (config.id === id && index === 0)
                 }
             })
         }
@@ -305,6 +323,7 @@ const selectView = (id, zone, configs) => {
 exports.activateDefaultConfigs = activateDefaultConfigs
 exports.defineConfigs = defineConfigs
 exports.findAllMatches = findAllMatches
+exports.getConfig = getConfig
 exports.getConfigs = getConfigs
 exports.getCurrentConfigs = getCurrentConfigs
 exports.getDeviationCost = getDeviationCost

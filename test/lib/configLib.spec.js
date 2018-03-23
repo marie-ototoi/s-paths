@@ -62,7 +62,7 @@ describe('lib/config', () => {
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
                         { path: 'nobel:LaureateAward/nobel:share/*' }
                     ],
-                    mainSelected: false
+                    selected: false
                 },
                 {
                     properties: [
@@ -70,7 +70,7 @@ describe('lib/config', () => {
                         { path: 'nobel:LaureateAward/nobel:category/*' },
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' }
                     ],
-                    mainSelected: true
+                    selected: true
                 },
                 {
                     properties: [
@@ -78,7 +78,7 @@ describe('lib/config', () => {
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' }
                     ],
-                    mainSelected: false
+                    selected: false
                 },
                 {
                     properties: [
@@ -86,15 +86,15 @@ describe('lib/config', () => {
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' },
                         { path: 'nobel:LaureateAward/nobel:share/*' }
                     ],
-                    mainSelected: false
+                    selected: false
                 }
             ]
         }
         let newConfig = config.selectProperty(formerConfig, 'main', 1, 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*')
-        expect(newConfig.matches[0].mainSelected).to.be.false
-        expect(newConfig.matches[1].mainSelected).to.be.false
-        expect(newConfig.matches[2].mainSelected).to.be.true
-        expect(newConfig.matches[3].mainSelected).to.be.false
+        expect(newConfig.matches[0].selected).to.be.false
+        expect(newConfig.matches[1].selected).to.be.false
+        expect(newConfig.matches[2].selected).to.be.true
+        expect(newConfig.matches[3].selected).to.be.false
     })
 
     it('should return lists of props available for each propIndex in a config', () => {
@@ -106,7 +106,7 @@ describe('lib/config', () => {
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
                         { path: 'nobel:LaureateAward/nobel:share/*' }
                     ],
-                    mainSelected: false
+                    selected: false
                 },
                 {
                     properties: [
@@ -114,7 +114,7 @@ describe('lib/config', () => {
                         { path: 'nobel:LaureateAward/nobel:category/*' },
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' }
                     ],
-                    mainSelected: true
+                    selected: true
                 },
                 {
                     properties: [
@@ -122,7 +122,7 @@ describe('lib/config', () => {
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' }
                     ],
-                    mainSelected: false
+                    selected: false
                 },
                 {
                     properties: [
@@ -130,7 +130,7 @@ describe('lib/config', () => {
                         { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' },
                         { path: 'nobel:LaureateAward/nobel:share/*' }
                     ],
-                    mainSelected: false
+                    selected: false
                 }
             ]
         }

@@ -143,27 +143,6 @@ const makeId = (textstr) => {
     }).toLowerCase()
 }
 
-const getPropList = (configs, zone, propIndex, labels, selectedOnly) => {
-    return configs.matches
-        .filter(config => config.properties[propIndex].path !== '')
-        .map(config => {
-            return {
-                path: config.properties[propIndex].path,
-                readablePath: getReadablePathsParts(config.properties[propIndex].path, labels),
-                selected: config[zone + 'Selected']
-            }
-        }).reduce((configAcc, config) => {
-            const exists = configAcc.filter(c => c.path === config.path).length > 0
-            if (!exists) {
-                configAcc.push(config)
-            }
-            return configAcc
-        }, [])
-        .filter(prop => {
-            return selectedOnly ? prop.selected : true
-        })
-}
-
 const getLegend = (nestedProps, propName, colors, category) => {
     return {
         info: nestedProps.map((p, i) => {
@@ -470,7 +449,6 @@ exports.getNumberOfTimeUnits = getNumberOfTimeUnits
 exports.getReadablePathsParts = getReadablePathsParts
 exports.getTransitionElements = getTransitionElements
 exports.makeId = makeId
-exports.getPropList = getPropList
 exports.getThresholds = getThresholds
 exports.getThresholdsForLegend = getThresholdsForLegend
 exports.getResults = getResults

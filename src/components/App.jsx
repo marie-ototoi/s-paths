@@ -10,7 +10,7 @@ import Debug from './Debug'
 // libs
 import { getScreen } from '../lib/scaleLib'
 import { areLoaded, getCurrentState, getResults, getTransitionElements } from '../lib/dataLib'
-import { getConfigs, getCurrentConfigs } from '../lib/configLib'
+import { getConfig, getCurrentConfigs } from '../lib/configLib'
 import selectionLib from '../lib/selectionLib'
 // redux actions
 import { setDisplay } from '../actions/displayActions'
@@ -62,7 +62,7 @@ class App extends React.Component {
             // console.log('transition target laid out', zone, role, elements)
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_target`])) {
                 // console.log('2 - ON CHANGE ', zone)
-                let transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getConfigs(getCurrentConfigs(configs, 'active'), zone), getConfigs(getCurrentConfigs(configs, 'transition'), zone), getResults(data, zone, 'delta'), zone)
+                let transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getConfig(getCurrentConfigs(configs, 'active'), zone), getConfig(getCurrentConfigs(configs, 'transition'), zone), getResults(data, zone, 'delta'), zone)
                 this.setState({ [`${zone}_target`]: elements, [`${zone}_transition`]: transitionElements, [`${zone}_step`]: 'changing' })
             }
         }
@@ -100,17 +100,17 @@ class App extends React.Component {
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')
         const statusAside = getCurrentState(this.props.data, 'aside')
-        const statusConfigs = (statusMain === 'transition' || statusAside === 'transition') ? 'transition' : 'active'
-        const mainConfig = getConfigs(getCurrentConfigs(configs, 'active'), 'main')
-        const mainTransitionConfig = getConfigs(getCurrentConfigs(configs, 'transition'), 'main')
+        const statusConfigs = (statusMain === 'transition' || statusAside === '<transiti></transiti>on') ? 'transition' : 'active'
+        const mainConfig = getConfig(getCurrentConfigs(configs, 'active'), 'main')
+        // console.log(getCurrentConfigs(configs, 'transition'))
+        const mainTransitionConfig = getConfig(getCurrentConfigs(configs, 'transition'), 'main')
         const MainComponent = mainConfig ? componentIds[mainConfig.id] : ''
         const MainTransitionComponent = mainTransitionConfig ? componentIds[mainTransitionConfig.id] : ''
-        const asideConfig = getConfigs(getCurrentConfigs(configs, 'active'), 'aside')
-        const asideTransitionConfig = getConfigs(getCurrentConfigs(configs, 'transition'), 'aside')
+        const asideConfig = getConfig(getCurrentConfigs(configs, 'active'), 'aside')
+        const asideTransitionConfig = getConfig(getCurrentConfigs(configs, 'transition'), 'aside')
         const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
         const SideTransitionComponent = asideConfig ? componentIds[asideTransitionConfig.id] : ''
         // to do : avoid recalculate transition data at each render
-
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
@@ -134,7 +134,7 @@ class App extends React.Component {
                         status = { statusMain }
                         data = { getResults(data, 'main', 'transition') }
                         coverage = { getResults(data, 'main', 'coverage') }
-                        config = { getConfigs(getCurrentConfigs(configs, 'transition'), 'main') }
+                        config = { getConfig(getCurrentConfigs(configs, 'transition'), 'main') }
                         selections = { selectionLib.getSelections(selections, 'main', 'transition') }
                         ref = "maintransition"
                         handleTransition = { this.handleTransition }
@@ -171,7 +171,7 @@ class App extends React.Component {
                         status = { statusAside }
                         data = { getResults(data, 'aside', 'transition') }
                         coverage = { getResults(data, 'aside', 'coverage') }
-                        config = { getConfigs(getCurrentConfigs(configs, 'transition'), 'aside') }
+                        config = { getConfig(getCurrentConfigs(configs, 'transition'), 'aside') }
                         selections = { selectionLib.getSelections(selections, 'aside', 'transition') }
                         ref = "asidetransition"
                         handleTransition = { this.handleTransition }

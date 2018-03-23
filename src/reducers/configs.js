@@ -1,78 +1,67 @@
 import * as types from '../constants/ActionTypes'
 
-const initialConfig = { matches: [] }
-
-const config = (state = initialConfig, action) => {
-    switch (action.type) {
-    /*case types.SET_DATA:
-        let unitDimensions = {
-            main: (action.resetUnitDimensions === 'all') ? null : state.unitDimensions.main,
-            aside: (action.resetUnitDimensions === 'all') ? null : state.unitDimensions.aside
-        }
-        if (action.resetUnitDimensions === 'zone') unitDimensions[action.zone] = null
-        return {
-            ...state,
-            unitDimensions
-        }
-    case types.SET_UNIT_DIMENSIONS:
-        return {
-            ...state,
-            unitDimensions: {
-                main: (state.id === action.configId && action.zone === 'main') ? action.unitDimensions : state.unitDimensions.main,
-                aside: (state.id === action.configId && action.zone === 'aside') ? action.unitDimensions : state.unitDimensions.aside
-            }
-        }*/
-    default:
-        return state
-    }
-}
+const initialConfig = [
+    { zone: 'main', views: [] },
+    { zone: 'aside', views: [] }
+]
 
 const configstatus = (state, action) => {
     switch (action.type) {
     case types.END_TRANSITION:
-        return {
-            ...state,
-            status: 'active'
+        if (action.zone === state.zone) {
+            return {
+                ...state,
+                status: 'active'
+            }
+        } else {
+            return state
         }
     default:
         return state
     }
 }
 
-const configs = (state = [], action) => {
+const configzone = (state, action) => {
     switch (action.type) {
     case types.SET_CONFIGS:
     case types.SET_STATS:
-        return action.configs.map(c => {
+        if (action[state.zone]) {
+            // except at first load a new config is always a transition
+            let status = (state.views[0]) ? 'transition' : 'active'
             return {
-                ...c,
-                // except at first load a new config is always a transition
-                status: (state[0] && state[0].matches.length > 0) ? 'transition' : 'active',
-                matches: c.matches.sort((a, b) => {
-                    return b.score - a.score
-                })
+                ...state,
+                views: action[state.zone] || state.views,
+                status
             }
-        })
+        } else {
+            return state
+        }
     case types.SET_CONFIG:
-        return state.map(c => {
-            if (c.id === action.config.id) {
-                return {
-                    ...action.config,
-                    matches: action.config.matches.sort((a, b) => {
-                        return b.score - a.score
-                    })
-                }
-            } else {
-                return c
+        if (action.zone === state.zone) {
+            return {
+                ...state,
+                views: state.views.map(v => {
+                    return (v.id === action.config.id) ? action.config : v
+                }),
+                status: 'transition'
             }
-        })
+        } else {
+            return state
+        }
+    default:
+        return state
+    }
+}
+
+const configs = (state = initialConfig, action) => {
+    switch (action.type) {
+    case types.SET_CONFIGS:
+    case types.SET_STATS:
+    case types.SET_CONFIG:
+        console.log(action)
+        return state.map(dz => configzone(dz, action))
     case types.END_TRANSITION:
         return state.map(dz => configstatus(dz, action))
-    /*case types.SET_DATA:
-        return state.map(v => config(v, action))
-    case types.SET_UNIT_DIMENSIONS:
-        return state.map(v => config(v, action))
-        // to do*/
     default:
         return state
     }

@@ -15,14 +15,14 @@ class PropSelector extends React.PureComponent {
         }
     }
     handleSelect (e) {
-        const { config, dataset, propIndex, propList, zone } = this.props
+        const { config, dataset, propIndex, zone } = this.props
         this.setState({
             selected: this.props.selected
         })
         this.props.selectProperty(propIndex, e.target.value, config, dataset, zone)
     }
     render () {
-        const { align, dimensions, display, offset, propList, type, zone } = this.props
+        const { align, dimensions, propList } = this.props
         // const dimensions = getDimensions('propSelector' + type, display.zones[zone], display.viz, offset)
         const { x, y, width, height } = dimensions
         const alignClass = (align === 'right') ? 'right' : 'left'

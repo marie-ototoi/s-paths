@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import * as types from '../constants/ActionTypes'
-import { activateDefaultConfigs, defineConfigs, getConfigs, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
+import { activateDefaultConfigs, defineConfigs, getConfig, getConfigs, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
 import { getData, makeQuery, makeTransitionQuery } from '../lib/queryLib'
 
 const getStats = (options) => {
@@ -70,6 +70,7 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
     const updatedConfig = selectPropertyConfig(config, zone, propIndex, path)
     dispatch({
         type: types.SET_CONFIG,
+        zone,
         config: updatedConfig
     })
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
@@ -132,7 +133,7 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                     // console.log(configLib.defineConfigs(views, stats))
                     // for each views, checks which properties ou sets of properties could match and evaluate
                     let configs = activateDefaultConfigs(defineConfigs(views, stats))
-                    // console.log(configs)
+                    console.log(configs)
                     dispatch({
                         type: types.SET_STATS,
                         stats,
@@ -140,7 +141,8 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                         prefixes: stats.options.prefixes,
                         labels: stats.options.labels,
                         constraints: stats.options.constraints,
-                        configs
+                        main: configs[0].views,
+                        aside: configs[1].views
                     })
                     newOptions = {
                         ...dataset,
@@ -153,18 +155,18 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
             })
         })
         .then(configs => {
-            // console.log(configs)
-            const configMain = getConfigs(configs, 'main')
+            const configMain = getConfig(configs, 'main')
+            // console.log(configMain)
             const queryMain = makeQuery(entrypoint, configMain, 'main', dataset)
             const coverageQueryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, prop1only: true })
-            const configAside = getConfigs(configs, 'aside')
+            const configAside = getConfig(configs, 'aside')
             const queryAside = makeQuery(entrypoint, configAside, 'aside', dataset)
             const coverageQueryAside = makeQuery(entrypoint, configAside, 'aside', { ...dataset, prop1only: true })
             let deltaMain
             let deltaAside
             if (previousConfigs.length > 0) {
-                const previousConfigMain = getConfigs(previousConfigs, 'main')
-                const previousConfigAside = getConfigs(previousConfigs, 'aside')
+                const previousConfigMain = getConfig(previousConfigs, 'main')
+                const previousConfigAside = getConfig(previousConfigs, 'aside')
                 let queryTransitionMain = makeTransitionQuery(configMain, newOptions, previousConfigMain, previousOptions, 'main')
                 deltaMain = getData(endpoint, queryTransitionMain, prefixes)
                 let queryTransitionAside = makeTransitionQuery(configAside, newOptions, previousConfigAside, previousOptions, 'aside')

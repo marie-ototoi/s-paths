@@ -10,7 +10,7 @@ const create = (el, props) => {
 
 const draw = (el, props) => {
     const { configs } = props
-    
+
 }
 
 const update = (el, props) => {

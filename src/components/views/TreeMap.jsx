@@ -13,7 +13,7 @@ import SelectionZone from '../elements/SelectionZone'
 import d3HeatMap from '../../d3/d3HeatMap'
 // libs
 import { getSelectedConfig } from '../../lib/configLib'
-import { getAxis, getLegend, getPropList, getThresholdsForLegend, groupTextData, groupTimeData } from '../../lib/dataLib'
+import { getAxis, getLegend, getPropsLists, getThresholdsForLegend, groupTextData, groupTimeData } from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
 // redux functions
@@ -75,11 +75,11 @@ class HeatMap extends React.Component {
             forceGroup: nestedCoverage1[0].group
         })
         const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
-        const listProp1 = getPropList(config, zone, 0, dataset.labels)
+        const listProp1 = getPropLists(config, zone, 0, dataset.labels)
         const categoryProp2 = selectedConfig.properties[1].category
         const nestedProp2 = groupTextData(data, 'prop2')
         const axisLeft = getAxis(nestedProp2, 'prop2', categoryProp2)
-        const listProp2 = getPropList(config, zone, 1, dataset.labels)
+        const listProp2 = getPropLists(config, zone, 1, dataset.labels)
 
         const colors = getQuantitativeColors()
         const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)

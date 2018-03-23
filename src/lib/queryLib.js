@@ -251,6 +251,7 @@ const defineGroup = (prop, previousProp, level, options) => {
 const makeQuery = (entrypoint, configZone, zone, options) => {
     const { defaultGraph, constraints, prop1only } = options
     let selectedConfig = configLib.getSelectedConfig(configZone, zone)
+    // console.log(selectedConfig)
     let properties = selectedConfig.properties
     if (prop1only === true) properties = [properties[0]]
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
