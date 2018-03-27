@@ -294,7 +294,7 @@ const selectProperty = (config, zone, propIndex, path) => {
         return b.score - a.score
     })
     let bestConfigIndex = possibleConfigs[0].index
-    console.log('bestConfigIndex', bestConfigIndex)
+    // console.log('bestConfigIndex', bestConfigIndex)
     return {
         ...config,
         matches: config.matches.map((match, index) => {
@@ -306,10 +306,11 @@ const selectProperty = (config, zone, propIndex, path) => {
     }
 }
 
-const selectView = (id, zone, configs) => {
+const selectView = (id, configs) => {
     return configs.map(config => {
         return {
             ...config,
+            selected: (config.id === id),
             matches: config.matches.map((match, index) => {
                 return {
                     ...match,

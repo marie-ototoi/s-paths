@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import * as types from '../constants/ActionTypes'
-import { activateDefaultConfigs, defineConfigs, getConfig, getConfigs, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
+import { activateDefaultConfigs, defineConfigs, getConfig, getConfigs, getSelectedConfig, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
 import { getData, makeQuery, makeTransitionQuery } from '../lib/queryLib'
 
 const getStats = (options) => {
@@ -29,15 +29,18 @@ const endTransition = (dispatch) => (zone) => {
     })
 }
 
-const selectView = (dispatch) => (id, zone, configs, dataset) => {
+const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => {
     const { endpoint, entrypoint, prefixes } = dataset
-    const updatedConfigs = selectViewConfig(id, zone, configs)
+    // console.log(selectedConfigs)
+    const updatedConfigs = selectViewConfig(id, selectedConfigs)
+    const selectedConfig = selectedConfigs.filter(c => c.selected)[0]
+    const updatedConfig = updatedConfigs.filter(c => c.selected)[0]
+    // console.log(selectedConfig)
     dispatch({
-        type: types.SET_CONFIGS,
-        configs: updatedConfigs
+        type: types.SET_CONFIG,
+        zone,
+        config: updatedConfig
     })
-    const selectedConfig = getConfigs(configs, zone)
-    const updatedConfig = getConfigs(updatedConfigs, zone)
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, selectedConfig, dataset, zone)
     const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
@@ -133,7 +136,7 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                     // console.log(configLib.defineConfigs(views, stats))
                     // for each views, checks which properties ou sets of properties could match and evaluate
                     let configs = activateDefaultConfigs(defineConfigs(views, stats))
-                    console.log(configs)
+                    // console.log(configs)
                     dispatch({
                         type: types.SET_STATS,
                         stats,

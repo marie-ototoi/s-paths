@@ -15,7 +15,8 @@ class History extends React.PureComponent {
     }
     render () {
         const { configs, display, offset, zone } = this.props
-        this.customState.configs = configs.filter(c => c[0].status === 'active')
+        console.log(configs.past.map(c => c.filter(z => z.zone === zone)[0].views))
+        // this.customState.configs = configs.filter(c => c[0].status === 'active')
         const dimensions = getDimensions('history', display.zones[zone], display.viz, offset)
         const { x, y, width, height } = dimensions
         return (<g
@@ -36,7 +37,8 @@ class History extends React.PureComponent {
 
 function mapStateToProps (state) {
     return {
-        configs: state.configs
+        configs: state.configs,
+        display: state.display
     }
 }
 

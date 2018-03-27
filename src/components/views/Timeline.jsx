@@ -5,6 +5,7 @@ import * as d3 from 'd3'
 // components
 import Coverage from '../elements/Coverage'
 import Header from '../elements/Header'
+import History from '../elements/History'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import PropSelector from '../elements/PropSelector'
@@ -83,7 +84,6 @@ class Timeline extends React.PureComponent {
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
         const propsLists = getPropsLists(config, zone, dataset.labels)
-        console.log(propsLists)
         // Save to reuse in render
         this.customState = { ...this.customState, propsLists, maxUnitsPerYear, nestedCoverage1, selectedConfig, nestedProp1, legend, axisBottom }
     }
@@ -173,6 +173,9 @@ class Timeline extends React.PureComponent {
                     config = { config }
                     dimensions = { getDimensions('legendLegend', display.zones[zone], display.viz, { x: 0, y: 0, width: -35, height: 0 }) }
                     propIndex = { 1 }
+                    zone = { zone }
+                />
+                <History
                     zone = { zone }
                 />
             </g>

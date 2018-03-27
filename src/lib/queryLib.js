@@ -250,6 +250,7 @@ const defineGroup = (prop, previousProp, level, options) => {
 // to do : take constraints into account
 const makeQuery = (entrypoint, configZone, zone, options) => {
     const { defaultGraph, constraints, prop1only } = options
+    // console.log(configZone)
     let selectedConfig = configLib.getSelectedConfig(configZone, zone)
     // console.log(selectedConfig)
     let properties = selectedConfig.properties

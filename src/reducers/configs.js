@@ -8,6 +8,7 @@ const initialConfig = [
 const configstatus = (state, action) => {
     switch (action.type) {
     case types.END_TRANSITION:
+        //console.log('END_TRANSITION')
         if (action.zone === state.zone) {
             return {
                 ...state,
@@ -38,10 +39,17 @@ const configzone = (state, action) => {
         }
     case types.SET_CONFIG:
         if (action.zone === state.zone) {
+            // console.log(state)
             return {
                 ...state,
                 views: state.views.map(v => {
-                    return (v.id === action.config.id) ? action.config : v
+                    return (v.id === action.config.id) ? {
+                        ...action.config,
+                        selected: true
+                    } : {
+                        ...v,
+                        selected: false
+                    }
                 }),
                 status: 'transition'
             }
@@ -58,7 +66,7 @@ const configs = (state = initialConfig, action) => {
     case types.SET_CONFIGS:
     case types.SET_STATS:
     case types.SET_CONFIG:
-        console.log(action)
+        //console.log(action)
         return state.map(dz => configzone(dz, action))
     case types.END_TRANSITION:
         return state.map(dz => configstatus(dz, action))
