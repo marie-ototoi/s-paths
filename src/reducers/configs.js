@@ -66,9 +66,10 @@ const configs = (state = initialConfig, action) => {
     case types.SET_CONFIGS:
     case types.SET_STATS:
     case types.SET_CONFIG:
-        //console.log(action)
+        console.log(action)
         return state.map(dz => configzone(dz, action))
     case types.END_TRANSITION:
+        console.log(action)
         return state.map(dz => configstatus(dz, action))
     default:
         return state

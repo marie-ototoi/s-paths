@@ -138,8 +138,8 @@ const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, he
         }
     case 'history':
         return {
-            x: origin.x + offset.x,
-            y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
+            x: origin.x + 10 + offset.x,
+            y: origin.y + viz.useful_height + (viz.vertical_margin * 2) - 10 + offset.y,
             width: (viz.horizontal_margin * 2) + viz.useful_width - 20 + offset.width,
             height: 20 + offset.height
         }

@@ -15,9 +15,7 @@ const discoverApp = combineReducers({
     data: undoable(data, { filter: (action, currentState, previousState) => {
         return currentState !== previousState
     }}),
-    dataset: undoable(dataset, { filter: (action, currentState, previousState) => {
-        return currentState !== previousState
-    }}),
+    dataset,
     display,
     palettes,
     selections,

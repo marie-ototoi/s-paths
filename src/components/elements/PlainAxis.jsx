@@ -8,7 +8,7 @@ import { getDimensions } from '../../lib/scaleLib'
 import { select } from '../../actions/selectionActions'
 import { selectProperty } from '../../actions/dataActions'
 
-class PlainAxis extends React.Component {
+class PlainAxis extends React.PureComponent {
     constructor (props) {
         super(props)
         this.customState = {
@@ -17,6 +17,7 @@ class PlainAxis extends React.Component {
         }
     }
     render () {
+        console.log('render plain axis')
         const { display, offset, type, zone } = this.props
         this.customState.dimensions = getDimensions('axis' + type, display.zones[zone], display.viz, offset)
         const { x, y, width, height } = this.customState.dimensions
@@ -42,7 +43,7 @@ function mapStateToProps (state) {
     return {
         display: state.display,
         selections: state.selections,
-        dataset: state.dataset.present
+        dataset: state.dataset
     }
 }
 

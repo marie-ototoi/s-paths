@@ -36,7 +36,7 @@ class Header extends React.PureComponent {
 
 function mapStateToProps (state) {
     return {
-        dataset: state.dataset.present,
+        dataset: state.dataset,
         data: state.data,
         display: state.display
     }

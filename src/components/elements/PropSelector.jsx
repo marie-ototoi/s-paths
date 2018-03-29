@@ -70,7 +70,7 @@ class PropSelector extends React.PureComponent {
 
 function mapStateToProps (state) {
     return {
-        dataset: state.dataset.present,
+        dataset: state.dataset,
         display: state.display
     }
 }

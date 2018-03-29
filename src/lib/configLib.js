@@ -267,7 +267,6 @@ const getPropsLists = (configs, zone, labels) => {
 }
 
 const selectProperty = (config, zone, propIndex, path) => {
-    console.log('select property bonjour')
     let selectedMatch = getSelectedConfig(config, zone)
     // console.log(config, zone, selectedMatch)
     let possibleConfigs = config.matches.map((match, index) => {

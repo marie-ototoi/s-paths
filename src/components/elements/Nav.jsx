@@ -62,7 +62,7 @@ class Nav extends React.PureComponent {
 function mapStateToProps (state) {
     return {
         configs: state.configs,
-        dataset: state.dataset.present,
+        dataset: state.dataset,
         data: state.data,
         display: state.display,
         views: state.views

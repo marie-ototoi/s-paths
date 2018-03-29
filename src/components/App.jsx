@@ -1,6 +1,5 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import shallowEqual from 'shallowequal'
 // components
 import HeatMap from './views/HeatMap'
 import Timeline from './views/Timeline'
@@ -70,9 +69,10 @@ class App extends React.Component {
     handleEndTransition (zone) {
         // console.log('transition ended', zone)
         this.setState({ [`${zone}_step`]: 'done', [`${zone}_target`]: [] })
-        this.props.endTransition(zone)
+        if (!this.props.configs.future.length > 0) this.props.endTransition(zone)
     }
     componentWillUpdate (nextProps, nextState) {
+        console.log(nextProps)
         if (getCurrentState(this.props.data, 'main') === 'active' && getCurrentState(nextProps.data, 'main') === 'transition') {
             // console.log('1 - ON LANCE main')
             this.setState({ [`main_step`]: 'launch' })
@@ -221,7 +221,7 @@ function mapStateToProps (state) {
     return {
         data: state.data,
         display: state.display,
-        dataset: state.dataset.present,
+        dataset: state.dataset,
         views: state.views,
         configs: state.configs,
         selections: state.selections

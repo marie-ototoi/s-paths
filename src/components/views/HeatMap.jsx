@@ -230,7 +230,7 @@ class HeatMap extends React.Component {
 function mapStateToProps (state) {
     return {
         configs: state.configs,
-        dataset: state.dataset.present,
+        dataset: state.dataset,
         display: state.display,
         palettes: state.palettes,
         selections: state.selections

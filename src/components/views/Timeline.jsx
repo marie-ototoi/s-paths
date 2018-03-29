@@ -41,11 +41,13 @@ class Timeline extends React.PureComponent {
         this.prepareData(this.props)
     }
     componentWillUpdate (nextProps, nextState) {
-        if (!shallowEqual(this.props.data, nextProps.data)) {
+        // console.log('equal ?', shallowEqual(this.props.data, nextProps.data), this.props, nextProps)
+        if (!shallowEqual(this.props, nextProps)) {
             this.prepareData(nextProps)
         }
     }
     shouldComponentUpdate (nextProps, nextState) {
+        // console.log('equal ?', shallowEqual(this.props, nextProps), shallowEqual(this.props.data, nextProps.data))
         return !shallowEqual(this.props, nextProps)
     }
     prepareData (nextProps) {
@@ -211,7 +213,7 @@ class Timeline extends React.PureComponent {
 
 function mapStateToProps (state) {
     return {
-        dataset: state.dataset.present,
+        dataset: state.dataset,
         configs: state.configs,
         display: state.display,
         palettes: state.palettes
