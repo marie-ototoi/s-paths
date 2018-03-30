@@ -40,6 +40,7 @@ class History extends React.PureComponent {
         const dimensions = getDimensions('history', display.zones[zone], display.viz, offset)
         const { x, y } = dimensions
         return (<g
+            className = "History"
             ref = { this.state.elementName }
             transform = { `translate(${x}, ${y})` }
         >

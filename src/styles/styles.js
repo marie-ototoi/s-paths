@@ -4,6 +4,7 @@ module.exports = {
     main: require('../styles/main.css'),
     debug: require('../styles/debug.css'),
     header: require('../styles/header.css'),
+    history: require('../styles/history.css'),
     timeline: require('../styles/timeline.css'),
     heatmap: require('../styles/heatmap.css'),
     axis: require('../styles/axis.css'),

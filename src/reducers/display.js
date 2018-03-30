@@ -162,6 +162,20 @@ const display = (state = defaultState, action) => {
                 }
             }
         }
+    case types.RESET_UNIT_DIMENSIONS:
+        return {
+            ...state,
+            unitDimensions: {
+                main: {
+                    origin: null,
+                    target: null
+                },
+                aside: {
+                    origin: null,
+                    target: null
+                }
+            }
+        }
     default:
         return state
     }

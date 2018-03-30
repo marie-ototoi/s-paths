@@ -72,7 +72,6 @@ class App extends React.Component {
         if (!this.props.configs.future.length > 0) this.props.endTransition(zone)
     }
     componentWillUpdate (nextProps, nextState) {
-        console.log(nextProps)
         if (getCurrentState(this.props.data, 'main') === 'active' && getCurrentState(nextProps.data, 'main') === 'transition') {
             // console.log('1 - ON LANCE main')
             this.setState({ [`main_step`]: 'launch' })

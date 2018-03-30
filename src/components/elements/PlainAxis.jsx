@@ -17,7 +17,6 @@ class PlainAxis extends React.PureComponent {
         }
     }
     render () {
-        console.log('render plain axis')
         const { display, offset, type, zone } = this.props
         this.customState.dimensions = getDimensions('axis' + type, display.zones[zone], display.viz, offset)
         const { x, y, width, height } = this.customState.dimensions

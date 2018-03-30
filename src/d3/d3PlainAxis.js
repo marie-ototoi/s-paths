@@ -25,7 +25,6 @@ const destroy = (el, props) => {
 }
 
 const resize = (el, props) => {
-    
     const { axis, dimensions, selectElements, type } = props
     const { info, category } = axis
     let axeLength
@@ -74,7 +73,6 @@ const resize = (el, props) => {
         tickF = (d, i) => { return info[i].key }
     }
     //
-    console.log('resize ???', scale)
     d3.select(el).selectAll(`.axis${type}`).remove()
     const axisEl = d3[`axis${type}`]()
         .scale(scale)
