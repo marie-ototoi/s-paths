@@ -20,7 +20,7 @@ class History extends React.PureComponent {
         }
     }
     jumpHistory (index) {
-        console.log(index, this.customState.currentIndex)
+        //console.log(index, this.customState.currentIndex)
         this.props.jump(index, this.customState.currentIndex)
     }
     render () {

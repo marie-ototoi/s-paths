@@ -4,6 +4,7 @@ import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 // components
 import Header from '../elements/Header'
+import History from '../elements/History'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import PlainAxis from '../elements/PlainAxis'
@@ -41,7 +42,7 @@ class HeatMap extends React.Component {
         this.prepareData(this.props)
     }
     componentWillUpdate (nextProps, nextState) {
-        if (!shallowEqual(this.props.data, nextProps.data)) {
+        if (!shallowEqual(this.props, nextProps)) {
             this.prepareData(nextProps)
         }
     }
@@ -183,6 +184,9 @@ class HeatMap extends React.Component {
                     offset = { { x: 20, y: -15, width: -50, height: 0 } }
                     selectElements = { this.selectElements }
                     propIndex = { 0 }
+                    zone = { zone }
+                />
+                <History
                     zone = { zone }
                 />
             </g>
