@@ -42,7 +42,9 @@ const getStats = (opt) => {
         prefixes: opt.prefixes || {}
     }
     let { prefixes, entrypoint, forceUpdate, endpoint } = options
-    if (forceUpdate === true) pathModel.deleteMany({ entrypoint: entrypoint, endpoint: endpoint })
+    if (forceUpdate === true) {
+        pathModel.deleteMany({ entrypoint: entrypoint, endpoint: endpoint })
+    }
     let totalInstances
     let selectionInstances
     let displayedInstances
@@ -170,6 +172,7 @@ const getLabels = (prefixes, props) => {
             return getLabelsFromGraph(missingUris, graph)
         })
         .then(missingUris => {
+            console.log('missingUris 1', missingUris)
             propertyModel.createOrUpdate(missingUris)
             return urisToLabel.map(prop => {
                 if (prop.label) {
@@ -184,7 +187,7 @@ const getLabels = (prefixes, props) => {
                 }
             })
         })
-        .then(urisToLabel => {
+        /* .then(urisToLabel => {
             missingUris = urisToLabel.filter(prop => !prop.label)
             return promiseSettle(
                 // try to load the ontology corresponding to each prefix
@@ -197,6 +200,7 @@ const getLabels = (prefixes, props) => {
             return getLabelsFromGraph(missingUris, graph)
         })
         .then(missingUris => {
+            console.log('missingUris 2', missingUris)
             propertyModel.createOrUpdate(missingUris)
             return urisToLabel.map(prop => {
                 if (prop.label) {
@@ -210,7 +214,7 @@ const getLabels = (prefixes, props) => {
                     }
                 }
             })
-        })
+        }) */
         // to add => if some properties are still not labeled,
         // try to load them one by one
         // save all labels in the store (find or create)    
@@ -261,7 +265,7 @@ const loadOntology = (url, graph) => {
             mediaType.indexOf('text/n3') >= 0)) {
                 return response.text().then(text => {
                     // console.log('ICI',url, text)
-                    // console.log(prefix._id, mediaType, 'successfully parsed', graph)
+                    // console.log(url, mediaType, 'successfully parsed', graph)
                     return rdflib.parse(text, graph, url, mediaType)
                 })
             }
@@ -275,9 +279,8 @@ const loadOntology = (url, graph) => {
 const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQuery) => {
     // console.log(props)
     const queriedProps = props.filter(prop => {
-        // check levels one after another 
-        // except for first time exploration,
-        // lower levels are sent only if upper levels have not been kept 
+        // check levels one after another :
+        // except for first time exploration, lower levels are sent only if upper levels have not been kept 
         return (prop.level === level &&
             (propsWithStats.filter(prevProp => prop.path.indexOf(prevProp.path) === 0 &&
             prop.level === prevProp.level + 1).length === 0)) // if the beginnig of the path is displayed at a higher level, don't keep (could be discussed)
@@ -287,7 +290,7 @@ const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQu
         return { statements: propsWithStats, options }
     } else {
         // if the query is about the whole set and stats have already been saved
-        //if (options.constraints === '' && queriedProps[0].coverage >= 0) return getStatsLevel(props, [ ...queriedProps, ...propsWithStats ], level + 1, total, options, firstTimeQuery)
+        // if (options.constraints === '' && queriedProps[0].coverage >= 0) return getStatsLevel(props, [ ...queriedProps, ...propsWithStats ], level + 1, total, options, firstTimeQuery)
         // get all
         return promiseSettle(queriedProps.map(prop => {
             let propQuery = queryLib.makePropQuery(prop, options, firstTimeQuery)

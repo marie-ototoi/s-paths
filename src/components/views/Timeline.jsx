@@ -87,7 +87,16 @@ class Timeline extends React.PureComponent {
         const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
         const propsLists = getPropsLists(config, zone, dataset.labels)
         // Save to reuse in render
-        this.customState = { ...this.customState, propsLists, maxUnitsPerYear, nestedCoverage1, selectedConfig, nestedProp1, legend, axisBottom }
+        this.customState = {
+            ...this.customState,
+            propsLists,
+            maxUnitsPerYear,
+            nestedCoverage1,
+            selectedConfig,
+            nestedProp1,
+            legend,
+            axisBottom
+        }
     }
     handleMouseMove (e) {
         const { display, zone } = this.props

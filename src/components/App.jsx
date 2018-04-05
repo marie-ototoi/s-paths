@@ -3,6 +3,7 @@ import { connect } from 'react-redux'
 // components
 import HeatMap from './views/HeatMap'
 import Timeline from './views/Timeline'
+import TreeMap from './views/TreeMap'
 import Map from './views/Map'
 import Transition from './elements/Transition'
 import Debug from './Debug'
@@ -89,12 +90,13 @@ class App extends React.Component {
         // console.log('display', display)
         // console.log('views', views)
         // console.log('dataset', dataset)
-        // console.log('configs', configs)
+         console.log('configs', configs)
         // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
             'HeatMap': HeatMap,
-            'Timeline': Timeline
+            'Timeline': Timeline,
+            'TreeMap': TreeMap
         }
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')

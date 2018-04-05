@@ -50,6 +50,23 @@ const defaultState = [
                 }
             ]
         ]
+    },
+    {
+        id: 'TreeMap',
+        constraints: [
+            [
+                {
+                    category: 'text',
+                    hierarchical: true,
+                    unique: { min: 5, max: 40, optimal: [10, 30] }
+                },
+                {
+                    category: 'uri',
+                    hierarchical: true,
+                    unique: { min: 5, max: 40, optimal: [10, 30] }
+                }
+            ]
+        ]
     }
 ]
 

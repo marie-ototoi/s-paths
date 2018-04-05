@@ -146,7 +146,7 @@ const makeId = (textstr) => {
 const getLegend = (nestedProps, propName, colors, category) => {
     return {
         info: nestedProps.map((p, i) => {
-            let label = (p.values && p.values[0].labelprop2) ? p.values[0].labelprop2.value : p.key
+            let label = (p.values && p.values.length > 0 && p.values[0].labelprop2) ? p.values[0].labelprop2.value : p.key
             if (Array.isArray(label)) label = label.join(' - ')
             return {
                 key: p.key,
@@ -282,7 +282,7 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
 }
 
 const deduplicate = (data, props) => {
-    return data.reduce((acc, cur) => {
+    /* return data.reduce((acc, cur) => {
         let alreadyIn = acc.filter(dt => {
             let conditions = props.map(prop => {
                 return cur[prop].value === dt[prop].value
@@ -291,6 +291,29 @@ const deduplicate = (data, props) => {
         })
         if (alreadyIn.length === 0) {
             acc.push(cur)
+        }
+        return acc
+    }, []) */
+    return data.reduce((acc, cur) => {
+        let alreadyInIndex = null
+        acc.forEach((dt,index) => {
+            let conditions = props.map(prop => {
+                return cur[prop].value === dt[prop].value
+            })
+            if (!conditions.includes(false)) alreadyInIndex = index
+        })
+        if (alreadyInIndex === null) {
+            acc.push(cur)
+        } else {
+            for (let prop in acc[alreadyInIndex]) {
+                let newprop = cur[prop]
+                let oldprop = acc[alreadyInIndex][prop]
+                if (!props.includes(prop) && !shallowEqual(newprop, oldprop)) {
+                    let oldelements = Array.isArray(oldprop) ? oldprop : [oldprop]
+                    let newelements = Array.isArray(newprop) ? newprop : [newprop]
+                    oldprop = oldelements.concat.newelements
+                }
+            }
         }
         return acc
     }, [])
@@ -366,7 +389,6 @@ const getAxis = (nestedProps, propName, category) => {
 const groupTextData = (data, propName, options) => {
     return d3.nest().key(d => d[propName].value)
         .entries(data).sort((a, b) => { return a.key.localeCompare(b.key) })
-        .concat([{ key: '', values: [], type: 'additionalValue' }])
 }
 
 const groupTimeData = (data, propName, options) => {

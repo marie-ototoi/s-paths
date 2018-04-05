@@ -3,18 +3,18 @@ import * as d3 from 'd3'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 // components
+import Coverage from '../elements/Coverage'
 import Header from '../elements/Header'
 import History from '../elements/History'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
-import PlainAxis from '../elements/PlainAxis'
 import PropSelector from '../elements/PropSelector'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import d3HeatMap from '../../d3/d3HeatMap'
+import d3TreeMap from '../../d3/d3TreeMap'
 // libs
-import { getSelectedConfig } from '../../lib/configLib'
-import { getAxis, getLegend, getPropsLists, getThresholdsForLegend, groupTextData, groupTimeData } from '../../lib/dataLib'
+import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
+import { deduplicate, getAxis, getLegend, getThresholdsForLegend, groupTextData, groupTimeData } from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
 // redux functions
@@ -22,7 +22,7 @@ import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
 import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
 
-class HeatMap extends React.Component {
+class TreeMap extends React.Component {
     constructor (props) {
         super(props)
         this.handleMouseDown = this.handleMouseDown.bind(this)
@@ -31,7 +31,7 @@ class HeatMap extends React.Component {
         this.selectElement = this.selectElement.bind(this)
         this.selectElements = this.selectElements.bind(this)
         this.customState = {
-            elementName: `HeatMap_${props.zone}`,
+            elementName: `TreeMap_${props.zone}`,
             selectElement: this.selectElement,
             selectElements: this.selectElements,
             handleMouseUp: this.handleMouseUp
@@ -55,47 +55,36 @@ class HeatMap extends React.Component {
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
 
-        let coverageFormatProp1
         let nestedCoverage1
         if (display.unitDimensions[zone][role] &&
             display.unitDimensions[zone][role].nestedCoverage1) {
             nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
         } else {
-            coverageFormatProp1 = config.matches[0].properties[0].format || 'YYYY-MM-DD'
-            nestedCoverage1 = groupTimeData(coverage, 'prop1', { format: coverageFormatProp1, max: 50 })
+            nestedCoverage1 = groupTextData(coverage, 'prop1', {
+                order: 'size'
+            })
             this.props.setUnitDimensions({ nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
         }
-
-        // First prop to be displayed in the bottom axis
-        const categoryProp1 = selectedConfig.properties[0].category
-        const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD'
-        const nestedProp1 = groupTimeData(data, 'prop1', {
-            format: formatProp1,
-            max: 50,
-            subgroup: 'prop2',
-            forceGroup: nestedCoverage1[0].group
+        
+        // First prop 
+        const nestedProp1 = groupTextData(data, 'prop1', {
+            order: 'size'
         })
-        const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
-        const listProp1 = getPropLists(config, zone, 0, dataset.labels)
-        const categoryProp2 = selectedConfig.properties[1].category
-        const nestedProp2 = groupTextData(data, 'prop2')
-        const axisLeft = getAxis(nestedProp2, 'prop2', categoryProp2)
-        const listProp2 = getPropLists(config, zone, 1, dataset.labels)
-
-        const colors = getQuantitativeColors()
-        const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
-        const legend = getLegend(thresholds, 'countprop2', colors, 'aggregate')
+        console.log('oo', nestedProp1)
+        //const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
+        //console.log(selectedConfig.properties[0].path, pathProp2)
+        //const legend = getLegend(nestedProp2, 'countprop2', colors, 'aggregate')
+        //console.log(legend, nestedProp2)
+        const propsLists = getPropsLists(config, zone, dataset.labels)
         // Save to reuse in render
         this.customState = {
             ...this.customState,
             selectedConfig,
+            nestedCoverage1,
             nestedProp1,
-            legend,
-            axisBottom,
-            axisLeft,
-            listProp1,
-            listProp2,
-            nestedProp2
+            //legend,
+            //nestedProp2,
+            propsLists
         }
     }
     handleMouseDown (e) {
@@ -108,16 +97,16 @@ class HeatMap extends React.Component {
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = d3HeatMap.getElementsInZone(this.refs.HeatMap, this.props)
+        const elements = d3TreeMap.getElementsInZone(this.refs.TreeMap, this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
     render () {
-        const { axisBottom, axisLeft, legend, listProp1, listProp2 } = this.customState
+        const { legend, propsLists } = this.customState
         const { data, config, display, role, selections, step, zone } = this.props
         const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
-
-        return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` } >
+        console.log('avant')
+        return (<g className = { `TreeMap ${this.customState.elementName} role_${role}` } >
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
@@ -128,7 +117,7 @@ class HeatMap extends React.Component {
             { step !== 'changing' &&
             <g
                 transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
-                ref = "HeatMap"
+                ref = "TreeMap"
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.handleMouseDown }
@@ -139,11 +128,20 @@ class HeatMap extends React.Component {
                 <Header
                     zone = { zone }
                 />
-                <Nav
+                <Coverage
                     zone = { zone }
-                    displayedInstances = { data.length } // to be fixed - works only for unit displays
+                    displayedInstances = { this.customState.displayedInstances } // to be fixed - works only for unit displays
+                    selectedInstances = { selections.reduce((acc, cur) => {
+                        acc += Number(cur.count)
+                        return acc
+                    }, 0) }
                     selections = { selections }
                     config = { config }
+                />
+                <Nav
+                    zone = { zone }
+                    config = { config }
+                    propsLists = { propsLists }
                 />
                 <Legend
                     type = "plain"
@@ -152,38 +150,23 @@ class HeatMap extends React.Component {
                     legend = { legend }
                     selectElements = { this.selectElements }
                 />
-                <PlainAxis
-                    type = "Bottom"
-                    zone = { zone }
-                    axis = { axisBottom }
-                    propIndex = { 0 }
-                    selectElements = { this.selectElements }
-                />
-                <PlainAxis
-                    type = "Left"
-                    zone = { zone }
-                    axis = { axisLeft }
-                    propIndex = { 1 }
-                    selectElements = { this.selectElements }
-                />
                 <PropSelector
-                    type = "AxisLeft"
-                    propList = { listProp2 }
+                    selected = { false }
+                    key = { zone + '_propselector_31' }
+                    propList = { propsLists[0] }
                     config = { config }
                     align = "right"
-                    offset = { { x: 20, y: 30, width: -15, height: 0 } }
-                    selectElements = { this.selectElements }
-                    propIndex = { 1 }
+                    dimensions = { getDimensions('legendAxisBottom', display.zones[zone], display.viz, { x: 0, y: -15, width: -35, height: 0 }) }
+                    propIndex = { 0 }
                     zone = { zone }
                 />
                 <PropSelector
-                    type = "AxisBottom"
-                    propList = { listProp1 }
-                    align = "right"
+                    selected = { false }
+                    key = { zone + '_propselector_32' }
+                    propList = { propsLists[1] }
                     config = { config }
-                    offset = { { x: 20, y: -15, width: -50, height: 0 } }
-                    selectElements = { this.selectElements }
-                    propIndex = { 0 }
+                    dimensions = { getDimensions('legendLegend', display.zones[zone], display.viz, { x: 0, y: 0, width: -35, height: 0 }) }
+                    propIndex = { 1 }
                     zone = { zone }
                 />
                 <History
@@ -195,7 +178,7 @@ class HeatMap extends React.Component {
     }
 
     selectElements (prop, value, category) {
-        const elements = d3HeatMap.getElements(this.refs.HeatMap, prop, value, category)
+        const elements = d3TreeMap.getElements(this.refs.TreeMap, prop, value, category)
         // console.log(prop, value, elements, category)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
@@ -206,13 +189,13 @@ class HeatMap extends React.Component {
     }
 
     componentDidMount () {
-        d3HeatMap.create(this.refs.HeatMap, { ...this.props, ...this.customState })
+        d3TreeMap.create(this.refs.TreeMap, { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3HeatMap.update(this.refs.HeatMap, { ...this.props, ...this.customState })
+        d3TreeMap.update(this.refs.TreeMap, { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3HeatMap.destroy(this.refs.HeatMap, { ...this.props, ...this.customState })
+        d3TreeMap.destroy(this.refs.TreeMap, { ...this.props, ...this.customState })
     }
 }
 
@@ -237,6 +220,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const HeatMapConnect = connect(mapStateToProps, mapDispatchToProps)(HeatMap)
+const TreeMapConnect = connect(mapStateToProps, mapDispatchToProps)(TreeMap)
 
-export default HeatMapConnect
+export default TreeMapConnect

@@ -8,12 +8,13 @@ const pathSchema = new mongoose.Schema({
     entrypoint: { type: String, required: true },
     endpoint: { type: String, required: true },
     level: { type: Number, required: true },
-    total: { type: Number },
-    unique: { type: Number },
-    coverage: { type: Number },
-    avgcharlength: { type: Number },
-    createdAt: { type: Date },
-    modifiedAt: { type: Date }
+    interlinks: [],
+    total: Number,
+    unique: Number,
+    coverage: Number,
+    avgcharlength: Number,
+    createdAt: Date,
+    modifiedAt: Date
 })
 
 pathSchema.statics = {

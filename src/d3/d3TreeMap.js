@@ -7,7 +7,7 @@ import {dragSelection} from './d3DragSelector'
 import selectionLib from '../lib/selectionLib'
 
 const create = (el, props) => {
-    // console.log('create')
+    console.log('create')
     if (el && props.data) {
         draw(el, props)
         resize(el, props)
@@ -21,47 +21,32 @@ const destroy = (el) => {
 
 const draw = (el, props) => {
     const { nestedProp1, legend, selectedConfig, selectElement, selections, zone } = props
-    // console.log(nestedProp1)
-    const xUnits = d3.select(el)
-        .selectAll('g.xUnits')
+    console.log(nestedProp1)
+    const units = d3.select(el)
+        .selectAll('rect.units')
         .data(nestedProp1)
-    xUnits
+    units
         .enter()
-        .append('g')
-        .attr('class', 'xUnits')
-    xUnits
-        .exit()
-        .remove()
-    const yUnits = d3.select(el).selectAll('g.xUnits').selectAll('g.yUnits')
-        .data(d => d.values)
-    yUnits
-        .enter()
-        .append('g')
-        .attr('class', 'yUnits')
         .append('rect')
-        .attr('class', 'yUnit')
-    yUnits
+        .attr('class', 'units')
+    units
         .exit()
         .remove()
 
     d3.select(el)
-        .selectAll('g.xUnits g.yUnits')
+        .selectAll('rect.units')
         .each((d, i) => {
-            // console.log(legend, d)
-            d.color = legend.info.filter(p => (p.key[0] <= Number(d.countprop2) && p.key[1] >= Number(d.countprop2)))[0].color
+            //console.log(d, legend)
+            //d.color = legend.info.filter(p => (p.key === d.values[0].prop2.value || (d.values[0].labelprop2 && p.key === d.values[0].labelprop2.value)))[0].color
             d.selection = {
-                selector: `heatmap_element_p1_${dataLib.makeId(d.parent.key)}_p2_${dataLib.makeId(d.key)}`,
-                count: Number(d.countprop2),
+                selector: `treemap_element_p1_${dataLib.makeId(d.key)}`,
+                count: Number(d.values.length),
                 query: {
                     type: 'set',
                     value: [{
                         category: selectedConfig.properties[0].category,
-                        value: dataLib.getDateRange(d.parent.key, nestedProp1[0].group),
-                        propName: 'prop1'
-                    }, {
-                        category: selectedConfig.properties[1].category,
                         value: d.key,
-                        propName: 'prop2'
+                        propName: 'prop1'
                     }]
                 }
             }
@@ -69,14 +54,18 @@ const draw = (el, props) => {
             d.shape = 'rectangle'
             d.zone = {}
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
+            //console.log(d)
         })
         .attr('id', d => d.selection.selector) // only needed to better understand html source code
         .classed('selected', d => d.selected)
-        .attr('fill', d => d.color)
-        .attr('opacity', d => (selections.length > 0 && d.selected !== true) ? 0.5 : 1)
+        //.attr('fill', d => d.color)
+        .attr('opacity', d => {
+            return (selections.length > 0 && d.selected !== true) ? 0.5 : 1
+        })
         .on('mouseup', d => {
             props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, zone)
         })
+        console.log("on ira... ou tu voudras")
 }
 
 const drawSelection = (el, props) => {
@@ -107,7 +96,7 @@ const drawSelection = (el, props) => {
 const getElements = (el, propName, value, propCategory) => {
     const isArray = Array.isArray(value)
     let elements = []
-    d3.select(el).selectAll('.yUnits').each(d => {
+    d3.select(el).selectAll('.units').each(d => {
         let propValue
         if (propCategory === 'datetime') {
             propValue = Number(d.parent.key)
@@ -131,7 +120,7 @@ const getElements = (el, propName, value, propCategory) => {
 
 const getElementsForTransition = (el, props) => {
     let results = []
-    d3.select(el).selectAll('.yUnits').each(d => {
+    d3.select(el).selectAll('.units').each(d => {
         results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity, shape: d.shape })
     })
     // console.log(results)
@@ -147,7 +136,7 @@ const getElementsInZone = (el, props) => {
         y2: zoneDimensions.y2 - props.display.viz.vertical_margin
     }
     let selectedElements = []
-    d3.select(el).selectAll('.yUnits')
+    d3.select(el).selectAll('.units')
         .each(function (d, i) {
             // console.log(d.zone)
             // console.log(selectionLib.detectRectCollision(selectedZone, elementZone), d3.select(this).node().parentNode.getAttribute('id'), d.selection)
@@ -159,43 +148,8 @@ const getElementsInZone = (el, props) => {
 
 const resize = (el, props) => {
     const { nestedCoverage1, nestedProp2, display } = props
-    let mapY = {}
-    nestedProp2.forEach((p, i) => {
-        mapY[p.key] = nestedProp2.length - 2 - i
-    })
-    const xScale = d3.scaleLinear()
-        .domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
-        .range([0, display.viz.useful_width])
-    let maxUnitsPerYear = 1
-    d3.select(el)
-        .selectAll('g.xUnits')
-        .attr('transform', d => `translate(${xScale(Number(d.key))}, 0)`)
-        .each(d => {
-            if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
-        })
-    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfTimeUnits(nestedCoverage1))
-    const unitHeight = Math.round(display.viz.useful_height / (props.nestedProp2.length - 1))
-    // todo : s'il n'y a pas de unitHeigth sauvé pour cette config on recalcule
-
-    d3.select(el).selectAll('g.xUnits').selectAll('.yUnits')
-        .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (mapY[d.key] * unitHeight)})`)
-        .each((d, i) => {
-            const x1 = xScale(Number(d.parent.key)) + 1
-            const y1 = display.viz.useful_height - (mapY[d.key] * unitHeight)
-            d.zone = {
-                x1,
-                y1: y1 - unitHeight,
-                x2: x1 + unitWidth - 2,
-                y2: y1 - 1,
-                width: unitWidth - 2,
-                height: unitHeight - 1
-            }
-        })
-    d3.select(el).selectAll('g.xUnits').selectAll('.yUnit')
-        .attr('x', d => 1)
-        .attr('width', d => unitWidth - 1)
-        .attr('y', -unitHeight)
-        .attr('height', d => unitHeight - 1)
+    console.log("et l'on s'aimera encore")
+    
     props.handleTransition(props, getElementsForTransition(el, props))
 }
 

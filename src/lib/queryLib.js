@@ -262,15 +262,22 @@ const makeQuery = (entrypoint, configZone, zone, options) => {
     let orderList = ``
     properties.forEach((prop, index) => {
         index += 1
+        let hierarchical = false
+        if (index === 1 && configZone.constraints[index - 1][0].hierarchical === true) {
+            //console.log(prop, prop.category)
+            hierarchical = prop.category === 'text' ? 'previous' : 'last'
+        }
         propList = propList.concat(`?prop${index} ?labelprop${index} `)
+        if (hierarchical) propList = propList.concat(`?directlink `)
         orderList = orderList.concat(`?prop${index} `)
         if (configZone.entrypoint === undefined) {
             propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
             orderList = orderList.concat(`?countprop${index} `)
         }
         groupList = groupList.concat(`?prop${index} ?labelprop${index} `)
+        if (hierarchical) groupList = groupList.concat(`?directlink `)
         const optional = configZone.constraints[index - 1] && configZone.constraints[index - 1][0].optional
-        defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`, 'entrypoint', (index === 1), optional))
+        defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`, 'entrypoint', (index === 1), optional, hierarchical))
     })
     return `SELECT DISTINCT ${propList}${graph}
 WHERE {
@@ -334,7 +341,7 @@ const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
     ORDER BY ${orderList}`
 }
 
-const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', entrypointType = true, optional = false) => {
+const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', entrypointType = true, optional = false, hierarchical = null) => {
     let pathParts = FSLpath.split('/')
     let query = (entrypointType) ? `?${entrypointName} rdf:type ${pathParts[0]} . ` : ``
     let levels = Math.floor(pathParts.length / 2)
@@ -350,7 +357,17 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
             query = query.concat(`?${thisObject} rdf:type ${objectType} . `)
         }
     }
-    return `${optional ? 'OPTIONAL { ' : ''}${query}${optional ? '} . ' : ''}`
+    let queryHierarchical = ''
+    if (hierarchical) {
+        const prevPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}inter${levels}` : propName
+        const newPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}inter${levels}bis` : `${propName}bis`
+        queryHierarchical = query.replace(prevPropName, `${newPropName}`)
+        queryHierarchical = `?${prevPropName} ?directlink ?${newPropName} . ` + queryHierarchical
+        queryHierarchical = queryHierarchical.replace(/OPTIONAL {.*} \. /, '')
+        //queryHierarchical = queryHierarchical.replace(prevPropName, newPropName)
+        queryHierarchical = `OPTIONAL { ${queryHierarchical} }`
+    }
+    return `${optional ? 'OPTIONAL { ' : ''}${query}${queryHierarchical}${optional ? '} . ' : ''}`
 }
 
 exports.convertPath = convertPath

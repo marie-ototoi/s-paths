@@ -165,7 +165,8 @@ const defineConfigs = (views, stats) => {
             match.forEach((prop, index) => {
                 missingProp = ((prop.path === '') && (!view.constraints[index][0].optional))
             })
-            return !missingProp
+            let unique = new Set(match.map(m => m.property))
+            return !missingProp && unique.size === match.length
         })
         // if the view is supposed to display each entity
         let entrypointFactor = 1
