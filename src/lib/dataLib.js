@@ -311,7 +311,7 @@ const deduplicate = (data, props) => {
                 if (!props.includes(prop) && !shallowEqual(newprop, oldprop)) {
                     let oldelements = Array.isArray(oldprop) ? oldprop : [oldprop]
                     let newelements = Array.isArray(newprop) ? newprop : [newprop]
-                    oldprop = oldelements.concat.newelements
+                    oldprop = oldelements.concat(newelements)
                 }
             }
         }
