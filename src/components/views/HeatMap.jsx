@@ -15,7 +15,7 @@ import SelectionZone from '../elements/SelectionZone'
 import d3HeatMap from '../../d3/d3HeatMap'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
-import { getAxis, getLegend, getThresholdsForLegend, groupTextData, groupTimeData } from '../../lib/dataLib'
+import { deduplicate, getAxis, getLegend, getThresholdsForLegend, groupTextData, groupTimeData } from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
 // redux functions
@@ -63,14 +63,14 @@ class HeatMap extends React.Component {
             nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
         } else {
             coverageFormatProp1 = config.matches[0].properties[0].format || 'YYYY-MM-DD'
-            nestedCoverage1 = groupTimeData(coverage, 'prop1', { format: coverageFormatProp1, max: 50 })
+            nestedCoverage1 = groupTimeData(deduplicate(coverage, ['prop1']), 'prop1', { format: coverageFormatProp1, max: 50 })
             this.props.setUnitDimensions({ nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
         }
 
         // First prop to be displayed in the bottom axis
         const categoryProp1 = selectedConfig.properties[0].category
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD'
-        const nestedProp1 = groupTimeData(data, 'prop1', {
+        const nestedProp1 = groupTimeData(deduplicate(data, ['prop1']), 'prop1', {
             format: formatProp1,
             max: 50,
             subgroup: 'prop2',

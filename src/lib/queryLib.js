@@ -52,7 +52,7 @@ const makeSelectionConstraints = (selections, selectedConfig, zone) => {
                     return `?${propName} ${(iR === 0) ? '>=' : '<='} ${cast}`
                 }).join(' && ')
                 return `(${conditions})`
-            } else if (constraint.category === 'text') {
+            } else if (constraint.category === 'text' || constraint.category === 'uri') {
                 return ` regex(?${propName}, '^${constraint.value}$', 'i')`
             }
         }).join(' && ') + ')'

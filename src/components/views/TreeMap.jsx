@@ -70,15 +70,21 @@ class TreeMap extends React.Component {
         const nestedProp1 = groupTextData(data, 'prop1', {
             order: 'size'
         })
-        console.log('oo', nestedProp1)
+        console.log('oo', data, nestedProp1)
         //const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         //console.log(selectedConfig.properties[0].path, pathProp2)
         //const legend = getLegend(nestedProp2, 'countprop2', colors, 'aggregate')
         //console.log(legend, nestedProp2)
         const propsLists = getPropsLists(config, zone, dataset.labels)
+
+        const displayedInstances = nestedProp1.reduce((acc, cur) => {
+            if (cur.values.length > 0 && cur.values[0].countprop1) acc += Number(cur.values[0].countprop1.value)
+            return acc
+        }, 0)
         // Save to reuse in render
         this.customState = {
             ...this.customState,
+            displayedInstances,
             selectedConfig,
             nestedCoverage1,
             nestedProp1,
@@ -158,15 +164,6 @@ class TreeMap extends React.Component {
                     align = "right"
                     dimensions = { getDimensions('legendAxisBottom', display.zones[zone], display.viz, { x: 0, y: -15, width: -35, height: 0 }) }
                     propIndex = { 0 }
-                    zone = { zone }
-                />
-                <PropSelector
-                    selected = { false }
-                    key = { zone + '_propselector_32' }
-                    propList = { propsLists[1] }
-                    config = { config }
-                    dimensions = { getDimensions('legendLegend', display.zones[zone], display.viz, { x: 0, y: 0, width: -35, height: 0 }) }
-                    propIndex = { 1 }
                     zone = { zone }
                 />
                 <History

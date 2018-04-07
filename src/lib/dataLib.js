@@ -261,6 +261,14 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
                     }
                     return dp
                 })
+                let size
+                if (cur.countprop1 && cur.countprop2) {
+                    size = d3.max([Number(cur.countprop1.value), Number(cur.countprop2.value)])
+                } else if (cur.countprop1) {
+                    size = Number(cur.countprop1.value)
+                } else {
+                    size = 1
+                }
                 // else creates the entry
                 if (!exists) {
                     acc.push({
@@ -269,7 +277,7 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
                         indexOrigin: cur.indexOrigin,
                         indexTarget: cur.indexTarget,
                         signature: `${zone}_origin${cur.indexOrigin}_target${cur.indexTarget}`,
-                        size: (cur.countprop1 || cur.countprop2) ? d3.max([Number(cur.countprop1.value), Number(cur.countprop2.value)]) : 1 
+                        size
                     })
                 }
                 return acc
@@ -389,6 +397,7 @@ const getAxis = (nestedProps, propName, category) => {
 const groupTextData = (data, propName, options) => {
     return d3.nest().key(d => d[propName].value)
         .entries(data).sort((a, b) => { return a.key.localeCompare(b.key) })
+        .concat([{ key: '', values: [], type: 'additionalValue' }])
 }
 
 const groupTimeData = (data, propName, options) => {
