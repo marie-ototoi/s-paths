@@ -5,8 +5,8 @@ const initialState = {
     entrypoint: 'http://data.nobelprize.org/terms/Laureate', //'http://xmlns.com/foaf/0.1/Person', // //'http://www.ica.org/standards/RiC/ontology#Place', ////, //  'http://xmlns.com/foaf/0.1/Person' //, // 'nobel:Laureate',  //  'nobel:LaureateAward',
     defaultGraph: 'http://localhost:8890/nobel', // 'urn:piaaf:siaf', // null, // ,
     constraints: '', // '?entrypoint <http://data.nobelprize.org/terms/year> ?year . filter (?year > 1980)',
-    forceUpdate: false,
-    maxLevel: 4,
+    forceUpdate: true,
+    maxLevel: 5,
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/'/* ,
         d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',

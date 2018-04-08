@@ -222,11 +222,11 @@ const defineGroup = (prop, previousProp, level, options) => {
                 returnprops.category = 'number'
             }
         } else if (datatype) {
-            if (avgcharlength && avgcharlength.value > maxChar) {
+            /* if (avgcharlength && avgcharlength.value > maxChar) {
                 returnprops.category = 'ignore'
-            } else {
+            } else { */
                 returnprops.category = 'text'
-            }
+            // }
         }
     } else if (isiri.value === '1' || isiri.value === 'true') {
         returnprops.category = 'uri'

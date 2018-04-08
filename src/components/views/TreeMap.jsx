@@ -70,7 +70,7 @@ class TreeMap extends React.Component {
         const nestedProp1 = groupTextData(data, 'prop1', {
             order: 'size'
         })
-        console.log('oo', data, nestedProp1)
+        //console.log('oo', data, nestedProp1)
         //const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         //console.log(selectedConfig.properties[0].path, pathProp2)
         //const legend = getLegend(nestedProp2, 'countprop2', colors, 'aggregate')
@@ -111,7 +111,6 @@ class TreeMap extends React.Component {
         const { legend, propsLists } = this.customState
         const { data, config, display, role, selections, step, zone } = this.props
         const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
-        console.log('avant')
         return (<g className = { `TreeMap ${this.customState.elementName} role_${role}` } >
             <SelectionZone
                 zone = { zone }

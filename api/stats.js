@@ -308,7 +308,8 @@ const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQu
                     return (prop.total > 0 &&
                     ((prop.category === 'number') ||
                     (prop.category === 'datetime') ||
-                    (prop.category === 'text' && prop.avgcharlength <= options.maxChar && prop.unique <= options.maxUnique) ||
+                    (prop.category === 'text') ||
+                    //(prop.category === 'text' && prop.avgcharlength <= options.maxChar && prop.unique <= options.maxUnique) ||
                     (prop.category === 'uri' && prop.unique <= options.maxUnique)))
                 })
             })

@@ -204,7 +204,6 @@ const defineConfigs = (views, stats) => {
         { zone: 'main', views: [...configSetUp] },
         { zone: 'aside', views: [...configSetUp] }
     ]
-
 }
 const activateDefaultConfigs = (configs) => {
     // console.log('activateDefaultConfigs', configs)

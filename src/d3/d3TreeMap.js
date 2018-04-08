@@ -7,7 +7,7 @@ import {dragSelection} from './d3DragSelector'
 import selectionLib from '../lib/selectionLib'
 
 const create = (el, props) => {
-    console.log('create')
+    // console.log('create')
     if (el && props.data) {
         draw(el, props)
         resize(el, props)
@@ -21,7 +21,7 @@ const destroy = (el) => {
 
 const draw = (el, props) => {
     const { nestedProp1, legend, selectedConfig, selectElement, selections, zone } = props
-    console.log(nestedProp1)
+    // console.log(nestedProp1)
     const units = d3.select(el)
         .selectAll('g.units')
         .data(nestedProp1)
@@ -72,7 +72,6 @@ const draw = (el, props) => {
         .on('mouseup', d => {
             props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, zone)
         })
-        console.log("on ira... ou tu voudras")
 }
 
 const drawSelection = (el, props) => {
@@ -165,7 +164,7 @@ const resize = (el, props) => {
             size: Number(propgroup.values[0].countprop1.value)
         } : propgroup
     }))
-    console.log(map)
+    // console.log(map)
     d3.select(el).selectAll('g.units')
         .each((d, i) => {
             d.zone = {
