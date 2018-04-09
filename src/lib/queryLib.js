@@ -359,8 +359,8 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
     }
     let queryHierarchical = ''
     if (hierarchical) {
-        const prevPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}inter${levels}` : propName
-        const newPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}inter${levels}bis` : `${propName}bis`
+        const prevPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}inter${levels-1}` : propName
+        const newPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}inter${levels-1}bis` : `${propName}bis`
         queryHierarchical = query.replace(prevPropName, `${newPropName}`)
         queryHierarchical = `?${prevPropName} ?directlink ?${newPropName} . ` + queryHierarchical
         queryHierarchical = queryHierarchical.replace(/OPTIONAL {.*} \. /, '')
