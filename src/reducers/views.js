@@ -58,7 +58,7 @@ const defaultState = [
                 {
                     category: 'text',
                     hierarchical: true,
-                    avg: { max: 100, optimal: [30, 50]},
+                    avg: { max: 100, optimal: [30, 50] },
                     unique: { min: 5, max: 40, optimal: [10, 30] }
                 },
                 {

@@ -352,7 +352,7 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
         let thisSubject = (level === 1) ? entrypointName : `${propName}inter${(level - 1)}`
         let thisObject = (level === levels) ? propName : `${propName}inter${level}`
         query = query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
-        if (level === levels) query = query.concat(`${!optional ? 'OPTIONAL { ' : ''}?${thisObject} rdfs:label ?label${propName}${!optional ? ' } .' : ''} `)
+        // if (level === levels) query = query.concat(`${!optional ? 'OPTIONAL { ' : ''}?${thisObject} rdfs:label ?label${propName}${!optional ? ' } .' : ''} `)
         if (objectType !== '*') {
             query = query.concat(`?${thisObject} rdf:type ${objectType} . `)
         }
@@ -360,10 +360,10 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
     let queryHierarchical = ''
     if (hierarchical) {
         const prevPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}inter${levels-1}` : propName
-        const newPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}inter${levels-1}bis` : `${propName}bis`
-        queryHierarchical = query.replace(prevPropName, `${newPropName}`)
+        const newPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}bisinter${levels-1}` : `${propName}bis`
+        queryHierarchical = query.replace(new RegExp(`[?]{1}${propName}`, 'gi'), `$&bis`)
         queryHierarchical = `?${prevPropName} ?directlink ?${newPropName} . ` + queryHierarchical
-        queryHierarchical = queryHierarchical.replace(/OPTIONAL {.*} \. /, '')
+        // queryHierarchical = queryHierarchical.replace(/OPTIONAL {.*} \. /, '')
         //queryHierarchical = queryHierarchical.replace(prevPropName, newPropName)
         queryHierarchical = `OPTIONAL { ${queryHierarchical} }`
     }

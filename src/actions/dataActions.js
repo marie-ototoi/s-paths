@@ -30,8 +30,9 @@ const endTransition = (dispatch) => (zone) => {
 }
 
 const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => {
+    
     const { endpoint, entrypoint, prefixes } = dataset
-    // console.log(selectedConfigs)
+     console.log(selectedConfigs)
     const updatedConfigs = selectViewConfig(id, selectedConfigs)
     const selectedConfig = selectedConfigs.filter(c => c.selected)[0]
     const updatedConfig = updatedConfigs.filter(c => c.selected)[0]
@@ -44,7 +45,7 @@ const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => {
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, selectedConfig, dataset, zone)
     const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
-    // console.log('test', queryTransition)
+    // console.log('test', newQuery)
     Promise.all([
         getData(endpoint, newQuery, prefixes),
         getData(endpoint, queryTransition, prefixes),

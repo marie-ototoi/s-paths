@@ -56,31 +56,34 @@ class TreeMap extends React.Component {
         const selectedConfig = getSelectedConfig(config, zone)
 
         let nestedCoverage1
+        // console.log(display.unitDimensions[zone][role])
         if (display.unitDimensions[zone][role] &&
             display.unitDimensions[zone][role].nestedCoverage1) {
             nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
         } else {
-            nestedCoverage1 = groupTextData(coverage, 'prop1', {
+            nestedCoverage1 = groupTextData(deduplicate(coverage, ['prop1']), 'prop1', {
                 order: 'size'
             })
             this.props.setUnitDimensions({ nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
         }
-        
+
         // First prop 
-        const nestedProp1 = groupTextData(data, 'prop1', {
+        const nestedProp1 = groupTextData(deduplicate(data, ['prop1']), 'prop1', {
             order: 'size'
         })
-        //console.log('oo', data, nestedProp1)
-        //const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
-        //console.log(selectedConfig.properties[0].path, pathProp2)
-        //const legend = getLegend(nestedProp2, 'countprop2', colors, 'aggregate')
-        //console.log(legend, nestedProp2)
+        // console.log('oo', data, nestedProp1)
+
         const propsLists = getPropsLists(config, zone, dataset.labels)
 
         const displayedInstances = nestedProp1.reduce((acc, cur) => {
-            if (cur.values.length > 0 && cur.values[0].countprop1) acc += Number(cur.values[0].countprop1.value)
+            //if (cur.values.length > 0 && cur.values[0].countprop1) acc += Number(cur.values[0].countprop1.value)
+            cur.values.forEach(val => {
+                acc += Number(val.countprop1.value)
+            })
+            
             return acc
         }, 0)
+        // console.log(nestedProp1)
         // Save to reuse in render
         this.customState = {
             ...this.customState,

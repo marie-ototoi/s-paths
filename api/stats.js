@@ -278,6 +278,7 @@ const loadOntology = (url, graph) => {
 
 const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQuery) => {
     // console.log(props)
+    let { maxLevel } = options
     const queriedProps = props.filter(prop => {
         // check levels one after another :
         // except for first time exploration, lower levels are sent only if upper levels have not been kept 
@@ -309,8 +310,9 @@ const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQu
                     ((prop.category === 'number') ||
                     (prop.category === 'datetime') ||
                     (prop.category === 'text') ||
+                    (prop.category === 'uri' && prop.level === maxLevel)))
                     //(prop.category === 'text' && prop.avgcharlength <= options.maxChar && prop.unique <= options.maxUnique) ||
-                    (prop.category === 'uri' && prop.unique <= options.maxUnique)))
+                    //(prop.category === 'uri' && prop.unique <= options.maxUnique)))
                 })
             })
             .then(merged => {

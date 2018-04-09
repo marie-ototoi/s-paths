@@ -42,7 +42,7 @@ const draw = (el, props) => {
     d3.select(el)
         .selectAll('g.units')
         .each((d, i) => {
-            //console.log(d, legend)
+            //console.log(d)
             //d.color = legend.info.filter(p => (p.key === d.values[0].prop2.value || (d.values[0].labelprop2 && p.key === d.values[0].labelprop2.value)))[0].color
             d.color = '#444',
             d.selection = {
@@ -154,7 +154,6 @@ const getElementsInZone = (el, props) => {
 
 const resize = (el, props) => {
     const { dataset, display, displayedInstances, nestedCoverage1, nestedProp1, zone } = props
-    
     let width = display.viz.useful_width
     let height = Math.floor(display.viz.useful_height * displayedInstances / dataset.stats.selectionInstances)
     if (height > display.viz.useful_height) height = display.viz.useful_height
@@ -164,7 +163,7 @@ const resize = (el, props) => {
             size: Number(propgroup.values[0].countprop1.value)
         } : propgroup
     }))
-    // console.log(map)
+    // console.log(display.viz.useful_height, displayedInstances, dataset.stats.selectionInstances, height)
     d3.select(el).selectAll('g.units')
         .each((d, i) => {
             d.zone = {

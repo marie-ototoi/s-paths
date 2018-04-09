@@ -8,7 +8,7 @@ const initialState = {
     forceUpdate: true,
     maxLevel: 5,
     prefixes: {
-        dcterms: 'http://purl.org/dc/terms/'/* ,
+        dcterms: 'http://purl.org/dc/terms/',
         d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
         dbpedia: 'http://dbpedia.org/resource/',
         'dbpedia-owl': 'http://dbpedia.org/ontology/',
@@ -47,7 +47,7 @@ const initialState = {
         frbr: 'http://purl.org/vocab/frbr/core#',
         sim: 'http://purl.org/ontology/similarity/',
         slickm: 'http://slickmem.data.t-mus.org/',
-        slickmem: 'http://slickmem.data.t-mus.org/terms/' */
+        slickmem: 'http://slickmem.data.t-mus.org/terms/'
     },
     status: 'off',
     stats: []
