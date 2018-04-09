@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import HeatMap from './views/HeatMap'
 import Timeline from './views/Timeline'
 import TreeMap from './views/TreeMap'
-import Map from './views/Map'
+import GeoMap from './views/GeoMap'
 import Transition from './elements/Transition'
 import Debug from './Debug'
 // libs
@@ -96,7 +96,8 @@ class App extends React.Component {
         const componentIds = {
             'HeatMap': HeatMap,
             'Timeline': Timeline,
-            'TreeMap': TreeMap
+            'TreeMap': TreeMap,
+            'GeoMap': GeoMap
         }
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')

@@ -68,6 +68,19 @@ const defaultState = [
                 }
             ]
         ]
+    },
+    {
+        id: 'GeoMap',
+        constraints: [
+            [
+                {
+                    category: 'geo',
+                    hierarchical: true,
+                    avg: { max: 100, optimal: [30, 50] },
+                    unique: { min: 5, max: 40, optimal: [10, 30] }
+                }
+            ]
+        ]
     }
 ]
 
