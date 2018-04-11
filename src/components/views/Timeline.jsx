@@ -63,7 +63,7 @@ class Timeline extends React.PureComponent {
             nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
         } else {
             coverageFormatProp1 = config.matches[0].properties[0].format || 'YYYY-MM-DD'
-            nestedCoverage1 = groupTimeData(deduplicate(coverage, ['entrypoint']), 'prop1', { format: coverageFormatProp1, max: 50 })
+            nestedCoverage1 = groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', { format: coverageFormatProp1, max: 50 })
             maxUnitsPerYear = 1
             nestedCoverage1.forEach(d => {
                 if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length

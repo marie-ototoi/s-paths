@@ -102,7 +102,7 @@ class App extends React.Component {
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')
         const statusAside = getCurrentState(this.props.data, 'aside')
-        const statusConfigs = (statusMain === 'transition' || statusAside === '<transiti></transiti>on') ? 'transition' : 'active'
+        const statusConfigs = (statusMain === 'transition' || statusAside === 'transition') ? 'transition' : 'active'
         const mainConfig = getConfig(getCurrentConfigs(configs, 'active'), 'main')
         // console.log(getCurrentConfigs(configs, 'transition'))
         const mainTransitionConfig = getConfig(getCurrentConfigs(configs, 'transition'), 'main')
@@ -111,7 +111,7 @@ class App extends React.Component {
         const asideConfig = getConfig(getCurrentConfigs(configs, 'active'), 'aside')
         const asideTransitionConfig = getConfig(getCurrentConfigs(configs, 'transition'), 'aside')
         const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
-        const SideTransitionComponent = asideConfig ? componentIds[asideTransitionConfig.id] : ''
+        const SideTransitionComponent = asideTransitionConfig ? componentIds[asideTransitionConfig.id] : ''
         // to do : avoid recalculate transition data at each render
         return (<div
             className = "view"

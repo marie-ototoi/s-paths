@@ -32,7 +32,7 @@ const endTransition = (dispatch) => (zone) => {
 const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => {
     
     const { endpoint, entrypoint, prefixes } = dataset
-     console.log(selectedConfigs)
+    // console.log(selectedConfigs)
     const updatedConfigs = selectViewConfig(id, selectedConfigs)
     const selectedConfig = selectedConfigs.filter(c => c.selected)[0]
     const updatedConfig = updatedConfigs.filter(c => c.selected)[0]
@@ -124,8 +124,9 @@ const setUnitDimensions = (dispatch) => (dimensions, zone, configId, role, setTa
 
 const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
     // console.log('load Data ', dataset.constraints)
-    let { endpoint, entrypoint, prefixes } = dataset
+    let { constraints, endpoint, entrypoint, labels, prefixes } = dataset
     let newOptions
+    if (constraints !== '') dataset.forceUpdate = false
     getStats(dataset)
         .then(stats => {
             return new Promise((resolve, reject) => {

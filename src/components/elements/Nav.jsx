@@ -35,8 +35,8 @@ class Nav extends React.PureComponent {
                     <rect
                         width = { itemWidth }
                         height = { itemHeight }
-                        fill = { selected ? '#333333' : '#E0E0E0' }>
-                    </rect>
+                        fill = { selected ? '#333333' : '#E0E0E0' }
+                    />
                     <text
                         y = "10"
                         x = "4"

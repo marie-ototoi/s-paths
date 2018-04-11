@@ -206,33 +206,28 @@ const defineGroup = (prop, previousProp, level, options) => {
     const fullPath = `${previousProp.fullPath}/<${property.value}>/*`
     const path = convertPath(fullPath, prefixes)
     let returnprops = {}
-    // console.log(datatype)
+    let propName = getPropName(property.value)
+    // console.log('oye ', property.value, datatype)
+    if (isliteral && (isliteral.value === '1' || isliteral.value === 'true')) {
+        returnprops.type = 'literal'
+    } else if (isiri.value === '1' || isiri.value === 'true') {
+        returnprops.type = 'uri'
+    }
     if (ignoreList.includes(property.value)) {
         returnprops.category = 'ignore'
-    } else if (isliteral && (isliteral.value === '1' || isliteral.value === 'true')) {
-        if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#date') {
-            returnprops.category = 'datetime'
-        } else if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#integer') {
-            let propName = getPropName(property.value)
-            if (propName.match(/year|date|birthday/gi) ||
-            propName === 'birth' ||
-            propName === 'death') {
-                returnprops.category = 'datetime'
-            } else {
-                returnprops.category = 'number'
-            }
-        } else if (datatype) {
-            /* if (avgcharlength && avgcharlength.value > maxChar) {
-                returnprops.category = 'ignore'
-            } else { */
-                returnprops.category = 'text'
-            // }
-        }
-    } else if (isiri.value === '1' || isiri.value === 'true') {
-        returnprops.category = 'uri'
+    } else if ((datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#date') ||
+        propName.match(/year|date|birthday/gi) ||
+        propName.match(/(\/|#)(birth|death)$/gi)) {
+        returnprops.category = 'datetime'
+    } else if (propName.match(/place|country|city|latitude|longitude/gi) ||
+        propName.match(/(\/|#)(lat|long)$/gi)) {
+        returnprops.category = 'geo'
+    } else if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#integer') {
+        returnprops.category = 'number'
     } else {
-        returnprops.category = 'ovni'
+        returnprops.category = 'text'
     }
+    console.log(propName, returnprops.category, returnprops.type)
     // to add : geographical info
     if (language && language.value) returnprops.language = language.value
     return {

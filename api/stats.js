@@ -30,21 +30,18 @@ const getStats = (opt) => {
     // add default options when not set
     const ignore = opt.ignoreList ? [...opt.ignoreList] : []
     let options = {
-        entrypoint: opt.entrypoint,
         constraints: opt.constraints || '',
+        dateList: opt.dateList,
         defaultGraph: opt.defaultGraph || null,
         endpoint: opt.endpoint,
+        entrypoint: opt.entrypoint,
+        forceUpdate: opt.forceUpdate,
         ignoreList: [...ignore, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
-        dateList: opt.dateList,
+        labels: opt.labels || [],
         maxLevel: opt.maxLevel || 4,
-        maxUnique: opt.maxUnique || 100,
-        maxChar: opt.maxChar || 55,
         prefixes: opt.prefixes || {}
     }
-    let { prefixes, entrypoint, forceUpdate, endpoint } = options
-    if (forceUpdate === true) {
-        pathModel.deleteMany({ entrypoint: entrypoint, endpoint: endpoint })
-    }
+    let { prefixes, endpoint, entrypoint, forceUpdate, labels } = options
     let totalInstances
     let selectionInstances
     let displayedInstances
@@ -59,9 +56,21 @@ const getStats = (opt) => {
     let totalQuery = queryLib.makeTotalQuery(entrypoint, { ...options, constraints: '' })
     // number of entities of the set of entrypoint class limited by given constraints
     let selectionQuery = queryLib.makeTotalQuery(entrypoint, options)
-    console.log(selectionQuery)
+    // console.log(selectionQuery)
     // retrieve number of entities
-    return queryLib.getData(endpoint, totalQuery, prefixes)
+    return new Promise((resolve, reject) => {
+        if (forceUpdate) {
+            pathModel.deleteMany({ entrypoint: queryLib.useFullUri(entrypoint, prefixes), endpoint })
+                .then(resModel => {
+                    resolve()
+                })
+        } else {
+            resolve()
+        }
+    })
+        .then(resDelete => {
+            return queryLib.getData(endpoint, totalQuery, prefixes)
+        })
         .then(totalcount => {
             totalInstances = Number(totalcount.results.bindings[0].total.value)
             if (options.constraints === '') {
@@ -87,7 +96,8 @@ const getStats = (opt) => {
                     path: entrypoint,
                     entrypoint: queryLib.useFullUri(entrypoint, prefixes),
                     level: 0,
-                    category: 'entrypoint'
+                    category: 'entrypoint',
+                    type: 'uri'
                 }]
                 // check if props available in database
                 // if necessary retrieve missing level
@@ -100,15 +110,22 @@ const getStats = (opt) => {
                     })
                     .then(resp => {
                         // get human readable rdfs:labels and rdfs:comments of all properties listed
-                        return getLabels(resp.options.prefixes, resp.statements)
-                            .then(labels => {
+                        return new Promise((resolve, reject) => {
+                            if (labels.length > 0) {
+                                resolve(labels)
+                            } else {
+                                getLabels(resp.options.prefixes, resp.statements)
+                                    .then(newlabels => { resolve(newlabels) })
+                            }
+                        })
+                            .then(newlabels => {
                                 return {
                                     statements: resp.statements.sort((a, b) => a.level - b.level),
                                     totalInstances,
                                     selectionInstances,
                                     options: {
                                         ...resp.options,
-                                        labels
+                                        labels: newlabels
                                     }
                                 }
                             })
@@ -172,7 +189,7 @@ const getLabels = (prefixes, props) => {
             return getLabelsFromGraph(missingUris, graph)
         })
         .then(missingUris => {
-            console.log('missingUris 1', missingUris)
+            // console.log('missingUris 1', missingUris)
             propertyModel.createOrUpdate(missingUris)
             return urisToLabel.map(prop => {
                 if (prop.label) {
@@ -282,9 +299,11 @@ const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQu
     const queriedProps = props.filter(prop => {
         // check levels one after another :
         // except for first time exploration, lower levels are sent only if upper levels have not been kept 
-        return (prop.level === level &&
-            (propsWithStats.filter(prevProp => prop.path.indexOf(prevProp.path) === 0 &&
-            prop.level === prevProp.level + 1).length === 0)) // if the beginnig of the path is displayed at a higher level, don't keep (could be discussed)
+        return (prop.level === level) 
+        // if the beginnig of the path is displayed at a higher level, don't keep (could be discussed)
+        /* &&
+        (propsWithStats.filter(prevProp => prop.path.indexOf(prevProp.path) === 0 &&
+        prop.level === prevProp.level + 1).length === 0) */
     })
     if (queriedProps.length === 0) {
         // end of the recursive loop
@@ -310,7 +329,8 @@ const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQu
                     ((prop.category === 'number') ||
                     (prop.category === 'datetime') ||
                     (prop.category === 'text') ||
-                    (prop.category === 'uri' && prop.level === maxLevel)))
+                    (prop.category === 'geo') ||
+                    (prop.type === 'uri' && prop.level === maxLevel - 1)))
                     //(prop.category === 'text' && prop.avgcharlength <= options.maxChar && prop.unique <= options.maxUnique) ||
                     //(prop.category === 'uri' && prop.unique <= options.maxUnique)))
                 })
@@ -328,7 +348,6 @@ const getPropsLevel = (categorizedProps, level, options) => {
     return pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level }).exec()
         .then(props => {
             if (props.length > 0) {
-                // console.log('////////////////////////// saved props')
                 // if available
                 // generate current prefixes
                 return props.map(prop => {
@@ -342,12 +361,11 @@ const getPropsLevel = (categorizedProps, level, options) => {
                     }
                 })
             } else {
-                // console.log('////////////////////////// new fetch')
                 // no props saved start from entr
                 const queriedProps = categorizedProps.filter(prop => {
                     return (prop.level === level - 1 &&
                         (prop.category === 'entrypoint' ||
-                        (prop.category === 'uri')))
+                        (prop.type === 'uri')))
                 })
                 const checkExistingProps = categorizedProps.map(p => p.property)
                 return promiseSettle(
@@ -373,7 +391,6 @@ const getPropsLevel = (categorizedProps, level, options) => {
                             prefixes = queryLib.addSmallestPrefix(prop.property.value, prefixes)
                         }
                     })
-                    // console.log('////////', propsLists)
                     propsLists.forEach((props, index) => {
                         let filteredCategorizedProps = props.map(prop => {
                             // the place to create or fetch a prefix if it does not exist, needed to make the path in defineGroup
@@ -394,15 +411,18 @@ const getPropsLevel = (categorizedProps, level, options) => {
                 })
             }
         }).then(newCategorizedProps => {
-            // console.log('tronc commun')
-            const returnProps = [
+            let returnProps = [
                 ...categorizedProps,
                 ...newCategorizedProps
             ]
-            // console.log(returnProps)
             if (level < maxLevel && newCategorizedProps.length > 0) {
                 return getPropsLevel(returnProps, level + 1, options)
             } else {
+                // discard uris when there are more specific paths
+                returnProps = returnProps.filter(prop => {
+                    return (returnProps.filter(specificProp => specificProp.path.indexOf(prop.path) === 0 &&
+                        specificProp.level > prop.level).length === 0)
+                })
                 return { statements: returnProps, options }
             }
         })
