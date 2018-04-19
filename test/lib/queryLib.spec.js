@@ -10,13 +10,13 @@ describe('lib/queryLib', () => {
         expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*' }, { constraints: '' })).to.equal(`SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) (COUNT(DISTINCT ?entrypoint) AS ?coverage) 
 WHERE {
 
-?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object . OPTIONAL { ?object rdfs:label ?labelobject } .  
+?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object .  
 
 }`)
         expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*', category: 'text' }, { constraints: '', defaultGraph: 'http://localhost:8890/nobel' }, true)).to.equal(`SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) (AVG(?charlength) as ?avgcharlength) (COUNT(DISTINCT ?entrypoint) AS ?coverage) FROM <http://localhost:8890/nobel> 
 WHERE {
 
-?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object . OPTIONAL { ?object rdfs:label ?labelobject } .  
+?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object .  
 BIND(STRLEN(?object) AS ?charlength)
 }`)
     })
@@ -27,11 +27,11 @@ WHERE {
 }`)
     })
     it('should transform a FSL path into SPARQL', () => {
-        expect(queryLib.FSL2SPARQL('nobel:LaureateAward/nobel:year/*', 'prop1', 'entrypoint')).to.equal('?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . ')
-        expect(queryLib.FSL2SPARQL('nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*', 'prop2', 'entrypoint')).to.equal('?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label ?labelprop2 } . ')
+        expect(queryLib.FSL2SPARQL('nobel:LaureateAward/nobel:year/*', 'prop1', 'entrypoint')).to.equal('?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . ')
+        expect(queryLib.FSL2SPARQL('nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*', 'prop2', 'entrypoint')).to.equal('?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . ')
         expect(queryLib.FSL2SPARQL('nobel:LaureateAward', 'object', 'entrypoint')).to.equal('?entrypoint rdf:type nobel:LaureateAward . ')
     })
-    it('should make a valid SPARQL query with given entrypoint and props', () => {
+    it('should make a valid SPARQL query to retrieve data for a specific config', () => {
         const config1 = {
             constraints: [
                 [{}],
@@ -54,30 +54,49 @@ WHERE {
                 [{}]
             ]
         }
+        const config3 = {
+            constraints: [
+                [{}]
+            ],
+            matches: [
+                {
+                    properties: [
+                        { path: 'nobel:Laureate/dbpedia-owl:affiliation/*/dbpedia-owl:country/*', category: 'geo', subcategory: 'name' }
+                    ],
+                    selected: true
+                }
+            ]
+        }
         expect(queryLib.makeQuery('nobel:LaureateAward', config1, 'main', { defaultGraph: 'http://localhost:8890/nobel', constraints: '' }))
-            .to.equal(`SELECT DISTINCT ?prop1 ?labelprop1 (COUNT(?prop1) as ?countprop1) ?prop2 ?labelprop2 (COUNT(?prop2) as ?countprop2) FROM <http://localhost:8890/nobel> 
+            .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) ?prop2 (COUNT(?prop2) as ?countprop2) FROM <http://localhost:8890/nobel> 
 WHERE {
 
-?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label ?labelprop2 } . 
-} GROUP BY ?prop1 ?labelprop1 ?prop2 ?labelprop2 ORDER BY ?prop1 ?countprop1 ?prop2 ?countprop2 `)
+?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . 
+} GROUP BY ?prop1 ?prop2 ORDER BY ?prop1 ?countprop1 ?prop2 ?countprop2 `)
         expect(queryLib.makeQuery('nobel:LaureateAward', { ...config1, entrypoint: {} }, 'main', { constraints: '' }))
-            .to.equal(`SELECT DISTINCT ?entrypoint ?prop1 ?labelprop1 ?prop2 ?labelprop2 
+            .to.equal(`SELECT DISTINCT ?entrypoint ?prop1 ?prop2 
 WHERE {
 
-?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label ?labelprop2 } . 
-} GROUP BY ?entrypoint ?prop1 ?labelprop1 ?prop2 ?labelprop2 ORDER BY ?prop1 ?prop2 `)
+?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . 
+} GROUP BY ?entrypoint ?prop1 ?prop2 ORDER BY ?prop1 ?prop2 `)
         expect(queryLib.makeQuery('nobel:LaureateAward', config1, 'main', { defaultGraph: 'http://localhost:8890/nobel', constraints: '', prop1only: true }))
-.to.equal(`SELECT DISTINCT ?prop1 ?labelprop1 (COUNT(?prop1) as ?countprop1) FROM <http://localhost:8890/nobel> 
+.to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) FROM <http://localhost:8890/nobel> 
 WHERE {
 
-?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . 
-} GROUP BY ?prop1 ?labelprop1 ORDER BY ?prop1 ?countprop1 `)
+?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . 
+} GROUP BY ?prop1 ORDER BY ?prop1 ?countprop1 `)
         expect(queryLib.makeQuery('nobel:LaureateAward', config2, 'main', { defaultGraph: 'http://localhost:8890/nobel', constraints: '', prop1only: true }))
-.to.equal(`SELECT DISTINCT ?prop1 ?labelprop1 ?directlink (COUNT(?prop1) as ?countprop1) FROM <http://localhost:8890/nobel> 
+.to.equal(`SELECT DISTINCT ?prop1 ?directlink (COUNT(?prop1) as ?countprop1) FROM <http://localhost:8890/nobel> 
 WHERE {
 
-?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . OPTIONAL { ?prop1 ?directlink ?prop1bis . ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1bis .  }
-} GROUP BY ?prop1 ?labelprop1 ?directlink ORDER BY ?prop1 ?countprop1 `)
+?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 ?directlink ?prop1bis . ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1bis .  }
+} GROUP BY ?prop1 ?directlink ORDER BY ?prop1 ?countprop1 `)
+        expect(queryLib.makeQuery('nobel:LaureateAward', config3, 'main', { constraints: '' }))
+.to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) 
+WHERE {
+
+?entrypoint rdf:type nobel:Laureate . ?entrypoint dbpedia-owl:affiliation ?prop1inter1 . ?prop1inter1 dbpedia-owl:country ?prop1 . 
+} GROUP BY ?prop1 ORDER BY ?prop1 ?countprop1 `)
     })
     it('should make a valid SPARQL to get stats for a prop', () => {
         expect(queryLib.makePropsQuery('nobel:LaureateAward', { constraints: '' }, 1))
@@ -92,7 +111,7 @@ WHERE {
     } GROUP BY ?property ?datatype ?language ?isiri ?isliteral`)
         expect(queryLib.makePropsQuery('nobel:LaureateAward/nobel:university/*', { constraints: '', defaultGraph: 'http://localhost:8890/nobel' }, 2))
             .to.equal(`SELECT DISTINCT ?property ?datatype ?language ?isiri ?isliteral FROM <http://localhost:8890/nobel> WHERE {
-        ?subject rdf:type nobel:LaureateAward . ?subject nobel:university ?interobject . OPTIONAL { ?interobject rdfs:label ?labelinterobject } . 
+        ?subject rdf:type nobel:LaureateAward . ?subject nobel:university ?interobject . 
         ?interobject ?property ?object .
         OPTIONAL { ?property rdfs:label ?propertylabel } .
         BIND(DATATYPE(?object) AS ?datatype) .
@@ -126,7 +145,8 @@ WHERE {
         expect(queryLib.defineGroup(stat, prevProp, 1, options))
             .to.deep.equal({
                 property: stat.property.value,
-                category: 'uri',
+                category: 'text',
+                type: 'uri',
                 datatype: '',
                 endpoint: 'http://localhost:8890/sparql',
                 entrypoint: 'nobel:LaureateAward',
@@ -267,9 +287,9 @@ WHERE {
             .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) ?prop2 (COUNT(?prop2) as ?countprop2) ?newprop1 (COUNT(?newprop1) as ?newcountprop1) ?newprop2 (COUNT(?newprop2) as ?newcountprop2) 
     WHERE {
         FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . 
-        ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . OPTIONAL { ?prop1 rdfs:label ?labelprop1 } . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . OPTIONAL { ?prop2 rdfs:label ?labelprop2 } . 
+        ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . 
         OPTIONAL {
-            ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:university ?newprop1 . OPTIONAL { ?newprop1 rdfs:label ?labelnewprop1 } . ?entrypoint dct:isPartOf ?newprop2 . OPTIONAL { ?newprop2 rdfs:label ?labelnewprop2 } . 
+            ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:university ?newprop1 . ?entrypoint dct:isPartOf ?newprop2 . 
         }
     } 
     GROUP BY ?prop1 ?prop2 ?newprop1 ?newprop2 

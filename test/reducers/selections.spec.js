@@ -28,6 +28,7 @@ describe('reducers/selections', () => {
                         type: 'uri',
                         value: 'http://unique.com'
                     },
+                    count: 0,
                     zone: 'main'
                 }
             ],
@@ -37,6 +38,7 @@ describe('reducers/selections', () => {
             .to.deep.equal([
                 {
                     selector: '#topic',
+                    count: 0,
                     query: {
                         type: 'uri',
                         value: 'http://unique.com'
@@ -56,6 +58,7 @@ describe('reducers/selections', () => {
                 },
                 {
                     selector: '#topic',
+                    count: 0,
                     query: {
                         type: 'uri',
                         value: 'http://unique.com'
