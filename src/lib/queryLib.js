@@ -219,16 +219,23 @@ const defineGroup = (prop, previousProp, level, options) => {
         propName.match(/year|date|birthday/gi) ||
         propName.match(/(\/|#)(birth|death)$/gi)) {
         returnprops.category = 'datetime'
-    } else if (propName.match(/place|country|city|latitude|longitude/gi) ||
-        propName.match(/(\/|#)(lat|long)$/gi)) {
+    } else if (propName.match(/latitude/gi) ||
+        propName.match(/(\/|#)(lat)$/gi)) {
         returnprops.category = 'geo'
+        returnprops.subcategory = 'latitude'
+    } else if (propName.match(/longitude/gi) ||
+        propName.match(/(\/|#)(long)$/gi)) {
+        returnprops.category = 'geo'
+        returnprops.subcategory = 'longitude'
+    } else if (propName.match(/place|country|city/gi)) {
+        returnprops.category = 'geo'
+        returnprops.subcategory = 'name'
     } else if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#integer') {
         returnprops.category = 'number'
     } else {
         returnprops.category = 'text'
     }
-    console.log(propName, returnprops.category, returnprops.type)
-    // to add : geographical info
+    //console.log(propName, returnprops.category, returnprops.type)
     if (language && language.value) returnprops.language = language.value
     return {
         ...returnprops,
@@ -262,14 +269,14 @@ const makeQuery = (entrypoint, configZone, zone, options) => {
             //console.log(prop, prop.category)
             hierarchical = prop.category === 'text' ? 'previous' : 'last'
         }
-        propList = propList.concat(`?prop${index} ?labelprop${index} `)
+        propList = propList.concat(`?prop${index} `)
         if (hierarchical) propList = propList.concat(`?directlink `)
         orderList = orderList.concat(`?prop${index} `)
         if (configZone.entrypoint === undefined) {
             propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
             orderList = orderList.concat(`?countprop${index} `)
         }
-        groupList = groupList.concat(`?prop${index} ?labelprop${index} `)
+        groupList = groupList.concat(`?prop${index} `)
         if (hierarchical) groupList = groupList.concat(`?directlink `)
         const optional = configZone.constraints[index - 1] && configZone.constraints[index - 1][0].optional
         defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`, 'entrypoint', (index === 1), optional, hierarchical))

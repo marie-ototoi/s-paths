@@ -75,7 +75,7 @@ const scoreProp = (prop, constraint) => {
     score *= prop.coverage / 10
     return (score > 0) ? score : 0
 }
-const scoreMatch = (match) => {
+const scoreMatch = (match, entrypointFactor) => {
     match = match.filter(m => m.score >= 0)
     // mean of each property's score
     let score = match.map(m => m.score).reduce((a, b) => a + b, 0) / match.length
@@ -84,7 +84,7 @@ const scoreMatch = (match) => {
     score += 0.3 * match.length
     score *= coverage / 10
     // domain rules to add values for some properties : TO DO 
-    return score
+    return score * entrypointFactor
 }
 const findAllMatches = (inputList, addList) => {
     return inputList.map(match => {
@@ -109,44 +109,16 @@ const defineConfigs = (views, stats) => {
             stats.statements.forEach(prop => {
                 constraintSet.forEach(constraint => {
                     // generic conditions
-                    if ((prop.category === constraint.category ||
-                        constraint.category === '*') &&
+                    if ((prop.category === constraint.category || constraint.category === '*') &&
+                    (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
                     !(
                         (constraint.unique.min && prop.unique < constraint.unique.min) ||
                         (constraint.unique.max && prop.unique > constraint.unique.max)
                     )) {
-                        // conditions specific to each category
-                        switch (prop.category) {
-                        case 'datetime':
-                            propSet.push({
-                                ...prop,
-                                score: scoreProp(prop, constraint)
-                            })
-                            break
-                        case 'number':
-                            propSet.push({
-                                ...prop,
-                                score: scoreProp(prop, constraint)
-                            })
-                            break
-                        case 'geo':
-                            propSet.push({
-                                ...prop,
-                                score: scoreProp(prop, constraint)
-                            })
-                            break
-                        case 'text':
-                            propSet.push({
-                                ...prop,
-                                score: scoreProp(prop, constraint)
-                            })
-                            break
-                        default:
-                            propSet.push({
-                                ...prop,
-                                score: scoreProp(prop, constraint)
-                            })
-                        }
+                        propSet.push({
+                            ...prop,
+                            score: scoreProp(prop, constraint)
+                        })
                     }
                 })
             })
@@ -156,17 +128,25 @@ const defineConfigs = (views, stats) => {
         })
         // find all possible combinations
         let matches = propList[0].map(prop => [prop])
-        for (let i = 1; i < propList.length; i++) {
-            matches = findAllMatches(matches, propList[i])
+        // console.log(matches, propList)
+        if (propList.length > 1 && propList[1].length > 0) {
+            for (let i = 1; i < propList.length; i++) {
+                matches = findAllMatches(matches, propList[i])
+            }
         }
+        // console.log(matches, propList)
         // remove combinations where a mandatory prop is missing
+        // or where latitude and longitude are not coordinated
         matches = matches.filter(match => {
             let missingProp = false
+            let geo = []
             match.forEach((prop, index) => {
                 missingProp = ((prop.path === '') && (!view.constraints[index][0].optional))
+                if (prop.category === 'geo') geo.push(prop.subcategory)
             })
+            let validgeo = (geo.length === 0 || (geo.length === 1 && geo[0] === 'name') || (geo[0] === 'latitude' && geo[1] === 'longitude') )
             let unique = new Set(match.map(m => m.property))
-            return !missingProp && unique.size === match.length
+            return !missingProp && unique.size === match.length && validgeo
         })
         // if the view is supposed to display each entity
         let entrypointFactor = 1
@@ -184,7 +164,8 @@ const defineConfigs = (views, stats) => {
         let scoredMatches = matches.map(match => {
             return {
                 properties: match,
-                score: scoreMatch(match) * entrypointFactor /*,
+                entrypointFactor,
+                score: scoreMatch(match, entrypointFactor) /*,
                 entrypoint: (view.entrypoint !== undefined) */
             }
         })
