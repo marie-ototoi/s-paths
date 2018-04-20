@@ -2,12 +2,14 @@ import express from 'express'
 import fetch from 'rdf-fetch'
 import rdflib from 'rdflib'
 import promiseSettle from 'promise-settle'
+import promiseLimit from 'promise-limit'
 import pathModel from '../models/path'
 import propertyModel from '../models/property'
 import queryLib from '../src/lib/queryLib'
 // import { error } from 'util';
 
 const router = express.Router()
+const limit = promiseLimit(10)
 
 router.post('/', (req, res) => {
     if (!req.body.entrypoint || !req.body.endpoint) {
@@ -26,7 +28,7 @@ router.post('/', (req, res) => {
     }
 })
 
-const getStats = (opt) => {
+const getStats = async (opt) => {
     // add default options when not set
     const ignore = opt.ignoreList ? [...opt.ignoreList] : []
     let options = {
@@ -36,7 +38,7 @@ const getStats = (opt) => {
         endpoint: opt.endpoint,
         entrypoint: opt.entrypoint,
         forceUpdate: opt.forceUpdate,
-        ignoreList: [...ignore, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
+        ignoreList: [...ignore],
         labels: opt.labels || [],
         maxLevel: opt.maxLevel || 4,
         prefixes: opt.prefixes || {}
@@ -58,19 +60,9 @@ const getStats = (opt) => {
     let selectionQuery = queryLib.makeTotalQuery(entrypoint, options)
     // console.log(selectionQuery)
     // retrieve number of entities
-    return new Promise((resolve, reject) => {
-        if (forceUpdate) {
-            pathModel.deleteMany({ entrypoint: queryLib.useFullUri(entrypoint, prefixes), endpoint })
-                .then(resModel => {
-                    resolve()
-                })
-        } else {
-            resolve()
-        }
-    })
-        .then(resDelete => {
-            return queryLib.getData(endpoint, totalQuery, prefixes)
-        })
+    if (forceUpdate) await pathModel.deleteMany({ entrypoint: queryLib.useFullUri(entrypoint, prefixes), endpoint })
+
+    return queryLib.getData(endpoint, totalQuery, prefixes)
         .then(totalcount => {
             totalInstances = Number(totalcount.results.bindings[0].total.value)
             if (options.constraints === '') {
@@ -203,38 +195,7 @@ const getLabels = (prefixes, props) => {
                     }
                 }
             })
-        })
-        /* .then(urisToLabel => {
-            missingUris = urisToLabel.filter(prop => !prop.label)
-            return promiseSettle(
-                // try to load the ontology corresponding to each prefix
-                missingUris.map(prop => {
-                    return loadOntology(prop.uri, graph)
-                })
-            )
-        })
-        .then(resp => {
-            return getLabelsFromGraph(missingUris, graph)
-        })
-        .then(missingUris => {
-            console.log('missingUris 2', missingUris)
-            propertyModel.createOrUpdate(missingUris)
-            return urisToLabel.map(prop => {
-                if (prop.label) {
-                    return prop
-                } else {
-                    const missing = missingUris.filter(missingprop => missingprop.uri === prop.uri && missingprop.label)
-                    if (missing.length > 0) {
-                        return missing[0]
-                    } else {
-                        return prop
-                    }
-                }
-            })
-        }) */
-        // to add => if some properties are still not labeled,
-        // try to load them one by one
-        // save all labels in the store (find or create)    
+        })  
 }
 
 const getLabelsFromGraph = (uris, graph) => {
