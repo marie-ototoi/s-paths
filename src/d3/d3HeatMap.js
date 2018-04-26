@@ -60,7 +60,7 @@ const draw = (el, props) => {
                     type: 'set',
                     value: [{
                         category: selectedConfig.properties[0].category,
-                        value: dataLib.getDateRange(d.parent, nestedProp1[0].group),
+                        value: (selectedConfig.properties[0].category === 'datetime') ? dataLib.getDateRange(d.values[0].prop1.value, nestedProp1[0].group) : d.values[0].prop1.value,
                         propName: 'prop1'
                     }, {
                         category: selectedConfig.properties[1].category,
@@ -69,7 +69,6 @@ const draw = (el, props) => {
                     }]
                 }
             }
-            //console.log(d.selection.selector)
             d.shape = 'rectangle'
             d.zone = {}
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
@@ -168,7 +167,6 @@ const resize = (el, props) => {
         mapY[p.key] = nestedProp2.length - 2 - i
     })
     let category = selectedConfig.properties[0].category
-    
     let dico = dataLib.getDict(nestedProp1)
     //console.log(dico, category, nestedCoverage1)
     const xScale = d3.scaleLinear().range([0, display.viz.useful_width])
@@ -177,10 +175,6 @@ const resize = (el, props) => {
     } else if (category === 'text' || category === 'uri') {
         xScale.domain([0, nestedProp1.length - 1])
     }
-
-    /*const xScale = d3.scaleLinear()
-        .domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
-        .range([0, display.viz.useful_width])*/
     let maxUnitsPerYear = 1
     d3.select(el)
         .selectAll('g.xUnits')
@@ -189,7 +183,6 @@ const resize = (el, props) => {
             if (category === 'number' || category === 'datetime') {
                 x = xScale(Number(d.key)) + 1
             } else {
-                //console.log(d.parent.key, dico[d.parent.key], xScale(Number(dico[d.parent.key])))
                 x = xScale(Number(dico[d.key]))
             }
             return `translate(${x}, 0)`
@@ -198,17 +191,20 @@ const resize = (el, props) => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
     const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedCoverage1, category))
-    console.log(nestedCoverage1,dataLib.getNumberOfUnits(nestedCoverage1, category))
     const unitHeight = Math.round(display.viz.useful_height / (props.nestedProp2.length - 1))
     // todo : s'il n'y a pas de unitHeigth sauvé pour cette config on recalcule
-    
     d3.select(el).selectAll('g.xUnits').selectAll('.yUnits')
         .each((d, i) => {
-            let x1 = 1
+            let x1
+            if (category === 'number' || category === 'datetime') {
+                x1 = xScale(Number(d.parent)) + 1
+            } else {
+                x1 = xScale(Number(dico[d.parent]))
+            }
             let y1 = display.viz.useful_height - (mapY[d.key] * unitHeight)
             d.zone = {
                 x1: x1,
-                y1: y1,
+                y1: y1 - unitHeight,
                 x2: x1 + unitWidth - 2,
                 y2: y1 - 1,
                 width: unitWidth - 2,
@@ -219,7 +215,7 @@ const resize = (el, props) => {
     d3.select(el).selectAll('g.xUnits').selectAll('.yUnit')
         .attr('x', d => 1)
         .attr('width', d => unitWidth - 1)
-        .attr('y', -unitHeight)
+        .attr('y', 0)
         .attr('height', d => unitHeight - 1)
     props.handleTransition(props, getElementsForTransition(el, props))
 }

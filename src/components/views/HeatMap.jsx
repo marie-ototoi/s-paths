@@ -61,7 +61,6 @@ class HeatMap extends React.Component {
             display.unitDimensions[zone][role].nestedCoverage1) {
             nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
         } else {
-            console.log(coverage)
             nestedCoverage1 = nestData(coverage, [{
                 propName: 'prop1',
                 category: config.matches[0].properties[0].category,
@@ -80,28 +79,24 @@ class HeatMap extends React.Component {
             max: 50,
             forceGroup: nestedCoverage1[0].group
         }, { propName: 'prop2', category: 'text' }])
-   
-        console.log(nestedProp1)
+
         const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
         const categoryProp2 = selectedConfig.properties[1].category
         const nestedProp2 = nestData(deduplicate(data, ['prop1', 'prop2']), [{
             propName: 'prop2',
             category: categoryProp2
         }])
-        //groupTextData(data, 'prop2', {})
         const axisLeft = getAxis(nestedProp2, 'prop2', categoryProp2)
 
         const colors = getQuantitativeColors()
         const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
-        console.log(thresholds)
+      
         const legend = getLegend(thresholds, 'countprop2', colors, 'aggregate')
         const propsLists = getPropsLists(config, zone, dataset.labels)
         const displayedInstances = data.reduce((acc, cur) => {
-            // console.log(cur)
             acc += Number(cur.countprop2.value)
             return acc
         }, 0)
-        console.log(nestedProp1, thresholds)
         // Save to reuse in render
         this.customState = {
             ...this.customState,
