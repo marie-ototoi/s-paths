@@ -20,10 +20,22 @@ const getCurrentState = (data, zone) => {
     }
 }
 
+const getDict = (arrayWithKeys) => {
+    let dico = {}
+    arrayWithKeys.forEach((entry, index) => {
+        dico[entry.key] = index
+    })
+    return dico
+}
+
 const getThresholdsForLegend = (nestedProps, propName, category, nbOfRanges) => {
     const values = nestedProps.reduce((acc, curr) => {
         curr.values.forEach(val => {
-            if (Number.isInteger(val['count' + propName])) acc.push(val['count' + propName])
+            if (Number.isInteger(val['count' + propName])) {
+                acc.push(val['count' + propName])
+            } else if (val['count' + propName] && val['count' + propName].value) {
+                acc.push(Number(val['count' + propName].value))
+            }
         })
         return acc
     }, []).sort((a, b) => a - b)
@@ -75,14 +87,18 @@ const getDateRange = (key, group) => {
     }
 }
 
-const getNumberOfTimeUnits = (nestedData) => {
-    let dif = Number(nestedData[nestedData.length - 1].key) - Number(nestedData[0].key)
-    if (nestedData[0].group === 'decade') {
-        dif = dif / 10
-    } else if (nestedData[0].group === 'century') {
-        dif = dif / 100
+const getNumberOfUnits = (nestedData, category) => {
+    if (category === 'datetime') {
+        let dif = Number(nestedData[nestedData.length - 1].key) - Number(nestedData[0].key)
+        if (nestedData[0].group === 'decade') {
+            dif = dif / 10
+        } else if (nestedData[0].group === 'century') {
+            dif = dif / 100
+        }
+        return dif
+    } else {
+        return nestedData.length
     }
-    return dif
 }
 
 const getCurrentData = (data, status) => {
@@ -304,7 +320,7 @@ const deduplicate = (data, props) => {
     }, []) */
     return data.reduce((acc, cur) => {
         let alreadyInIndex = null
-        acc.forEach((dt,index) => {
+        acc.forEach((dt, index) => {
             let conditions = props.map(prop => {
                 return cur[prop].value === dt[prop].value
             })
@@ -394,79 +410,123 @@ const getAxis = (nestedProps, propName, category) => {
     }
 }
 
-const groupTextData = (data, propName, options) => {
-    return d3.nest().key(d => d[propName].value)
-        .entries(data).sort((a, b) => { return a.key.localeCompare(b.key) })
-        .concat([{ key: '', values: [], type: 'additionalValue' }])
+const nestData = (data, props) => {
+    // first level
+    let dataToNest = nestDataLevel(data, props)
+    // second level
+    if (props.length > 1) {
+        dataToNest = dataToNest.map(group => {
+            return {
+                ...group,
+                values: (group.values.length > 0) ? nestDataLevel(group.values, props, group.key) : []
+            }
+        })
+    }
+    return dataToNest
 }
 
-const groupTimeData = (data, propName, options) => {
-    let { forceGroup, format, max, subgroup } = options
-    // console.log(data, propName, format, max)
-    let group
-    let dataToNest = data.map(d => {
-        let dateProp = moment(d[propName].value, format)
-        if (!dateProp.isValid()) throw new Error('Cannot use time format')
-        return {
-            ...d,
-            dateProp,
-            year: dateProp.format('Y'),
-            decade: Math.floor(Number(dateProp.format('Y')) / 10) * 10,
-            century: Math.floor(Number(dateProp.format('Y')) / 100) * 100
-        }
-    }).sort((a, b) => a.year - b.year)
-    let yearNest = d3.nest().key(prop => prop.year).entries(dataToNest)
-    let yearNumber = Number(yearNest[yearNest.length - 1].key) - Number(yearNest[0].key)
-    let decadeNest = d3.nest().key(prop => prop.decade).entries(dataToNest)
-    let decadeNumber = (Number(decadeNest[decadeNest.length - 1].key) - Number(decadeNest[0].key)) / 10
-    let centuryNest = d3.nest().key(prop => prop.century).entries(dataToNest)
-    // let centuryNumber = (Number(centuryNest[centuryNest.length - 1].key) - Number(centuryNest[0].key)) / 100
-    // console.log(yearNest.length, yearNumber, decadeNest.length, decadeNumber, centuryNest.length, centuryNumber)
-    let nest
-    let additionalValue
-    if (forceGroup === 'year' || (!forceGroup && yearNumber < max)) {
-        nest = yearNest
-        group = 'year'
-        additionalValue = Number(yearNest[yearNest.length - 1].key) + 1
-    } else if (forceGroup === 'decade' || (!forceGroup && decadeNumber < max)) {
-        nest = decadeNest
-        group = 'decade'
-        additionalValue = Number(decadeNest[decadeNest.length - 1].key) + 10
-    } else {
-        nest = centuryNest
-        group = 'century'
-        additionalValue = Number(centuryNest[centuryNest.length - 1].key) + 100
-    }
-    return [...nest.map(keygroup => {
-        let yearStart = Number(keygroup.key)
-        let range = getDateRange(yearStart, group)
-        let groupWithAdd = {
-            ...keygroup,
-            group,
-            range
-        }
-        if (subgroup) {
-            let groups = d3.nest().key(prop => prop[subgroup].value).entries(keygroup.values)
-            groupWithAdd.values = groups.map(group => {
-                group['count' + subgroup] = 0
-                group.parent = keygroup
-                group.values.forEach(groupElt => {
-                    if (groupElt['count' + subgroup]) {
-                        group['count' + subgroup] += Number(groupElt['count' + subgroup].value)
-                    } else {
-                        group['count' + subgroup] += 1
-                    }
-                })
-                return group
-            }).sort((a, b) => a.key.localeCompare(b.key))
+const sortData = (data, sortOn, sortOrder) => {
+    return data.sort((a, b) => {
+        let first = (sortOrder === 'DESC') ? a[sortOn] : b[sortOn]
+        let last = (sortOrder === 'DESC') ? b[sortOn] : a[sortOn]
+        if (first.value) first = first.value
+        if (last.value) last = last.value
+        if (!isNaN(Number(first)) && !isNaN(Number(last))) {
+            return Number(last) - Number(first)
         } else {
-            groupWithAdd.values = keygroup.values
-                .map(val => { return { ...val, group } })
-                .sort((a, b) => b.prop2 ? b.prop2.value.localeCompare(a.prop2.value) : 0)
+            return last.localeCompare(first)
         }
-        return groupWithAdd
-    }), { key: additionalValue, values: [], type: 'additionalValue' }]
+    })
 }
+
+const nestDataLevel = (data, props, parent) => {
+    let index = parent ? 1 : 0
+    let { forceGroup, format, category, max, propName, sortKey, sortKeyOrder, sortValues, sortValuesOrder } = props[index]
+    // console.log(data, propName, format, max)
+    let nestedData
+    let additionalValue
+    if (category === 'datetime') {
+        let group
+        let dataToNest = data.map(d => {
+            let dateProp = moment(d[propName].value, format)
+            if (!dateProp.isValid()) throw new Error('Cannot use time format')
+            return {
+                ...d,
+                dateProp,
+                year: dateProp.format('Y'),
+                decade: Math.floor(Number(dateProp.format('Y')) / 10) * 10,
+                century: Math.floor(Number(dateProp.format('Y')) / 100) * 100
+            }
+        }).sort((a, b) => a.year - b.year)
+
+        let yearNest = d3.nest().key(prop => prop.year).entries(dataToNest)
+        let yearNumber = Number(yearNest[yearNest.length - 1].key) - Number(yearNest[0].key)
+        let decadeNest = d3.nest().key(prop => prop.decade).entries(dataToNest)
+        let decadeNumber = (Number(decadeNest[decadeNest.length - 1].key) - Number(decadeNest[0].key)) / 10
+        let centuryNest = d3.nest().key(prop => prop.century).entries(dataToNest)
+        let nest
+        if (forceGroup === 'year' || (!forceGroup && yearNumber < max)) {
+            nest = yearNest
+            group = 'year'
+            additionalValue = Number(yearNest[yearNest.length - 1].key) + 1
+        } else if (forceGroup === 'decade' || (!forceGroup && decadeNumber < max)) {
+            nest = decadeNest
+            group = 'decade'
+            additionalValue = Number(decadeNest[decadeNest.length - 1].key) + 10
+        } else {
+            nest = centuryNest
+            group = 'century'
+            additionalValue = Number(centuryNest[centuryNest.length - 1].key) + 100
+        }
+        nestedData = nest.map(keygroup => {
+            let yearStart = Number(keygroup.key)
+            let range = getDateRange(yearStart, group)
+            return {
+                ...keygroup,
+                group,
+                range
+            }
+        })
+    } else if (category === 'text') {
+        nestedData = d3.nest().key(d => d[propName].value)
+            .entries(data).sort((a, b) => { return a.key.localeCompare(b.key) })
+        additionalValue = ''
+    }
+    if (!parent) {
+        nestedData.push({ key: additionalValue, values: [], type: 'additionalValue' })
+    } else {
+        nestedData = nestedData.map(elt => {
+            elt['count' + propName] = 0
+            elt.values = elt.values.map(groupElt => {
+                groupElt.key = groupElt[propName].value
+                groupElt.parent = { key: elt.key }
+                if (groupElt['count' + propName]) {
+                    elt['count' + propName] += Number(groupElt['count' + propName].value)
+                } else {
+                    elt['count' + propName] += 1
+                }
+                return groupElt
+            })
+            return elt
+        })
+    }
+    // console.log(nestedData)
+    if (sortKey) {
+        nestedData = sortData(nestedData, sortKey, sortKeyOrder)
+    }
+    if (sortValues) {
+        nestedData = nestedData.map(group => {
+            return {
+                ...group,
+                values: sortData(group.values, sortValues, sortValuesOrder)
+                    .map(dt => { return { ...dt } })
+            }
+        })
+    }
+    console.log(nestedData)
+    return nestedData
+}
+
 
 exports.areLoaded = areLoaded
 exports.deduplicate = deduplicate
@@ -474,16 +534,16 @@ exports.getAxis = getAxis
 exports.getCurrentState = getCurrentState
 exports.getDateRange = getDateRange
 exports.getDeltaIndex = getDeltaIndex
+exports.getDict = getDict
 exports.getHeadings = getHeadings
 exports.getLegend = getLegend
-exports.getNumberOfTimeUnits = getNumberOfTimeUnits
+exports.getNumberOfUnits = getNumberOfUnits
 exports.getReadablePathsParts = getReadablePathsParts
 exports.getTransitionElements = getTransitionElements
 exports.makeId = makeId
+exports.nestData = nestData
 exports.getThresholds = getThresholds
 exports.getThresholdsForLegend = getThresholdsForLegend
 exports.getResults = getResults
-exports.groupTextData = groupTextData
-exports.groupTimeData = groupTimeData
 exports.splitRectangle = splitRectangle
 exports.guid = guid

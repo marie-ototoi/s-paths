@@ -32,7 +32,62 @@ const dataSet1 = {
         }
     ]
 }
-//const dataSet2 = testSet.load('Timeline').results.bindings
+const dataSet2 = [
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb11885977m#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"-106"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb11940325v#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"742"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb11908143b#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1304"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb119042727#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1331"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb11896834h#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1363"},"prop2":{"type":"literal","value":"female"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb120074247#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1401"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb13482403j#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1466"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb11987560f#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1469"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb12517771n#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1501"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb12170907z#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1503"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb134909745#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1518"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb11891892g#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1519"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb125151647#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1519"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb12175956c#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1533"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb12368701d#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1541"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb118957747#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1547"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb144367352#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1551"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb12168909c#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1555"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb13957453j#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1561"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb14827633t#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1561"},"prop2":{"type":"literal","value":"male"}},
+    {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb119246079#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1564"},"prop2":{"type":"literal","value":"male"}}
+]
+const dataSet3 = [
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/ara"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"2"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/ben"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/bul"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/cat"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"2"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/cze"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"3"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/dan"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"2"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/dut"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"6"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/eng"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"42"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/fin"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/fre"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"160"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/frm"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"2"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/fro"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/ger"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"39"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/grc"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"2"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/gre"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/heb"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"2"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/hin"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"4"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/hrv"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"2"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/hun"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"6"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/ita"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"20"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/lat"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"11"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/ota"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"2"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/per"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/pol"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"2"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/por"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"4"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/rum"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/rus"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"12"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/spa"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"14"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/srp"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}},
+    {"prop1":{"type":"uri","value":"http://id.loc.gov/vocabulary/iso639-2/yid"},"countprop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"2"}}
+]
+
 
 describe('lib/data', () => {
 
@@ -47,6 +102,16 @@ describe('lib/data', () => {
     it('should return data headings for a specific zone', () => {
         expect(data.getHeadings(dataSet1, 'main', 'active')).to.deep.equal(['prop1'])
         expect(data.getHeadings(dataSet1, 'aside', 'active')).to.deep.equal([])
+    })
+    it('should return a nested set of data', () => {
+        let groupA = data.nestData(dataSet2, [{ propName: 'prop1', category: 'datetime', format: 'Y', max: 50 }, { propName: 'prop2', category: 'text' }])
+        let groupB = data.nestData(dataSet2, [{ propName: 'prop1', category: 'datetime', format: 'Y', forceGroup: 'decade' }])
+        let groupC = data.nestData(dataSet2, [{ propName: 'prop1', category: 'datetime', format: 'Y', forceGroup: 'year' }])
+        expect(groupA.map(group => group.key)).to.deep.equal(['-200', '700', '1300', '1400', '1500', 1600])
+        expect(groupB.map(group => group.key)).to.deep.equal(['-110', '740', '1300', '1330', '1360', '1400', '1460', '1500', '1510', '1530', '1540', '1550', '1560', 1570])
+        expect(groupC.map(group => group.key)).to.deep.equal(['-106', '742', '1304', '1331', '1363', '1401', '1466', '1469', '1501', '1503', '1518', '1519', '1533', '1541', '1547', '1551', '1555', '1561', '1564', 1565])
+        expect(groupA[0].values[0].key).to.equal('male')
+        expect(groupA[2].values[0].key).to.equal('female')
     })
     /* it('should return a nested set of data, optimizing grouping by date', () => {
         expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 150).length).to.deep.equal(113)

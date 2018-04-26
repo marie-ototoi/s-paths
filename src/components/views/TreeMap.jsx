@@ -14,7 +14,7 @@ import SelectionZone from '../elements/SelectionZone'
 import d3TreeMap from '../../d3/d3TreeMap'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
-import { deduplicate, getAxis, getLegend, getThresholdsForLegend, groupTextData, groupTimeData } from '../../lib/dataLib'
+import { deduplicate, getAxis, getLegend, getThresholdsForLegend, groupTextData, groupTimeData, nestData } from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
 // redux functions
@@ -51,32 +51,19 @@ class TreeMap extends React.Component {
     }
 
     prepareData (nextProps) {
-        const { config, configs, coverage, data, dataset, display, getPropPalette, palettes, role, zone } = nextProps
+        const { config, configs, data, dataset, display, getPropPalette, palettes, role, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
 
-        let nestedCoverage1
-        // console.log(display.unitDimensions[zone][role])
-        if (display.unitDimensions[zone][role] &&
-            display.unitDimensions[zone][role].nestedCoverage1) {
-            nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
-        } else {
-            nestedCoverage1 = groupTextData(deduplicate(coverage, ['prop1']), 'prop1', {
-                order: 'size'
-            })
-            this.props.setUnitDimensions({ nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
-        }
-
         // First prop 
-        const nestedProp1 = groupTextData(deduplicate(data, ['prop1']), 'prop1', {
-            order: 'size'
-        })
-        // console.log('oo', data, nestedProp1)
+        const nestedProp1 = nestData(deduplicate(data, ['prop1']), [{
+            propName: 'prop1',
+            category: 'text'
+        }])
 
         const propsLists = getPropsLists(config, zone, dataset.labels)
 
         const displayedInstances = nestedProp1.reduce((acc, cur) => {
-            //if (cur.values.length > 0 && cur.values[0].countprop1) acc += Number(cur.values[0].countprop1.value)
             cur.values.forEach(val => {
                 acc += Number(val.countprop1.value)
             })
@@ -89,7 +76,6 @@ class TreeMap extends React.Component {
             ...this.customState,
             displayedInstances,
             selectedConfig,
-            nestedCoverage1,
             nestedProp1,
             //legend,
             //nestedProp2,
@@ -158,16 +144,6 @@ class TreeMap extends React.Component {
                     legend = { legend }
                     selectElements = { this.selectElements }
                 />
-                <PropSelector
-                    selected = { false }
-                    key = { zone + '_propselector_31' }
-                    propList = { propsLists[0] }
-                    config = { config }
-                    align = "right"
-                    dimensions = { getDimensions('legendAxisBottom', display.zones[zone], display.viz, { x: 0, y: -15, width: -35, height: 0 }) }
-                    propIndex = { 0 }
-                    zone = { zone }
-                />
                 <History
                     zone = { zone }
                 />
@@ -182,6 +158,7 @@ class TreeMap extends React.Component {
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }
+
     selectElement (selection) {
         const { select, zone, selections } = this.props
         select([selection], zone, selections)

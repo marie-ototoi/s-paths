@@ -15,7 +15,7 @@ import SelectionZone from '../elements/SelectionZone'
 import d3HeatMap from '../../d3/d3HeatMap'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
-import { deduplicate, getAxis, getLegend, getThresholdsForLegend, groupTextData, groupTimeData } from '../../lib/dataLib'
+import { deduplicate, getAxis, getLegend, getThresholdsForLegend, groupTextData, groupTimeData, nestData } from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
 // redux functions
@@ -55,34 +55,45 @@ class HeatMap extends React.Component {
         const { config, configs, coverage, data, dataset, display, getPropPalette, palettes, role, selections, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
-
         let coverageFormatProp1
         let nestedCoverage1
         if (display.unitDimensions[zone][role] &&
             display.unitDimensions[zone][role].nestedCoverage1) {
             nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
         } else {
-            coverageFormatProp1 = config.matches[0].properties[0].format || 'YYYY-MM-DD'
-            nestedCoverage1 = groupTimeData(deduplicate(coverage, ['prop1']), 'prop1', { format: coverageFormatProp1, max: 50 })
+            console.log(coverage)
+            nestedCoverage1 = nestData(coverage, [{
+                propName: 'prop1',
+                category: config.matches[0].properties[0].category,
+                format: config.matches[0].properties[0].format || 'YYYY-MM-DD',
+                max: 50
+            }])
             this.props.setUnitDimensions({ nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
         }
 
         // First prop to be displayed in the bottom axis
-        const categoryProp1 = selectedConfig.properties[0].category
-        const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD'
-        const nestedProp1 = groupTimeData(deduplicate(data, ['prop1']), 'prop1', {
-            format: formatProp1,
+        let categoryProp1 = selectedConfig.properties[0].category
+        let nestedProp1 = nestData(deduplicate(data, ['prop1', 'prop2']), [{
+            propName: 'prop1',
+            category: categoryProp1,
+            format: selectedConfig.properties[0].format || 'YYYY-MM-DD',
             max: 50,
-            subgroup: 'prop2',
             forceGroup: nestedCoverage1[0].group
-        })
+        }, { propName: 'prop2', category: 'text' }])
+   
+        console.log(nestedProp1)
         const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
         const categoryProp2 = selectedConfig.properties[1].category
-        const nestedProp2 = groupTextData(data, 'prop2')
+        const nestedProp2 = nestData(deduplicate(data, ['prop1', 'prop2']), [{
+            propName: 'prop2',
+            category: categoryProp2
+        }])
+        //groupTextData(data, 'prop2', {})
         const axisLeft = getAxis(nestedProp2, 'prop2', categoryProp2)
 
         const colors = getQuantitativeColors()
         const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
+        console.log(thresholds)
         const legend = getLegend(thresholds, 'countprop2', colors, 'aggregate')
         const propsLists = getPropsLists(config, zone, dataset.labels)
         const displayedInstances = data.reduce((acc, cur) => {
@@ -90,7 +101,7 @@ class HeatMap extends React.Component {
             acc += Number(cur.countprop2.value)
             return acc
         }, 0)
-
+        console.log(nestedProp1, thresholds)
         // Save to reuse in render
         this.customState = {
             ...this.customState,

@@ -15,7 +15,7 @@ import SelectionZone from '../elements/SelectionZone'
 import d3Timeline from '../../d3/d3Timeline'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
-import { deduplicate, getAxis, getLegend, groupTimeData } from '../../lib/dataLib'
+import { deduplicate, getAxis, getLegend, nestData } from '../../lib/dataLib'
 import { getDimensions, getZoneCoord } from '../../lib/scaleLib'
 // redux functions
 import { setUnitDimensions } from '../../actions/dataActions'
@@ -63,7 +63,8 @@ class Timeline extends React.PureComponent {
             nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
         } else {
             coverageFormatProp1 = config.matches[0].properties[0].format || 'YYYY-MM-DD'
-            nestedCoverage1 = groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', { format: coverageFormatProp1, max: 50 })
+            //nestedCoverage1 = groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', { format: coverageFormatProp1, max: 50 })
+            nestedCoverage1 = nestData(deduplicate(data, ['entrypoint']), [{ propName: 'prop1', category: 'datetime', format: coverageFormatProp1, max: 50 }])
             maxUnitsPerYear = 1
             nestedCoverage1.forEach(d => {
                 if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
@@ -71,11 +72,22 @@ class Timeline extends React.PureComponent {
             this.props.setUnitDimensions({ maxUnitsPerYear, nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
         }
         const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD'
-        const nestedProp1 = groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', {
+        const nestedProp1 = nestData(deduplicate(data, ['entrypoint']), [{
+            propName: 'prop1',
+            category: 'datetime',
+            format: formatProp1,
+            max: 50,
+            forceGroup: nestedCoverage1[0].group,
+            sortValues: 'prop2',
+            sortValuesOrder: 'DESC'
+        }])
+        /*
+        groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', {
             format: formatProp1,
             max: 50,
             forceGroup: nestedCoverage1[0].group
         })
+        */
         const categoryProp1 = selectedConfig.properties[0].category
         const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
         // Second prop to be displayed in the legend
