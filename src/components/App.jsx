@@ -14,7 +14,7 @@ import { getConfig, getCurrentConfigs } from '../lib/configLib'
 import selectionLib from '../lib/selectionLib'
 // redux actions
 import { setDisplay } from '../actions/displayActions'
-import { endTransition, loadData } from '../actions/dataActions'
+import { endTransition, loadData, loadResources } from '../actions/dataActions'
 
 class App extends React.Component {
     constructor (props) {
@@ -44,6 +44,7 @@ class App extends React.Component {
         this.onResize()
         const { configs, dataset, views } = this.props
         // this is where it all starts
+        //this.props.loadResources(dataset)
         this.props.loadData(dataset, views, configs, {})
     }
     handleTransition (props, elements) {
@@ -234,6 +235,7 @@ function mapDispatchToProps (dispatch) {
     return {
         endTransition: endTransition(dispatch),
         loadData: loadData(dispatch),
+        loadResources: loadResources(dispatch),
         setDisplay: setDisplay(dispatch)
     }
 }

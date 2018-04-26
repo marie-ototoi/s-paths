@@ -14,6 +14,6 @@ router.use('/', (req, res, next) => {
 })
 
 router.use('/stats', stats)
-//router.use('/resources', resources)
+router.use('/resources', resources)
 
 export default router

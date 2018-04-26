@@ -3,6 +3,13 @@ import * as types from '../constants/ActionTypes'
 import { activateDefaultConfigs, defineConfigs, getConfig, getConfigs, getSelectedConfig, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
 import { getData, makeQuery, makeTransitionQuery } from '../lib/queryLib'
 
+const endTransition = (dispatch) => (zone) => {
+    return dispatch({
+        zone,
+        type: types.END_TRANSITION
+    })
+}
+
 const getStats = (options) => {
     // console.log(JSON.stringify(options))
     return fetch(('http://localhost:5000/stats'),
@@ -24,116 +31,6 @@ const getResources = (options) => {
             headers: { 'Content-Type': 'application/json' }
         })
         .then((resp) => resp.json())
-}
-
-const receiveStats = (dispatch) => (stats) => {
-    return dispatch({
-        type: types.SET_STATS,
-        stats
-    })
-}
-
-const endTransition = (dispatch) => (zone) => {
-    return dispatch({
-        zone,
-        type: types.END_TRANSITION
-    })
-}
-
-const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => {
-    
-    const { endpoint, entrypoint, prefixes } = dataset
-    // console.log(selectedConfigs)
-    const updatedConfigs = selectViewConfig(id, selectedConfigs)
-    const selectedConfig = selectedConfigs.filter(c => c.selected)[0]
-    const updatedConfig = updatedConfigs.filter(c => c.selected)[0]
-    // console.log(selectedConfig)
-    dispatch({
-        type: types.SET_CONFIG,
-        zone,
-        config: updatedConfig
-    })
-    const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
-    const queryTransition = makeTransitionQuery(updatedConfig, dataset, selectedConfig, dataset, zone)
-    const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
-    // console.log('test', newQuery)
-    Promise.all([
-        getData(endpoint, newQuery, prefixes),
-        getData(endpoint, queryTransition, prefixes),
-        getData(endpoint, coverageQuery, prefixes)
-    ])
-        .then(([newData, newDelta, newCoverage]) => {
-            // console.log(newData, newDelta)
-            const action = {
-                type: types.SET_DATA,
-                resetUnitDimensions: 'zone',
-                zone: zone
-            }
-            action[zone] = newData
-            action[zone + 'Delta'] = newDelta
-            action[zone + 'Coverage'] = newCoverage
-            dispatch(action)
-        })
-        .catch(error => {
-            console.error('Error getting data after view update', error)
-        })
-}
-
-const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) => {
-    // console.log('select property')
-    const { endpoint, entrypoint, prefixes } = dataset
-    const updatedConfig = selectPropertyConfig(config, zone, propIndex, path)
-    dispatch({
-        type: types.SET_CONFIG,
-        zone,
-        config: updatedConfig
-    })
-    const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
-    const queryTransition = makeTransitionQuery(updatedConfig, dataset, config, dataset, zone)
-    const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
-    let reset = (propIndex === 0 || 
-        (propIndex === 1 && getSelectedConfig(config).properties[1].category !== getSelectedConfig(updatedConfig).properties[1].category) ||
-        getSelectedConfig(updatedConfig).properties[1].category === 'text')
-    Promise.all([
-        getData(endpoint, newQuery, prefixes),
-        getData(endpoint, queryTransition, prefixes),
-        (reset) ? getData(endpoint, coverageQuery, prefixes) : {}
-    ])
-        .then(([newData, newDelta, newCoverage]) => {
-            // console.log(newData, newDelta)
-            const action = {
-                type: types.SET_DATA,
-                resetUnitDimensions: (reset) ? 'zone' : null,
-                zone: zone
-            }
-            action[zone] = newData
-            action[zone + 'Delta'] = newDelta
-            action[zone + 'Coverage'] = newCoverage
-            dispatch(action)
-        })
-        .catch(error => {
-            console.error('Error getting data after property update', error)
-        })
-}
-
-const setUnitDimensions = (dispatch) => (dimensions, zone, configId, role, setTarget) => {
-    // console.log(dimensions, zone, configId, role)
-    dispatch({
-        type: types.SET_UNIT_DIMENSIONS,
-        unitDimensions: dimensions,
-        configId,
-        zone,
-        role
-    })
-    if (setTarget) {
-        dispatch({
-            type: types.SET_UNIT_DIMENSIONS,
-            unitDimensions: dimensions,
-            configId,
-            zone,
-            role: 'target'
-        })
-    }
 }
 
 const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
@@ -227,8 +124,125 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
         })
 }
 
+const loadResources = (dispatch) => (dataset) => {
+    getResources(dataset)
+        .then(resources => {
+            console.log(resources)
+        })
+}
+
+const receiveResources = (dispatch) => (resources) => {
+    console.log(resources)
+    return dispatch({
+        type: types.SET_RESOURCES,
+        resources
+    })
+}
+
+const receiveStats = (dispatch) => (stats) => {
+    return dispatch({
+        type: types.SET_STATS,
+        stats
+    })
+}
+
+const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) => {
+    // console.log('select property')
+    const { endpoint, entrypoint, prefixes } = dataset
+    const updatedConfig = selectPropertyConfig(config, zone, propIndex, path)
+    dispatch({
+        type: types.SET_CONFIG,
+        zone,
+        config: updatedConfig
+    })
+    const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
+    const queryTransition = makeTransitionQuery(updatedConfig, dataset, config, dataset, zone)
+    const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
+    let reset = (propIndex === 0 ||
+        (propIndex === 1 && getSelectedConfig(config).properties[1].category !== getSelectedConfig(updatedConfig).properties[1].category && (getSelectedConfig(config).properties[1].category === 'datetime' || getSelectedConfig(updatedConfig).properties[1].category === 'datetime')))
+    Promise.all([
+        getData(endpoint, newQuery, prefixes),
+        getData(endpoint, queryTransition, prefixes),
+        (reset) ? getData(endpoint, coverageQuery, prefixes) : {}
+    ])
+        .then(([newData, newDelta, newCoverage]) => {
+            // console.log(newData, newDelta)
+            const action = {
+                type: types.SET_DATA,
+                resetUnitDimensions: (reset) ? 'zone' : null,
+                zone: zone
+            }
+            action[zone] = newData
+            action[zone + 'Delta'] = newDelta
+            action[zone + 'Coverage'] = newCoverage
+            dispatch(action)
+        })
+        .catch(error => {
+            console.error('Error getting data after property update', error)
+        })
+}
+
+const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => {
+    const { endpoint, entrypoint, prefixes } = dataset
+    // console.log(selectedConfigs)
+    const updatedConfigs = selectViewConfig(id, selectedConfigs)
+    const selectedConfig = selectedConfigs.filter(c => c.selected)[0]
+    const updatedConfig = updatedConfigs.filter(c => c.selected)[0]
+    // console.log(selectedConfig)
+    dispatch({
+        type: types.SET_CONFIG,
+        zone,
+        config: updatedConfig
+    })
+    const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
+    const queryTransition = makeTransitionQuery(updatedConfig, dataset, selectedConfig, dataset, zone)
+    const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
+    // console.log('test', newQuery)
+    Promise.all([
+        getData(endpoint, newQuery, prefixes),
+        getData(endpoint, queryTransition, prefixes),
+        getData(endpoint, coverageQuery, prefixes)
+    ])
+        .then(([newData, newDelta, newCoverage]) => {
+            // console.log(newData, newDelta)
+            const action = {
+                type: types.SET_DATA,
+                resetUnitDimensions: 'zone',
+                zone: zone
+            }
+            action[zone] = newData
+            action[zone + 'Delta'] = newDelta
+            action[zone + 'Coverage'] = newCoverage
+            dispatch(action)
+        })
+        .catch(error => {
+            console.error('Error getting data after view update', error)
+        })
+}
+
+const setUnitDimensions = (dispatch) => (dimensions, zone, configId, role, setTarget) => {
+    // console.log(dimensions, zone, configId, role)
+    dispatch({
+        type: types.SET_UNIT_DIMENSIONS,
+        unitDimensions: dimensions,
+        configId,
+        zone,
+        role
+    })
+    if (setTarget) {
+        dispatch({
+            type: types.SET_UNIT_DIMENSIONS,
+            unitDimensions: dimensions,
+            configId,
+            zone,
+            role: 'target'
+        })
+    }
+}
+
 exports.endTransition = endTransition
 exports.loadData = loadData
+exports.loadResources = loadResources
 exports.receiveStats = receiveStats
 exports.selectProperty = selectProperty
 exports.selectView = selectView

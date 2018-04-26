@@ -368,7 +368,7 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
         queryHierarchical = query.replace(new RegExp(`[?]{1}${propName}`, 'gi'), `$&bis`)
         queryHierarchical = `?${prevPropName} ?directlink ?${newPropName} . ` + queryHierarchical
         // queryHierarchical = queryHierarchical.replace(/OPTIONAL {.*} \. /, '')
-        //queryHierarchical = queryHierarchical.replace(prevPropName, newPropName)
+        // queryHierarchical = queryHierarchical.replace(prevPropName, newPropName)
         queryHierarchical = `OPTIONAL { ${queryHierarchical} }`
     }
     return `${optional ? 'OPTIONAL { ' : ''}${query}${queryHierarchical}${optional ? '} . ' : ''}`
