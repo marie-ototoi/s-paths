@@ -113,9 +113,9 @@ const getElements = (el, propName, value, propCategory) => {
     d3.select(el).selectAll('.yUnits').each(d => {
         let propValue
         if (propCategory === 'datetime') {
-            propValue = Number(d.parent.key)
+            propValue = Number(d.parent)
         } else if (propCategory === 'text' || propCategory === 'uri') {
-            propValue = d.key
+            propValue = (propName === 'prop1') ? d.parent : d.key
         } else if (propCategory === 'number') {
             propValue = Number(d[propName].value)
         } else if (propCategory === 'aggregate') {

@@ -217,7 +217,6 @@ class HeatMap extends React.Component {
 
     selectElements (prop, value, category) {
         const elements = d3HeatMap.getElements(this.refs.HeatMap, prop, value, category)
-        // console.log(prop, value, elements, category)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }

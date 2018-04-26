@@ -94,8 +94,6 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
     let reset = (propIndex === 0 || 
         (propIndex === 1 && getSelectedConfig(config).properties[1].category !== getSelectedConfig(updatedConfig).properties[1].category) ||
         getSelectedConfig(updatedConfig).properties[1].category === 'text')
-    //console.log(propIndex, getSelectedConfig(config).properties[1].category, getSelectedConfig(updatedConfig).properties[1].category)
-    console.log('reset ?', reset)
     Promise.all([
         getData(endpoint, newQuery, prefixes),
         getData(endpoint, queryTransition, prefixes),
@@ -154,7 +152,6 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                     // console.log(configLib.defineConfigs(views, stats))
                     // for each views, checks which properties ou sets of properties could match and evaluate
                     let configs = activateDefaultConfigs(defineConfigs(views, stats))
-                    console.log(configs)
                     dispatch({
                         type: types.SET_STATS,
                         stats,
@@ -177,7 +174,6 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
         })
         .then(configs => {
             const configMain = getConfig(configs, 'main')
-            console.log(entrypoint, configs, configMain, 'main', dataset)
             const queryMain = makeQuery(entrypoint, configMain, 'main', dataset)
             const coverageQueryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, prop1only: true })
             const configAside = getConfig(configs, 'aside')
