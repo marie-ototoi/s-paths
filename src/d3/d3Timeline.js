@@ -151,7 +151,7 @@ const getElementsInZone = (el, props) => {
 // const retrieveValues
 
 const resize = (el, props) => {
-    const { nestedCoverage1, display, role, zone } = props
+    const { nestedCoverage1, nestedProp1, display, role, zone } = props
     let maxUnitsPerYear
     if (display.unitDimensions[zone][role] &&
         display.unitDimensions[zone][role].maxUnitsPerYear) {
@@ -175,18 +175,17 @@ const resize = (el, props) => {
         .selectAll('g.time')
         .attr('transform', d => `translate(${xScale(Number(d.key))}, 0)`)
     //console.log(maxUnitsPerYear, zone, role)
-    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfTimeUnits(nestedCoverage1))
+    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedCoverage1, 'datetime'))
     const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
-
+    const group = nestedProp1[0].group
     d3.select(el).selectAll('g.time').selectAll('.elements')
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
     d3.select(el).selectAll('g.time').selectAll('.elements')
         .each((d, i) => {
-            // console.log(d.group, d[d.group])
-            const x1 = xScale(Number(d[d.group])) + 1
+            const x1 = xScale(Number(d[group])) + 1
             const y1 = display.viz.useful_height - (i * unitHeight)
             d.zone = {
-                x1,
+                x1: x1,
                 y1: y1 - unitHeight,
                 x2: x1 + unitWidth - 2,
                 y2: y1,

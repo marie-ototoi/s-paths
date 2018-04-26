@@ -153,7 +153,7 @@ const getElementsInZone = (el, props) => {
 }
 
 const resize = (el, props) => {
-    const { dataset, display, displayedInstances, nestedCoverage1, nestedProp1, zone } = props
+    const { dataset, display, displayedInstances, nestedProp1, zone } = props
     let width = display.viz.useful_width
     let height = Math.floor(display.viz.useful_height * displayedInstances / dataset.stats.selectionInstances)
     if (height > display.viz.useful_height) height = display.viz.useful_height
