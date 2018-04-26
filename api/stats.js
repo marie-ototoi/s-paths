@@ -38,7 +38,7 @@ const getStats = async (opt) => {
         endpoint: opt.endpoint,
         entrypoint: opt.entrypoint,
         forceUpdate: opt.forceUpdate,
-        ignoreList: [...ignore],
+        ignoreList: [...ignore, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
         labels: opt.labels || [],
         maxLevel: opt.maxLevel || 4,
         prefixes: opt.prefixes || {}
@@ -61,16 +61,17 @@ const getStats = async (opt) => {
     // console.log(selectionQuery)
     // retrieve number of entities
     if (forceUpdate) await pathModel.deleteMany({ entrypoint: queryLib.useFullUri(entrypoint, prefixes), endpoint })
-
     return queryLib.getData(endpoint, totalQuery, prefixes)
         .then(totalcount => {
             totalInstances = Number(totalcount.results.bindings[0].total.value)
             if (options.constraints === '') {
+                console.log('là ?', totalcount)
                 selectionInstances = totalInstances
                 return true
             } else {
-                queryLib.getData(endpoint, selectionQuery, prefixes)
+                return queryLib.getData(endpoint, selectionQuery, prefixes)
                     .then(selectioncount => {
+                        console.log('ici ?', selectioncount.results.bindings[0].total)
                         selectionInstances = Number(selectioncount.results.bindings[0].total.value)
                         return true
                     })
@@ -96,21 +97,24 @@ const getStats = async (opt) => {
                 // or recursively retrieve properties
                 return getPropsLevel(entryProp, 1, options)
                     .then(resp => {
+                        console.log('PROPS', resp)
                         // get stats to match the props
                         return getStatsLevel(resp.statements, [], 1, totalInstances, options, true)
                         // last parameter is for first time query, should be changed dynamically
                     })
                     .then(resp => {
+                        console.log('STATS', resp)
                         // get human readable rdfs:labels and rdfs:comments of all properties listed
                         return new Promise((resolve, reject) => {
                             if (labels.length > 0) {
                                 resolve(labels)
                             } else {
-                                getLabels(resp.options.prefixes, resp.statements)
+                                return getLabels(resp.options.prefixes, resp.statements)
                                     .then(newlabels => { resolve(newlabels) })
                             }
                         })
                             .then(newlabels => {
+                                console.log('[[[[[[[[[[[[[[[[[[', selectionInstances)
                                 return {
                                     statements: resp.statements.sort((a, b) => a.level - b.level),
                                     totalInstances,

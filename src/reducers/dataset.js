@@ -1,11 +1,11 @@
 import * as types from '../constants/ActionTypes'
 
 const initialState = {
-    endpoint: 'http://localhost:8890/sparql', //'http://wilda.lri.fr:3030/nobel/sparql', //  'http://localhost:8890/sparql', // , //    'http://slickmem.data.t-mus.org/sparql'
-    entrypoint: 'http://data.nobelprize.org/terms/Laureate', //'http://xmlns.com/foaf/0.1/Person', // //'http://www.ica.org/standards/RiC/ontology#Place', ////, //  'http://xmlns.com/foaf/0.1/Person' //, // 'nobel:Laureate',  //  'nobel:LaureateAward',
-    defaultGraph: 'http://localhost:8890/nobel', // 'urn:piaaf:siaf', // null, // ,
+    endpoint: 'http://localhost:8890/sparql', //'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql', //  'http://localhost:8890/sparql', // , //    'http://slickmem.data.t-mus.org/sparql'
+    entrypoint: 'http://xmlns.com/foaf/0.1/Person', //'http://data.nobelprize.org/terms/Laureate', //'http://xmlns.com/foaf/0.1/Person', // //'http://www.ica.org/standards/RiC/ontology#Place', ////, //  'http://xmlns.com/foaf/0.1/Person' //, // 'nobel:Laureate',  //  'nobel:LaureateAward',
+    defaultGraph: 'http://localhost:8890/data10', // 'urn:piaaf:siaf', // null, // ,
     constraints: '', // '?entrypoint <http://data.nobelprize.org/terms/year> ?year . filter (?year > 1980)',
-    forceUpdate: true,
+    forceUpdate: false,
     maxLevel: 5,
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',

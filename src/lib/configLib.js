@@ -38,7 +38,7 @@ const getDeviationCost = (min, max, optimal, score) => {
     return (maxGap) ? (score / maxGap) : null
 }
 const getCost = (val, min, max, optimal, score) => {
-    if (optimal && inRange(val, optimal)) return 0
+    if ((optimal && inRange(val, optimal)) || !optimal)  return 0
     const deviationCost = getDeviationCost(min, max, optimal, score)
     if (underRange(val, optimal) && min) {
         return deviationCost * (optimal[0] - val)

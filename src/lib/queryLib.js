@@ -45,6 +45,7 @@ const makeSelectionConstraints = (selections, selectedConfig, zone) => {
     const setConstraints = setSelection.map((sel, iS) => {
         return '(' + sel.query.value.map((constraint, iC) => {
             const propName = 'contraint' + constraint.propName
+            console.log(constraint.category, constraint.subcategory)
             if (iS === 0) paths += FSL2SPARQL(selectedConfig.properties[iC].path, propName)
             if (constraint.category === 'datetime') {
                 const conditions = constraint.value.map((r, iR) => {
@@ -52,7 +53,7 @@ const makeSelectionConstraints = (selections, selectedConfig, zone) => {
                     return `?${propName} ${(iR === 0) ? '>=' : '<='} ${cast}`
                 }).join(' && ')
                 return `(${conditions})`
-            } else if (constraint.category === 'text' || constraint.category === 'uri') {
+            } else if (constraint.category === 'text' || constraint.category === 'uri' || (constraint.category === 'geo' && constraint.subcategory === 'name')) {
                 return ` regex(?${propName}, '^${constraint.value}$', 'i')`
             }
         }).join(' && ') + ')'
@@ -215,9 +216,10 @@ const defineGroup = (prop, previousProp, level, options) => {
     }
     if (ignoreList.includes(property.value)) {
         returnprops.category = 'ignore'
-    } else if ((datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#date') ||
+    } else if (returnprops.type !== 'uri' &&
+        ((datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#date') ||
         propName.match(/year|date|birthday/gi) ||
-        propName.match(/(\/|#)(birth|death)$/gi)) {
+        propName.match(/(\/|#)(birth|death)$/gi))) {
         returnprops.category = 'datetime'
     } else if (propName.match(/latitude/gi) ||
         propName.match(/(\/|#)(lat)$/gi)) {
@@ -235,7 +237,7 @@ const defineGroup = (prop, previousProp, level, options) => {
     } else {
         returnprops.category = 'text'
     }
-    //console.log(propName, returnprops.category, returnprops.type)
+    // console.log('????', propName, returnprops.category, returnprops.type)
     if (language && language.value) returnprops.language = language.value
     return {
         ...returnprops,
@@ -372,6 +374,16 @@ const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', 
     return `${optional ? 'OPTIONAL { ' : ''}${query}${queryHierarchical}${optional ? '} . ' : ''}`
 }
 
+const makeQueryResources = (options) => {
+    const { defaultGraph } = options
+    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    return `SELECT DISTINCT ?type (COUNT(?type) as ?occurrences) ${graph}
+    WHERE {
+      ?s rdf:type ?type
+    }
+    ORDER BY DESC(?occurrences)`
+}
+
 exports.convertPath = convertPath
 exports.createPrefix = createPrefix
 exports.defineGroup = defineGroup
@@ -380,6 +392,7 @@ exports.getData = getData
 exports.getRoot = getRoot
 exports.makeQuery = makeQuery
 exports.makeQueryFromConstraint = makeQueryFromConstraint
+exports.makeQueryResources = makeQueryResources
 exports.makePropQuery = makePropQuery
 exports.makePropsQuery = makePropsQuery
 exports.makeSelectionConstraints = makeSelectionConstraints

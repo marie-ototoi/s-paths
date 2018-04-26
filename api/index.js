@@ -1,5 +1,6 @@
 import express from 'express'
 import stats from './stats'
+import resources from './resources'
 
 let router = express.Router()
 
@@ -13,5 +14,6 @@ router.use('/', (req, res, next) => {
 })
 
 router.use('/stats', stats)
+//router.use('/resources', resources)
 
 export default router

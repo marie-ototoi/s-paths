@@ -5,7 +5,7 @@ import { getData, makeQuery, makeTransitionQuery } from '../lib/queryLib'
 
 const getStats = (options) => {
     // console.log(JSON.stringify(options))
-    return fetch(('http://localhost:5000/stats/'),
+    return fetch(('http://localhost:5000/stats'),
         {
             method: 'POST',
             body: JSON.stringify(options),
@@ -13,6 +13,17 @@ const getStats = (options) => {
         })
         .then((resp) => resp.json())
     // return rp('http://localhost:5000/stats/' + entrypoint)
+}
+
+const getResources = (options) => {
+    // console.log(JSON.stringify(options))
+    return fetch(('http://localhost:5000/resources'),
+        {
+            method: 'POST',
+            body: JSON.stringify(options),
+            headers: { 'Content-Type': 'application/json' }
+        })
+        .then((resp) => resp.json())
 }
 
 const receiveStats = (dispatch) => (stats) => {
@@ -80,16 +91,21 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, config, dataset, zone)
     const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
+    let reset = (propIndex === 0 || 
+        (propIndex === 1 && getSelectedConfig(config).properties[1].category !== getSelectedConfig(updatedConfig).properties[1].category) ||
+        getSelectedConfig(updatedConfig).properties[1].category === 'text')
+    //console.log(propIndex, getSelectedConfig(config).properties[1].category, getSelectedConfig(updatedConfig).properties[1].category)
+    console.log('reset ?', reset)
     Promise.all([
         getData(endpoint, newQuery, prefixes),
         getData(endpoint, queryTransition, prefixes),
-        (propIndex === 0) ? getData(endpoint, coverageQuery, prefixes) : {}
+        (reset) ? getData(endpoint, coverageQuery, prefixes) : {}
     ])
         .then(([newData, newDelta, newCoverage]) => {
             // console.log(newData, newDelta)
             const action = {
                 type: types.SET_DATA,
-                resetUnitDimensions: (propIndex === 0) ? 'zone' : null,
+                resetUnitDimensions: (reset) ? 'zone' : null,
                 zone: zone
             }
             action[zone] = newData
@@ -138,7 +154,7 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                     // console.log(configLib.defineConfigs(views, stats))
                     // for each views, checks which properties ou sets of properties could match and evaluate
                     let configs = activateDefaultConfigs(defineConfigs(views, stats))
-                    // console.log(configs)
+                    console.log(configs)
                     dispatch({
                         type: types.SET_STATS,
                         stats,
@@ -161,7 +177,7 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
         })
         .then(configs => {
             const configMain = getConfig(configs, 'main')
-            // console.log(configMain)
+            console.log(entrypoint, configs, configMain, 'main', dataset)
             const queryMain = makeQuery(entrypoint, configMain, 'main', dataset)
             const coverageQueryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, prop1only: true })
             const configAside = getConfig(configs, 'aside')

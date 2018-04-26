@@ -13,13 +13,15 @@ const defaultState = [
             ],
             [
                 {
-                    category: 'uri',
+                    category: 'text',
                     unique: { min: 2, max: 10, optimal: [4, 6] }
                 },
                 {
-                    category: 'text',
+                    category: 'geo',
+                    subcategory: 'name',
                     unique: { min: 2, max: 10, optimal: [4, 6] }
                 }
+                
             ]/* ,
             [
                 {
@@ -41,6 +43,10 @@ const defaultState = [
                 {
                     category: 'datetime',
                     unique: { min: 2, max: 200 }
+                },
+                {
+                    category: 'text',
+                    unique: { min: 2, max: 50 }
                 }
             ],
             [
@@ -62,26 +68,42 @@ const defaultState = [
                     unique: { min: 5, max: 40, optimal: [10, 30] }
                 },
                 {
-                    category: 'uri',
-                    hierarchical: true,
-                    unique: { min: 5, max: 40, optimal: [10, 30] }
-                }
-            ]
-        ]
-    },
-    {
-        id: 'GeoMap',
-        constraints: [
-            [
-                {
                     category: 'geo',
+                    subcategory: 'name',
                     hierarchical: true,
                     avg: { max: 100, optimal: [30, 50] },
                     unique: { min: 5, max: 40, optimal: [10, 30] }
                 }
             ]
         ]
-    }
+    }/*,
+    {
+        id: 'GeoMap',
+        constraints: [
+            [
+                {
+                    category: 'geo',
+                    subcategory: 'latitude',
+                    hierarchical: true,
+                    unique: { min: 2 }
+                },
+                {
+                    category: 'geo',
+                    subcategory: 'name',
+                    hierarchical: true,
+                    unique: { min: 2 }
+                }
+            ],
+            [
+                {
+                    category: 'geo',
+                    subcategory: 'longitude',
+                    optional: true,
+                    unique: { min: 2 }
+                }
+            ]
+        ]
+    }*/
 ]
 
 const view = (state = {}, action) => {

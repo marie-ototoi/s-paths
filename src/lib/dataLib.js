@@ -97,7 +97,7 @@ const getNumberOfUnits = (nestedData, category) => {
         }
         return dif
     } else {
-        return nestedData.length
+        return nestedData.length - 1
     }
 }
 
@@ -497,6 +497,7 @@ const nestDataLevel = (data, props, parent) => {
     } else {
         nestedData = nestedData.map(elt => {
             elt['count' + propName] = 0
+            elt.parent = parent
             elt.values = elt.values.map(groupElt => {
                 groupElt.key = groupElt[propName].value
                 groupElt.parent = { key: elt.key }
@@ -510,7 +511,6 @@ const nestDataLevel = (data, props, parent) => {
             return elt
         })
     }
-    // console.log(nestedData)
     if (sortKey) {
         nestedData = sortData(nestedData, sortKey, sortKeyOrder)
     }
@@ -523,10 +523,8 @@ const nestDataLevel = (data, props, parent) => {
             }
         })
     }
-    console.log(nestedData)
     return nestedData
 }
-
 
 exports.areLoaded = areLoaded
 exports.deduplicate = deduplicate

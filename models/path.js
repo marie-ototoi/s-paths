@@ -42,6 +42,7 @@ pathSchema.statics = {
                     $setOnInsert: {
                         createdAt: Date.now(),
                         property: prop.property,
+                        endpoint: prop.endpoint,
                         fullPath: prop.fullPath,
                         datatype: prop.datatype,
                         level: prop.level
