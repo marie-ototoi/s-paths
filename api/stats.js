@@ -60,74 +60,46 @@ const getStats = async (opt) => {
     let selectionQuery = queryLib.makeTotalQuery(entrypoint, options)
     // console.log(selectionQuery)
     // retrieve number of entities
-    if (forceUpdate) await pathModel.deleteMany({ entrypoint: queryLib.useFullUri(entrypoint, prefixes), endpoint })
-    return queryLib.getData(endpoint, totalQuery, prefixes)
-        .then(totalcount => {
-            totalInstances = Number(totalcount.results.bindings[0].total.value)
-            if (options.constraints === '') {
-                console.log('là ?', totalcount)
-                selectionInstances = totalInstances
-                return true
-            } else {
-                return queryLib.getData(endpoint, selectionQuery, prefixes)
-                    .then(selectioncount => {
-                        console.log('ici ?', selectioncount.results.bindings[0].total)
-                        selectionInstances = Number(selectioncount.results.bindings[0].total.value)
-                        return true
-                    })
-                    .catch(error => { console.error('Error getting constrained total count', error) })
+    let totalcount = await queryLib.getData(endpoint, totalQuery, prefixes)
+    totalInstances = Number(totalcount.results.bindings[0].total.value)
+    if (options.constraints === '') {
+        selectionInstances = totalInstances
+    } else {
+        let selectioncount = await queryLib.getData(endpoint, selectionQuery, prefixes)
+        selectionInstances = Number(selectioncount.results.bindings[0].total.value)
+    }
+    if (selectionInstances === 0) {
+        // if number of entities is null return an empty array
+        return { statements: [], options }
+    } else {
+        // create first prop for entrypoint to feed recursive function
+        const entryProp = [{
+            fullPath: '<' + queryLib.useFullUri(entrypoint, prefixes) + '>',
+            path: entrypoint,
+            entrypoint: queryLib.useFullUri(entrypoint, prefixes),
+            level: 0,
+            category: 'entrypoint',
+            type: 'uri'
+        }]
+        // check if props available in database
+        // if necessary retrieve missing level
+        // or recursively retrieve properties
+        let paths = await getPropsLevel(entryProp, 1, options)
+        // get stats to match the props
+        let stats = await getStatsLevel(paths.statements, [], 1, totalInstances, options, true)
+        // last parameter is for first time query, should be changed dynamically
+        // get human readable rdfs:labels and rdfs:comments of all properties listed
+        let newlabels = (labels.length > 0) ? labels : await getLabels(stats.options.prefixes, stats.statements)
+        return {
+            statements: stats.statements.sort((a, b) => a.level - b.level),
+            totalInstances,
+            selectionInstances,
+            options: {
+                ...stats.options,
+                labels: newlabels
             }
-        })
-        .then(ok => {
-            if (selectionInstances === 0) {
-                // if number of entities is null return an empty array
-                return { statements: [], options }
-            } else {
-                // create first prop for entrypoint to feed recursive function
-                const entryProp = [{
-                    fullPath: '<' + queryLib.useFullUri(entrypoint, prefixes) + '>',
-                    path: entrypoint,
-                    entrypoint: queryLib.useFullUri(entrypoint, prefixes),
-                    level: 0,
-                    category: 'entrypoint',
-                    type: 'uri'
-                }]
-                // check if props available in database
-                // if necessary retrieve missing level
-                // or recursively retrieve properties
-                return getPropsLevel(entryProp, 1, options)
-                    .then(resp => {
-                        console.log('PROPS', resp)
-                        // get stats to match the props
-                        return getStatsLevel(resp.statements, [], 1, totalInstances, options, true)
-                        // last parameter is for first time query, should be changed dynamically
-                    })
-                    .then(resp => {
-                        console.log('STATS', resp)
-                        // get human readable rdfs:labels and rdfs:comments of all properties listed
-                        return new Promise((resolve, reject) => {
-                            if (labels.length > 0) {
-                                resolve(labels)
-                            } else {
-                                return getLabels(resp.options.prefixes, resp.statements)
-                                    .then(newlabels => { resolve(newlabels) })
-                            }
-                        })
-                            .then(newlabels => {
-                                console.log('[[[[[[[[[[[[[[[[[[', selectionInstances)
-                                return {
-                                    statements: resp.statements.sort((a, b) => a.level - b.level),
-                                    totalInstances,
-                                    selectionInstances,
-                                    options: {
-                                        ...resp.options,
-                                        labels: newlabels
-                                    }
-                                }
-                            })
-                    })
-            }
-        })
+        }
+    }
 }
 
 const getLabels = (prefixes, props) => {
