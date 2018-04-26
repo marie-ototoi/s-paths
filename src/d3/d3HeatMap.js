@@ -43,20 +43,24 @@ const draw = (el, props) => {
     yUnits
         .exit()
         .remove()
-
+    
     d3.select(el)
         .selectAll('g.xUnits g.yUnits')
         .each((d, i) => {
             // console.log(legend, d)
-            d.color = legend.info.filter(p => (p.key[0] <= Number(d.countprop2) && p.key[1] >= Number(d.countprop2)))[0].color
+            let filteredLegend = legend.info.filter(p => {
+                return (p.key[0] <= Number(d.countprop2) && p.key[1] >= Number(d.countprop2)) ||
+                    (d.countprop2.value && p.key[0] <= Number(d.countprop2.value) && p.key[1] >= Number(d.countprop2.value))
+            })
+            if (filteredLegend.length > 0) d.color = filteredLegend[0].color
             d.selection = {
-                selector: `heatmap_element_p1_${dataLib.makeId(d.parent.key)}_p2_${dataLib.makeId(d.key)}`,
+                selector: `heatmap_element_p1_${dataLib.makeId(d.values[0].prop1.value)}_p2_${dataLib.makeId(d.values[0].prop2.value)}`,
                 count: Number(d.countprop2),
                 query: {
                     type: 'set',
                     value: [{
                         category: selectedConfig.properties[0].category,
-                        value: dataLib.getDateRange(d.parent.key, nestedProp1[0].group),
+                        value: dataLib.getDateRange(d.parent, nestedProp1[0].group),
                         propName: 'prop1'
                     }, {
                         category: selectedConfig.properties[1].category,
@@ -158,39 +162,60 @@ const getElementsInZone = (el, props) => {
 }
 
 const resize = (el, props) => {
-    const { nestedCoverage1, nestedProp2, display } = props
+    const { nestedCoverage1, nestedProp1, nestedProp2, display, selectedConfig } = props
     let mapY = {}
     nestedProp2.forEach((p, i) => {
         mapY[p.key] = nestedProp2.length - 2 - i
     })
-    const xScale = d3.scaleLinear()
+    let category = selectedConfig.properties[0].category
+    
+    let dico = dataLib.getDict(nestedProp1)
+    //console.log(dico, category, nestedCoverage1)
+    const xScale = d3.scaleLinear().range([0, display.viz.useful_width])
+    if (category === 'number' || category === 'datetime') {
+        xScale.domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
+    } else if (category === 'text' || category === 'uri') {
+        xScale.domain([0, nestedProp1.length - 1])
+    }
+
+    /*const xScale = d3.scaleLinear()
         .domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
-        .range([0, display.viz.useful_width])
+        .range([0, display.viz.useful_width])*/
     let maxUnitsPerYear = 1
     d3.select(el)
         .selectAll('g.xUnits')
-        .attr('transform', d => `translate(${xScale(Number(d.key))}, 0)`)
+        .attr('transform', d => {
+            let x
+            if (category === 'number' || category === 'datetime') {
+                x = xScale(Number(d.key)) + 1
+            } else {
+                //console.log(d.parent.key, dico[d.parent.key], xScale(Number(dico[d.parent.key])))
+                x = xScale(Number(dico[d.key]))
+            }
+            return `translate(${x}, 0)`
+        })
         .each(d => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
-    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfTimeUnits(nestedCoverage1))
+    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedCoverage1, category))
+    console.log(nestedCoverage1,dataLib.getNumberOfUnits(nestedCoverage1, category))
     const unitHeight = Math.round(display.viz.useful_height / (props.nestedProp2.length - 1))
     // todo : s'il n'y a pas de unitHeigth sauvé pour cette config on recalcule
-
+    
     d3.select(el).selectAll('g.xUnits').selectAll('.yUnits')
-        .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (mapY[d.key] * unitHeight)})`)
         .each((d, i) => {
-            const x1 = xScale(Number(d.parent.key)) + 1
-            const y1 = display.viz.useful_height - (mapY[d.key] * unitHeight)
+            let x1 = 1
+            let y1 = display.viz.useful_height - (mapY[d.key] * unitHeight)
             d.zone = {
-                x1,
-                y1: y1 - unitHeight,
+                x1: x1,
+                y1: y1,
                 x2: x1 + unitWidth - 2,
                 y2: y1 - 1,
                 width: unitWidth - 2,
                 height: unitHeight - 1
             }
         })
+        .attr('transform', (d, i) => `translate(0, ${d.zone.y1})`)
     d3.select(el).selectAll('g.xUnits').selectAll('.yUnit')
         .attr('x', d => 1)
         .attr('width', d => unitWidth - 1)
