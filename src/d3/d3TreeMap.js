@@ -155,7 +155,7 @@ const getElementsInZone = (el, props) => {
 const resize = (el, props) => {
     const { dataset, display, displayedInstances, nestedProp1, zone } = props
     let width = display.viz.useful_width
-    let height = Math.floor(display.viz.useful_height * displayedInstances / dataset.stats.selectionInstances)
+    let height = display.viz.useful_height // Math.floor(display.viz.useful_height * displayedInstances / dataset.stats.selectionInstances)
     if (height > display.viz.useful_height) height = display.viz.useful_height
     let map = dataLib.splitRectangle({ x1: 0, y1: 0, width, height }, nestedProp1.map(propgroup => {
         return (propgroup.values.length > 0) ? {
