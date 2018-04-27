@@ -1,10 +1,8 @@
 import express from 'express'
-import fetch from 'rdf-fetch'
-import rdflib from 'rdflib'
 import promiseSettle from 'promise-settle'
 import promiseLimit from 'promise-limit'
 import pathModel from '../models/path'
-import propertyModel from '../models/property'
+import { getPropsLabels } from '../src/lib/labelLib'
 import queryLib from '../src/lib/queryLib'
 // import { error } from 'util';
 
@@ -89,7 +87,7 @@ const getStats = async (opt) => {
         let stats = await getStatsLevel(paths.statements, [], 1, totalInstances, options, true)
         // last parameter is for first time query, should be changed dynamically
         // get human readable rdfs:labels and rdfs:comments of all properties listed
-        let newlabels = (labels.length > 0) ? labels : await getLabels(stats.options.prefixes, stats.statements)
+        let newlabels = (labels.length > 0) ? labels : await getPropsLabels(stats.options.prefixes, stats.statements)
         return {
             statements: stats.statements.sort((a, b) => a.level - b.level),
             totalInstances,
@@ -100,134 +98,6 @@ const getStats = async (opt) => {
             }
         }
     }
-}
-
-const getLabels = (prefixes, props) => {
-    // find all classes and props used in paths
-    let urisToLabel = props.reduce((acc, curr) => {
-        let pathParts = curr.path.split('/')
-        // deduplicate
-        pathParts.forEach(part => {
-            if (part !== '*' && !acc.includes(part)) acc.push(part)
-        })
-        return acc
-    }, []).map(prop => {
-        return {
-            uri: queryLib.useFullUri(prop, prefixes),
-            prefUri: prop
-        }
-    })
-    let missingUris
-    // create a local graph
-    let graph = new rdflib.IndexedFormula()
-    // to add 
-    // try to get props labels and comments in database
-    // if already defined, do not keep in queried prefixes
-    // propertyModel.find({ uri: uri }).exec()
-    return Promise.all(urisToLabel.map(prop => {
-        return propertyModel.findOne({ uri: prop.uri }).exec()
-    }))
-        .then(propsInDatabase => {
-            propsInDatabase.forEach((prop, index) => {
-                if (prop) {
-                    urisToLabel[index].label = prop.label
-                    urisToLabel[index].comment = prop.comment
-                }
-            })
-            return true
-        })
-        .then(next => {
-            missingUris = urisToLabel.filter(prop => !prop.label)
-            // make an array of prefix object
-            let prefixesArray = []
-            for (let pref in prefixes) {
-                // check if needed for the missing props
-                const isNeeded = missingUris.filter(prop => prop.prefUri.indexOf(pref) === 0).length > 0
-                if (isNeeded) prefixesArray.push({ _id: prefixes[pref], prefix: pref })
-            }
-            // load ontologies corresponding to prefixes
-            return promiseSettle(
-                // try to load the ontology corresponding to each prefix
-                prefixesArray.map(prefix => {
-                    return loadOntology(prefix._id, graph)
-                })
-            )
-        })
-        .then(resp => {
-            return getLabelsFromGraph(missingUris, graph)
-        })
-        .then(missingUris => {
-            // console.log('missingUris 1', missingUris)
-            propertyModel.createOrUpdate(missingUris)
-            return urisToLabel.map(prop => {
-                if (prop.label) {
-                    return prop
-                } else {
-                    const missing = missingUris.filter(missingprop => missingprop.uri === prop.uri && missingprop.label)
-                    if (missing.length > 0) {
-                        return missing[0]
-                    } else {
-                        return prop
-                    }
-                }
-            })
-        })  
-}
-
-const getLabelsFromGraph = (uris, graph) => {
-    return promiseSettle(uris.map(prop => {
-        return graph.any(rdflib.sym(prop.uri), rdflib.sym('http://www.w3.org/2000/01/rdf-schema#label'))
-    }))
-        .then(labels => {
-            labels.forEach((label, index) => {
-                if (label.isFulfilled() && label.value()) {
-                    // console.log('////', label.value())
-                    // to add : save in database
-                    uris[index].label = label.value().value
-                }
-            })
-            return uris
-        })
-        .then(uris => {
-            // get a rdfs:comment for each prop 
-            return promiseSettle(uris.map(prop => {
-                return graph.any(rdflib.sym(prop.uri), rdflib.sym('http://www.w3.org/2000/01/rdf-schema#comment'))
-            })).then(comments => {
-                comments.forEach((comment, index) => {
-                    if (comment.isFulfilled() && comment.value()) {
-                        // to add : save in database
-                        uris[index].comment = comment.value().value
-                    }
-                })
-                return uris
-            })
-        })
-}
-
-const loadOntology = (url, graph) => {
-    // console.log('load ontology', url)
-    return fetch(url, { redirect: 'follow', headers: { 'Accept': 'Accept: text/turtle, application/rdf+xml; q=0.7, text/ntriples; q=0.9, application/ld+json; q=0.8' } }).then(response => {
-        if (response.ok) {
-            // if succesful, parse it and add it to the graph
-            let mediaType = response.headers.get('Content-type')
-            // little hack to be removed -> warn hosts that the mime type is wrong
-            if (mediaType === 'text/xml') mediaType = 'application/rdf+xml'
-            // check for parsable ontologies type (to avoid app crash)    
-            if (mediaType &&
-            (mediaType.indexOf('application/rdf+xml') >= 0 ||
-            mediaType.indexOf('text/turtle') >= 0 ||
-            mediaType.indexOf('text/n3') >= 0)) {
-                return response.text().then(text => {
-                    // console.log('ICI',url, text)
-                    // console.log(url, mediaType, 'successfully parsed', graph)
-                    return rdflib.parse(text, graph, url, mediaType)
-                })
-            }
-        } else {
-            // nothing
-            return response
-        }
-    })
 }
 
 const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQuery) => {

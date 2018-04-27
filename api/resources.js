@@ -2,7 +2,10 @@ import express from 'express'
 import promiseLimit from 'promise-limit'
 import pathModel from '../models/path'
 import resourceModel from '../models/resource'
+import { getLabels } from '../src/lib/labelLib'
 import queryLib from '../src/lib/queryLib'
+import dataLib from '../src/lib/dataLib'
+import dataset from '../src/reducers/dataset'
 // import { error } from 'util';
 
 const router = express.Router()
@@ -30,9 +33,10 @@ const getResources = async (opt) => {
     let options = {
         defaultGraph: opt.defaultGraph || null,
         endpoint: opt.endpoint,
-        forceUpdate: opt.forceUpdate
+        forceUpdate: opt.forceUpdate,
+        prefixes: opt.prefixes
     }
-    let { endpoint, forceUpdate } = options
+    let { endpoint, forceUpdate, prefixes } = options
     if (forceUpdate) {
         await pathModel.deleteMany({ endpoint })
         await resourceModel.deleteMany({ endpoint })
@@ -43,7 +47,17 @@ const getResources = async (opt) => {
         return { total: Number(resource.occurrences.value), type: resource.type.value, endpoint }
     })
     await resourceModel.createOrUpdate(resources)
-    return resources
+    let labels = await getLabels(resources.map(resource => {
+        return { uri: resource.type }
+    }))
+    let dico = dataLib.getDict(labels.map(label => { return { key: label.uri } }))
+    return resources.map(resource => {
+        return {
+            ...resource,
+            label: labels[dico[resource.type]].label || resource.uri,
+            comment: labels[dico[resource.type]].comment || null
+        }
+    })
 }
 
 export default router

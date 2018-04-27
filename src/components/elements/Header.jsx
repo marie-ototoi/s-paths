@@ -1,14 +1,29 @@
 import React from 'react'
 import pluralize from 'pluralize'
 import { connect } from 'react-redux'
+import PropSelector from './PropSelector'
 import { getDimensions } from '../../lib/scaleLib'
 
 class Header extends React.PureComponent {
     render () {
-        const { data, dataset, display, offset, zone } = this.props
+        const { config, data, dataset, display, offset, zone } = this.props
         const dimensions = getDimensions('header', display.zones[zone], display.viz, offset)
         const { x, y, width, height } = dimensions
-        return (<foreignObject
+        console.log(dataset.resources)
+        return (
+            <g>
+            <PropSelector
+                type = "header"
+                selected = { false }
+                key = { zone + '_propselector_resources' }
+                propList = { dataset.resources.map((resource, index) => { return { readablePath: [{ label: resource.label, comment: resource.comment }], path: resource.type, selected: resource.type === dataset.entrypoint } }) }
+                config = { config }
+                dimensions = { getDimensions('header', display.zones[zone], display.viz, { x: 0, y: 0, width: 0, height: 0 }) }
+                zone = { zone }
+            />
+            </g>
+        )
+        /* return (<foreignObject
             transform = { `translate(${x}, ${y})` }
             width = { width }
             height = { height }
@@ -22,7 +37,7 @@ class Header extends React.PureComponent {
                 </strong><br />
                 <span>{ dataset.labels[0].comment }</span>
             </h1>
-        </foreignObject>)
+        </foreignObject>) */
         // <span> in </span>
         // { this.props.dataset.endpoint }
     }

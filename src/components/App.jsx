@@ -44,8 +44,10 @@ class App extends React.Component {
         this.onResize()
         const { configs, dataset, views } = this.props
         // this is where it all starts
-        //this.props.loadResources(dataset)
-        this.props.loadData(dataset, views, configs, {})
+        this.props.loadResources(dataset)
+            .then(resources => {
+                this.props.loadData(dataset, views, configs, {})
+            })
     }
     handleTransition (props, elements) {
         const { role, status, zone } = props
@@ -91,7 +93,7 @@ class App extends React.Component {
         // console.log('display', display)
         // console.log('views', views)
         // console.log('dataset', dataset)
-        // console.log('configs', configs)
+         console.log('configs', configs)
         // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {

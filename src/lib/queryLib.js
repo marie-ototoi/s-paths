@@ -113,6 +113,10 @@ const useFullUri = (path, prefixes) => {
     })
 }
 
+const ignorePromise = (promise) => {
+    return promise.catch(e => undefined)
+}
+
 const getRoot = (uri) => {
     const splitSlash = uri.split('/')
     const slashEnd = splitSlash[splitSlash.length - 1]
@@ -390,6 +394,7 @@ exports.defineGroup = defineGroup
 exports.FSL2SPARQL = FSL2SPARQL
 exports.getData = getData
 exports.getRoot = getRoot
+exports.ignorePromise = ignorePromise
 exports.makeQuery = makeQuery
 exports.makeQueryFromConstraint = makeQueryFromConstraint
 exports.makeQueryResources = makeQueryResources

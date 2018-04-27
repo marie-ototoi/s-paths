@@ -35,7 +35,7 @@
     "promise-limit": "^2.6.0",
     "promise-settle": "^0.3.0",
     "rdf-fetch": "^1.0.0",
-    "rdflib": "^0.16.5",
+    "rdflib": "^0.16.8",
     "request": "^2.83.0",
     "rewire": "^3.0.2",
     "shallowequal": "^1.0.2"

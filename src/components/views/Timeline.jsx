@@ -98,6 +98,7 @@ class Timeline extends React.PureComponent {
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
         const propsLists = getPropsLists(config, zone, dataset.labels)
+        console.log(propsLists)
         // Save to reuse in render
         this.customState = {
             ...this.customState,

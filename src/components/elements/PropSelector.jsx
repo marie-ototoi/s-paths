@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 
 import { getDimensions } from '../../lib/scaleLib'
 
-import { selectProperty } from '../../actions/dataActions'
+import { loadData, selectProperty } from '../../actions/dataActions'
 
 class PropSelector extends React.PureComponent {
     constructor (props) {
@@ -15,11 +15,15 @@ class PropSelector extends React.PureComponent {
         }
     }
     handleSelect (e) {
-        const { config, dataset, propIndex, zone } = this.props
+        const { config, configs, dataset, propIndex, views, zone } = this.props
         this.setState({
             selected: this.props.selected
         })
-        this.props.selectProperty(propIndex, e.target.value, config, dataset, zone)
+        if (this.props.type === 'header') {
+            this.props.loadData({ ...dataset, entrypoint: e.target.value }, views, configs, {})
+        } else {
+            this.props.selectProperty(propIndex, e.target.value, config, dataset, zone)
+        }
     }
     render () {
         const { align, dimensions, propList } = this.props
@@ -70,14 +74,17 @@ class PropSelector extends React.PureComponent {
 
 function mapStateToProps (state) {
     return {
+        configs: state.configs,
         dataset: state.dataset,
-        display: state.display
+        display: state.display,
+        views: state.views
     }
 }
 
 function mapDispatchToProps (dispatch) {
     return {
-        selectProperty: selectProperty(dispatch)
+        selectProperty: selectProperty(dispatch),
+        loadData: loadData(dispatch)
     }
 }
 

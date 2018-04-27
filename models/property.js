@@ -13,27 +13,45 @@ propertySchema.statics = {
     createOrUpdate (properties) {
         // console.log('youhou', properties)
         let allPromises = properties.map(prop => {
-            return this.update(
-                {
-                    property: prop.uri
-                },
-                {
-                    $set: {
-                        category: prop.category,
-                        label: prop.label || null,
-                        comment: prop.comment || null,
-                        modifiedAt: Date.now()
-                    },
-                    $setOnInsert: {
-                        createdAt: Date.now(),
+            if (prop.label) {
+                return this.update(
+                    {
                         property: prop.uri
                     },
-                    $inc: {
-                        loadAttempts: 1
-                    }
-                },
-                { upsert: true }
-            ).exec()
+                    {
+                        $set: {
+                            category: prop.category,
+                            label: prop.label || null,
+                            comment: prop.comment || null,
+                            modifiedAt: Date.now()
+                        },
+                        $setOnInsert: {
+                            createdAt: Date.now(),
+                            property: prop.uri
+                        }
+                    },
+                    { upsert: true }
+                ).exec()
+            } else {
+                return this.update(
+                    {
+                        property: prop.uri
+                    },
+                    {
+                        $set: {
+                            modifiedAt: Date.now()
+                        },
+                        $setOnInsert: {
+                            createdAt: Date.now(),
+                            property: prop.uri
+                        },
+                        $inc: {
+                            loadAttempts: 1
+                        }
+                    },
+                    { upsert: true }
+                ).exec()
+            }
         })
         return Promise.all(allPromises)
     }

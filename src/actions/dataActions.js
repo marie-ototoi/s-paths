@@ -125,25 +125,14 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
 }
 
 const loadResources = (dispatch) => (dataset) => {
-    getResources(dataset)
+    return getResources(dataset)
         .then(resources => {
-            console.log(resources)
+            dispatch({
+                type: types.SET_RESOURCES,
+                resources
+            })
+            return resources
         })
-}
-
-const receiveResources = (dispatch) => (resources) => {
-    console.log(resources)
-    return dispatch({
-        type: types.SET_RESOURCES,
-        resources
-    })
-}
-
-const receiveStats = (dispatch) => (stats) => {
-    return dispatch({
-        type: types.SET_STATS,
-        stats
-    })
 }
 
 const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) => {
@@ -243,7 +232,6 @@ const setUnitDimensions = (dispatch) => (dimensions, zone, configId, role, setTa
 exports.endTransition = endTransition
 exports.loadData = loadData
 exports.loadResources = loadResources
-exports.receiveStats = receiveStats
 exports.selectProperty = selectProperty
 exports.selectView = selectView
 exports.setUnitDimensions = setUnitDimensions
