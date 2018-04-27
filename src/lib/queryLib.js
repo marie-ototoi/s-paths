@@ -189,9 +189,9 @@ const addSmallestPrefix = (url, prefixes) => {
 
 const mergeStatsWithProps = (props, stats, totalEntities) => {
     return props.map((prop, index) => {
-        if (stats[index].isFulfilled()) {
+        if (stats[index]) {
             let returnprops = { ...prop }
-            let stat = stats[index].value()
+            let stat = stats[index]
             if (prop.category === 'text' && stat.results.bindings[0].avgcharlength) returnprops.avgcharlength = Math.floor(Number(stat.results.bindings[0].avgcharlength.value))
             return {
                 ...returnprops,
@@ -220,10 +220,11 @@ const defineGroup = (prop, previousProp, level, options) => {
     }
     if (ignoreList.includes(property.value)) {
         returnprops.category = 'ignore'
-    } else if (returnprops.type !== 'uri' &&
-        ((datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#date') ||
+    } else if (returnprops.type === 'uri') {
+        returnprops.category = 'uri'
+    } else if ((datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#date') ||
         propName.match(/year|date|birthday/gi) ||
-        propName.match(/(\/|#)(birth|death)$/gi))) {
+        propName.match(/(\/|#)(birth|death)$/gi)) {
         returnprops.category = 'datetime'
     } else if (propName.match(/latitude/gi) ||
         propName.match(/(\/|#)(lat)$/gi)) {

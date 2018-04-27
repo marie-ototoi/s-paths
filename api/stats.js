@@ -3,7 +3,7 @@ import promiseSettle from 'promise-settle'
 import promiseLimit from 'promise-limit'
 import pathModel from '../models/path'
 import { getPropsLabels } from '../src/lib/labelLib'
-import queryLib from '../src/lib/queryLib'
+import queryLib, { ignorePromise } from '../src/lib/queryLib'
 // import { error } from 'util';
 
 const router = express.Router()
@@ -100,13 +100,14 @@ const getStats = async (opt) => {
     }
 }
 
-const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQuery) => {
+const getStatsLevel = async (props, propsWithStats, level, total, options, firstTimeQuery) => {
     // console.log(props)
     let { maxLevel } = options
+    
     const queriedProps = props.filter(prop => {
         // check levels one after another :
         // except for first time exploration, lower levels are sent only if upper levels have not been kept 
-        return (prop.level === level) 
+        return (prop.level === level)
         // if the beginnig of the path is displayed at a higher level, don't keep (could be discussed)
         /* &&
         (propsWithStats.filter(prevProp => prop.path.indexOf(prevProp.path) === 0 &&
@@ -118,121 +119,102 @@ const getStatsLevel = (props, propsWithStats, level, total, options, firstTimeQu
     } else {
         // if the query is about the whole set and stats have already been saved
         // if (options.constraints === '' && queriedProps[0].coverage >= 0) return getStatsLevel(props, [ ...queriedProps, ...propsWithStats ], level + 1, total, options, firstTimeQuery)
-        // get all
-        return promiseSettle(queriedProps.map(prop => {
+        // get all        
+        let stats = await Promise.all(queriedProps.map(prop => {
             let propQuery = queryLib.makePropQuery(prop, options, firstTimeQuery)
             return queryLib.getData(options.endpoint, propQuery, options.prefixes)
-        }))
-            .then(stats => {
-                return queryLib.mergeStatsWithProps(queriedProps, stats, total)
-            })
-            .then(merged => {
-                // save all stats, only if they are relative to the whole ensemble
-                if (options.constraints === '') pathModel.createOrUpdate(merged)
-                // do not wait for success
-                // filter based on unique values, only if not first time
-                return merged.filter(prop => {
-                    return (prop.total > 0 &&
-                    ((prop.category === 'number') ||
-                    (prop.category === 'datetime') ||
-                    (prop.category === 'text') ||
-                    (prop.category === 'geo') ||
-                    (prop.type === 'uri' && prop.level === maxLevel - 1)))
-                    //(prop.category === 'text' && prop.avgcharlength <= options.maxChar && prop.unique <= options.maxUnique) ||
-                    //(prop.category === 'uri' && prop.unique <= options.maxUnique)))
-                })
-            })
-            .then(merged => {
-                return getStatsLevel(props, [ ...merged, ...propsWithStats ], level + 1, total, options, firstTimeQuery)
-            })
+        }).map(ignorePromise))
+        let merged = await queryLib.mergeStatsWithProps(queriedProps, stats, total)
+        // save all stats, only if they are relative to the whole ensemble
+        if (options.constraints === '') pathModel.createOrUpdate(merged)
+        // do not wait for success
+        // filter based on unique values, only if not first time
+        merged = merged.filter(prop => {
+            return (prop.total > 0 &&
+            ((prop.category === 'number') ||
+            (prop.category === 'datetime') ||
+            (prop.category === 'text') ||
+            (prop.category === 'geo') ||
+            (prop.type === 'uri' && prop.level === maxLevel - 1)))
+            //(prop.category === 'text' && prop.avgcharlength <= options.maxChar && prop.unique <= options.maxUnique) ||
+            //(prop.category === 'uri' && prop.unique <= options.maxUnique)))
+        })
+        return getStatsLevel(props, [ ...merged, ...propsWithStats ], level + 1, total, options, firstTimeQuery)
     }
 }
 
-const getPropsLevel = (categorizedProps, level, options) => {
+const getPropsLevel = async (categorizedProps, level, options) => {
     let { entrypoint, endpoint, prefixes, maxLevel } = options
     let newCategorizedProps = []
     // look for savedProps in the database
-    return pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level }).exec()
-        .then(props => {
-            if (props.length > 0) {
-                // if available
-                // generate current prefixes
-                return props.map(prop => {
-                    if (!queryLib.prefixDefined(prop.property, prefixes)) {
-                        prefixes = queryLib.addSmallestPrefix(prop.property, prefixes)
-                    }
-                    return {
-                        ...prop._doc,
-                        // generate prefixed paths
-                        path: queryLib.convertPath(prop.fullPath, prefixes)
-                    }
-                })
-            } else {
-                // no props saved start from entr
-                const queriedProps = categorizedProps.filter(prop => {
-                    return (prop.level === level - 1 &&
-                        (prop.category === 'entrypoint' ||
-                        (prop.type === 'uri')))
-                })
-                const checkExistingProps = categorizedProps.map(p => p.property)
-                return promiseSettle(
-                    queriedProps.map(prop => {
-                        let propsQuery = queryLib.makePropsQuery(prop.path, options, level)
-                        // console.log('////////', propsQuery)
-                        return queryLib.getData(endpoint, propsQuery, prefixes)
-                    })
-                ).then(propsLists => {
-                    // keep only promises that have been fulfilled
-                    propsLists = propsLists.map((props, index) => {
-                        if (props.isFulfilled()) {
-                            return props.value().results.bindings
-                        } else {
-                            return false
-                        }
-                    }).filter(props => props !== false)
-                    // generate prefixes if needed
-                    propsLists.reduce(function (flatArray, list) {
-                        return flatArray.concat(list)
-                    }, []).forEach(prop => {
-                        if (!queryLib.prefixDefined(prop.property.value, prefixes)) {
-                            prefixes = queryLib.addSmallestPrefix(prop.property.value, prefixes)
-                        }
-                    })
-                    propsLists.forEach((props, index) => {
-                        let filteredCategorizedProps = props.map(prop => {
-                            // the place to create or fetch a prefix if it does not exist, needed to make the path in defineGroup
-                            return queryLib.defineGroup(prop, queriedProps[index], level, options)
-                        }).filter(prop => {
-                            return (prop.category !== 'ignore') &&
-                            !checkExistingProps.includes(prop.property)
-                            // to prevent a loop - to be refined, better check if a pattern in the path is repeated or inverse
-                        })
-                        newCategorizedProps.push(...filteredCategorizedProps)
-                    })
-                    if (newCategorizedProps.length > 0) {
-                        // save in mongo database
-                        pathModel.createOrUpdate(newCategorizedProps)
-                    }
-                    // do not wait for result to continue
-                    return newCategorizedProps
-                })
+    let props = await pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level }).exec()
+    if (props.length > 0) {
+        // if available
+        // generate current prefixes
+        newCategorizedProps = props.map(prop => {
+            if (!queryLib.prefixDefined(prop.property, prefixes)) {
+                prefixes = queryLib.addSmallestPrefix(prop.property, prefixes)
             }
-        }).then(newCategorizedProps => {
-            let returnProps = [
-                ...categorizedProps,
-                ...newCategorizedProps
-            ]
-            if (level < maxLevel && newCategorizedProps.length > 0) {
-                return getPropsLevel(returnProps, level + 1, options)
-            } else {
-                // discard uris when there are more specific paths
-                returnProps = returnProps.filter(prop => {
-                    return (returnProps.filter(specificProp => specificProp.path.indexOf(prop.path) === 0 &&
-                        specificProp.level > prop.level).length === 0)
-                })
-                return { statements: returnProps, options }
+            return {
+                ...prop._doc,
+                // generate prefixed paths
+                path: queryLib.convertPath(prop.fullPath, prefixes)
             }
         })
+    } else {
+        // no props saved start from entr
+        const queriedProps = categorizedProps.filter(prop => {
+            return (prop.level === level - 1 &&
+                (prop.category === 'entrypoint' ||
+                (prop.type === 'uri')))
+        })
+        const checkExistingProps = categorizedProps.map(p => p.property)
+        let propsLists = await Promise.all(queriedProps.map(prop => {
+            let propsQuery = queryLib.makePropsQuery(prop.path, options, level)
+            // console.log('////////', propsQuery)
+            return queryLib.getData(endpoint, propsQuery, prefixes)
+        }).map(ignorePromise))
+        // keep only promises that have been fulfilled
+        propsLists = propsLists.map((props, index) => {
+            return (props.results) ? props.results.bindings : false
+        }).filter(props => props !== false)
+        // generate prefixes if needed
+        propsLists.reduce(function (flatArray, list) {
+            return flatArray.concat(list)
+        }, []).forEach(prop => {
+            if (!queryLib.prefixDefined(prop.property.value, prefixes)) {
+                prefixes = queryLib.addSmallestPrefix(prop.property.value, prefixes)
+            }
+        })
+        propsLists.forEach((props, index) => {
+            let filteredCategorizedProps = props.map(prop => {
+                // the place to create or fetch a prefix if it does not exist, needed to make the path in defineGroup
+                return queryLib.defineGroup(prop, queriedProps[index], level, options)
+            }).filter(prop => {
+                return (prop.category !== 'ignore') &&
+                !checkExistingProps.includes(prop.property)
+                // to prevent a loop - to be refined, better check if a pattern in the path is repeated or inverse
+            })
+            newCategorizedProps.push(...filteredCategorizedProps)
+        })
+        // save in mongo database
+        if (newCategorizedProps.length > 0) pathModel.createOrUpdate(newCategorizedProps)
+        // do not wait for result to continue
+    }
+    let returnProps = [
+        ...categorizedProps,
+        ...newCategorizedProps
+    ]
+    if (level < maxLevel && newCategorizedProps.length > 0) {
+        return getPropsLevel(returnProps, level + 1, options)
+    } else {
+        // discard uris when there are more specific paths
+        returnProps = returnProps.filter(prop => {
+            return (returnProps.filter(specificProp => specificProp.path.indexOf(prop.path) === 0 &&
+                specificProp.level > prop.level).length === 0)
+        })
+        return { statements: returnProps, options }
+    }
 }
 
 export default router
