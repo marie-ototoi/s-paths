@@ -176,7 +176,7 @@ const getPropsLevel = async (categorizedProps, level, options) => {
         }).map(ignorePromise))
         // keep only promises that have been fulfilled
         propsLists = propsLists.map((props, index) => {
-            return (props.results) ? props.results.bindings : false
+            return (props) ? props.results.bindings : false
         }).filter(props => props !== false)
         // generate prefixes if needed
         propsLists.reduce(function (flatArray, list) {
