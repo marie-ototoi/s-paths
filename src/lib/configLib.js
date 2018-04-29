@@ -38,7 +38,7 @@ const getDeviationCost = (min, max, optimal, score) => {
     return (maxGap) ? (score / maxGap) : null
 }
 const getCost = (val, min, max, optimal, score) => {
-    if ((optimal && inRange(val, optimal)) || !optimal)  return 0
+    if ((optimal && inRange(val, optimal)) || !optimal) return 0
     const deviationCost = getDeviationCost(min, max, optimal, score)
     if (underRange(val, optimal) && min) {
         return deviationCost * (optimal[0] - val)
@@ -109,11 +109,11 @@ const defineConfigs = (views, stats) => {
             stats.statements.forEach(prop => {
                 constraintSet.forEach(constraint => {
                     // generic conditions
-                    if ((prop.category === constraint.category || constraint.category === '*') &&
+                    if ((prop.category === constraint.category) &&
                     (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
                     !(
-                        (constraint.unique.min && prop.unique < constraint.unique.min) ||
-                        (constraint.unique.max && prop.unique > constraint.unique.max)
+                        (!constraint.unique.min || (constraint.unique.min && prop.unique < constraint.unique.min)) ||
+                        (!constraint.unique.max || (constraint.unique.max && prop.unique > constraint.unique.max))
                     )) {
                         propSet.push({
                             ...prop,
