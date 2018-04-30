@@ -41,7 +41,7 @@ const getStats = async (opt) => {
         maxLevel: opt.maxLevel || 4,
         prefixes: opt.prefixes || {}
     }
-    let { prefixes, endpoint, entrypoint, forceUpdate, labels } = options
+    let { prefixes, endpoint, entrypoint, labels } = options
     let totalInstances
     let selectionInstances
     let displayedInstances
