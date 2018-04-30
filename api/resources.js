@@ -54,7 +54,7 @@ const getResources = async (opt) => {
     return resources.map(resource => {
         return {
             ...resource,
-            label: labels[dico[resource.type]].label || resource.uri,
+            label: labels[dico[resource.type]].label || resource.type,
             comment: labels[dico[resource.type]].comment || null
         }
     })
