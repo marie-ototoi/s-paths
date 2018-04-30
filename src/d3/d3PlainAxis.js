@@ -36,11 +36,9 @@ const resize = (el, props) => {
     if (type === 'Bottom') {
         axeLength = dimensions.width
         legendLinePoints = { x1: 0, y1: 0.5, x2: -30, y2: 0.5 }
-        transformation = 'rotate(-45 0,0) translate(-8, -5)'
     } else {
         axeLength = dimensions.height
         legendLinePoints = { x1: 0, y1: dimensions.height + 20, x2: 0, y2: dimensions.height + 35 }
-        transformation = 'rotate(-45 0,0) translate(0, -10)'
     }
     //
     const scale = d3.scaleLinear().range([0, axeLength])
@@ -97,6 +95,7 @@ const resize = (el, props) => {
     const tickHeight = (type === 'Bottom') ? 7 : Math.floor(dimensions.height / (ticks.size() - 1))
     const tickX = (type === 'Bottom') ? 0 : -7
     const tickY = (type === 'Bottom') ? 2 : 0
+    
     // console.log(dimensions.height, tickX, tickY, tickWidth, tickHeight)
     ticks.append('rect')
         .classed('reactzone', true)
@@ -125,8 +124,16 @@ const resize = (el, props) => {
             return (data.length > 0 && data[0].range !== null)
         })
     d3.select(el).selectAll('.tick text')
-        .attr('transform', transformation)
+        .attr('width', 400)
         .attr('text-anchor', 'end')
+        .attr('transform', d => {
+            if (type === 'Bottom') {
+                return `translate(${(category === 'datetime') ? -8 : - 8 + (axeLength / ((ticks.size() - 1) * 2))}, 3) rotate(315 0,0)`
+            } else {
+                return `translate(-5, ${axeLength / ((ticks.size() - 1) * 2)})`
+            }
+        })
+        //
 }
 
 exports.create = create
