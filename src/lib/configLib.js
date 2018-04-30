@@ -111,10 +111,9 @@ const defineConfigs = (views, stats) => {
                     // generic conditions
                     if ((prop.category === constraint.category) &&
                     (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
-                    !(
-                        (!constraint.unique.min || (constraint.unique.min && prop.unique < constraint.unique.min)) ||
-                        (!constraint.unique.max || (constraint.unique.max && prop.unique > constraint.unique.max))
-                    )) {
+                    (!constraint.unique.min || (constraint.unique.min && (prop.unique > constraint.unique.min))) &&
+                    (!constraint.unique.max || (constraint.unique.max && prop.unique < constraint.unique.max))
+                    ) {
                         propSet.push({
                             ...prop,
                             score: scoreProp(prop, constraint)
