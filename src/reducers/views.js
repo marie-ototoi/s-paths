@@ -14,12 +14,12 @@ const defaultState = [
             [
                 {
                     category: 'text',
-                    unique: { min: 2, max: 10, optimal: [4, 6] }
+                    unique: { min: 2, max: 50, optimal: [4, 6] }
                 },
                 {
                     category: 'geo',
                     subcategory: 'name',
-                    unique: { min: 2, max: 10, optimal: [4, 6] }
+                    unique: { min: 2, max: 50, optimal: [4, 6] }
                 }
                 
             ]/* ,
@@ -42,17 +42,17 @@ const defaultState = [
             [
                 {
                     category: 'datetime',
-                    unique: { min: 2, max: 200 }
+                    unique: { min: 2 }
                 },
                 {
                     category: 'text',
-                    unique: { min: 2, max: 50 }
+                    unique: { min: 2, max: 150 }
                 }
             ],
             [
                 {
                     category: 'text',
-                    unique: { min: 2, max: 160, optimal: [6, 15] }
+                    unique: { min: 2, max: 50, optimal: [6, 15] }
                 }
             ]
         ]
