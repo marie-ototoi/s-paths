@@ -4,176 +4,6 @@ import { SparqlClient } from 'sparql-client-2'
 import configLib from './configLib'
 import { select } from '../actions/selectionActions';
 
-const makePropQuery = (prop, options, firstTimeQuery) => {
-    const { constraints, defaultGraph } = options
-    const { path } = prop
-    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
-    const avgchar = (prop.category === 'text') ? `(AVG(?charlength) as ?avgcharlength) ` : ``
-    const char = (prop.category === 'text' && firstTimeQuery) ? `BIND(STRLEN(?object) AS ?charlength)` : ``
-    return `SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) ${avgchar}(COUNT(DISTINCT ?entrypoint) AS ?coverage) ${graph}
-WHERE {
-${constraints}
-${FSL2SPARQL(path, 'object')} 
-${char}
-}`
-}
-
-const makeQueryFromConstraint = (constraint) => {
-    const { category, group, propName, value } = constraint
-    if (category === 'datetime') {
-        const startValue = Number(value)
-        if (group === 'century') {
-            return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${(startValue + 99)}-12-31")) . `
-        } else if (group === 'decade') {
-            return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${(startValue + 9)}-12-31")) . `
-        } else { // treats other case as year (should be refined to handle time)
-            return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${startValue}-12-31")) . `
-        }
-    } else if (category === 'text') {
-        return `FILTER regex(?${propName}, "^${value}$") . `
-    } else if (category === 'aggregate') {
-        return `FILTER (?${propName} >= ${value[0]} && ?${propName} < ${value[1]}) . `
-    }
-}
-
-const makeSelectionConstraints = (selections, selectedConfig, zone) => {
-    const uriSelections = selections.filter(sel => sel.query.type === 'uri' && sel.zone === zone)
-    const uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
-    // add constraints for constrained groups of entities (heatmap)
-    const setSelection = selections.filter(sel => sel.query.type === 'set' && sel.zone === zone)
-    let paths = ''
-    const setConstraints = setSelection.map((sel, iS) => {
-        return '(' + sel.query.value.map((constraint, iC) => {
-            const propName = 'contraint' + constraint.propName
-            console.log(constraint.category, constraint.subcategory)
-            if (iS === 0) paths += FSL2SPARQL(selectedConfig.properties[iC].path, propName)
-            if (constraint.category === 'datetime') {
-                const conditions = constraint.value.map((r, iR) => {
-                    const cast = (selectedConfig.properties[iC].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? `xsd:date("${r}-${(iR === 0) ? '01-01' : '12-31'}")` : `xsd:integer("${r}")`
-                    return `?${propName} ${(iR === 0) ? '>=' : '<='} ${cast}`
-                }).join(' && ')
-                return `(${conditions})`
-            } else if (constraint.category === 'text' || constraint.category === 'uri' || (constraint.category === 'geo' && constraint.subcategory === 'name')) {
-                return ` regex(?${propName}, '^${constraint.value}$', 'i')`
-            }
-        }).join(' && ') + ')'
-    }).join(' || ')
-    let totalQuery = ''
-    if (uriRegex !== '') totalQuery += `FILTER regex(?entrypoint, '^${uriRegex}$', 'i') .`
-    if (setConstraints !== '') totalQuery += `${paths} FILTER (${setConstraints}) . `
-    return totalQuery
-}
-
-const makeTotalQuery = (entitiesClass, options) => {
-    let { constraints, defaultGraph } = options
-    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
-    return `SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) ${graph}
-WHERE {
-?entrypoint rdf:type ${entitiesClass} . ${constraints}
-}`
-}
-
-const getData = (endpoint, query, prefixes) => {
-    const client = new SparqlClient(endpoint)
-        .registerCommon('rdf', 'rdfs')
-        .register(prefixes)
-    return client
-        .query(query)
-        .execute()
-}
-
-const usesPrefix = (uri, prefixes) => {
-    const parts = uri.split(':')
-    return uri.match(/:/g) && !uri.match(/\//g) && prefixes[parts[0]] !== undefined
-}
-
-const createPrefix = (uri) => {
-    return uri.replace(/([/:#_\-.]|purl|org|data|http|www)/g, (match, p1) => {
-        if (p1) return ''
-    }).toLowerCase()
-}
-
-const usePrefix = (uri, prefixes) => {
-    return uri.replace(uri, (match, offset, string) => {
-        for (var pref in prefixes) {
-            let splittedUri = match.split(prefixes[pref])
-            if (splittedUri.length > 1) return `${pref}:${splittedUri[1]}`
-        }
-        return match
-    })
-}
-
-const useFullUri = (path, prefixes) => {
-    return path.replace(path, (match, offset, string) => {
-        for (var pref in prefixes) {
-            let splittedUri = match.split(pref + ':')
-            if (splittedUri.length > 1) return `${prefixes[pref]}${splittedUri[1]}`
-        }
-        return match
-    })
-}
-
-const ignorePromise = (promise) => {
-    return promise.catch(e => {
-        console.log(e)
-        return undefined
-    })
-}
-
-const getRoot = (uri) => {
-    const splitSlash = uri.split('/')
-    const slashEnd = splitSlash[splitSlash.length - 1]
-    const splitHash = uri.split('#')
-    const hashEnd = splitHash[splitHash.length - 1]
-    if ((slashEnd !== '' &&
-    slashEnd.length < hashEnd.length)) {
-        return splitSlash.slice(0, -1).join('/').concat('/')
-    } else {
-        return splitHash.slice(0, -1).join('#').concat('#')
-    }
-}
-
-const getPropName = (uri) => {
-    const root = getRoot(uri)
-    return uri.replace(root, '')
-}
-
-const convertPath = (fullPath, prefixes) => {
-    var uriRegex = /<[\w\d:.#_\-/#]+>?/gi
-    return fullPath.replace(uriRegex, (match, p1) => {
-        if (match) return usePrefix(match.substr(1, match.length - 2), prefixes)
-    })
-}
-
-const makePropsQuery = (entitiesClass, options, level) => {
-    // this is valid only for first level
-    const { constraints, defaultGraph } = options
-    const pathQuery = FSL2SPARQL(entitiesClass, 'interobject', 'subject')
-    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
-    const subject = (level === 1) ? '?subject' : '?interobject'
-    return `SELECT DISTINCT ?property ?datatype ?language ?isiri ?isliteral ${graph}WHERE {
-        ${pathQuery}${constraints}
-        ${subject} ?property ?object .
-        OPTIONAL { ?property rdfs:label ?propertylabel } .
-        BIND(DATATYPE(?object) AS ?datatype) .
-        BIND(ISIRI(?object) AS ?isiri) .
-        BIND(ISLITERAL(?object) AS ?isliteral) .
-        BIND(LANG(?object) AS ?language) .
-    } GROUP BY ?property ?datatype ?language ?isiri ?isliteral`
-    /* for (let index = 1; index <= levels; index ++) {
-        let subject
-    } */
-}
-
-const prefixDefined = (uri, prefixes) => {
-    let root = getRoot(uri)
-    let rootList = []
-    for (let pref in prefixes) {
-        rootList.push(prefixes[pref])
-    }
-    return rootList.includes(root)
-}
-
 const addSmallestPrefix = (url, prefixes) => {
     const root = getRoot(url)
     const flatRoot = createPrefix(root)
@@ -190,21 +20,16 @@ const addSmallestPrefix = (url, prefixes) => {
     return prefixes
 }
 
-const mergeStatsWithProps = (props, stats, totalEntities) => {
-    return props.map((prop, index) => {
-        if (stats[index]) {
-            let returnprops = { ...prop }
-            let stat = stats[index]
-            if (prop.category === 'text' && stat.results.bindings[0].avgcharlength) returnprops.avgcharlength = Math.floor(Number(stat.results.bindings[0].avgcharlength.value))
-            return {
-                ...returnprops,
-                total: Number(stat.results.bindings[0].total.value),
-                unique: Number(stat.results.bindings[0].unique.value),
-                coverage: Number(stat.results.bindings[0].coverage.value) * 100 / totalEntities
-            }
-        } else {
-            return prop
-        }
+const createPrefix = (uri) => {
+    return uri.replace(/([/:#_\-.]|purl|org|data|http|www)/g, (match, p1) => {
+        if (p1) return ''
+    }).toLowerCase()
+}
+
+const convertPath = (fullPath, prefixes) => {
+    var uriRegex = /<[\w\d:.#_\-/#]+>?/gi
+    return fullPath.replace(uriRegex, (match, p1) => {
+        if (match) return usePrefix(match.substr(1, match.length - 2), prefixes)
     })
 }
 
@@ -259,6 +84,149 @@ const defineGroup = (prop, previousProp, level, options) => {
     }
 }
 
+const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', entrypointType = true, optional = false, hierarchical = null) => {
+    let pathParts = FSLpath.split('/')
+    let query = (entrypointType) ? `?${entrypointName} rdf:type ${pathParts[0]} . ` : ``
+    let levels = Math.floor(pathParts.length / 2)
+    for (let index = 1; index < pathParts.length; index += 2) {
+        let predicate = pathParts[index]
+        let objectType = pathParts[index + 1]
+        let level = Math.ceil(index / 2)
+        let thisSubject = (level === 1) ? entrypointName : `${propName}inter${(level - 1)}`
+        let thisObject = (level === levels) ? propName : `${propName}inter${level}`
+        query = query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
+        // if (level === levels) query = query.concat(`${!optional ? 'OPTIONAL { ' : ''}?${thisObject} rdfs:label ?label${propName}${!optional ? ' } .' : ''} `)
+        if (objectType !== '*') {
+            query = query.concat(`?${thisObject} rdf:type ${objectType} . `)
+        }
+    }
+    let queryHierarchical = ''
+    if (hierarchical) {
+        const prevPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}inter${levels-1}` : propName
+        const newPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}bisinter${levels-1}` : `${propName}bis`
+        queryHierarchical = query.replace(new RegExp(`[?]{1}${propName}`, 'gi'), `$&bis`)
+        queryHierarchical = `?${prevPropName} ?directlink ?${newPropName} . ` + queryHierarchical
+        // queryHierarchical = queryHierarchical.replace(/OPTIONAL {.*} \. /, '')
+        // queryHierarchical = queryHierarchical.replace(prevPropName, newPropName)
+        queryHierarchical = `OPTIONAL { ${queryHierarchical} }`
+    }
+    return `${optional ? 'OPTIONAL { ' : ''}${query}${queryHierarchical}${optional ? '} . ' : ''}`
+}
+
+const getData = (endpoint, query, prefixes) => {
+    const client = new SparqlClient(endpoint)
+        .registerCommon('rdf', 'rdfs')
+        .register(prefixes)
+    return client
+        .query(query)
+        .execute()
+}
+
+const getPropName = (uri) => {
+    const root = getRoot(uri)
+    return uri.replace(root, '')
+}
+
+const getRoot = (uri) => {
+    const splitSlash = uri.split('/')
+    const slashEnd = splitSlash[splitSlash.length - 1]
+    const splitHash = uri.split('#')
+    const hashEnd = splitHash[splitHash.length - 1]
+    if ((slashEnd !== '' &&
+    slashEnd.length < hashEnd.length)) {
+        return splitSlash.slice(0, -1).join('/').concat('/')
+    } else {
+        return splitHash.slice(0, -1).join('#').concat('#')
+    }
+}
+
+const ignorePromise = (promise) => {
+    return promise.catch(e => {
+        console.error(e)
+        return undefined
+    })
+}
+
+const makePropQuery = (prop, options, firstTimeQuery) => {
+    const { constraints, defaultGraph } = options
+    const { path } = prop
+    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    const avgchar = (prop.category === 'text' && firstTimeQuery) ? `(AVG(?charlength) as ?avgcharlength) ` : ``
+    const char = (prop.category === 'text' && firstTimeQuery) ? `BIND(STRLEN(?object) AS ?charlength)` : ``
+    return `SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) ${avgchar}(COUNT(DISTINCT ?entrypoint) AS ?coverage) ${graph}
+WHERE {
+${constraints}
+${FSL2SPARQL(path, 'object')} 
+${char}
+}`
+}
+
+const makePropsQuery = (entitiesClass, options, level) => {
+    // this is valid only for first level
+    const { constraints, defaultGraph } = options
+    const pathQuery = FSL2SPARQL(entitiesClass, 'interobject', 'subject')
+    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    const subject = (level === 1) ? '?subject' : '?interobject'
+    return `SELECT DISTINCT ?property ?datatype ?language ?isiri ?isliteral ${graph}WHERE {
+        ${pathQuery}${constraints}
+        ${subject} ?property ?object .
+        OPTIONAL { ?property rdfs:label ?propertylabel } .
+        BIND(DATATYPE(?object) AS ?datatype) .
+        BIND(ISIRI(?object) AS ?isiri) .
+        BIND(ISLITERAL(?object) AS ?isliteral) .
+        BIND(LANG(?object) AS ?language) .
+    } GROUP BY ?property ?datatype ?language ?isiri ?isliteral`
+    /* for (let index = 1; index <= levels; index ++) {
+        let subject
+    } */
+}
+
+const makeQueryFromConstraint = (constraint) => {
+    const { category, group, propName, value } = constraint
+    if (category === 'datetime') {
+        const startValue = Number(value)
+        if (group === 'century') {
+            return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${(startValue + 99)}-12-31")) . `
+        } else if (group === 'decade') {
+            return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${(startValue + 9)}-12-31")) . `
+        } else { // treats other case as year (should be refined to handle time)
+            return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${startValue}-12-31")) . `
+        }
+    } else if (category === 'text') {
+        return `FILTER regex(?${propName}, "^${value}$") . `
+    } else if (category === 'aggregate') {
+        return `FILTER (?${propName} >= ${value[0]} && ?${propName} < ${value[1]}) . `
+    }
+}
+
+const makeSelectionConstraints = (selections, selectedConfig, zone) => {
+    const uriSelections = selections.filter(sel => sel.query.type === 'uri' && sel.zone === zone)
+    const uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
+    // add constraints for constrained groups of entities (heatmap)
+    const setSelection = selections.filter(sel => sel.query.type === 'set' && sel.zone === zone)
+    let paths = ''
+    const setConstraints = setSelection.map((sel, iS) => {
+        return '(' + sel.query.value.map((constraint, iC) => {
+            const propName = 'contraint' + constraint.propName
+            console.log(constraint.category, constraint.subcategory)
+            if (iS === 0) paths += FSL2SPARQL(selectedConfig.properties[iC].path, propName)
+            if (constraint.category === 'datetime') {
+                const conditions = constraint.value.map((r, iR) => {
+                    const cast = (selectedConfig.properties[iC].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? `xsd:date("${r}-${(iR === 0) ? '01-01' : '12-31'}")` : `xsd:integer("${r}")`
+                    return `?${propName} ${(iR === 0) ? '>=' : '<='} ${cast}`
+                }).join(' && ')
+                return `(${conditions})`
+            } else if (constraint.category === 'text' || constraint.category === 'uri' || (constraint.category === 'geo' && constraint.subcategory === 'name')) {
+                return ` regex(?${propName}, '^${constraint.value}$', 'i')`
+            }
+        }).join(' && ') + ')'
+    }).join(' || ')
+    let totalQuery = ''
+    if (uriRegex !== '') totalQuery += `FILTER regex(?entrypoint, '^${uriRegex}$', 'i') .`
+    if (setConstraints !== '') totalQuery += `${paths} FILTER (${setConstraints}) . `
+    return totalQuery
+}
+
 // to do : take constraints into account
 const makeQuery = (entrypoint, configZone, zone, options) => {
     const { defaultGraph, constraints, prop1only } = options
@@ -296,6 +264,25 @@ WHERE {
 ${constraints}
 ${defList}
 } GROUP BY ${groupList}ORDER BY ${orderList}`
+}
+
+const makeQueryResources = (options) => {
+    const { defaultGraph } = options
+    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    return `SELECT DISTINCT ?type (COUNT(?type) as ?occurrences) ${graph}
+    WHERE {
+      ?s rdf:type ?type
+    }
+    ORDER BY DESC(?occurrences)`
+}
+
+const makeTotalQuery = (entitiesClass, options) => {
+    let { constraints, defaultGraph } = options
+    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    return `SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) ${graph}
+WHERE {
+?entrypoint rdf:type ${entitiesClass} . ${constraints}
+}`
 }
 
 const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
@@ -353,43 +340,56 @@ const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
     ORDER BY ${orderList}`
 }
 
-const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', entrypointType = true, optional = false, hierarchical = null) => {
-    let pathParts = FSLpath.split('/')
-    let query = (entrypointType) ? `?${entrypointName} rdf:type ${pathParts[0]} . ` : ``
-    let levels = Math.floor(pathParts.length / 2)
-    for (let index = 1; index < pathParts.length; index += 2) {
-        let predicate = pathParts[index]
-        let objectType = pathParts[index + 1]
-        let level = Math.ceil(index / 2)
-        let thisSubject = (level === 1) ? entrypointName : `${propName}inter${(level - 1)}`
-        let thisObject = (level === levels) ? propName : `${propName}inter${level}`
-        query = query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
-        // if (level === levels) query = query.concat(`${!optional ? 'OPTIONAL { ' : ''}?${thisObject} rdfs:label ?label${propName}${!optional ? ' } .' : ''} `)
-        if (objectType !== '*') {
-            query = query.concat(`?${thisObject} rdf:type ${objectType} . `)
+const mergeStatsWithProps = (props, stats, totalEntities) => {
+    return props.map((prop, index) => {
+        if (stats[index]) {
+            let returnprops = { ...prop }
+            let stat = stats[index]
+            if (prop.category === 'text' && stat.results.bindings[0].avgcharlength) returnprops.avgcharlength = Math.floor(Number(stat.results.bindings[0].avgcharlength.value))
+            return {
+                ...returnprops,
+                total: Number(stat.results.bindings[0].total.value),
+                unique: Number(stat.results.bindings[0].unique.value),
+                coverage: Number(stat.results.bindings[0].coverage.value) * 100 / totalEntities
+            }
+        } else {
+            return prop
         }
-    }
-    let queryHierarchical = ''
-    if (hierarchical) {
-        const prevPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}inter${levels-1}` : propName
-        const newPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}bisinter${levels-1}` : `${propName}bis`
-        queryHierarchical = query.replace(new RegExp(`[?]{1}${propName}`, 'gi'), `$&bis`)
-        queryHierarchical = `?${prevPropName} ?directlink ?${newPropName} . ` + queryHierarchical
-        // queryHierarchical = queryHierarchical.replace(/OPTIONAL {.*} \. /, '')
-        // queryHierarchical = queryHierarchical.replace(prevPropName, newPropName)
-        queryHierarchical = `OPTIONAL { ${queryHierarchical} }`
-    }
-    return `${optional ? 'OPTIONAL { ' : ''}${query}${queryHierarchical}${optional ? '} . ' : ''}`
+    })
 }
 
-const makeQueryResources = (options) => {
-    const { defaultGraph } = options
-    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
-    return `SELECT DISTINCT ?type (COUNT(?type) as ?occurrences) ${graph}
-    WHERE {
-      ?s rdf:type ?type
+const prefixDefined = (uri, prefixes) => {
+    let root = getRoot(uri)
+    let rootList = []
+    for (let pref in prefixes) {
+        rootList.push(prefixes[pref])
     }
-    ORDER BY DESC(?occurrences)`
+    return rootList.includes(root)
+}
+
+const useFullUri = (path, prefixes) => {
+    return path.replace(path, (match, offset, string) => {
+        for (var pref in prefixes) {
+            let splittedUri = match.split(pref + ':')
+            if (splittedUri.length > 1) return `${prefixes[pref]}${splittedUri[1]}`
+        }
+        return match
+    })
+}
+
+const usePrefix = (uri, prefixes) => {
+    return uri.replace(uri, (match, offset, string) => {
+        for (var pref in prefixes) {
+            let splittedUri = match.split(prefixes[pref])
+            if (splittedUri.length > 1) return `${pref}:${splittedUri[1]}`
+        }
+        return match
+    })
+}
+
+const usesPrefix = (uri, prefixes) => {
+    const parts = uri.split(':')
+    return uri.match(/:/g) && !uri.match(/\//g) && prefixes[parts[0]] !== undefined
 }
 
 exports.convertPath = convertPath
