@@ -7,7 +7,7 @@ import queryLib, { ignorePromise } from './queryLib'
 
 const limit = promiseLimit(10)
 
-const getPropsLabels = (prefixes, props) => {
+const getPropsLabels = async (prefixes, props) => {
     // find all classes and props used in paths
     let urisToLabel = props.reduce((acc, curr) => {
         let pathParts = curr.path.split('/')

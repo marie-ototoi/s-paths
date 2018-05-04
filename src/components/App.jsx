@@ -46,8 +46,11 @@ class App extends React.Component {
         // this is where it all starts
         this.props.loadResources(dataset)
             .then(resources => {
+                dataset.entrypoint = resources[0].type
+                dataset.totalInstances = resources[0].total
                 this.props.loadData(dataset, views, configs, {})
             })
+            .catch(e => console.error('Error fetching data from app', e))
     }
     handleTransition (props, elements) {
         const { role, status, zone } = props

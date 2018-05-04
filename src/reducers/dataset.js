@@ -73,6 +73,7 @@ const dataset = (state = initialState, action) => {
         return {
             ...state,
             entrypoint: action.resources[0].type,
+            totalInstances: action.resources[0].total,
             resources: action.resources
         }
     case types.SET_DATA:

@@ -114,7 +114,10 @@ const useFullUri = (path, prefixes) => {
 }
 
 const ignorePromise = (promise) => {
-    return promise.catch(e => undefined)
+    return promise.catch(e => {
+        console.log(e)
+        return undefined
+    })
 }
 
 const getRoot = (uri) => {

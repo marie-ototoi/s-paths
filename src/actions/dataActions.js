@@ -34,7 +34,7 @@ const getResources = (options) => {
 }
 
 const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
-    // console.log('load Data ', dataset.constraints)
+    console.log('load Data ', dataset.constraints)
     let { constraints, endpoint, entrypoint, labels, prefixes } = dataset
     let newOptions
     if (constraints !== '') dataset.forceUpdate = false
@@ -97,7 +97,7 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                 deltaMain,
                 deltaAside,
                 getData(endpoint, coverageQueryMain, prefixes),
-                getData(endpoint, coverageQueryAside, prefixes),
+                getData(endpoint, coverageQueryAside, prefixes)
             ])
                 .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside, coverageMain, coverageAside]) => {
                     // console.log(dataMain, dataAside)

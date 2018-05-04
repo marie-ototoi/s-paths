@@ -15,14 +15,15 @@ class PropSelector extends React.PureComponent {
         }
     }
     handleSelect (e) {
-        const { config, configs, dataset, propIndex, views, zone } = this.props
+        const { config, configs, dataset, propIndex, propList, views, zone } = this.props
         this.setState({
             selected: this.props.selected
         })
+        let requestedProp = propList[e.target.value]
         if (this.props.type === 'header') {
-            this.props.loadData({ ...dataset, entrypoint: e.target.value }, views, configs, {})
+            this.props.loadData({ ...dataset, entrypoint: requestedProp.path, totalInstances: requestedProp.total }, views, configs, {})
         } else {
-            this.props.selectProperty(propIndex, e.target.value, config, dataset, zone)
+            this.props.selectProperty(propIndex, requestedProp.path, config, dataset, zone)
         }
     }
     render () {
@@ -30,7 +31,11 @@ class PropSelector extends React.PureComponent {
         // const dimensions = getDimensions('propSelector' + type, display.zones[zone], display.viz, offset)
         const { x, y, width, height } = dimensions
         const alignClass = (align === 'right') ? 'right' : 'left'
-        const selectedProp = propList.filter(p => p.selected)[0]
+        let selectedPropIndex
+        propList.forEach((p, i) => {
+            if (p.selected) selectedPropIndex = i
+        })
+        const selectedProp = propList[selectedPropIndex]
         return (
             <foreignObject className = {this.state.elementName}
                 transform = { `translate(${x}, ${y})` }
@@ -55,14 +60,14 @@ class PropSelector extends React.PureComponent {
                     className = { alignClass }
                     style = { { width: width + `px` } }
                     onChange = { this.handleSelect }
-                    value = { selectedProp.path }
+                    value = { selectedPropIndex }
                 >
                     { propList.map((config, i) => {
                         return <option
-                            value = { config.path }
+                            value = { i }
                             key = { this.state.elementName + i }
                         >
-                            { config.readablePath.map(part => part.label).join(' / ') }
+                            { config.readablePath.map(part => part.label).join(' / ').concat(config.total ? ' (' + config.total + ')' : '') }
                         </option>
                     }) }
                 </select>

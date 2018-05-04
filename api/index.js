@@ -9,7 +9,7 @@ router.use('/', (req, res, next) => {
     if (req.path === '/favicon.ico') {
         res.writeHead(200, { 'Content-Type': 'image/x-icon' })
         res.end()
-    } 
+    }
     next()
 })
 
