@@ -9,6 +9,7 @@
     "dev": "npm run server | npm run devserver",
     "devserver": "webpack-dev-server --env development --port 3000",
     "test": "NODE_ENV=test mocha --require test/setup.js --compilers js:babel-core/register --recursive",
+    "lint": "eslint --ext .js,.jsx src api models app.js webpack.config.js",
     "coverage": "nyc npm test",
     "server": "babel-node app --presets env"
   },
