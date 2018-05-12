@@ -77,7 +77,7 @@ const getStats = async (opt) => {
         // check if props available in database
         // if necessary retrieve missing level
         // or recursively retrieve properties
-        let paths = await getPropsLevel(entryProp, 1, options, { totalInstances, selectionInstances }).catch(e => console.error('Error getting paths and stats', e))
+        let paths = await getProps(entryProp, 1, options, { totalInstances, selectionInstances }).catch(e => console.error('Error getting paths and stats', e))
 
         // last parameter is for first time query, should be changed dynamically
         // get human readable rdfs:labels and rdfs:comments of all properties listed
@@ -106,7 +106,7 @@ const getMaxRequest = (parentQuantities) => {
         maxRequests = 4
     } else if (parentQuantities < 2000) {
         maxRequests = 3
-    } else if (parentQuantities < 5000) {
+    } else if (parentQuantities < 3000) {
         maxRequests = 2
     } else {
         maxRequests = 1
@@ -114,12 +114,16 @@ const getMaxRequest = (parentQuantities) => {
     return maxRequests
 }
 
-const getPropsLevel = async (categorizedProps, level, options, instances) => {
+const getProps = async (categorizedProps, level, options, instances) => {
     let { constraints, entrypoint, endpoint, prefixes, maxLevel } = options
     let { selectionInstances, totalInstances } = instances
     let maxRequests = getMaxRequest(selectionInstances)
-    
     let newCategorizedProps = []
+    const queriedProps = categorizedProps.filter(prop => {
+        return (prop.level === level - 1 &&
+            (prop.category === 'entrypoint' ||
+            (prop.type === 'uri')))
+    })
     // look for savedProps in the database
     let props = await pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level }).exec()
     if (props.length > 0) {
@@ -136,58 +140,114 @@ const getPropsLevel = async (categorizedProps, level, options, instances) => {
             }
         })
     } else {
-        // no props saved start from entr
-        const queriedProps = categorizedProps.filter(prop => {
-            return (prop.level === level - 1 &&
-                (prop.category === 'entrypoint' ||
-                (prop.type === 'uri')))
-        })
-        const checkExistingProps = categorizedProps.map(p => p.property)
-        let propQueries = queriedProps.map(prop => {
-            let propsQuery = queryLib.makePropsQuery(prop.path, options, level)
-            // console.log('////////', prop.path, level, propsQuery)
-            return queryLib.getData(endpoint, propsQuery, prefixes)
-        })
-        // let propsLists = await Promise.all(propQueries.map(ignorePromise))
+        //let propQueries = queriedProps
         // deal with props by bunches of promises 
-        for (let i = 0; i < propQueries.length; i += maxRequests) {
-            let elementsToSlice = (propQueries.length - i < maxRequests) ? propQueries.length - i : maxRequests
-            let propsLists = await Promise.all(propQueries.slice(i, elementsToSlice).map(ignorePromise))
-            
+        for (let i = 0; i < queriedProps.length; i += maxRequests) {
+            let elementsToSlice = (queriedProps.length - i < maxRequests) ? queriedProps.length - i : maxRequests
+            console.log('**** on boucle', level, i, maxRequests, elementsToSlice)
+            let propsLists = await Promise.all(queriedProps
+                .slice(i, i + elementsToSlice)
+                .map(prop => {
+                    let propsQuery = queryLib.makePropsQuery(prop.path, options, level)
+                     console.log(propsQuery)
+                    return queryLib.getData(endpoint, propsQuery, prefixes)
+                })
+                .map(ignorePromise))
             // keep only promises that have been fulfilled
             propsLists = propsLists
-                .map((props, index) => (props) ? props.results.bindings.map(prop => { return { ...prop, index } }) : false)
+                .map((props, index) => {
+                    // console.log(props.results.bindings)
+                    return (props && props.results.bindings.length > 0) ? props.results.bindings.map(prop => {
+                    // generate prefixes if needed
+                        if (!queryLib.prefixDefined(prop.property.value, prefixes)) {
+                            prefixes = queryLib.addSmallestPrefix(prop.property.value, prefixes)
+                        }
+                        return queryLib.makePath(prop, queriedProps[index], level, { prefixes, endpoint }) 
+                    }) : false
+                })
                 .filter(props => props !== false)
                 .reduce((flatArray, list) => flatArray.concat(list), [])
-                .map(prop => {
-                    // generate prefixes if needed
-                    if (!queryLib.prefixDefined(prop.property.value, prefixes)) {
-                        prefixes = queryLib.addSmallestPrefix(prop.property.value, prefixes)
-                    }
-                    // the place to create or fetch a prefix if it does not exist, needed to make the path in defineGroup
-                    return queryLib.defineGroup(prop, queriedProps[prop.index], level, options)
-                })
-                .filter(prop => (prop.category !== 'ignore') && !checkExistingProps.includes(prop.property))
-            // push to the list
+                
             newCategorizedProps.push(...propsLists)
         }
         // save in mongo database
-        if (newCategorizedProps.length > 0) await pathModel.createOrUpdate(newCategorizedProps).catch(e => console.error('Error updating paths', e))
+        //if (newCategorizedProps.length > 0) await pathModel.createOrUpdate(newCategorizedProps).catch(e => console.error('Error updating paths', e))
     }
     //
     let propsWithStats = []
     if (props.length === 0 || constraints !== '') {
-        let statsQueries = newCategorizedProps.map(prop => {
-            let propQuery = queryLib.makePropQuery(prop, options, (props.length === 0))
-            return queryLib.getData(options.endpoint, propQuery, options.prefixes)
-        })
-        let stats = []
-        for (let i = 0; i < statsQueries.length; i += maxRequests) {
-            let elementsToSlice = (statsQueries.length - i < maxRequests) ? statsQueries.length - i : maxRequests
-            let statsList = await Promise.all(statsQueries.slice(i, elementsToSlice).map(ignorePromise))
-            stats.push(...statsList)
+        let typeStats = []
+        let countStats = []
+        for (let i = 0; i < newCategorizedProps.length; i += maxRequests) {
+            let elementsToSlice = (newCategorizedProps.length - i < maxRequests) ? newCategorizedProps.length - i : maxRequests
+            let temp = await Promise.all(newCategorizedProps
+                .slice(i, i + elementsToSlice)
+                .map(prop => {
+                    let propQuery = queryLib.makePropQuery(prop, options, 'count')
+                    // console.log('count ', propQuery)
+                    return queryLib.getData(options.endpoint, propQuery, options.prefixes)
+                })
+                .map(ignorePromise))
+            countStats.push(...temp)
+            if (props.length === 0) {
+                temp = await Promise.all(newCategorizedProps
+                    .slice(i, i + elementsToSlice)
+                    .map(prop => {
+                        let propQuery = queryLib.makePropQuery(prop, options, 'type')
+                        // console.log('type ', propQuery)
+                        return (props.length === 0) ? queryLib.getData(options.endpoint, propQuery, options.prefixes)
+                            : false
+                    })
+                    .map(ignorePromise))
+                typeStats.push(...temp)
+            }
         }
-        propsWithStats = queryLib.mergeStatsWithProps(newCategorizedProps, stats, totalInstances)
+        propsWithStats = queryLib.mergeStatsWithProps(newCategorizedProps, countStats, typeStats, totalInstances)
+        // console.log('|||||| stop tout bon')
+        propsWithStats = propsWithStats.map(prop => {
+            // the place to create or fetch a prefix if it does not exist, needed to make the path in defineGroup
+            return queryLib.defineGroup(prop, options)
+        })
+        let propsWithSample = []
+        for (let i = 0; i < propsWithStats.length; i += maxRequests) {            
+            let elementsToSlice = (propsWithStats.length - i < maxRequests) ? propsWithStats.length - i : maxRequests
+            let temp = await Promise.all(propsWithStats
+                .slice(i, i + elementsToSlice)
+                .map(async prop => {
+                    if (prop.category === 'datetime') {
+                        let sampleQuery = queryLib.makePropQuery(prop, options, 'dateformat')
+                       // console.log('dateformat', sampleQuery)
+                        return queryLib.getData(options.endpoint, sampleQuery, options.prefixes)
+                            .then(sampleData => {
+                                // console.log(sampleData )
+                                // console.log(']]', sampleData.results.bindings)
+                                if (sampleData && sampleData.results.bindings.length > 0) {
+                                    let countInvalid = 0
+                                    sampleData.results.bindings.forEach(element => {
+                                        let thedate = new Date(element.object.value)
+                                        if (thedate == 'Invalid Date') countInvalid++
+                                        // console.log(thedate == 'Invalid Date', element.object.value, thedate.getFullYear())
+                                    })
+                                    let category = (countInvalid > 5) ? 'text' : prop.category
+                                    return {
+                                        ...prop,
+                                        category
+                                    }
+                                } else {
+                                    return prop
+                                }
+                            })
+                    } else {
+                        return prop
+                    }
+                })
+                .map(ignorePromise))
+            propsWithSample.push(...temp)
+        }
+        propsWithStats = propsWithSample
+            .filter(prop => (prop && prop.category !== 'ignore'))
+
+        
         // save all stats, only if they are relative to the whole ensemble
         if (options.constraints === '') await pathModel.createOrUpdate(propsWithStats).catch(e => console.error('Error updating stats', e))
     } else {
@@ -199,7 +259,7 @@ const getPropsLevel = async (categorizedProps, level, options, instances) => {
         ...propsWithStats
     ]
     if (level < maxLevel && propsWithStats.length > 0) {
-        return getPropsLevel(returnProps, level + 1, options, instances)
+        return getProps(returnProps, level + 1, options, instances)
     } else {
         // discard uris when there are more specific paths
         returnProps = returnProps.filter(prop => {

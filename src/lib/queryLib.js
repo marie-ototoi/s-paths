@@ -20,6 +20,19 @@ const addSmallestPrefix = (url, prefixes) => {
     return prefixes
 }
 
+const analyseSampleData = (prop, data, options) => {
+    if (prop.category === 'datetime') {
+
+    } else if (prop.category === 'geo') {
+
+    }
+    //
+    if (prop.category === 'text') {
+
+    }
+    return prop
+}
+
 const createPrefix = (uri) => {
     return uri.replace(/([/:#_\-.]|purl|org|data|http|www)/g, (match, p1) => {
         if (p1) return ''
@@ -33,60 +46,59 @@ const convertPath = (fullPath, prefixes) => {
     })
 }
 
-const defineGroup = (prop, previousProp, level, options) => {
-    const { avgcharlength, property, datatype, isiri, isliteral, language } = prop
-    const { ignoreList, maxChar, prefixes } = options
-    const fullPath = `${previousProp.fullPath}/<${property.value}>/*`
-    const path = convertPath(fullPath, prefixes)
-    let returnprops = {}
-    let propName = getPropName(property.value)
+const defineGroup = (prop, options) => {
+    const { property, datatype, isiri, isliteral, language } = prop
+    const { ignoreList } = options
+    let propName = getPropName(property)
+    let type, category, subcategory
     // console.log('oye ', property.value, datatype)
-    if (isliteral && (isliteral.value === '1' || isliteral.value === 'true')) {
-        returnprops.type = 'literal'
-    } else if (isiri.value === '1' || isiri.value === 'true') {
-        returnprops.type = 'uri'
+    if (isliteral && (isliteral === '1' || isliteral === 'true')) {
+        type = 'literal'
+    } else if (isiri === '1' || isiri === 'true') {
+        type = 'uri'
     }
-    if (ignoreList.includes(property.value)) {
-        returnprops.category = 'ignore'
-    } else if (returnprops.type === 'uri') {
-        returnprops.category = 'uri'
-    } else if ((datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#date') ||
+    if (ignoreList.includes(property)) {
+        category = 'ignore'
+    } else if (type === 'uri') {
+        category = 'uri'
+    } else if ((datatype && datatype === 'http://www.w3.org/2001/XMLSchema#date') ||
         propName.match(/year|date|birthday/gi) ||
         propName.match(/(\/|#)(birth|death)$/gi)) {
-        returnprops.category = 'datetime'
+        category = 'datetime'
     } else if (propName.match(/latitude/gi) ||
         propName.match(/(\/|#)(lat)$/gi)) {
-        returnprops.category = 'geo'
-        returnprops.subcategory = 'latitude'
+        category = 'geo'
+        subcategory = 'latitude'
     } else if (propName.match(/longitude/gi) ||
         propName.match(/(\/|#)(long)$/gi)) {
-        returnprops.category = 'geo'
-        returnprops.subcategory = 'longitude'
+        category = 'geo'
+        subcategory = 'longitude'
     } else if (propName.match(/place|country|city/gi)) {
-        returnprops.category = 'geo'
-        returnprops.subcategory = 'name'
-    } else if (datatype && datatype.value === 'http://www.w3.org/2001/XMLSchema#integer') {
-        returnprops.category = 'number'
+        category = 'geo'
+        subcategory = 'name'
+    } else if (datatype && datatype === 'http://www.w3.org/2001/XMLSchema#integer') {
+        category = 'number'
     } else {
-        returnprops.category = 'text'
+        category = 'text'
     }
-    // console.log('????', propName, returnprops.category, returnprops.type)
-    if (language && language.value) returnprops.language = language.value
     return {
-        ...returnprops,
-        entrypoint: previousProp.entrypoint,
-        endpoint: options.endpoint,
-        property: property.value,
-        datatype: (datatype) ? datatype.value : '',
-        fullPath,
-        path,
-        level
+        ...prop,
+        category,
+        subcategory,
+        type,
+        language
     }
 }
 
-const FSL2SPARQL = (FSLpath, propName = 'prop1', entrypointName = 'entrypoint', entrypointType = true, optional = false, hierarchical = null) => {
+const FSL2SPARQL = (FSLpath, options) => {
+    let { propName, entrypointName, entrypointType, optional, hierarchical, sample, graph } = options
     let pathParts = FSLpath.split('/')
-    let query = (entrypointType) ? `?${entrypointName} rdf:type ${pathParts[0]} . ` : ``
+    let query = ``
+    if (entrypointType) {
+        let graphDef = graph ? `FROM <${graph}> ` : ``
+        let entryDef = sample ? `{ SELECT ?${entrypointName} ${graphDef}WHERE { ?${entrypointName} rdf:type ${pathParts[0]} . } LIMIT ${sample} } . ` : `?${entrypointName} rdf:type ${pathParts[0]} . `
+        query = query.concat(entryDef)
+    }
     let levels = Math.floor(pathParts.length / 2)
     for (let index = 1; index < pathParts.length; index += 2) {
         let predicate = pathParts[index]
@@ -147,35 +159,86 @@ const ignorePromise = (promise) => {
     })
 }
 
-const makePropQuery = (prop, options, firstTimeQuery) => {
+const makePath = (prop, previousProp, level, options) => {
+    const { property } = prop
+    const { prefixes } = options
+    const fullPath = `${previousProp.fullPath}/<${property.value}>/*`
+    const path = convertPath(fullPath, prefixes)
+    return {
+        entrypoint: previousProp.entrypoint,
+        endpoint: options.endpoint,
+        property: property.value,
+        fullPath,
+        path,
+        level
+    }
+}
+
+const makePropQuery = (prop, options, queryType) => {
+    // queryType: count, type, char
     const { constraints, defaultGraph } = options
     const { path } = prop
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
-    const avgchar = (prop.category === 'text' && firstTimeQuery) ? `(AVG(?charlength) as ?avgcharlength) ` : ``
-    const char = (prop.category === 'text' && firstTimeQuery) ? `BIND(STRLEN(?object) AS ?charlength)` : ``
-    return `SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) ${avgchar}(COUNT(DISTINCT ?entrypoint) AS ?coverage) ${graph}
+    let props
+    let bindProps
+    let propsPath
+    if (queryType === 'type') {
+        props = `DISTINCT ?datatype ?language ?isiri ?isliteral (AVG(?charlength) as ?avgcharlength) `
+        bindProps = `BIND(DATATYPE(?object) AS ?datatype) .
+        BIND(ISIRI(?object) AS ?isiri) .
+        BIND(ISLITERAL(?object) AS ?isliteral) .
+        BIND(LANG(?object) AS ?language) .
+        BIND(STRLEN(xsd:string(?object)) AS ?charlength) .`
+        propsPath = FSL2SPARQL(path, {
+            propName: 'object',
+            entrypointName: 'entrypoint',
+            entrypointType: true,
+            sample: 100,
+            graph: defaultGraph
+        })
+    } else if (queryType === 'count') {
+        props = `(COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) (COUNT(DISTINCT ?entrypoint) AS ?coverage) `
+        bindProps = ``
+        propsPath = FSL2SPARQL(path, {
+            propName: 'object',
+            entrypointName: 'entrypoint',
+            entrypointType: true
+        })
+    } else if (queryType === 'dateformat') {
+        props = `DISTINCT ?object `
+        bindProps = ``
+        propsPath = FSL2SPARQL(path, {
+            propName: 'object',
+            entrypointName: 'entrypoint',
+            entrypointType: true,
+            sample: 30,
+            graph: defaultGraph
+        })
+    }
+    return `SELECT ${props}${graph}
 WHERE {
 ${constraints}
-${FSL2SPARQL(path, 'object')} 
-${char}
+${propsPath}
+${bindProps}
 }`
 }
 
 const makePropsQuery = (entitiesClass, options, level) => {
     // this is valid only for first level
     const { constraints, defaultGraph } = options
-    const pathQuery = FSL2SPARQL(entitiesClass, 'interobject', 'subject')
+    const pathQuery = FSL2SPARQL(entitiesClass, {
+        propName: 'interobject', 
+        entrypointName: 'subject',
+        entrypointType: true,
+        sample: 100,
+        graph: defaultGraph
+    })
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     const subject = (level === 1) ? '?subject' : '?interobject'
-    return `SELECT DISTINCT ?property ?datatype ?language ?isiri ?isliteral ${graph}WHERE {
+    return `SELECT DISTINCT ?property ${graph}WHERE {
         ${pathQuery}${constraints}
         ${subject} ?property ?object .
-        OPTIONAL { ?property rdfs:label ?propertylabel } .
-        BIND(DATATYPE(?object) AS ?datatype) .
-        BIND(ISIRI(?object) AS ?isiri) .
-        BIND(ISLITERAL(?object) AS ?isliteral) .
-        BIND(LANG(?object) AS ?language) .
-    } GROUP BY ?property ?datatype ?language ?isiri ?isliteral`
+    } GROUP BY ?property`
     /* for (let index = 1; index <= levels; index ++) {
         let subject
     } */
@@ -209,7 +272,13 @@ const makeSelectionConstraints = (selections, selectedConfig, zone) => {
         return '(' + sel.query.value.map((constraint, iC) => {
             const propName = 'contraint' + constraint.propName
             console.log(constraint.category, constraint.subcategory)
-            if (iS === 0) paths += FSL2SPARQL(selectedConfig.properties[iC].path, propName)
+            if (iS === 0) {
+                paths += FSL2SPARQL(selectedConfig.properties[iC].path, {
+                    propName,
+                    entrypointName: 'entrypoint',
+                    entrypointType: true
+                })
+            }
             if (constraint.category === 'datetime') {
                 const conditions = constraint.value.map((r, iR) => {
                     const cast = (selectedConfig.properties[iC].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? `xsd:date("${r}-${(iR === 0) ? '01-01' : '12-31'}")` : `xsd:integer("${r}")`
@@ -229,7 +298,7 @@ const makeSelectionConstraints = (selections, selectedConfig, zone) => {
 
 // to do : take constraints into account
 const makeQuery = (entrypoint, configZone, zone, options) => {
-    const { defaultGraph, constraints, prop1only } = options
+    const { defaultGraph, constraints, limit, prop1only } = options
     // console.log(configZone)
     let selectedConfig = configLib.getSelectedConfig(configZone, zone)
     // console.log(selectedConfig)
@@ -257,7 +326,13 @@ const makeQuery = (entrypoint, configZone, zone, options) => {
         groupList = groupList.concat(`?prop${index} `)
         if (hierarchical) groupList = groupList.concat(`?directlink `)
         const optional = configZone.constraints[index - 1] && configZone.constraints[index - 1][0].optional
-        defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`, 'entrypoint', (index === 1), optional, hierarchical))
+        defList = defList.concat(FSL2SPARQL(prop.path, {
+            propName: `prop${index}`, 
+            entrypointName: 'entrypoint',
+            entrypointType: (index === 1),
+            optional,
+            hierarchical
+        }))
     })
     return `SELECT DISTINCT ${propList}${graph}
 WHERE {
@@ -307,7 +382,12 @@ const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
             }
             groupList = groupList.concat(`?prop${index} `)
             const optional = config.constraints[index - 1] && config.constraints[index - 1][0].optional
-            defList = defList.concat(FSL2SPARQL(prop.path, `prop${index}`, 'entrypoint', (index === 1), optional))
+            defList = defList.concat(FSL2SPARQL(prop.path, {
+                propName: `prop${index}`,
+                entrypointName: 'entrypoint',
+                entrypointType: (index === 1),
+                optional
+            }))
         }
     })
     //
@@ -325,7 +405,12 @@ const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
                 orderList = orderList.concat(`?newcountprop${index} `)
             }
             groupList = groupList.concat(`?newprop${index} `)
-            newdefList = newdefList.concat(FSL2SPARQL(prop.path, `newprop${index}`, 'entrypoint', (index === 1), false))
+            newdefList = newdefList.concat(FSL2SPARQL(prop.path, {
+                propName: `newprop${index}`,
+                entrypointName: 'entrypoint',
+                entrypointType: (index === 1),
+                optional: false
+            }))
         }
     })
     return `SELECT DISTINCT ${propList}${graph}
@@ -340,17 +425,27 @@ const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
     ORDER BY ${orderList}`
 }
 
-const mergeStatsWithProps = (props, stats, totalEntities) => {
+const mergeStatsWithProps = (props, countStats, typeStats, totalEntities) => {
     return props.map((prop, index) => {
-        if (stats[index]) {
-            let returnprops = { ...prop }
-            let stat = stats[index]
-            if (prop.category === 'text' && stat.results.bindings[0].avgcharlength) returnprops.avgcharlength = Math.floor(Number(stat.results.bindings[0].avgcharlength.value))
+        if (countStats[index] && countStats[index].results.bindings[0]) {
+            let countStat = countStats[index].results.bindings[0]
+            let typeStat = typeStats[index] ? typeStats[index].results.bindings[0] : null
+            let countProps = {
+                total: Number(countStat.total.value),
+                unique: Number(countStat.unique.value),
+                coverage: Number(countStat.coverage.value) * 100 / totalEntities
+            }
+            let typeProps = (typeStat) ? {
+                datatype: typeStat.datatype ? typeStat.datatype.value : ``,
+                language: typeStat.language ? typeStat.language.value : ``,
+                isiri: typeStat.isiri.value,
+                isliteral: typeStat.isliteral.value,
+                avgcharlength: Math.floor(Number(typeStat.avgcharlength.value))
+            } : {}
             return {
-                ...returnprops,
-                total: Number(stat.results.bindings[0].total.value),
-                unique: Number(stat.results.bindings[0].unique.value),
-                coverage: Number(stat.results.bindings[0].coverage.value) * 100 / totalEntities
+                ...prop,
+                ...countProps,
+                ...typeProps
             }
         } else {
             return prop
@@ -402,6 +497,7 @@ exports.ignorePromise = ignorePromise
 exports.makeQuery = makeQuery
 exports.makeQueryFromConstraint = makeQueryFromConstraint
 exports.makeQueryResources = makeQueryResources
+exports.makePath = makePath
 exports.makePropQuery = makePropQuery
 exports.makePropsQuery = makePropsQuery
 exports.makeSelectionConstraints = makeSelectionConstraints

@@ -2,21 +2,28 @@ import mongoose from 'mongoose'
 
 const pathSchema = new mongoose.Schema({
     fullPath: { type: String, required: true },
-    property: { type: String, required: true },
-    category: { type: String, required: true },
-    subcategory: { type: String },
-    datatype: { type: String, required: true },
-    type: { type: String, required: true },
-    entrypoint: { type: String, required: true },
+    
     endpoint: { type: String, required: true },
-    level: { type: Number, required: true },
-    interlinks: [],
-    total: Number,
-    unique: Number,
-    coverage: Number,
-    avgcharlength: Number,
+    //
+    //  
     createdAt: Date,
-    modifiedAt: Date
+    //
+    entrypoint: { type: String, required: true },
+    level: { type: Number, required: true },
+    property: { type: String, required: true },
+    //
+    // 
+    modifiedAt: Date,
+    //
+    avgcharlength: Number,
+    category: { type: String, required: true },
+    coverage: Number,
+    datatype: { type: String, required: true },
+    interlinks: [],
+    subcategory: { type: String },
+    total: Number,
+    type: { type: String, required: true },
+    unique: Number    
 })
 
 pathSchema.statics = {
@@ -25,27 +32,27 @@ pathSchema.statics = {
             return this.update(
                 {
                     fullPath: prop.fullPath,
-                    entrypoint: prop.entrypoint,
                     endpoint: prop.endpoint
                 },
                 {
                     $set: {
-                        category: prop.category,
-                        subcategory: prop.subcategory || null,
-                        type: prop.type,
-                        total: prop.total || null,
-                        unique: prop.unique || null,
-                        coverage: prop.coverage || null,
                         avgcharlength: prop.avgcharlength || null,
-                        modifiedAt: Date.now()
+                        category: prop.category,
+                        coverage: prop.coverage || null,
+                        datatype: prop.datatype,
+                        total: prop.total || null,
+                        type: prop.type,
+                        unique: prop.unique || null,
+                        modifiedAt: Date.now(),
+                        subcategory: prop.subcategory || null
                     },
                     $setOnInsert: {
                         createdAt: Date.now(),
-                        property: prop.property,
-                        endpoint: prop.endpoint,
-                        fullPath: prop.fullPath,
-                        datatype: prop.datatype,
-                        level: prop.level
+                        /*endpoint: prop.endpoint,
+                        fullPath: prop.fullPath,*/
+                        entrypoint: prop.entrypoint,
+                        level: prop.level,
+                        property: prop.property
                     }
                 },
                 { upsert: true }

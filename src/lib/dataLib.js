@@ -1,6 +1,5 @@
 import * as d3 from 'd3'
 import { nest } from 'd3'
-import moment from 'moment'
 import shallowEqual from 'shallowequal'
 
 const areLoaded = (data, zone, status) => {
@@ -322,6 +321,7 @@ const deduplicate = (data, props) => {
         let alreadyInIndex = null
         acc.forEach((dt, index) => {
             let conditions = props.map(prop => {
+                console.log(prop, cur[prop], dt[prop])
                 return cur[prop].value === dt[prop].value
             })
             if (!conditions.includes(false)) alreadyInIndex = index
@@ -441,23 +441,25 @@ const sortData = (data, sortOn, sortOrder) => {
 
 const nestDataLevel = (data, props, parent) => {
     let index = parent ? 1 : 0
-    let { forceGroup, format, category, max, propName, sortKey, sortKeyOrder, sortValues, sortValuesOrder } = props[index]
-    // console.log(data, propName, format, max)
+    let { forceGroup, category, max, propName, sortKey, sortKeyOrder, sortValues, sortValuesOrder } = props[index]
+    // console.log(data, propName, max)
     let nestedData
     let additionalValue
     if (category === 'datetime') {
         let group
         let dataToNest = data.map(d => {
-            let dateProp = moment(d[propName].value, format)
-            if (!dateProp.isValid()) throw new Error('Cannot use time format')
+            let dateProp = new Date(d[propName].value)
+            if (dateProp == 'Invalid Date') return false
             return {
                 ...d,
                 dateProp,
-                year: dateProp.format('Y'),
-                decade: Math.floor(Number(dateProp.format('Y')) / 10) * 10,
-                century: Math.floor(Number(dateProp.format('Y')) / 100) * 100
+                year: dateProp.getFullYear(),
+                decade: Math.floor(Number(dateProp.getFullYear()) / 10) * 10,
+                century: Math.floor(Number(dateProp.getFullYear()) / 100) * 100
             }
-        }).sort((a, b) => a.year - b.year)
+        })
+            .filter(prop => prop !== false)
+            .sort((a, b) => a.year - b.year)
 
         let yearNest = d3.nest().key(prop => prop.year).entries(dataToNest)
         let yearNumber = Number(yearNest[yearNest.length - 1].key) - Number(yearNest[0].key)
