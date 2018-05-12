@@ -145,7 +145,7 @@ const defineConfigs = (views, stats) => {
             })
             let validgeo = (geo.length === 0 || (geo.length === 1 && geo[0] === 'name') || (geo[0] === 'latitude' && geo[1] === 'longitude') )
             let unique = new Set(match.map(m => m.property))
-            return !missingProp && unique.size === match.length && validgeo
+            return !missingProp && unique.size === match.length && validgeo && match.length === view.constraints.length
         })
         // if the view is supposed to display each entity
         let entrypointFactor = 1
