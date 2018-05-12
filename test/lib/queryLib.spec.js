@@ -7,17 +7,21 @@ chai.use(sinonChai)
 
 describe('lib/queryLib', () => {
     it('should write query to get stats', () => {
-        expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*' }, { constraints: '' })).to.equal(`SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) (COUNT(DISTINCT ?entrypoint) AS ?coverage) 
+        expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*' }, { constraints: '' }, 'count')).to.equal(`SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) (COUNT(DISTINCT ?entrypoint) AS ?coverage) 
 WHERE {
 
-?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object .  
+?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object . 
 
 }`)
-        expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*', category: 'text' }, { constraints: '', defaultGraph: 'http://localhost:8890/nobel' }, true)).to.equal(`SELECT (COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) (AVG(?charlength) as ?avgcharlength) (COUNT(DISTINCT ?entrypoint) AS ?coverage) FROM <http://localhost:8890/nobel> 
+        expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*', category: 'text' }, { constraints: '', defaultGraph: 'http://localhost:8890/nobel' }, 'type')).to.equal(`SELECT DISTINCT ?datatype ?language ?isiri ?isliteral (AVG(?charlength) as ?avgcharlength) FROM <http://localhost:8890/nobel> 
 WHERE {
 
-?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object .  
-BIND(STRLEN(?object) AS ?charlength)
+{ SELECT ?entrypoint FROM <http://localhost:8890/nobel> WHERE { ?entrypoint rdf:type nobel:LaureateAward . } LIMIT 100 } . ?entrypoint nobel:year ?object . 
+BIND(DATATYPE(?object) AS ?datatype) .
+        BIND(ISIRI(?object) AS ?isiri) .
+        BIND(ISLITERAL(?object) AS ?isliteral) .
+        BIND(LANG(?object) AS ?language) .
+        BIND(STRLEN(xsd:string(?object)) AS ?charlength) .
 }`)
     })
     it('should write query to get total number of entities', () => {
@@ -27,9 +31,21 @@ WHERE {
 }`)
     })
     it('should transform a FSL path into SPARQL', () => {
-        expect(queryLib.FSL2SPARQL('nobel:LaureateAward/nobel:year/*', 'prop1', 'entrypoint')).to.equal('?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . ')
-        expect(queryLib.FSL2SPARQL('nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*', 'prop2', 'entrypoint')).to.equal('?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . ')
-        expect(queryLib.FSL2SPARQL('nobel:LaureateAward', 'object', 'entrypoint')).to.equal('?entrypoint rdf:type nobel:LaureateAward . ')
+        expect(queryLib.FSL2SPARQL('nobel:LaureateAward/nobel:year/*', {
+            propName: 'prop1',
+            entrypointName: 'entrypoint',
+            entrypointType: true
+        })).to.equal('?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . ')
+        expect(queryLib.FSL2SPARQL('nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*', {
+            propName: 'prop2',
+            entrypointName: 'entrypoint',
+            entrypointType: true
+        })).to.equal('?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . ?prop2inter1 foaf:gender ?prop2 . ')
+        expect(queryLib.FSL2SPARQL('nobel:LaureateAward', {
+            propName: 'object',
+            entrypointName: 'entrypoint',
+            entrypointType: true
+        })).to.equal('?entrypoint rdf:type nobel:LaureateAward . ')
     })
     it('should make a valid SPARQL query to retrieve data for a specific config', () => {
         const config1 = {
@@ -100,25 +116,15 @@ WHERE {
     })
     it('should make a valid SPARQL to get stats for a prop', () => {
         expect(queryLib.makePropsQuery('nobel:LaureateAward', { constraints: '' }, 1))
-            .to.equal(`SELECT DISTINCT ?property ?datatype ?language ?isiri ?isliteral WHERE {
-        ?subject rdf:type nobel:LaureateAward . 
+            .to.equal(`SELECT DISTINCT ?property WHERE {
+        { SELECT ?subject WHERE { ?subject rdf:type nobel:LaureateAward . } LIMIT 100 } . 
         ?subject ?property ?object .
-        OPTIONAL { ?property rdfs:label ?propertylabel } .
-        BIND(DATATYPE(?object) AS ?datatype) .
-        BIND(ISIRI(?object) AS ?isiri) .
-        BIND(ISLITERAL(?object) AS ?isliteral) .
-        BIND(LANG(?object) AS ?language) .
-    } GROUP BY ?property ?datatype ?language ?isiri ?isliteral`)
+    } GROUP BY ?property`)
         expect(queryLib.makePropsQuery('nobel:LaureateAward/nobel:university/*', { constraints: '', defaultGraph: 'http://localhost:8890/nobel' }, 2))
-            .to.equal(`SELECT DISTINCT ?property ?datatype ?language ?isiri ?isliteral FROM <http://localhost:8890/nobel> WHERE {
-        ?subject rdf:type nobel:LaureateAward . ?subject nobel:university ?interobject . 
+            .to.equal(`SELECT DISTINCT ?property FROM <http://localhost:8890/nobel> WHERE {
+        { SELECT ?subject FROM <http://localhost:8890/nobel> WHERE { ?subject rdf:type nobel:LaureateAward . } LIMIT 100 } . ?subject nobel:university ?interobject . 
         ?interobject ?property ?object .
-        OPTIONAL { ?property rdfs:label ?propertylabel } .
-        BIND(DATATYPE(?object) AS ?datatype) .
-        BIND(ISIRI(?object) AS ?isiri) .
-        BIND(ISLITERAL(?object) AS ?isliteral) .
-        BIND(LANG(?object) AS ?language) .
-    } GROUP BY ?property ?datatype ?language ?isiri ?isliteral`)
+    } GROUP BY ?property`)
     })
     it('should affect a prop to the right group', () => {
         const options = {
@@ -129,30 +135,19 @@ WHERE {
             ignoreList: [],
             endpoint: 'http://localhost:8890/sparql'
         }
-        const prevProp = {
-            fullPath: '<http://data.nobelprize.org/terms/LaureateAward>',
-            entrypoint: 'nobel:LaureateAward'
-        }
         const stat = {
-            property: { type: 'uri', value: 'http://purl.org/dc/terms/isPartOf' },
-            type: { type: 'uri', value: 'http://dbpedia.org/ontology/Award' },
-            isiri: {
-                type: 'literal',
-                datatype: 'http://www.w3.org/2001/XMLSchema#boolean',
-                value: 'true'
-            }
+            property: 'http://purl.org/dc/terms/isPartOf',
+            type: 'http://dbpedia.org/ontology/Award',
+            isiri: 'true'
         }
-        expect(queryLib.defineGroup(stat, prevProp, 1, options))
+        expect(queryLib.defineGroup(stat, options))
             .to.deep.equal({
-                property: stat.property.value,
-                category: 'text',
+                property: stat.property,
+                category: 'uri',
+                subcategory: undefined,
                 type: 'uri',
-                datatype: '',
-                endpoint: 'http://localhost:8890/sparql',
-                entrypoint: 'nobel:LaureateAward',
-                path: 'nobel:LaureateAward/dct:isPartOf/*',
-                level: 1,
-                fullPath: '<http://data.nobelprize.org/terms/LaureateAward>/<http://purl.org/dc/terms/isPartOf>/*'
+                isiri: 'true',
+                language: undefined
             })
     })
     it('should replace the beginning of a url with a prefix', () => {

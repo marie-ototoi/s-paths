@@ -104,9 +104,9 @@ describe('lib/data', () => {
         expect(data.getHeadings(dataSet1, 'aside', 'active')).to.deep.equal([])
     })
     it('should return a nested set of data', () => {
-        let groupA = data.nestData(dataSet2, [{ propName: 'prop1', category: 'datetime', format: 'Y', max: 50 }, { propName: 'prop2', category: 'text' }])
-        let groupB = data.nestData(dataSet2, [{ propName: 'prop1', category: 'datetime', format: 'Y', forceGroup: 'decade' }])
-        let groupC = data.nestData(dataSet2, [{ propName: 'prop1', category: 'datetime', format: 'Y', forceGroup: 'year' }])
+        let groupA = data.nestData(dataSet2, [{ propName: 'prop1', category: 'datetime', max: 50 }, { propName: 'prop2', category: 'text' }])
+        let groupB = data.nestData(dataSet2, [{ propName: 'prop1', category: 'datetime', forceGroup: 'decade' }])
+        let groupC = data.nestData(dataSet2, [{ propName: 'prop1', category: 'datetime', forceGroup: 'year' }])
         expect(groupA.map(group => group.key)).to.deep.equal(['-200', '700', '1300', '1400', '1500', 1600])
         expect(groupB.map(group => group.key)).to.deep.equal(['-110', '740', '1300', '1330', '1360', '1400', '1460', '1500', '1510', '1530', '1540', '1550', '1560', 1570])
         expect(groupC.map(group => group.key)).to.deep.equal(['-106', '742', '1304', '1331', '1363', '1401', '1466', '1469', '1501', '1503', '1518', '1519', '1533', '1541', '1547', '1551', '1555', '1561', '1564', 1565])
