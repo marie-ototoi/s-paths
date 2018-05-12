@@ -64,7 +64,6 @@ class HeatMap extends React.Component {
             nestedCoverage1 = nestData(coverage, [{
                 propName: 'prop1',
                 category: config.matches[0].properties[0].category,
-                format: config.matches[0].properties[0].format || 'YYYY-MM-DD',
                 max: 50
             }])
             this.props.setUnitDimensions({ nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
@@ -75,7 +74,6 @@ class HeatMap extends React.Component {
         let nestedProp1 = nestData(deduplicate(data, ['prop1', 'prop2']), [{
             propName: 'prop1',
             category: categoryProp1,
-            format: selectedConfig.properties[0].format || 'YYYY-MM-DD',
             max: 50,
             forceGroup: nestedCoverage1[0].group
         }, { propName: 'prop2', category: 'text' }])

@@ -62,20 +62,17 @@ class Timeline extends React.PureComponent {
             display.unitDimensions[zone][role].nestedCoverage1) {
             nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
         } else {
-            coverageFormatProp1 = config.matches[0].properties[0].format || 'YYYY-MM-DD'
-            //nestedCoverage1 = groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', { format: coverageFormatProp1, max: 50 })
-            nestedCoverage1 = nestData(deduplicate(data, ['entrypoint']), [{ propName: 'prop1', category: 'datetime', format: coverageFormatProp1, max: 50 }])
+            //nestedCoverage1 = groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', { max: 50 })
+            nestedCoverage1 = nestData(deduplicate(data, ['entrypoint']), [{ propName: 'prop1', category: 'datetime', max: 50 }])
             maxUnitsPerYear = 1
             nestedCoverage1.forEach(d => {
                 if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
             })
             this.props.setUnitDimensions({ maxUnitsPerYear, nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
         }
-        const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD'
         const nestedProp1 = nestData(deduplicate(data, ['entrypoint']), [{
             propName: 'prop1',
             category: 'datetime',
-            format: formatProp1,
             max: 50,
             forceGroup: nestedCoverage1[0].group,
             sortValues: 'prop2',
@@ -83,7 +80,6 @@ class Timeline extends React.PureComponent {
         }])
         /*
         groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', {
-            format: formatProp1,
             max: 50,
             forceGroup: nestedCoverage1[0].group
         })
