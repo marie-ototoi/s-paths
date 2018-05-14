@@ -6,7 +6,7 @@ const initialState = {
     defaultGraph: 'http://localhost:8890/data10', // 'urn:piaaf:siaf', // null, // ,
     constraints: '', // '?entrypoint <http://data.nobelprize.org/terms/year> ?year . filter (?year > 1980)',
     forceUpdate: false,
-    maxLevel: 5,
+    maxLevel: 4,
     resources: [],
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',
@@ -41,7 +41,7 @@ const initialState = {
         ore: 'http://www.openarchives.org/ore/terms/',
         rdagroup1elements: 'http://rdvocab.info/Elements/',
         rdagroup2elements: 'http://rdvocab.info/ElementsGr2/',
-        rdarelationships: 'http://rdvocab.info/RDARelationshipsWEMI',
+        rdarelationships: 'http://rdvocab.info/RDARelationshipsWEMI/',
         schemaorg: 'http://schema.org/',
         blt: 'http://www.bl.uk/schemas/bibliographic/blterms#', // t-mus
         event: 'http://purl.org/NET/c4dm/event.owl#',

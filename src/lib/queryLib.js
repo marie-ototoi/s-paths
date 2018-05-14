@@ -2,7 +2,7 @@
 // import moment from 'moment'
 import { SparqlClient } from 'sparql-client-2'
 import configLib from './configLib'
-import { select } from '../actions/selectionActions';
+import { select } from '../actions/selectionActions'
 
 const addSmallestPrefix = (url, prefixes) => {
     const root = getRoot(url)
@@ -18,19 +18,6 @@ const addSmallestPrefix = (url, prefixes) => {
     let prefix = checkRoot(5)
     prefixes[prefix] = root
     return prefixes
-}
-
-const analyseSampleData = (prop, data, options) => {
-    if (prop.category === 'datetime') {
-
-    } else if (prop.category === 'geo') {
-
-    }
-    //
-    if (prop.category === 'text') {
-
-    }
-    return prop
 }
 
 const createPrefix = (uri) => {
@@ -238,7 +225,7 @@ const makePropsQuery = (entitiesClass, options, level) => {
     return `SELECT DISTINCT ?property ${graph}WHERE {
         ${pathQuery}${constraints}
         ${subject} ?property ?object .
-    } GROUP BY ?property`
+    } GROUP BY ?property ?object`
     /* for (let index = 1; index <= levels; index ++) {
         let subject
     } */
