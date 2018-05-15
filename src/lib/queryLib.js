@@ -78,12 +78,12 @@ const defineGroup = (prop, options) => {
 }
 
 const FSL2SPARQL = (FSLpath, options) => {
-    let { propName, entrypointName, entrypointType, optional, hierarchical, sample, graph } = options
+    let { constraints, entrypointName, entrypointType, graph, hierarchical, optional, propName, sample } = options
     let pathParts = FSLpath.split('/')
     let query = ``
     if (entrypointType) {
         let graphDef = graph ? `FROM <${graph}> ` : ``
-        let entryDef = sample ? `{ SELECT ?${entrypointName} ${graphDef}WHERE { ?${entrypointName} rdf:type ${pathParts[0]} . } LIMIT ${sample} } . ` : `?${entrypointName} rdf:type ${pathParts[0]} . `
+        let entryDef = sample ? `{ SELECT ?${entrypointName} ${graphDef}WHERE { ?${entrypointName} rdf:type ${pathParts[0]} . ${constraints || ``}} LIMIT ${sample} } . ` : `?${entrypointName} rdf:type ${pathParts[0]} . `
         query = query.concat(entryDef)
     }
     let levels = Math.floor(pathParts.length / 2)
@@ -218,7 +218,8 @@ const makePropsQuery = (entitiesClass, options, level) => {
         entrypointName: 'subject',
         entrypointType: true,
         sample: 100,
-        graph: defaultGraph
+        graph: defaultGraph,
+        constraints
     })
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     const subject = (level === 1) ? '?subject' : '?interobject'
@@ -234,6 +235,7 @@ const makePropsQuery = (entitiesClass, options, level) => {
 const makeQueryFromConstraint = (constraint) => {
     const { category, group, propName, value } = constraint
     if (category === 'datetime') {
+        // console.log(value, Number(value))
         const startValue = Number(value)
         if (group === 'century') {
             return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${(startValue + 99)}-12-31")) . `
@@ -258,7 +260,7 @@ const makeSelectionConstraints = (selections, selectedConfig, zone) => {
     const setConstraints = setSelection.map((sel, iS) => {
         return '(' + sel.query.value.map((constraint, iC) => {
             const propName = 'contraint' + constraint.propName
-            console.log(constraint.category, constraint.subcategory)
+            // console.log(constraint.category, constraint.subcategory)
             if (iS === 0) {
                 paths += FSL2SPARQL(selectedConfig.properties[iC].path, {
                     propName,
@@ -268,18 +270,19 @@ const makeSelectionConstraints = (selections, selectedConfig, zone) => {
             }
             if (constraint.category === 'datetime') {
                 const conditions = constraint.value.map((r, iR) => {
-                    const cast = (selectedConfig.properties[iC].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? `xsd:date("${r}-${(iR === 0) ? '01-01' : '12-31'}")` : `xsd:integer("${r}")`
-                    return `?${propName} ${(iR === 0) ? '>=' : '<='} ${cast}`
+                    const theDate = new Date(r, (iR === 0) ? 0 : 11, (iR === 0) ? 1 : 31)
+                    return `xsd:date(?${propName}) ${(iR === 0) ? '>=' : '<='} xsd:date('${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}')`
                 }).join(' && ')
                 return `(${conditions})`
             } else if (constraint.category === 'text' || constraint.category === 'uri' || (constraint.category === 'geo' && constraint.subcategory === 'name')) {
-                return ` regex(?${propName}, '^${constraint.value}$', 'i')`
+                return ` regex(?${propName}, '^${constraint.value.replace(`'`, `\\'`)}$', 'i')`
             }
         }).join(' && ') + ')'
     }).join(' || ')
     let totalQuery = ''
     if (uriRegex !== '') totalQuery += `FILTER regex(?entrypoint, '^${uriRegex}$', 'i') .`
     if (setConstraints !== '') totalQuery += `${paths} FILTER (${setConstraints}) . `
+    // console.log(totalQuery)
     return totalQuery
 }
 

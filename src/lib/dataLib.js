@@ -321,7 +321,7 @@ const deduplicate = (data, props) => {
         let alreadyInIndex = null
         acc.forEach((dt, index) => {
             let conditions = props.map(prop => {
-                console.log(prop, cur[prop], dt[prop])
+                // console.log(prop, cur[prop], dt[prop])
                 return cur[prop].value === dt[prop].value
             })
             if (!conditions.includes(false)) alreadyInIndex = index
@@ -418,7 +418,7 @@ const nestData = (data, props) => {
         dataToNest = dataToNest.map(group => {
             return {
                 ...group,
-                values: (group.values.length > 0) ? nestDataLevel(group.values, props, group.key) : []
+                values: (group.values.length > 0) ? nestDataLevel(group.values, props, group) : []
             }
         })
     }
@@ -445,8 +445,8 @@ const nestDataLevel = (data, props, parent) => {
     // console.log(data, propName, max)
     let nestedData
     let additionalValue
+    let group
     if (category === 'datetime') {
-        let group
         let dataToNest = data.map(d => {
             let dateProp = new Date(d[propName].value)
             if (dateProp == 'Invalid Date') return false
@@ -454,8 +454,8 @@ const nestDataLevel = (data, props, parent) => {
                 ...d,
                 dateProp,
                 year: dateProp.getFullYear(),
-                decade: Math.floor(Number(dateProp.getFullYear()) / 10) * 10,
-                century: Math.floor(Number(dateProp.getFullYear()) / 100) * 100
+                decade: Math.floor((dateProp.getFullYear()) / 10) * 10,
+                century: Math.floor((dateProp.getFullYear()) / 100) * 100
             }
         })
             .filter(prop => prop !== false)
@@ -483,6 +483,7 @@ const nestDataLevel = (data, props, parent) => {
         nestedData = nest.map(keygroup => {
             let yearStart = Number(keygroup.key)
             let range = getDateRange(yearStart, group)
+            // console.log(yearStart, range)
             return {
                 ...keygroup,
                 group,
@@ -499,7 +500,8 @@ const nestDataLevel = (data, props, parent) => {
     } else {
         nestedData = nestedData.map(elt => {
             elt['count' + propName] = 0
-            elt.parent = parent
+            elt.parent = parent.key
+            elt.range = parent.range
             elt.values = elt.values.map(groupElt => {
                 groupElt.key = groupElt[propName].value
                 groupElt.parent = { key: elt.key }

@@ -47,7 +47,7 @@ const draw = (el, props) => {
     d3.select(el)
         .selectAll('g.xUnits g.yUnits')
         .each((d, i) => {
-            // console.log(legend, d)
+            // console.log(d.range)
             let filteredLegend = legend.info.filter(p => {
                 return (p.key[0] <= Number(d.countprop2) && p.key[1] >= Number(d.countprop2)) ||
                     (d.countprop2.value && p.key[0] <= Number(d.countprop2.value) && p.key[1] >= Number(d.countprop2.value))
@@ -60,7 +60,8 @@ const draw = (el, props) => {
                     type: 'set',
                     value: [{
                         category: selectedConfig.properties[0].category,
-                        value: (selectedConfig.properties[0].category === 'datetime') ? dataLib.getDateRange(d.values[0].prop1.value, nestedProp1[0].group) : d.values[0].prop1.value,
+                        group: d.values[0].group,
+                        value: (selectedConfig.properties[0].category === 'datetime') ? d.range : d.values[0].prop1.value,
                         propName: 'prop1'
                     }, {
                         category: selectedConfig.properties[1].category,
@@ -190,7 +191,8 @@ const resize = (el, props) => {
         .each(d => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
-    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedCoverage1, category))
+    let unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedCoverage1, category))
+    if (unitWidth < 1) unitWidth = 1
     const unitHeight = Math.round(display.viz.useful_height / (props.nestedProp2.length - 1))
     // todo : s'il n'y a pas de unitHeigth sauvé pour cette config on recalcule
     d3.select(el).selectAll('g.xUnits').selectAll('.yUnits')
