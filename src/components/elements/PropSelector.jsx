@@ -21,7 +21,7 @@ class PropSelector extends React.PureComponent {
         })
         let requestedProp = propList[e.target.value]
         if (this.props.type === 'header') {
-            this.props.loadData({ ...dataset, entrypoint: requestedProp.path, totalInstances: requestedProp.total }, views, configs, {})
+            this.props.loadData({ ...dataset, entrypoint: requestedProp.path, totalInstances: requestedProp.total, constraints: `` }, views, configs, {})
         } else {
             this.props.selectProperty(propIndex, requestedProp.path, config, dataset, zone)
         }
