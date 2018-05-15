@@ -34,11 +34,11 @@ const getResources = (options) => {
 }
 
 const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
-    console.log('load Data ', dataset.constraints)
+     console.log('load Data ', dataset.constraints)
     let { constraints, endpoint, entrypoint, labels, prefixes } = dataset
     let newOptions
     if (constraints !== '') dataset.forceUpdate = false
-    getStats(dataset)
+    getStats({ ...dataset, stats: [] })
         .then(stats => {
             return new Promise((resolve, reject) => {
                 if (stats.totalInstances === 0) {
@@ -46,7 +46,7 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                 } else {
                     entrypoint = stats.options.entrypoint
                     prefixes = stats.options.prefixes
-                    // console.log(configLib.defineConfigs(views, stats))
+                    // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
                     // for each views, checks which properties ou sets of properties could match and evaluate
                     let configs = activateDefaultConfigs(defineConfigs(views, stats))
                     dispatch({
