@@ -6,7 +6,7 @@ const initialState = {
     defaultGraph: 'http://localhost:8890/data10', // 'urn:piaaf:siaf', // null, // ,
     constraints: '', // '?entrypoint <http://data.nobelprize.org/terms/year> ?year . filter (?year > 1980)',
     forceUpdate: false,
-    maxLevel: 4,
+    maxLevel: 3,
     resources: [],
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',

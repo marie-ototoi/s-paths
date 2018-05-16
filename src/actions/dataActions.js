@@ -34,7 +34,7 @@ const getResources = (options) => {
 }
 
 const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
-     console.log('load Data ', dataset.constraints)
+    // console.log('load Data ', dataset.constraints)
     let { constraints, endpoint, entrypoint, labels, prefixes } = dataset
     let newOptions
     if (constraints !== '') dataset.forceUpdate = false
@@ -85,12 +85,16 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                 deltaMain = getData(endpoint, queryTransitionMain, prefixes)
                 let queryTransitionAside = makeTransitionQuery(configAside, newOptions, previousConfigAside, previousOptions, 'aside')
                 deltaAside = getData(endpoint, queryTransitionAside, prefixes)
+                // console.log('queryTransitionMain', queryTransitionMain)
+                // console.log('queryTransitionAside', queryTransitionAside)
             } else {
                 deltaMain = {}
                 deltaAside = {}
             }
             // console.log('queryMain', queryMain)
-            // console.log('queryaside', queryAside)
+            // console.log('coverageQueryMain', coverageQueryMain)
+            // console.log('queryAside', queryAside)
+            // console.log('coverageQueryAside', coverageQueryAside)
             return Promise.all([
                 getData(endpoint, queryMain, prefixes),
                 getData(endpoint, queryAside, prefixes),

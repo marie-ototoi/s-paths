@@ -113,7 +113,7 @@ const resize = (el, props) => {
                 data = axis.info.filter(i => i.key === String(d))
             }
             if (data.length > 0) {
-                // console.log(data[0].range)
+                // console.log(data[0])
                 selectElements(data[0].propName, data[0].range, data[0].category)
             }
         })
@@ -128,7 +128,7 @@ const resize = (el, props) => {
         .attr('text-anchor', 'end')
         .attr('transform', d => {
             if (type === 'Bottom') {
-                return `translate(${(category === 'datetime') ? -8 : - 8 + (axeLength / ((ticks.size() - 1) * 2))}, 3) rotate(315 0,0)`
+                return `translate(${(category === 'datetime') ? -8 : -8 + (axeLength / ((ticks.size() - 1) * 2))}, 3) rotate(315 0,0)`
             } else {
                 return `translate(-5, ${axeLength / ((ticks.size() - 1) * 2)})`
             }

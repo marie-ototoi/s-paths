@@ -1,5 +1,5 @@
 import express from 'express'
-import promiseLimit from 'promise-limit'
+import promiseLimit from 'p-limit'
 import pathModel from '../models/path'
 import resourceModel from '../models/resource'
 import { getLabels } from '../src/lib/labelLib'

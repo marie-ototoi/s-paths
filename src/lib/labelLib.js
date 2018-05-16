@@ -1,6 +1,5 @@
 import fetch from 'rdf-fetch'
-import promiseSettle from 'promise-settle'
-import promiseLimit from 'promise-limit'
+import promiseLimit from 'p-limit'
 import rdflib from 'rdflib'
 import propertyModel from '../../models/property'
 import queryLib, { ignorePromise } from './queryLib'
@@ -47,7 +46,6 @@ const getLabels = async (urisToLabel, prefixes) => {
     missingUris = await getLabelsFromGraph(missingUris, graph)
     propertyModel.createOrUpdate(missingUris)
     //
-    
     return urisToLabel.map(prop => {
         if (prop.label) {
             return prop
@@ -77,9 +75,7 @@ const getLabelsFromGraph = async (uris, graph) => {
 const loadUri = (uri, graph) => {
     // console.log('load ontology', url)
     return fetch(uri, { redirect: 'follow', headers: { 'Accept': 'Accept: text/turtle, application/rdf+xml, text/ntriples, application/ld+json' } }).then(response => {
-        
         if (response.ok) {
-            
             // if succesful, parse it and add it to the graph
             let mediaType = response.headers.get('Content-type')
             // little hack to be removed -> warn hosts that the mime type is wrong

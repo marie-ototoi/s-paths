@@ -1,4 +1,5 @@
 import express from 'express'
+import promiseLimit from 'p-limit'
 import pathModel from '../models/path'
 import { getPropsLabels } from '../src/lib/labelLib'
 import queryLib, { ignorePromise } from '../src/lib/queryLib'
@@ -73,7 +74,7 @@ const getStats = async (opt) => {
             type: 'uri',
             total: totalInstances
         }]
-        options.maxRequests = getMaxRequest(selectionInstances)
+        let limit = promiseLimit(getMaxRequest(totalInstances))
         // check if props available in database
         // if necessary retrieve missing level
         // or recursively retrieve properties
@@ -117,17 +118,18 @@ const getMaxRequest = (parentQuantities) => {
 const getProps = async (categorizedProps, level, options, instances) => {
     let { constraints, entrypoint, endpoint, prefixes, maxLevel } = options
     let { selectionInstances, totalInstances } = instances
-    let maxRequests = getMaxRequest(selectionInstances)
     let newCategorizedProps = []
     const queriedProps = categorizedProps.filter(prop => {
+        // console.log(prop.total)
         return (prop.level === level - 1 &&
             (prop.category === 'entrypoint' ||
-            (prop.type === 'uri')))
+            prop.type === 'uri') &&
+            (!prop.total || (prop.total && prop.total > 0)))
     })
     // look for savedProps in the database
     let props = await pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level }).exec()
     if (props.length > 0) {
-        console.log ('ici ?')
+        // console.log ('ici ?')
         // if available
         // generate current prefixes
         newCategorizedProps = props.map(prop => {
@@ -140,41 +142,36 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 path: queryLib.convertPath(prop.fullPath, prefixes)
             }
         })
+        // keep only those whose parents count > 0
     } else {
-        console.log ('là !')
-        //let propQueries = queriedProps
+        // console.log ('là !')
+        // let propQueries = queriedProps
         // deal with props by bunches of promises 
-        for (let i = 0; i < queriedProps.length; i += maxRequests) {
-            let elementsToSlice = (queriedProps.length - i < maxRequests) ? queriedProps.length - i : maxRequests
-            console.log('**** on boucle', level, i, maxRequests, elementsToSlice)
-            let propsLists = await Promise.all(queriedProps
-                .slice(i, i + elementsToSlice)
-                .map(prop => {
-                    let propsQuery = queryLib.makePropsQuery(prop.path, options, level)
-                    // console.log('QUERY', prop.path, propsQuery)
-                    return queryLib.getData(endpoint, propsQuery, prefixes)
-                })
-                .map((promise) => promise.catch(e => {
-                    console.error('Error with makePropsQuery', e)
-                    return undefined
-                })))
-            // keep only promises that have been fulfilled
-            propsLists = propsLists
-                .map((props, index) => {
-                    //console.log('BINDINGS', props.results.bindings)
-                    return (props && props.results.bindings.length > 0) ? props.results.bindings.map(prop => {
-                    // generate prefixes if needed
-                        if (!queryLib.prefixDefined(prop.property.value, prefixes)) {
-                            prefixes = queryLib.addSmallestPrefix(prop.property.value, prefixes)
-                        }
-                        return queryLib.makePath(prop, queriedProps[i + index], level, { prefixes, endpoint })
-                    }) : false
-                })
-                .filter(props => props !== false)
-                .reduce((flatArray, list) => flatArray.concat(list), [])
-                
-            newCategorizedProps.push(...propsLists)
-        }
+        let propsLists = await Promise.all(queriedProps
+            .map(prop => {
+                let propsQuery = queryLib.makePropsQuery(prop.path, options, level)
+                // console.log('QUERY', prop.path, propsQuery)
+                return queryLib.getData(endpoint, propsQuery, prefixes)
+            })
+            .map((promise) => promise.catch(e => {
+                console.error('Error with makePropsQuery', e)
+                return undefined
+            })))
+        // keep only promises that have been fulfilled
+        propsLists = propsLists
+            .map((props, index) => {
+                //console.log('BINDINGS', props.results.bindings)
+                return (props && props.results.bindings.length > 0) ? props.results.bindings.map(prop => {
+                // generate prefixes if needed
+                    if (!queryLib.prefixDefined(prop.property.value, prefixes)) {
+                        prefixes = queryLib.addSmallestPrefix(prop.property.value, prefixes)
+                    }
+                    return queryLib.makePath(prop, queriedProps[index], level, { prefixes, endpoint })
+                }) : false
+            })
+            .filter(props => props !== false)
+            .reduce((flatArray, list) => flatArray.concat(list), [])
+        newCategorizedProps.push(...propsLists)
         // save in mongo database
         // if (newCategorizedProps.length > 0) await pathModel.createOrUpdate(newCategorizedProps).catch(e => console.error('Error updating paths', e))
     }
@@ -184,35 +181,30 @@ const getProps = async (categorizedProps, level, options, instances) => {
     if (props.length === 0 || constraints !== '') {
         let typeStats = []
         let countStats = []
-        for (let i = 0; i < newCategorizedProps.length; i += maxRequests) {
-            // console.log('stats ', i, '/', newCategorizedProps.length, newCategorizedProps[i].path)
-            let elementsToSlice = (newCategorizedProps.length - i < maxRequests) ? newCategorizedProps.length - i : maxRequests
-            let temp = await Promise.all(newCategorizedProps
-                .slice(i, i + elementsToSlice)
+        let temp = await Promise.all(newCategorizedProps
+            .map(prop => {
+                let propQuery = queryLib.makePropQuery(prop, options, 'count')
+                // console.log('count ', propQuery)
+                return queryLib.getData(options.endpoint, propQuery, options.prefixes)
+            })
+            .map((promise, i) => promise.catch(e => {
+                console.error('Error with makePropQuery count', e, queryLib.makePropQuery(newCategorizedProps[i], options, 'count'))
+                return undefined
+            })))
+        countStats.push(...temp)
+        if (props.length === 0) {
+            temp = await Promise.all(newCategorizedProps
+                // .slice(i, i + elementsToSlice)
                 .map(prop => {
-                    let propQuery = queryLib.makePropQuery(prop, options, 'count')
-                    // console.log('count ', propQuery)
+                    let propQuery = queryLib.makePropQuery(prop, options, 'type')
+                    // console.log('type ', propQuery)
                     return queryLib.getData(options.endpoint, propQuery, options.prefixes)
                 })
                 .map((promise) => promise.catch(e => {
-                    console.error('Error with makePropQuery count', e)
+                    console.error('Error with makePropQuery type', e)
                     return undefined
                 })))
-            countStats.push(...temp)
-            if (props.length === 0) {
-                temp = await Promise.all(newCategorizedProps
-                    .slice(i, i + elementsToSlice)
-                    .map(prop => {
-                        let propQuery = queryLib.makePropQuery(prop, options, 'type')
-                        // console.log('type ', propQuery)
-                        return queryLib.getData(options.endpoint, propQuery, options.prefixes)
-                    })
-                    .map((promise) => promise.catch(e => {
-                        console.error('Error with makePropQuery type', e)
-                        return undefined
-                    })))
-                typeStats.push(...temp)
-            }
+            typeStats.push(...temp)
         }
         propsWithStats = queryLib.mergeStatsWithProps(newCategorizedProps, countStats, typeStats, totalInstances)
         // console.log('|||||| stop tout bon')
@@ -221,42 +213,38 @@ const getProps = async (categorizedProps, level, options, instances) => {
             return queryLib.defineGroup(prop, options)
         })
         let propsWithSample = []
-        for (let i = 0; i < propsWithStats.length; i += maxRequests) {
-            let elementsToSlice = (propsWithStats.length - i < maxRequests) ? propsWithStats.length - i : maxRequests
-            let temp = await Promise.all(propsWithStats
-                .slice(i, i + elementsToSlice)
-                .map(async prop => {
-                    if (prop.category === 'datetime' && prop.total > 0) {
-                        let sampleQuery = queryLib.makePropQuery(prop, options, 'dateformat')
-                        // console.log('dateformat', sampleQuery)
-                        let sampleData = await queryLib.getData(options.endpoint, sampleQuery, options.prefixes)           
-                        // console.log(sampleData )
-                        // console.log(']]', sampleData.results.bindings)
-                        if (sampleData && sampleData.results.bindings.length > 0) {
-                            let countInvalid = 0
-                            sampleData.results.bindings.forEach(element => {
-                                let thedate = new Date(element.object.value)
-                                if (thedate == 'Invalid Date') countInvalid++
-                                // console.log(thedate == 'Invalid Date', element.object.value, thedate.getFullYear())
-                            })
-                            let category = (countInvalid > 5) ? 'text' : prop.category
-                            return {
-                                ...prop,
-                                category
-                            }
-                        } else {
-                            return prop
+        temp = await Promise.all(propsWithStats
+            .map(async prop => {
+                if (prop.category === 'datetime' && prop.total > 0) {
+                    let sampleQuery = queryLib.makePropQuery(prop, options, 'dateformat')
+                    // console.log('dateformat', sampleQuery)
+                    let sampleData = await queryLib.getData(options.endpoint, sampleQuery, options.prefixes)           
+                    // console.log(sampleData )
+                    // console.log(']]', sampleData.results.bindings)
+                    if (sampleData && sampleData.results.bindings.length > 0) {
+                        let countInvalid = 0
+                        sampleData.results.bindings.forEach(element => {
+                            let thedate = new Date(element.object.value)
+                            if (thedate == 'Invalid Date') countInvalid++
+                            // console.log(thedate == 'Invalid Date', element.object.value, thedate.getFullYear())
+                        })
+                        let category = (countInvalid > 5) ? 'text' : prop.category
+                        return {
+                            ...prop,
+                            category
                         }
                     } else {
                         return prop
                     }
-                })
-                .map((promise) => promise.catch(e => {
-                    console.error('Error with makePropQuery sample dateformat', e)
-                    return undefined
-                })))
-            propsWithSample.push(...temp)
-        }
+                } else {
+                    return prop
+                }
+            })
+            .map((promise) => promise.catch(e => {
+                console.error('Error with makePropQuery sample dateformat', e)
+                return undefined
+            })))
+        propsWithSample.push(...temp)
         propsWithStats = propsWithSample
             .filter(prop => (prop && prop.category !== 'ignore'))
 
