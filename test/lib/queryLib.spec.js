@@ -119,12 +119,12 @@ WHERE {
             .to.equal(`SELECT DISTINCT ?property WHERE {
         { SELECT ?subject WHERE { ?subject rdf:type nobel:LaureateAward . } LIMIT 100 } . 
         ?subject ?property ?object .
-    } GROUP BY ?property`)
+    } GROUP BY ?property ?object`)
         expect(queryLib.makePropsQuery('nobel:LaureateAward/nobel:university/*', { constraints: '', defaultGraph: 'http://localhost:8890/nobel' }, 2))
             .to.equal(`SELECT DISTINCT ?property FROM <http://localhost:8890/nobel> WHERE {
         { SELECT ?subject FROM <http://localhost:8890/nobel> WHERE { ?subject rdf:type nobel:LaureateAward . } LIMIT 100 } . ?subject nobel:university ?interobject . 
         ?interobject ?property ?object .
-    } GROUP BY ?property`)
+    } GROUP BY ?property ?object`)
     })
     it('should affect a prop to the right group', () => {
         const options = {
