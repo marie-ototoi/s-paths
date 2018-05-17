@@ -116,7 +116,7 @@ const getMaxRequest = (parentQuantities) => {
 }
 
 const getProps = async (categorizedProps, level, options, instances) => {
-    let { constraints, entrypoint, endpoint, prefixes, maxLevel } = options
+    let { constraints, defaultGraph, entrypoint, endpoint, prefixes, maxLevel } = options
     let { selectionInstances, totalInstances } = instances
     let newCategorizedProps = []
     const queriedProps = categorizedProps.filter(prop => {
@@ -146,7 +146,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
     } else {
         // console.log ('là !')
         // let propQueries = queriedProps
-        // deal with props by bunches of promises 
+        // deal with props by bunches of promises
         let propsLists = await Promise.all(queriedProps
             .map(prop => {
                 let propsQuery = queryLib.makePropsQuery(prop.path, options, level)
@@ -160,7 +160,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
         // keep only promises that have been fulfilled
         propsLists = propsLists
             .map((props, index) => {
-                //console.log('BINDINGS', props.results.bindings)
+                // console.log('BINDINGS', props.results.bindings)
                 return (props && props.results.bindings.length > 0) ? props.results.bindings.map(prop => {
                 // generate prefixes if needed
                     if (!queryLib.prefixDefined(prop.property.value, prefixes)) {
@@ -218,7 +218,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 if (prop.category === 'datetime' && prop.total > 0) {
                     let sampleQuery = queryLib.makePropQuery(prop, options, 'dateformat')
                     // console.log('dateformat', sampleQuery)
-                    let sampleData = await queryLib.getData(options.endpoint, sampleQuery, options.prefixes)           
+                    let sampleData = await queryLib.getData(options.endpoint, sampleQuery, options.prefixes)
                     // console.log(sampleData )
                     // console.log(']]', sampleData.results.bindings)
                     if (sampleData && sampleData.results.bindings.length > 0) {
@@ -247,13 +247,14 @@ const getProps = async (categorizedProps, level, options, instances) => {
         propsWithSample.push(...temp)
         propsWithStats = propsWithSample
             .filter(prop => (prop && prop.category !== 'ignore'))
+            .map(prop => { return { ...prop, endpoint, graph: defaultGraph } })
 
         // save all stats, only if they are relative to the whole ensemble
         if (options.constraints === '') await pathModel.createOrUpdate(propsWithStats).catch(e => console.error('Error updating stats', e))
     } else {
         propsWithStats = newCategorizedProps
     }
-    // 
+    //
     let returnProps = [
         ...categorizedProps,
         ...propsWithStats

@@ -2,17 +2,15 @@ import mongoose from 'mongoose'
 
 const pathSchema = new mongoose.Schema({
     fullPath: { type: String, required: true },
-    
+    graph: { type: String },
     endpoint: { type: String, required: true },
     //
-    //  
     createdAt: Date,
     //
     entrypoint: { type: String, required: true },
     level: { type: Number, required: true },
     property: { type: String, required: true },
     //
-    // 
     modifiedAt: Date,
     //
     avgcharlength: Number,
@@ -23,7 +21,7 @@ const pathSchema = new mongoose.Schema({
     subcategory: { type: String },
     total: Number,
     type: { type: String, required: true },
-    unique: Number    
+    unique: Number
 })
 
 pathSchema.statics = {
@@ -32,7 +30,8 @@ pathSchema.statics = {
             return this.update(
                 {
                     fullPath: prop.fullPath,
-                    endpoint: prop.endpoint
+                    endpoint: prop.endpoint,
+                    graph: prop.graph
                 },
                 {
                     $set: {
@@ -48,9 +47,6 @@ pathSchema.statics = {
                     },
                     $setOnInsert: {
                         createdAt: Date.now(),
-                        /*endpoint: prop.endpoint,
-                        fullPath: prop.fullPath,*/
-                        entrypoint: prop.entrypoint,
                         level: prop.level,
                         property: prop.property
                     }

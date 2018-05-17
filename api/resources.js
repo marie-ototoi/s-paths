@@ -36,7 +36,7 @@ const getResources = async (opt) => {
         forceUpdate: opt.forceUpdate,
         prefixes: opt.prefixes
     }
-    let { endpoint, forceUpdate, prefixes } = options
+    let { defaultGraph, endpoint, forceUpdate, prefixes } = options
     if (forceUpdate) {
         await pathModel.deleteMany({ endpoint })
         await resourceModel.deleteMany({ endpoint })
@@ -44,7 +44,7 @@ const getResources = async (opt) => {
     let query = queryLib.makeQueryResources(options)
     let result = await queryLib.getData(endpoint, query, {})
     let resources = result.results.bindings.map(resource => {
-        return { total: Number(resource.occurrences.value), type: resource.type.value, endpoint }
+        return { total: Number(resource.occurrences.value), type: resource.type.value, endpoint, graph: defaultGraph }
     })
     await resourceModel.createOrUpdate(resources)
     let labels = await getLabels(resources.map(resource => {
