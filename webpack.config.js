@@ -49,7 +49,7 @@ const devConfig = () =>
             devServer: {
                 contentBase: path.join(__dirname, 'public'),
                 hot: true,
-                overlay: true,
+                overlay: true
             },
             plugins: [
                 new webpack.HotModuleReplacementPlugin()
