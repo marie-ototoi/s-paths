@@ -1,5 +1,4 @@
 import express from 'express'
-import promiseLimit from 'p-limit'
 import pathModel from '../models/path'
 import resourceModel from '../models/resource'
 import { getLabels } from '../src/lib/labelLib'
@@ -9,7 +8,6 @@ import dataset from '../src/reducers/dataset'
 // import { error } from 'util';
 
 const router = express.Router()
-const limit = promiseLimit(10)
 
 router.post('/', (req, res) => {
     if (!req.body.endpoint) {

@@ -127,6 +127,7 @@ const getPropName = (uri) => {
 }
 
 const getRoot = (uri) => {
+    if (uri.slice(-1) === '/') uri = uri.slice(0, uri.length - 1)
     const splitSlash = uri.split('/')
     const slashEnd = splitSlash[splitSlash.length - 1]
     const splitHash = uri.split('#')
@@ -169,8 +170,9 @@ const makePropQuery = (prop, options, queryType) => {
     let props
     let bindProps
     let propsPath
+    let limit = ``
     if (queryType === 'type') {
-        props = `DISTINCT ?datatype ?language ?isiri ?isliteral (AVG(?charlength) as ?avgcharlength) `
+        props = `DISTINCT ?datatype ?language ?isiri ?isliteral ((?charlength) as ?avgcharlength) `
         bindProps = `BIND(DATATYPE(?object) AS ?datatype) .
         BIND(ISIRI(?object) AS ?isiri) .
         BIND(ISLITERAL(?object) AS ?isliteral) .
@@ -180,9 +182,10 @@ const makePropQuery = (prop, options, queryType) => {
             propName: 'object',
             entrypointName: 'entrypoint',
             entrypointType: true,
-            sample: 100,
+            // sample: 100,
             graph: defaultGraph
         })
+        limit = ` LIMIT 1`
     } else if (queryType === 'count') {
         props = `(COUNT(DISTINCT ?object) AS ?unique) (COUNT(?object) AS ?total) (COUNT(DISTINCT ?entrypoint) AS ?coverage) `
         bindProps = ``
@@ -198,16 +201,17 @@ const makePropQuery = (prop, options, queryType) => {
             propName: 'object',
             entrypointName: 'entrypoint',
             entrypointType: true,
-            sample: 30,
+            //sample: 30,
             graph: defaultGraph
         })
+        limit = ` LIMIT 30`
     }
     return `SELECT ${props}${graph}
 WHERE {
 ${constraints}
 ${propsPath}
 ${bindProps}
-}`
+}${limit}`
 }
 
 const makePropsQuery = (entitiesClass, options, level) => {
@@ -217,7 +221,7 @@ const makePropsQuery = (entitiesClass, options, level) => {
         propName: 'interobject', 
         entrypointName: 'subject',
         entrypointType: true,
-        sample: 100,
+        // sample: 100,
         graph: defaultGraph,
         constraints
     })
@@ -303,7 +307,7 @@ const makeQuery = (entrypoint, configZone, zone, options) => {
         index += 1
         let hierarchical = false
         if (index === 1 && configZone.constraints[index - 1][0].hierarchical === true) {
-            //console.log(prop, prop.category)
+            // console.log(prop, prop.category)
             hierarchical = prop.category === 'text' ? 'previous' : 'last'
         }
         propList = propList.concat(`?prop${index} `)
@@ -317,18 +321,27 @@ const makeQuery = (entrypoint, configZone, zone, options) => {
         if (hierarchical) groupList = groupList.concat(`?directlink `)
         const optional = configZone.constraints[index - 1] && configZone.constraints[index - 1][0].optional
         defList = defList.concat(FSL2SPARQL(prop.path, {
-            propName: `prop${index}`, 
+            propName: `prop${index}`,
             entrypointName: 'entrypoint',
             entrypointType: (index === 1),
             optional,
             hierarchical
         }))
+        if (prop.category === 'geo' && prop.subcategory === 'name') {
+            groupList = groupList.concat(`?latitude ?longitude ?geoname `)
+            defList = defList.concat('SELECT * FROM')
+        }
     })
     return `SELECT DISTINCT ${propList}${graph}
 WHERE {
 ${constraints}
 ${defList}
 } GROUP BY ${groupList}ORDER BY ${orderList}`
+}
+
+const makeGeoNamesQuery = (options) => {
+    const { defaultGraph, geograph } = options
+    let service = (getRoot(defaultGraph) !== getRoot(geograph)) ? ` { service <${geograph}> }` : ``
 }
 
 const makeQueryResources = (options) => {

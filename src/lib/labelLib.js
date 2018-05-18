@@ -1,10 +1,7 @@
 import fetch from 'rdf-fetch'
-import promiseLimit from 'p-limit'
 import rdflib from 'rdflib'
 import propertyModel from '../../models/property'
 import queryLib, { ignorePromise } from './queryLib'
-
-const limit = promiseLimit(10)
 
 const getPropsLabels = async (prefixes, props) => {
     // find all classes and props used in paths
