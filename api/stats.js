@@ -127,7 +127,6 @@ const getProps = async (categorizedProps, level, options, instances) => {
     // look for savedProps in the database
     let props = await pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level, graph: defaultGraph }).exec()
     if (props.length > 0) {
-        // console.log ('ici ?')
         // if available
         // generate current prefixes
         newCategorizedProps = props.map(prop => {
@@ -175,8 +174,6 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 .reduce((flatArray, list) => flatArray.concat(list), [])
             newCategorizedProps.push(...propsLists)
         }
-        // save in mongo database
-        // if (newCategorizedProps.length > 0) await pathModel.createOrUpdate(newCategorizedProps).catch(e => console.error('Error updating paths', e))
     }
     //
     // console.log('newCategorizedProps ', newCategorizedProps)
