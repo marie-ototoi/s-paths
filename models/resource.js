@@ -24,6 +24,9 @@ resourceSchema.statics = {
                         modifiedAt: Date.now()
                     },
                     $setOnInsert: {
+                        type: prop.type,
+                        endpoint: prop.endpoint,
+                        graph: prop.graph,
                         createdAt: Date.now()
                     }
                 },

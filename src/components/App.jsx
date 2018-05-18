@@ -141,7 +141,7 @@ class App extends React.Component {
                         zone = "main"
                         status = { statusMain }
                         data = { getResults(data, 'main', 'transition') }
-                        coverage = { getResults(data, 'main', 'coverage') }
+                        // coverage = { getResults(data, 'main', 'coverage') }
                         config = { getConfig(getCurrentConfigs(configs, 'transition'), 'main') }
                         selections = { selectionLib.getSelections(selections, 'main', 'transition') }
                         ref = "maintransition"
@@ -163,7 +163,7 @@ class App extends React.Component {
                         zone = "main"
                         step = { this.state.main_step }
                         status = { statusMain }
-                        coverage = { getResults(data, 'main', 'coverage') }
+                        // coverage = { getResults(data, 'main', 'coverage') }
                         data = { getResults(data, 'main', 'active') }
                         config = { mainConfig }
                         selections = { selectionLib.getSelections(selections, 'main', 'active') }
@@ -178,7 +178,7 @@ class App extends React.Component {
                         zone = "aside"
                         status = { statusAside }
                         data = { getResults(data, 'aside', 'transition') }
-                        coverage = { getResults(data, 'aside', 'coverage') }
+                        // coverage = { getResults(data, 'aside', 'coverage') }
                         config = { getConfig(getCurrentConfigs(configs, 'transition'), 'aside') }
                         selections = { selectionLib.getSelections(selections, 'aside', 'transition') }
                         ref = "asidetransition"
@@ -201,7 +201,7 @@ class App extends React.Component {
                         step = { this.state.aside_step }
                         status = { statusAside }
                         data = { getResults(data, 'aside', 'active') }
-                        coverage = { getResults(data, 'aside', 'coverage') }
+                        // coverage = { getResults(data, 'aside', 'coverage') }
                         config = { asideConfig }
                         selections = { selectionLib.getSelections(selections, 'aside', 'active') }
                         ref = "aside"

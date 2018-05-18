@@ -172,7 +172,8 @@ const resize = (el, props) => {
     //console.log(dico, category, nestedCoverage1)
     const xScale = d3.scaleLinear().range([0, display.viz.useful_width])
     if (category === 'number' || category === 'datetime') {
-        xScale.domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
+        //xScale.domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
+        xScale.domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
     } else if (category === 'text' || category === 'uri') {
         xScale.domain([0, nestedProp1.length - 1])
     }
@@ -191,7 +192,8 @@ const resize = (el, props) => {
         .each(d => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
-    let unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedCoverage1, category))
+    //let unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedCoverage1, category))
+    let unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedProp1, category))
     if (unitWidth < 1) unitWidth = 1
     const unitHeight = Math.round(display.viz.useful_height / (props.nestedProp2.length - 1))
     // todo : s'il n'y a pas de unitHeigth sauvé pour cette config on recalcule

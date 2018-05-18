@@ -168,14 +168,16 @@ const resize = (el, props) => {
     }
 
     const xScale = d3.scaleLinear()
-        .domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
+        .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
+        //.domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
         .range([0, display.viz.useful_width])
 
     d3.select(el)
         .selectAll('g.time')
         .attr('transform', d => `translate(${xScale(Number(d.key))}, 0)`)
     //console.log(maxUnitsPerYear, zone, role)
-    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedCoverage1, 'datetime'))
+    //const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedCoverage1, 'datetime'))
+    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedProp1, 'datetime'))
     const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
     const group = nestedProp1[0].group
     d3.select(el).selectAll('g.time').selectAll('.elements')

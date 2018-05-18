@@ -55,7 +55,7 @@ class HeatMap extends React.Component {
         const { config, configs, coverage, data, dataset, display, getPropPalette, palettes, role, selections, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
-        let coverageFormatProp1
+        /* let coverageFormatProp1
         let nestedCoverage1
         if (display.unitDimensions[zone][role] &&
             display.unitDimensions[zone][role].nestedCoverage1) {
@@ -67,7 +67,7 @@ class HeatMap extends React.Component {
                 max: 50
             }])
             this.props.setUnitDimensions({ nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
-        }
+        } */
 
         // First prop to be displayed in the bottom axis
         let categoryProp1 = selectedConfig.properties[0].category
@@ -75,10 +75,11 @@ class HeatMap extends React.Component {
             propName: 'prop1',
             category: categoryProp1,
             max: 50,
-            forceGroup: nestedCoverage1[0].group
+            // forceGroup: nestedCoverage1[0].group
         }, { propName: 'prop2', category: 'text' }])
 
-        const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
+        // const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
+        const axisBottom = getAxis(nestedProp1, 'prop1', categoryProp1)
         const categoryProp2 = selectedConfig.properties[1].category
         const nestedProp2 = nestData(deduplicate(data, ['prop1', 'prop2']), [{
             propName: 'prop2',
@@ -102,7 +103,7 @@ class HeatMap extends React.Component {
             displayedInstances,
             selectedConfig,
             nestedProp1,
-            nestedCoverage1,
+            // nestedCoverage1,
             legend,
             axisBottom,
             axisLeft,

@@ -58,7 +58,7 @@ class Timeline extends React.PureComponent {
         let coverageFormatProp1
         let nestedCoverage1
         let maxUnitsPerYear
-        if (display.unitDimensions[zone][role] &&
+        /* if (display.unitDimensions[zone][role] &&
             display.unitDimensions[zone][role].nestedCoverage1) {
             nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
         } else {
@@ -69,12 +69,12 @@ class Timeline extends React.PureComponent {
                 if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
             })
             this.props.setUnitDimensions({ maxUnitsPerYear, nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
-        }
+        } */
         const nestedProp1 = nestData(deduplicate(data, ['entrypoint']), [{
             propName: 'prop1',
             category: 'datetime',
             max: 50,
-            forceGroup: nestedCoverage1[0].group,
+            // forceGroup: nestedCoverage1[0].group,
             sortValues: 'prop2',
             sortValuesOrder: 'DESC'
         }])
@@ -85,7 +85,8 @@ class Timeline extends React.PureComponent {
         })
         */
         const categoryProp1 = selectedConfig.properties[0].category
-        const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
+        //const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
+        const axisBottom = getAxis(nestedProp1, 'prop1', categoryProp1)
         // Second prop to be displayed in the legend
 
         const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
@@ -94,13 +95,13 @@ class Timeline extends React.PureComponent {
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
         const propsLists = getPropsLists(config, zone, dataset.labels)
-        console.log(propsLists)
+        // console.log(propsLists)
         // Save to reuse in render
         this.customState = {
             ...this.customState,
             propsLists,
             maxUnitsPerYear,
-            nestedCoverage1,
+            // nestedCoverage1,
             selectedConfig,
             nestedProp1,
             legend,

@@ -1,12 +1,12 @@
 import * as types from '../constants/ActionTypes'
 
 const initialState = {
-    endpoint: 'http://localhost:8890/sparql', //'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql', //  'http://localhost:8890/sparql', // , //    'http://slickmem.data.t-mus.org/sparql'
-    entrypoint: 'http://xmlns.com/foaf/0.1/Person', // 'http://xmlns.com/foaf/0.1/Document', // 'http://www.w3.org/2004/02/skos/core#Concept', // 'http://data.nobelprize.org/terms/Laureate', //'http://xmlns.com/foaf/0.1/Person', // //'http://www.ica.org/standards/RiC/ontology#Place', ////, //  'http://xmlns.com/foaf/0.1/Person' //, // 'nobel:Laureate',  //  'nobel:LaureateAward',
-    defaultGraph: 'http://localhost:8890/data10', // 'urn:piaaf:siaf', // null, // ,
+    endpoint: 'http://localhost:8890/sparql', //'http://bnf.lri.fr:8890/sparql', //'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql', //  'http://localhost:8890/sparql', // , //    'http://slickmem.data.t-mus.org/sparql'
+    entrypoint: '', //'http://xmlns.com/foaf/0.1/Person', // 'http://xmlns.com/foaf/0.1/Document', // 'http://www.w3.org/2004/02/skos/core#Concept', // 'http://data.nobelprize.org/terms/Laureate', //'http://xmlns.com/foaf/0.1/Person', // //'http://www.ica.org/standards/RiC/ontology#Place', ////, //  'http://xmlns.com/foaf/0.1/Person' //, // 'nobel:Laureate',  //  'nobel:LaureateAward',
+    defaultGraph: 'http://localhost:8890/data01', //'http://data01.bnf.fr', , //null, // 'http://localhost:8890/nobel', // 'urn:piaaf:siaf', // null, // ,
     constraints: '', // '?entrypoint <http://data.nobelprize.org/terms/year> ?year . filter (?year > 1980)',
     forceUpdate: false,
-    maxLevel: 3,
+    maxLevel: 4,
     resources: [],
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',

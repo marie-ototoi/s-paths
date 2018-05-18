@@ -29,9 +29,10 @@ pathSchema.statics = {
         let allPromises = properties.map(prop => {
             return this.update(
                 {
-                    fullPath: prop.fullPath,
                     endpoint: prop.endpoint,
-                    graph: prop.graph
+                    graph: prop.graph,
+                    entrypoint: prop.entrypoint,
+                    fullPath: prop.fullPath,
                 },
                 {
                     $set: {

@@ -26,6 +26,7 @@ propertySchema.statics = {
                             modifiedAt: Date.now()
                         },
                         $setOnInsert: {
+                            property: prop.uri,
                             createdAt: Date.now()
                         }
                     },

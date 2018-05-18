@@ -17,7 +17,7 @@ if (module.hot) {
 
 // mode = main / aside / full / dev
 const init = () => {
-    ReactDOM.render(<Provider store = { store }><App mode = "main" /></Provider>, document.getElementById('discover'))
+    ReactDOM.render(<Provider store = { store }><App mode = "full" /></Provider>, document.getElementById('discover'))
 }
 init()
 
