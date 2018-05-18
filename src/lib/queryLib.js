@@ -230,7 +230,7 @@ const makePropsQuery = (entitiesClass, options, level) => {
     return `SELECT DISTINCT ?property ${graph}WHERE {
         ${pathQuery}${constraints}
         ${subject} ?property ?object .
-    } GROUP BY ?property ?object`
+    } GROUP BY ?property`
     /* for (let index = 1; index <= levels; index ++) {
         let subject
     } */
