@@ -21,7 +21,6 @@ const defaultState = [
                     subcategory: 'name',
                     unique: { min: 2, max: 50, optimal: [4, 6] }
                 }
-                
             ]/* ,
             [
                 {
@@ -76,7 +75,8 @@ const defaultState = [
                 }
             ]
         ]
-    }/*,
+    }
+    /* ,
     {
         id: 'GeoMap',
         constraints: [
@@ -103,7 +103,7 @@ const defaultState = [
                 }
             ]
         ]
-    }*/
+    } */
 ]
 
 const view = (state = {}, action) => {

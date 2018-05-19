@@ -32,7 +32,7 @@ pathSchema.statics = {
                     endpoint: prop.endpoint,
                     graph: prop.graph,
                     entrypoint: prop.entrypoint,
-                    fullPath: prop.fullPath,
+                    fullPath: prop.fullPath
                 },
                 {
                     $set: {

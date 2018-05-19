@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import * as types from '../constants/ActionTypes'
-import { activateDefaultConfigs, defineConfigs, getConfig, getConfigs, getSelectedConfig, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
+import { activateDefaultConfigs, defineConfigs, getConfig, getSelectedConfig, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
 import { getData, makeQuery, makeTransitionQuery } from '../lib/queryLib'
 
 const endTransition = (dispatch) => (zone) => {
@@ -35,7 +35,7 @@ const getResources = (options) => {
 
 const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
     // console.log('load Data ', dataset.constraints)
-    let { constraints, endpoint, entrypoint, labels, prefixes } = dataset
+    let { constraints, endpoint, entrypoint, prefixes } = dataset
     let newOptions
     if (constraints !== '') dataset.forceUpdate = false
     getStats({ ...dataset, stats: [] })
@@ -72,10 +72,10 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
         .then(configs => {
             const configMain = getConfig(configs, 'main')
             const queryMain = makeQuery(entrypoint, configMain, 'main', dataset)
-            //const coverageQueryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, prop1only: true })
+            // const coverageQueryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, prop1only: true })
             const configAside = getConfig(configs, 'aside')
             const queryAside = makeQuery(entrypoint, configAside, 'aside', dataset)
-            //const coverageQueryAside = makeQuery(entrypoint, configAside, 'aside', { ...dataset, prop1only: true })
+            // const coverageQueryAside = makeQuery(entrypoint, configAside, 'aside', { ...dataset, prop1only: true })
             let deltaMain
             let deltaAside
             if (previousConfigs.length > 0) {
@@ -99,11 +99,11 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                 getData(endpoint, queryMain, prefixes),
                 getData(endpoint, queryAside, prefixes),
                 deltaMain,
-                deltaAside//,
-                //getData(endpoint, coverageQueryMain, prefixes),
-                //getData(endpoint, coverageQueryAside, prefixes)
+                deltaAside // ,
+                // getData(endpoint, coverageQueryMain, prefixes),
+                // getData(endpoint, coverageQueryAside, prefixes)
             ])
-                .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside/*, coverageMain, coverageAside*/]) => {
+                .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside]) => { // , coverageMain, coverageAside
                     // console.log(dataMain, dataAside)
                     // console.log('dataTransitionMain', dataTransitionMain)
                     // console.log('dataTransitionAside', dataTransitionAside)
@@ -205,7 +205,7 @@ const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => {
             }
             action[zone] = newData
             action[zone + 'Delta'] = newDelta
-            //action[zone + 'Coverage'] = newCoverage
+            // action[zone + 'Coverage'] = newCoverage
             dispatch(action)
         })
         .catch(error => {

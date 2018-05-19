@@ -51,41 +51,19 @@ class Timeline extends React.PureComponent {
         return !shallowEqual(this.props, nextProps)
     }
     prepareData (nextProps) {
-        const { data, config, configs, coverage, dataset, display, getPropPalette, palettes, role, zone } = nextProps
+        const { data, config, dataset, getPropPalette, palettes, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
         // First prop to be displayed in the bottom axis
-        let coverageFormatProp1
-        let nestedCoverage1
         let maxUnitsPerYear
-        /* if (display.unitDimensions[zone][role] &&
-            display.unitDimensions[zone][role].nestedCoverage1) {
-            nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
-        } else {
-            //nestedCoverage1 = groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', { max: 50 })
-            nestedCoverage1 = nestData(deduplicate(data, ['entrypoint']), [{ propName: 'prop1', category: 'datetime', max: 50 }])
-            maxUnitsPerYear = 1
-            nestedCoverage1.forEach(d => {
-                if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
-            })
-            this.props.setUnitDimensions({ maxUnitsPerYear, nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
-        } */
         const nestedProp1 = nestData(deduplicate(data, ['entrypoint']), [{
             propName: 'prop1',
             category: 'datetime',
             max: 50,
-            // forceGroup: nestedCoverage1[0].group,
             sortValues: 'prop2',
             sortValuesOrder: 'DESC'
         }])
-        /*
-        groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', {
-            max: 50,
-            forceGroup: nestedCoverage1[0].group
-        })
-        */
         const categoryProp1 = selectedConfig.properties[0].category
-        //const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
         const axisBottom = getAxis(nestedProp1, 'prop1', categoryProp1)
         // Second prop to be displayed in the legend
 
@@ -101,7 +79,6 @@ class Timeline extends React.PureComponent {
             ...this.customState,
             propsLists,
             maxUnitsPerYear,
-            // nestedCoverage1,
             selectedConfig,
             nestedProp1,
             legend,
@@ -124,7 +101,7 @@ class Timeline extends React.PureComponent {
     }
     render () {
         const { axisBottom, legend } = this.customState
-        const { config, data, dataset, display, role, selections, step, zone } = this.props
+        const { config, data, display, role, selections, step, zone } = this.props
         // display settings
         const classN = `Timeline ${this.customState.elementName} role_${role}`
         const coreDimensions = getDimensions('core', display.zones[zone], display.viz)

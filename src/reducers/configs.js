@@ -8,7 +8,7 @@ const initialConfig = [
 const configstatus = (state, action) => {
     switch (action.type) {
     case types.END_TRANSITION:
-        //console.log('END_TRANSITION')
+        // console.log('END_TRANSITION')
         if (action.zone === state.zone) {
             return {
                 ...state,

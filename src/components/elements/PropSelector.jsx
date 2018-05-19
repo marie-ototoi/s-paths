@@ -1,8 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { getDimensions } from '../../lib/scaleLib'
-
 import { loadData, selectProperty } from '../../actions/dataActions'
 
 class PropSelector extends React.PureComponent {

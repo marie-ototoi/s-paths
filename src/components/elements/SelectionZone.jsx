@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 
 class SelectionZone extends React.PureComponent {
     render () {
-        const { display, dimensions, zone } = this.props
+        const { dimensions, zone } = this.props
         return (<rect
             className = "SelectionZone"
             ref = { `selectionZone_${zone}` }

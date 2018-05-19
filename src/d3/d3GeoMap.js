@@ -1,9 +1,5 @@
 import * as d3 from 'd3'
-import d3Legend from './d3Legend'
 import dataLib from '../lib/dataLib'
-import {getQuantitativeColors} from '../lib/paletteLib.js'
-import config from '../lib/configLib'
-import {dragSelection} from './d3DragSelector'
 import selectionLib from '../lib/selectionLib'
 
 const create = (el, props) => {
@@ -20,7 +16,7 @@ const destroy = (el) => {
 }
 
 const draw = (el, props) => {
-    const { nestedProp1, legend, selectedConfig, selectElement, selections, zone } = props
+    const { nestedProp1, selectedConfig, selections, zone } = props
     // console.log(nestedProp1)
     const units = d3.select(el)
         .selectAll('g.units')
@@ -42,8 +38,8 @@ const draw = (el, props) => {
     d3.select(el)
         .selectAll('g.units')
         .each((d, i) => {
-            //console.log(d)
-            //d.color = legend.info.filter(p => (p.key === d.values[0].prop2.value || (d.values[0].labelprop2 && p.key === d.values[0].labelprop2.value)))[0].color
+            // console.log(d)
+            // d.color = legend.info.filter(p => (p.key === d.values[0].prop2.value || (d.values[0].labelprop2 && p.key === d.values[0].labelprop2.value)))[0].color
             d.color = '#444'
             d.selection = {
                 selector: `treemap_element_p1_${dataLib.makeId(d.key)}`,
@@ -57,15 +53,15 @@ const draw = (el, props) => {
                     }]
                 }
             }
-            //console.log(d.selection.selector)
+            // console.log(d.selection.selector)
             d.shape = 'rectangle'
             d.zone = {}
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
-            //console.log(d)
+            // console.log(d)
         })
         .attr('id', d => d.selection.selector) // only needed to better understand html source code
         .classed('selected', d => d.selected)
-        //.attr('fill', d => d.color)
+        // .attr('fill', d => d.color)
         .attr('opacity', d => {
             return (selections.length > 0 && d.selected !== true) ? 0.5 : 1
         })
@@ -153,7 +149,7 @@ const getElementsInZone = (el, props) => {
 }
 
 const resize = (el, props) => {
-    const { dataset, display, displayedInstances, nestedCoverage1, nestedProp1, zone } = props
+    const { dataset, display, displayedInstances, nestedProp1 } = props
     let width = display.viz.useful_width
     let height = Math.floor(display.viz.useful_height * displayedInstances / dataset.stats.selectionInstances)
     if (height > display.viz.useful_height) height = display.viz.useful_height

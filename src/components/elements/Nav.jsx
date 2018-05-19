@@ -3,15 +3,14 @@ import { connect } from 'react-redux'
 
 import PropSelector from '../elements/PropSelector'
 
-import { getConfigs, getCurrentConfigs, getSelectedConfig } from '../../lib/configLib'
-import queryLib from '../../lib/queryLib'
+import { getConfigs, getCurrentConfigs } from '../../lib/configLib'
 import { getDimensions } from '../../lib/scaleLib'
 
 import { loadData, selectView } from '../../actions/dataActions'
 
 class Nav extends React.PureComponent {
     render () {
-        const { config, configs, dataset, displayedInstances, display, offset, propsLists, selections, zone } = this.props
+        const { config, configs, dataset, display, offset, zone } = this.props
         // console.log(propsLists)
         const activeConfigs = getConfigs(getCurrentConfigs(configs, 'active'), zone)
         const dimensions = getDimensions('nav', display.zones[zone], display.viz, offset)

@@ -83,7 +83,7 @@ const scoreMatch = (match, entrypointFactor) => {
     // bonus for each property represented
     score += 0.3 * match.length
     score *= coverage / 10
-    // domain rules to add values for some properties : TO DO 
+    // domain rules to add values for some properties : TO DO
     return score * entrypointFactor
 }
 const findAllMatches = (inputList, addList) => {
@@ -143,7 +143,7 @@ const defineConfigs = (views, stats) => {
                 missingProp = ((prop.path === '') && (!view.constraints[index][0].optional))
                 if (prop.category === 'geo') geo.push(prop.subcategory)
             })
-            let validgeo = (geo.length === 0 || (geo.length === 1 && geo[0] === 'name') || (geo[0] === 'latitude' && geo[1] === 'longitude') )
+            let validgeo = (geo.length === 0 || (geo.length === 1 && geo[0] === 'name') || (geo[0] === 'latitude' && geo[1] === 'longitude'))
             let unique = new Set(match.map(m => m.property))
             return !missingProp && unique.size === match.length && validgeo && match.length === view.constraints.length
         })
@@ -200,8 +200,8 @@ const activateDefaultConfigs = (configs) => {
                         selectedMatchIndex = 0
                     } else {
                         selectedMatchIndex = 1
-                        // would be interesting to check that properties for the second choice are different, 
-                        // if possible, from those of the first choice 
+                        // would be interesting to check that properties for the second choice are different,
+                        // if possible, from those of the first choice
                     }
                 }
                 return {

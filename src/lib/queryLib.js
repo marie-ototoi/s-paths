@@ -2,7 +2,6 @@
 // import moment from 'moment'
 import { SparqlClient } from 'sparql-client-2'
 import configLib from './configLib'
-import { select } from '../actions/selectionActions'
 
 const addSmallestPrefix = (url, prefixes) => {
     const root = getRoot(url)
@@ -101,8 +100,8 @@ const FSL2SPARQL = (FSLpath, options) => {
     }
     let queryHierarchical = ''
     if (hierarchical) {
-        const prevPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}inter${levels-1}` : propName
-        const newPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}bisinter${levels-1}` : `${propName}bis`
+        const prevPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}inter${levels - 1}` : propName
+        const newPropName = (hierarchical !== 'last' && levels > 1) ? `${propName}bisinter${levels - 1}` : `${propName}bis`
         queryHierarchical = query.replace(new RegExp(`[?]{1}${propName}`, 'gi'), `$&bis`)
         queryHierarchical = `?${prevPropName} ?directlink ?${newPropName} . ` + queryHierarchical
         // queryHierarchical = queryHierarchical.replace(/OPTIONAL {.*} \. /, '')
@@ -142,7 +141,7 @@ const getRoot = (uri) => {
 
 const ignorePromise = (promise) => {
     return promise.catch(e => {
-        console.error(e)
+        // console.error(e)
         return undefined
     })
 }
@@ -201,7 +200,7 @@ const makePropQuery = (prop, options, queryType) => {
             propName: 'object',
             entrypointName: 'entrypoint',
             entrypointType: true,
-            //sample: 30,
+            // sample: 30,
             graph: defaultGraph
         })
         limit = ` LIMIT 30`
@@ -218,7 +217,7 @@ const makePropsQuery = (entitiesClass, options, level) => {
     // this is valid only for first level
     const { constraints, defaultGraph } = options
     const pathQuery = FSL2SPARQL(entitiesClass, {
-        propName: 'interobject', 
+        propName: 'interobject',
         entrypointName: 'subject',
         entrypointType: true,
         // sample: 100,
@@ -292,7 +291,7 @@ const makeSelectionConstraints = (selections, selectedConfig, zone) => {
 
 // to do : take constraints into account
 const makeQuery = (entrypoint, configZone, zone, options) => {
-    const { defaultGraph, constraints, limit, prop1only } = options
+    const { defaultGraph, constraints, prop1only } = options
     // console.log(configZone)
     let selectedConfig = configLib.getSelectedConfig(configZone, zone)
     // console.log(selectedConfig)
@@ -307,8 +306,8 @@ const makeQuery = (entrypoint, configZone, zone, options) => {
         index += 1
         let hierarchical = false
         if (index === 1 && configZone.constraints[index - 1][0].hierarchical === true) {
-            // console.log(prop, prop.category)
-            hierarchical = prop.category === 'text' ? 'previous' : 'last'
+            // deactivate retrieval of hierarchy between concepts
+            // hierarchical = prop.category === 'text' ? 'previous' : 'last'
         }
         propList = propList.concat(`?prop${index} `)
         if (hierarchical) propList = propList.concat(`?directlink `)
@@ -364,8 +363,8 @@ WHERE {
 }
 
 const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
-    let newConstraints = newOptions.constraints
-    newConstraints = newConstraints.replace('?', '?new')
+    // let newConstraints = newOptions.constraints
+    // newConstraints = newConstraints.replace('?', '?new')
     const { defaultGraph, constraints } = options
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     //

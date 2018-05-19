@@ -6,8 +6,6 @@ import d3PlainLegend from '../../d3/d3PlainLegend'
 
 import { getDimensions } from '../../lib/scaleLib'
 
-import { select } from '../../actions/selectionActions'
-
 class Legend extends React.PureComponent {
     constructor (props) {
         super(props)

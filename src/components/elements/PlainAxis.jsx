@@ -19,7 +19,7 @@ class PlainAxis extends React.PureComponent {
     render () {
         const { display, offset, type, zone } = this.props
         this.customState.dimensions = getDimensions('axis' + type, display.zones[zone], display.viz, offset)
-        const { x, y, width, height } = this.customState.dimensions
+        const { x, y, width } = this.customState.dimensions
         const x1 = (type === 'Bottom') ? x : x + width
         return (<g className = "Axis"
             transform = { `translate(${x1}, ${y})` }

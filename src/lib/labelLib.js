@@ -3,7 +3,7 @@ import rdflib from 'rdflib'
 import propertyModel from '../../models/property'
 import queryLib, { ignorePromise } from './queryLib'
 
-const getPropsLabels = async (prefixes, props) => {
+const getPropsLabels = (prefixes, props) => {
     // find all classes and props used in paths
     let urisToLabel = props.reduce((acc, curr) => {
         let pathParts = curr.path.split('/')
@@ -24,7 +24,7 @@ const getLabels = async (urisToLabel, prefixes) => {
     let missingUris
     // create a local graph
     let graph = new rdflib.IndexedFormula()
-    // to add 
+    // to add
     // try to get props labels and comments in database
     // if already defined, do not keep in queried prefixes
     // propertyModel.find({ uri: uri }).exec()
@@ -38,9 +38,9 @@ const getLabels = async (urisToLabel, prefixes) => {
         }
     })
     missingUris = urisToLabel.filter(prop => !prop.label)
-    // load 
+    // load
     await Promise.all(missingUris.map(prop => loadUri(prop.uri, graph)).map(ignorePromise))
-    missingUris = await getLabelsFromGraph(missingUris, graph)
+    missingUris = await Promise.all(getLabelsFromGraph(missingUris, graph))
     propertyModel.createOrUpdate(missingUris)
     //
     return urisToLabel.map(prop => {
@@ -57,7 +57,7 @@ const getLabels = async (urisToLabel, prefixes) => {
     })
 }
 
-const getLabelsFromGraph = async (uris, graph) => {
+const getLabelsFromGraph = (uris, graph) => {
     let labels = uris.map(prop => graph.any(rdflib.sym(prop.uri), rdflib.sym('http://www.w3.org/2000/01/rdf-schema#label')))
     labels.forEach((label, index) => {
         if (label) uris[index].label = label.value
@@ -77,7 +77,7 @@ const loadUri = (uri, graph) => {
             let mediaType = response.headers.get('Content-type')
             // little hack to be removed -> warn hosts that the mime type is wrong
             if (mediaType === 'text/xml') mediaType = 'application/rdf+xml'
-            // check for parsable ontologies type (to avoid app crash)    
+            // check for parsable ontologies type (to avoid app crash)
             if (mediaType &&
             (mediaType.indexOf('application/ld+json') >= 0 ||
             mediaType.indexOf('application/rdf+xml') >= 0 ||

@@ -1,5 +1,4 @@
 import React from 'react'
-import pluralize from 'pluralize'
 import { connect } from 'react-redux'
 
 import d3History from '../../d3/d3History'
@@ -20,14 +19,13 @@ class History extends React.PureComponent {
         }
     }
     jumpHistory (index) {
-        //console.log(index, this.customState.currentIndex)
+        // console.log(index, this.customState.currentIndex)
         this.props.jump(index, this.customState.currentIndex)
     }
     render () {
         const { configs, display, offset, zone } = this.props
-        
         this.customState.currentIndex = configs.past.length
-        //console.log(this.customState.currentIndex)
+        // console.log(this.customState.currentIndex)
         this.customState.configs = [
             ...configs.past,
             configs.present,

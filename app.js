@@ -5,7 +5,7 @@ import bodyParser from 'body-parser'
 import index from './api/index'
 
 dotenv.config()
-const dbConnect = require('./models/connection')
+require('./models/connection')
 
 const app = express()
 const router = express.Router()

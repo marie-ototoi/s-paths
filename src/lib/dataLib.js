@@ -199,8 +199,6 @@ const splitRectangle = (zone, parts) => {
         name: 'main',
         children: parts
     }
-    //if (!zone.x0 && zone.x1) zone.x0 = zone.x1
-    //if (!zone.y0 && zone.y1) zone.y0 = zone.y1
     let hierarchy = d3.hierarchy(parts)
     let treemap = d3.treemap()
         .size([zone.width, zone.height])
@@ -236,7 +234,7 @@ const getDeltaIndex = (dataPiece, elements, options) => {
                 // console.log('||||||||||||', dataPiece[propName], condition.category)
                 if (dataPiece[propName]) {
                     if (condition.category === 'datetime') {
-                        const cast = (dataPiece[propName].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? Number(dataPiece[propName].value.substr(0,4)) : Number(dataPiece[propName].value)
+                        const cast = (dataPiece[propName].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? Number(dataPiece[propName].value.substr(0, 4)) : Number(dataPiece[propName].value)
                         return cast >= condition.value[0] && cast <= condition.value[1]
                     } else if (condition.category === 'number') {
                         if (Array.isArray(condition.value)) {
@@ -379,8 +377,8 @@ const getTransitionElements = (originElements, targetElements, originConfig, tar
     }
     // console.log('after', originElements, targetElements)
     // pour chaque zone d'arrivée identifier tous les points de départ
-    // diviser la zone d'arrivée et la remplacer par le nombre de zones nécessaires 
-    // en donnant le nom de la zone de départ 
+    // diviser la zone d'arrivée et la remplacer par le nombre de zones nécessaires
+    // en donnant le nom de la zone de départ
     return { origin: originElements, target: targetElements }
 }
 

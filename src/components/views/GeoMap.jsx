@@ -1,12 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import * as d3 from 'd3'
 import d3GeoMap from '../../d3/d3GeoMap'
 import Legend from '../elements/Legend'
 import History from '../elements/History'
-import config from '../../lib/configLib'
-import dataLib from '../../lib/dataLib'
-import selectionLib from '../../lib/selectionLib'
 import { select } from '../../actions/selectionActions'
 import { getPropPalette } from '../../actions/palettesActions'
 
@@ -26,8 +22,8 @@ class GeoMap extends React.Component {
     }
 
     render () {
-        console.log('salut GeoMap')
-        const { data, display, zone } = this.props
+        // console.log('salut GeoMap')
+        const { display, zone } = this.props
         const classN = `GeoMap `
         return (<g className = { classN } >
             <g

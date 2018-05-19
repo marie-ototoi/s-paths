@@ -1,7 +1,7 @@
 import express from 'express'
 import pathModel from '../models/path'
 import { getPropsLabels } from '../src/lib/labelLib'
-import queryLib, { ignorePromise } from '../src/lib/queryLib'
+import queryLib from '../src/lib/queryLib'
 // import { error } from 'util';
 
 const router = express.Router()
@@ -39,9 +39,8 @@ const getStats = async (opt) => {
         prefixes: opt.prefixes || {},
         totalInstances: opt.totalInstances
     }
-    let { prefixes, endpoint, entrypoint, labels, maxLevel, totalInstances } = options
+    let { prefixes, endpoint, entrypoint, labels, totalInstances } = options
     let selectionInstances
-    let displayedInstances
     // add prefix to entrypoint if full url
     if (!queryLib.usesPrefix(entrypoint, prefixes)) {
         if (!queryLib.prefixDefined(entrypoint)) {
@@ -79,14 +78,14 @@ const getStats = async (opt) => {
 
         // last parameter is for first time query, should be changed dynamically
         // get human readable rdfs:labels and rdfs:comments of all properties listed
-        let newlabels = (labels.length > 0) ? labels : await getPropsLabels(paths.options.prefixes, paths.statements).catch(e => console.error('Error getting labels', e))
+        let newlabels = (labels.length > 0) ? labels : getPropsLabels(paths.options.prefixes, paths.statements)
         return {
             statements: paths.statements.sort((a, b) => a.level - b.level),
             totalInstances,
             selectionInstances,
             options: {
-                ...paths.options,
-                labels: newlabels
+                ...paths.options//,
+                //labels: newlabels
             }
         }
     }
@@ -114,7 +113,7 @@ const getMaxRequest = (parentQuantities) => {
 
 const getProps = async (categorizedProps, level, options, instances) => {
     let { constraints, defaultGraph, entrypoint, endpoint, prefixes, maxLevel } = options
-    let { selectionInstances, totalInstances } = instances
+    let { totalInstances } = instances
     let maxRequests = getMaxRequest(totalInstances)
     let newCategorizedProps = []
     const queriedProps = categorizedProps.filter(prop => {
@@ -183,7 +182,6 @@ const getProps = async (categorizedProps, level, options, instances) => {
         let typeStats = []
         let countStats = []
         for (let i = 0; i < newCategorizedProps.length; i += maxRequests) {
-            
             let elementsToSlice = (newCategorizedProps.length - i < maxRequests) ? newCategorizedProps.length - i : maxRequests
             // console.log('a', level, i, elementsToSlice, maxRequests)
             temp = await Promise.all(newCategorizedProps
@@ -197,7 +195,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                     console.error('Error with makePropQuery count', e, queryLib.makePropQuery(newCategorizedProps[i], options, 'count'))
                     return undefined
                 })))
-                // console.log('b', level, i, elementsToSlice, maxRequests)
+            // console.log('b', level, i, elementsToSlice, maxRequests)
             countStats.push(...temp)
             if (props.length === 0) {
                 temp = await Promise.all(newCategorizedProps
@@ -235,7 +233,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                                 let countInvalid = 0
                                 sampleData.results.bindings.forEach(element => {
                                     let thedate = new Date(element.object.value)
-                                    if (thedate == 'Invalid Date') countInvalid++
+                                    if (thedate == 'Invalid Date') countInvalid++ // with === the condition is false when the date is invalid :(((
                                     // console.log(thedate == 'Invalid Date', element.object.value, thedate.getFullYear())
                                 })
                                 let category = (countInvalid > 5) ? 'text' : prop.category

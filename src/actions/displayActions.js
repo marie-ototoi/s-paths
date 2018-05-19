@@ -2,7 +2,7 @@ import * as types from '../constants/ActionTypes'
 import scale from '../lib/scaleLib'
 
 const setDisplay = (dispatch) => ({ env, mode, zonesDef, gridDef, screen, vizDef }) => {
-    let viewBoxDef = (env === 'dev') ? zonesDef.dev : zonesDef[mode||'full']
+    let viewBoxDef = (env === 'dev') ? zonesDef.dev : zonesDef[mode || 'full']
     let stage = scale.scaleStage(viewBoxDef, screen)
     let viewBox = scale.scaleViewBox(viewBoxDef, stage)
     let grid = scale.getGrid(gridDef, stage)

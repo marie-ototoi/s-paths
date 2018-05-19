@@ -5,7 +5,7 @@ import { getCurrentConfigs, getSelectedConfig } from '../../lib/configLib'
 import queryLib from '../../lib/queryLib'
 import { getDimensions } from '../../lib/scaleLib'
 
-import { loadData, selectView } from '../../actions/dataActions'
+import { loadData } from '../../actions/dataActions'
 
 class Coverage extends React.PureComponent {
     constructor (props) {
@@ -26,8 +26,8 @@ class Coverage extends React.PureComponent {
         }
     }
     render () {
-        const { config, configs, dataset, displayedInstances, display, offset, selectedInstances, zone } = this.props
-        const activeConfigs = getCurrentConfigs(configs, 'active')
+        const { dataset, displayedInstances, display, offset, selectedInstances, zone } = this.props
+        // const activeConfigs = getCurrentConfigs(configs, 'active')
         const dimensions = getDimensions('coverage', display.zones[zone], display.viz, offset)
         const { x, y, width } = dimensions
         // console.log(dataset.stats)
@@ -38,7 +38,7 @@ class Coverage extends React.PureComponent {
             { label: 'selected', total: selectedInstances }
         ]
         const itemWidth = width / 6
-        const itemHeight = itemWidth * 3 / 4
+        // const itemHeight = itemWidth * 3 / 4
         const margin = itemWidth / 6
         const maxBarWidth = (itemWidth * 3) + (margin * 2)
 

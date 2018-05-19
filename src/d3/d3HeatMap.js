@@ -1,9 +1,5 @@
 import * as d3 from 'd3'
-import d3Legend from './d3Legend'
 import dataLib from '../lib/dataLib'
-import {getQuantitativeColors} from '../lib/paletteLib.js'
-import config from '../lib/configLib'
-import {dragSelection} from './d3DragSelector'
 import selectionLib from '../lib/selectionLib'
 
 const create = (el, props) => {
@@ -20,7 +16,7 @@ const destroy = (el) => {
 }
 
 const draw = (el, props) => {
-    const { nestedProp1, legend, selectedConfig, selectElement, selections, zone } = props
+    const { nestedProp1, legend, selectedConfig, selections, zone } = props
     // console.log(nestedProp1)
     const xUnits = d3.select(el)
         .selectAll('g.xUnits')
@@ -43,7 +39,6 @@ const draw = (el, props) => {
     yUnits
         .exit()
         .remove()
-    
     d3.select(el)
         .selectAll('g.xUnits g.yUnits')
         .each((d, i) => {
@@ -162,17 +157,15 @@ const getElementsInZone = (el, props) => {
 }
 
 const resize = (el, props) => {
-    const { nestedCoverage1, nestedProp1, nestedProp2, display, selectedConfig } = props
+    const { nestedProp1, nestedProp2, display, selectedConfig } = props
     let mapY = {}
     nestedProp2.forEach((p, i) => {
         mapY[p.key] = nestedProp2.length - 2 - i
     })
     let category = selectedConfig.properties[0].category
     let dico = dataLib.getDict(nestedProp1)
-    //console.log(dico, category, nestedCoverage1)
     const xScale = d3.scaleLinear().range([0, display.viz.useful_width])
     if (category === 'number' || category === 'datetime') {
-        //xScale.domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
         xScale.domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
     } else if (category === 'text' || category === 'uri') {
         xScale.domain([0, nestedProp1.length - 1])
@@ -192,7 +185,6 @@ const resize = (el, props) => {
         .each(d => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
-    //let unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedCoverage1, category))
     let unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedProp1, category))
     if (unitWidth < 1) unitWidth = 1
     const unitHeight = Math.round(display.viz.useful_height / (props.nestedProp2.length - 1))

@@ -1,5 +1,4 @@
 import React from 'react'
-import * as d3 from 'd3'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 // components
@@ -14,8 +13,7 @@ import SelectionZone from '../elements/SelectionZone'
 import d3TreeMap from '../../d3/d3TreeMap'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
-import { deduplicate, getAxis, getLegend, getThresholdsForLegend, groupTextData, groupTimeData, nestData } from '../../lib/dataLib'
-import { getQuantitativeColors } from '../../lib/paletteLib'
+import { deduplicate, nestData } from '../../lib/dataLib'
 import scaleLib, { getDimensions } from '../../lib/scaleLib'
 // redux functions
 import { setUnitDimensions } from '../../actions/dataActions'
@@ -51,11 +49,11 @@ class TreeMap extends React.Component {
     }
 
     prepareData (nextProps) {
-        const { config, configs, data, dataset, display, getPropPalette, palettes, role, zone } = nextProps
+        const { config, data, dataset, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
 
-        // First prop 
+        // First prop
         const nestedProp1 = nestData(deduplicate(data, ['prop1']), [{
             propName: 'prop1',
             category: 'text'
@@ -67,7 +65,6 @@ class TreeMap extends React.Component {
             cur.values.forEach(val => {
                 acc += Number(val.countprop1.value)
             })
-            
             return acc
         }, 0)
         // console.log(nestedProp1)
@@ -77,8 +74,6 @@ class TreeMap extends React.Component {
             displayedInstances,
             selectedConfig,
             nestedProp1,
-            //legend,
-            //nestedProp2,
             propsLists
         }
     }
@@ -98,7 +93,7 @@ class TreeMap extends React.Component {
     }
     render () {
         const { legend, propsLists } = this.customState
-        const { data, config, display, role, selections, step, zone } = this.props
+        const { config, display, role, selections, step, zone } = this.props
         const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
         return (<g className = { `TreeMap ${this.customState.elementName} role_${role}` } >
             <SelectionZone

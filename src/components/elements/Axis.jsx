@@ -1,6 +1,5 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { select } from '../../actions/selectionActions'
 import d3Axis from '../../d3/d3Axis/d3Axis'
 
 class Axis extends React.Component {

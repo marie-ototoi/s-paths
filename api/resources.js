@@ -4,7 +4,6 @@ import resourceModel from '../models/resource'
 import { getLabels } from '../src/lib/labelLib'
 import queryLib from '../src/lib/queryLib'
 import dataLib from '../src/lib/dataLib'
-import dataset from '../src/reducers/dataset'
 // import { error } from 'util';
 
 const router = express.Router()
@@ -34,7 +33,7 @@ const getResources = async (opt) => {
         forceUpdate: opt.forceUpdate,
         prefixes: opt.prefixes
     }
-    let { defaultGraph, endpoint, forceUpdate, prefixes } = options
+    let { defaultGraph, endpoint, forceUpdate } = options
     if (forceUpdate) {
         await pathModel.deleteMany({ endpoint })
         await resourceModel.deleteMany({ endpoint })
