@@ -49,8 +49,7 @@ const drawRectangles = (el, props, rectangles, type) => {
             .transition(tRemove)
             .attr('fill-opacity', 0)
             .remove()
-        let called = 0
-        let changeRectangles = rectanglesSelection
+        rectanglesSelection
             .transition(tChange)
             .attr('x', d => d.zone.x1)
             .attr('y', d => d.zone.y1)

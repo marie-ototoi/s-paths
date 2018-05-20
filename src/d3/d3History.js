@@ -49,7 +49,6 @@ const destroy = (el) => {
 }
 
 const resize = (el, props) => {
-    const { configs, currentIndex } = props
     d3.select(el).selectAll('circle.config')
         .attr('cx', (d, i) => i * 10)
 

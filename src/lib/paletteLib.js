@@ -32,18 +32,19 @@ const selectColorsInPalette = (colors, length) => {
 const colorPattern = (el, pattern, color) => {
     const stringify = require('virtual-dom-stringify')
     let resultPattern
+    let patternLib
     switch (pattern) {
     case 'lines':
-        const lines = require('svg-patterns/p/lines')
-        resultPattern = lines({
+        patternLib = require('svg-patterns/p/lines')
+        resultPattern = patternLib({
             background: color,
             strokeWidth: 2.5,
             size: 20
         })
         break
     case 'circles':
-        const circles = require('svg-patterns/p/circles')
-        resultPattern = circles({
+        patternLib = require('svg-patterns/p/circles')
+        resultPattern = patternLib({
             background: color,
             radius: 5,
             size: 30,
@@ -51,8 +52,8 @@ const colorPattern = (el, pattern, color) => {
         })
         break
     case 'rhombic':
-        const rhombic = require('svg-patterns/p/rhombic')
-        resultPattern = rhombic({
+        patternLib = require('svg-patterns/p/rhombic')
+        resultPattern = patternLib({
             background: color,
             strokeWidth: 2,
             size: 40,
@@ -60,8 +61,8 @@ const colorPattern = (el, pattern, color) => {
         })
         break
     case 'crosses':
-        const crosses = require('svg-patterns/p/crosses')
-        resultPattern = crosses({
+        patternLib = require('svg-patterns/p/crosses')
+        resultPattern = patternLib({
             background: color,
             strokeWidth: 1.2,
             size: 20,
@@ -69,8 +70,8 @@ const colorPattern = (el, pattern, color) => {
         })
         break
     case 'hexagons':
-        const hexagons = require('svg-patterns/p/hexagons')
-        resultPattern = hexagons({
+        patternLib = require('svg-patterns/p/hexagons')
+        resultPattern = patternLib({
             background: color,
             strokeWidth: 1.8,
             size: 22,
@@ -78,8 +79,8 @@ const colorPattern = (el, pattern, color) => {
         })
         break
     case 'nylon':
-        const nylon = require('svg-patterns/p/nylon')
-        resultPattern = nylon({
+        patternLib = require('svg-patterns/p/nylon')
+        resultPattern = patternLib({
             background: color,
             strokeWidth: 5,
             size: 60,
@@ -87,8 +88,8 @@ const colorPattern = (el, pattern, color) => {
         })
         break
     case 'squares':
-        const squares = require('svg-patterns/p/squares')
-        resultPattern = squares({
+        patternLib = require('svg-patterns/p/squares')
+        resultPattern = patternLib({
             background: color,
             strokeWidth: 2,
             size: 20,
@@ -96,8 +97,8 @@ const colorPattern = (el, pattern, color) => {
         })
         break
     case 'waves':
-        const waves = require('svg-patterns/p/waves')
-        resultPattern = waves({
+        patternLib = require('svg-patterns/p/waves')
+        resultPattern = patternLib({
             background: color,
             strokeWidth: 2,
             size: 20,
@@ -105,8 +106,8 @@ const colorPattern = (el, pattern, color) => {
         })
         break
     case 'woven':
-        const woven = require('svg-patterns/p/woven')
-        resultPattern = woven({
+        patternLib = require('svg-patterns/p/woven')
+        resultPattern = patternLib({
             background: color,
             strokeWidth: 2,
             size: 20,
@@ -114,8 +115,8 @@ const colorPattern = (el, pattern, color) => {
         })
         break
     case 'lines2':
-        const lines2 = require('svg-patterns/p/lines')
-        resultPattern = lines2({
+        patternLib = require('svg-patterns/p/lines')
+        resultPattern = patternLib({
             background: color,
             strokeWidth: 2.5,
             size: 20,
@@ -123,8 +124,8 @@ const colorPattern = (el, pattern, color) => {
         })
         break
     case 'circles2':
-        const circles2 = require('svg-patterns/p/circles')
-        resultPattern = circles2({
+        patternLib = require('svg-patterns/p/circles')
+        resultPattern = patternLib({
             background: color,
             radius: 5,
             size: 30,
@@ -134,8 +135,8 @@ const colorPattern = (el, pattern, color) => {
         })
         break
     case 'rhombic3d':
-        const rhombic3d = require('svg-patterns/p/rhombic3d')
-        resultPattern = rhombic3d({
+        patternLib = require('svg-patterns/p/rhombic3d')
+        resultPattern = patternLib({
             background: color,
             strokeWidth: 2,
             size: 40,
@@ -143,8 +144,8 @@ const colorPattern = (el, pattern, color) => {
         })
         break
     default:
-        const def = require('svg-patterns/p/lines')
-        resultPattern = def({
+        patternLib = require('svg-patterns/p/lines')
+        resultPattern = patternLib({
             background: color,
             strokeWidth: 2.5,
             size: 20

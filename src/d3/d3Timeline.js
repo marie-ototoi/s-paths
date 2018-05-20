@@ -19,7 +19,7 @@ const destroy = (el) => {
 }
 
 const draw = (el, props) => {
-    const { nestedProp1, legend, selectElement, selections, zone } = props
+    const { nestedProp1, legend, selections, zone } = props
     //console.log(selections)
     const timeUnits = d3.select(el)
         .selectAll('g.time')

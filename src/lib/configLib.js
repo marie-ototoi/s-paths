@@ -52,6 +52,7 @@ const scoreProp = (prop, constraint) => {
     // et eventuellement si la prop peut avoir plusieurs valeurs pour une meme instance (specifier dans la vue si c'est souhaite)
     const maxscore = 1
     let cost = 0
+    const { min, max, optimal } = constraint.unique
     switch (prop.category) {
     case 'datetime':
         // repartition
@@ -62,7 +63,6 @@ const scoreProp = (prop, constraint) => {
         break
     case 'text':
         // the closer to the optimal range, the better
-        const { min, max, optimal } = constraint.unique
         cost = getCost(prop.unique, min, max, optimal, maxscore)
         break
     default:

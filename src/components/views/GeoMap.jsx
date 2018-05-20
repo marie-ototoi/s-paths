@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 import d3GeoMap from '../../d3/d3GeoMap'
@@ -14,13 +15,9 @@ class GeoMap extends React.Component {
         this.state = {
             setLegend: this.setLegend,
             selectElements: this.selectElements,
-            elementName: `GeoMap_${props.zone}`
+            elementName: `refGeoMap_${props.zone}`
         }
     }
-    componentWillMount () {
-
-    }
-
     render () {
         // console.log('salut GeoMap')
         const { display, zone } = this.props
@@ -28,7 +25,7 @@ class GeoMap extends React.Component {
         return (<g className = { classN } >
             <g
                 transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
-                ref = { this.refs.elementName } >
+                ref = {(c) => { this[this.state.elementName] = c }} >
             </g>
         </g>)
     }
@@ -43,7 +40,6 @@ class GeoMap extends React.Component {
         select(elements, zone, selections)
     }
     */
-
     setLegend (legend) {
         this.setState({ legend })
     }
@@ -53,15 +49,22 @@ class GeoMap extends React.Component {
     }
     componentDidMount () {
         // console.log(this.props.data)
-        d3GeoMap.create(this.refs.elementName, { ...this.props, ...this.state })
+        d3GeoMap.create(this[this.state.elementName], { ...this.props, ...this.state })
     }
     componentDidUpdate () {
         // console.log('update')
-        d3GeoMap.update(this.refs.elementName, { ...this.props, ...this.state })
+        d3GeoMap.update(this[this.state.elementName], { ...this.props, ...this.state })
     }
     componentWillUnmount () {
-        d3GeoMap.destroy(this.refs.elementName, { ...this.props, ...this.state })
+        d3GeoMap.destroy(this[this.state.elementName], { ...this.props, ...this.state })
     }
+}
+
+GeoMap.propTypes = {
+    display: PropTypes.object,
+    selections: PropTypes.array,
+    zone: PropTypes.string,
+    select: PropTypes.func,
 }
 
 function mapStateToProps (state) {

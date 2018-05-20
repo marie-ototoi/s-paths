@@ -1,5 +1,4 @@
 import * as d3 from 'd3'
-import dataLib from '../lib/dataLib'
 
 const create = (el, props) => {
     // console.log('create', props)

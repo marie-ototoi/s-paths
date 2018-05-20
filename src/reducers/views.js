@@ -107,10 +107,10 @@ const defaultState = [
 ]
 
 const view = (state = {}, action) => {
+    let relevantProps = state.stats
     switch (action.type) {
     case types.SELECT_VIEWS:
         // for each prop, check if it fits the constraints
-        let relevantProps = state.stats
         return {
             ...state,
             relevantProps
