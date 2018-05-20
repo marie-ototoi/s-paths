@@ -84,8 +84,8 @@ const getStats = async (opt) => {
             totalInstances,
             selectionInstances,
             options: {
-                ...paths.options//,
-                //labels: newlabels
+                ...paths.options,
+                labels: newlabels
             }
         }
     }

@@ -1,48 +1,63 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-import d3Axis from '../../d3/d3Axis/d3Axis'
 
-class Axis extends React.Component {
+import d3Axis from '../../d3/d3Axis'
+
+import { getDimensions } from '../../lib/scaleLib'
+
+import { select } from '../../actions/selectionActions'
+import { selectProperty } from '../../actions/dataActions'
+
+class Axis extends React.PureComponent {
     constructor (props) {
         super(props)
-        this.state = {}
+        this.customState = {
+            elementName: `ref${props.zone}_axis_${props.type}`,
+            dimensions: getDimensions('axis' + props.type, props.display.zones[props.zone], props.display.viz, props.offset)
+        }
     }
-
     render () {
+        const { display, offset, type, zone } = this.props
+        this.customState.dimensions = getDimensions('axis' + type, display.zones[zone], display.viz, offset)
+        const { x, y, width } = this.customState.dimensions
+        const x1 = (type === 'Bottom') ? x : x + width
         return (<g className = "Axis"
-            ref = {this.props.zone + '-' + this.props.type} >
+            transform = { `translate(${x1}, ${y})` }
+            ref = {(c) => { this[this.customState.elementName] = c }}
+        >
         </g>)
     }
     componentDidMount () {
-        if (this.props.zone === undefined || this.props.type === undefined) return
-        d3Axis.create(this.refs[this.props.zone + '-' + this.props.type], this.props)
+        d3Axis.create(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        if (this.props.zone === undefined || this.props.type === undefined) return
-        d3Axis.update(this.refs[this.props.zone + '-' + this.props.type], this.props)
+        d3Axis.update(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        /*
-        const { zone, type } = this.props
-        if (type === 'plain') {
-            d3PlainLegend.destroy(this.refs[`legend_${zone}`])
-        }
-        */
+        d3Axis.destroy(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
+}
+
+Axis.propTypes = {
+    display: PropTypes.object,
+    offset: PropTypes.number,
+    type: PropTypes.string,
+    zone: PropTypes.string,
 }
 
 function mapStateToProps (state) {
     return {
-        /*        display: state.display,
-        data: state.data,
-        selections: state.selections
-        */
+        display: state.display,
+        selections: state.selections,
+        dataset: state.dataset
     }
 }
 
 function mapDispatchToProps (dispatch) {
     return {
-    //    select: select(dispatch)
+        select: select(dispatch),
+        selectProperty: selectProperty(dispatch)
     }
 }
 

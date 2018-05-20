@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
@@ -79,6 +80,7 @@ class App extends React.Component {
         if (!this.props.configs.future.length > 0) this.props.endTransition(zone)
     }
     componentWillUpdate (nextProps, nextState) {
+        // console.log('foutu ?', getCurrentState(this.props.data, 'main'), getCurrentState(nextProps.data, 'main'))
         if (getCurrentState(this.props.data, 'main') === 'active' && getCurrentState(nextProps.data, 'main') === 'transition') {
             // console.log('1 - ON LANCE main')
             this.setState({ [`main_step`]: 'launch' })
@@ -97,7 +99,7 @@ class App extends React.Component {
         // console.log('views', views)
         // console.log('dataset', dataset)
         // console.log('configs', configs)
-        // console.log('data', data)
+        // console.log('data', data,  this.state.main_step )
         // console.log('selections', selections)
         const componentIds = {
             'HeatMap': HeatMap,
@@ -108,7 +110,6 @@ class App extends React.Component {
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')
         const statusAside = getCurrentState(this.props.data, 'aside')
-        const statusConfigs = (statusMain === 'transition' || statusAside === 'transition') ? 'transition' : 'active'
         const mainConfig = getConfig(getCurrentConfigs(configs, 'active'), 'main')
         // console.log(getCurrentConfigs(configs, 'transition'))
         const mainTransitionConfig = getConfig(getCurrentConfigs(configs, 'transition'), 'main')
@@ -124,7 +125,7 @@ class App extends React.Component {
             style = {{ width: display.screen.width + 'px' }}
         >
             <svg
-                ref = "view"
+                ref = {(c) => { this.refView = c }}
                 width = { display.screen.width }
                 height = { display.screen.height }
                 viewBox = { `${display.viewBox.x}, ${display.viewBox.y}, ${display.viewBox.width}, ${display.viewBox.height}` }
@@ -144,7 +145,7 @@ class App extends React.Component {
                         // coverage = { getResults(data, 'main', 'coverage') }
                         config = { getConfig(getCurrentConfigs(configs, 'transition'), 'main') }
                         selections = { selectionLib.getSelections(selections, 'main', 'transition') }
-                        ref = "maintransition"
+                        ref = {(c) => { this.refMainTransition = c }}
                         handleTransition = { this.handleTransition }
                     />
                 }
@@ -167,7 +168,7 @@ class App extends React.Component {
                         data = { getResults(data, 'main', 'active') }
                         config = { mainConfig }
                         selections = { selectionLib.getSelections(selections, 'main', 'active') }
-                        ref = "main"
+                        ref = {(c) => { this.refMain = c }}
                         handleTransition = { this.handleTransition }
                     />
                 }
@@ -181,7 +182,7 @@ class App extends React.Component {
                         // coverage = { getResults(data, 'aside', 'coverage') }
                         config = { getConfig(getCurrentConfigs(configs, 'transition'), 'aside') }
                         selections = { selectionLib.getSelections(selections, 'aside', 'transition') }
-                        ref = "asidetransition"
+                        ref = {(c) => { this.refAsideTransition = c }}
                         handleTransition = { this.handleTransition }
                     />
                 }
@@ -204,7 +205,7 @@ class App extends React.Component {
                         // coverage = { getResults(data, 'aside', 'coverage') }
                         config = { asideConfig }
                         selections = { selectionLib.getSelections(selections, 'aside', 'active') }
-                        ref = "aside"
+                        ref = {(c) => { this.refAside = c }}
                         handleTransition = { this.handleTransition }
                     />
                 }
@@ -223,6 +224,24 @@ class App extends React.Component {
             vizDef: display.vizDefPercent
         })
     }
+}
+
+App.propTypes = {
+    configs: PropTypes.object.isRequired,
+    data: PropTypes.object.isRequired,
+    dataset: PropTypes.object.isRequired,
+    display: PropTypes.object.isRequired,
+    mode: PropTypes.string.isRequired,
+    selections: PropTypes.array.isRequired,
+    role: PropTypes.string,
+    step: PropTypes.string,
+    views: PropTypes.array.isRequired,
+    zone: PropTypes.string,
+    endTransition: PropTypes.func.isRequired,
+    handleTransition: PropTypes.func,
+    loadData: PropTypes.func.isRequired,
+    loadResources: PropTypes.func.isRequired,
+    setDisplay: PropTypes.func.isRequired
 }
 
 function mapStateToProps (state) {

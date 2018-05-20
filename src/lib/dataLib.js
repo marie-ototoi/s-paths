@@ -125,10 +125,7 @@ const getResults = (data, zone, status) => {
     data = getCurrentData(data, status)
     data = data.filter(d => d.zone === zone)
     let statementsType
-    if (status === 'coverage') {
-        status = data[0].status
-        statementsType = 'coverageStatements'
-    } else if (status === 'delta') {
+    if (status === 'delta') {
         status = 'transition'
         statementsType = 'deltaStatements'
     } else {

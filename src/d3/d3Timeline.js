@@ -151,7 +151,7 @@ const getElementsInZone = (el, props) => {
 // const retrieveValues
 
 const resize = (el, props) => {
-    const { nestedCoverage1, nestedProp1, display, role, zone } = props
+    const { nestedProp1, display, role, zone } = props
     let maxUnitsPerYear
     if (display.unitDimensions[zone][role] &&
         display.unitDimensions[zone][role].maxUnitsPerYear) {

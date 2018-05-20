@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
@@ -64,6 +65,19 @@ class Coverage extends React.PureComponent {
             >Explore Selection</text>
         </g>)
     }
+}
+Coverage.propTypes = {
+    config: PropTypes.object,
+    configs: PropTypes.object,
+    dataset: PropTypes.object,
+    display: PropTypes.object,
+    displayedInstances: PropTypes.number,
+    offset: PropTypes.number,
+    selectedInstances: PropTypes.number,
+    selections: PropTypes.array,
+    views: PropTypes.array,
+    zone: PropTypes.string,
+    loadData: PropTypes.func,
 }
 
 function mapStateToProps (state) {

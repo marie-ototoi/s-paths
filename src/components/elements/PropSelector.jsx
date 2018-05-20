@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
@@ -8,7 +9,7 @@ class PropSelector extends React.PureComponent {
         super(props)
         this.handleSelect = this.handleSelect.bind(this)
         this.state = {
-            elementName: `${props.zone}_selector_${props.propIndex} propSelector`,
+            elementName: `${props.zone}_selector_${props.propIndex}`,
             selected: props.selected
         }
     }
@@ -35,7 +36,7 @@ class PropSelector extends React.PureComponent {
         })
         const selectedProp = propList[selectedPropIndex]
         return (
-            <foreignObject className = {this.state.elementName}
+            <foreignObject className = {this.state.elementName + ` propSelector`}
                 transform = { `translate(${x}, ${y})` }
                 ref = { this.state.elementName }
                 width = { width }
@@ -73,6 +74,22 @@ class PropSelector extends React.PureComponent {
             </foreignObject>
         )
     }
+}
+
+PropSelector.propTypes = {
+    align: PropTypes.string,
+    config: PropTypes.object,
+    configs: PropTypes.object,
+    dataset: PropTypes.object,
+    dimensions: PropTypes.object,
+    propIndex: PropTypes.number,
+    propList: PropTypes.array,
+    selected: PropTypes.bool,
+    type: PropTypes.string,
+    views: PropTypes.array,
+    zone: PropTypes.string,
+    loadData: PropTypes.func,
+    selectProperty: PropTypes.func
 }
 
 function mapStateToProps (state) {

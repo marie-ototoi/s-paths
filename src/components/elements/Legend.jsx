@@ -1,15 +1,18 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 
-import d3PlainLegend from '../../d3/d3PlainLegend'
+import d3Legend from '../../d3/d3Legend'
 
 import { getDimensions } from '../../lib/scaleLib'
 
 class Legend extends React.PureComponent {
     constructor (props) {
         super(props)
-        this.customState = { }
+        this.customState = {
+            element_name: `legend_${props.zone}`
+        }
     }
     render () {
         const { display, offset, zone } = this.props
@@ -17,7 +20,7 @@ class Legend extends React.PureComponent {
         this.customState.dimensions = dimensions
         return (<g className = "Legend"
             transform = { `translate(${dimensions.x}, ${dimensions.y})` }
-            ref = { `legend_${zone}` }
+            ref = {(c) => { this[this.customState.element_name] = c }}
         >
         </g>)
     }
@@ -25,24 +28,31 @@ class Legend extends React.PureComponent {
         return !shallowEqual(this.props, nextProps)
     }
     componentDidMount () {
-        const { zone, type } = this.props
+        const { type } = this.props
         if (type === 'plain') {
-            d3PlainLegend.create(this.refs[`legend_${zone}`], { ...this.props, ...this.customState })
+            d3Legend.create(this[this.customState.element_name], { ...this.props, ...this.customState })
         }
     }
     componentDidUpdate () {
         // console.log('upd')
-        const { zone, type } = this.props
+        const { type } = this.props
         if (type === 'plain') {
-            d3PlainLegend.update(this.refs[`legend_${zone}`], { ...this.props, ...this.customState })
+            d3Legend.update(this[this.customState.element_name], { ...this.props, ...this.customState })
         }
     }
     componentWillUnmount () {
-        const { zone, type } = this.props
+        const { type } = this.props
         if (type === 'plain') {
-            d3PlainLegend.destroy(this.refs[`legend_${zone}`])
+            d3Legend.destroy(this[this.customState.element_name])
         }
     }
+}
+
+Legend.propTypes = {
+    display: PropTypes.object,
+    offset: PropTypes.object,
+    type: PropTypes.string,
+    zone: PropTypes.string,
 }
 
 function mapStateToProps (state) {

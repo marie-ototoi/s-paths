@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 import d3Transition from '../../d3/d3Transition'
@@ -8,19 +9,24 @@ class Transition extends React.PureComponent {
         const { display, zone } = this.props
         return (<g className = "Transition"
             transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
-            ref = { `transition_${zone}` }
+            ref = {(c) => { this[`refTransition_${zone}`] = c }}
         >
         </g>)
     }
     componentDidMount () {
         // console.log('bonjour component Transition')
         const { zone } = this.props
-        d3Transition.create(this.refs[`transition_${zone}`], this.props)
+        d3Transition.create(this[`refTransition_${zone}`], this.props)
     }
     componentWillUnMount () {
         const { zone } = this.props
-        d3Transition.destroy(this.refs[`transition_${zone}`], this.props)
+        d3Transition.destroy(this[`refTransition_${zone}`], this.props)
     }
+}
+
+Transition.propTypes = {
+    display: PropTypes.object.isRequired,
+    zone: PropTypes.string.isRequired
 }
 
 function mapStateToProps (state) {

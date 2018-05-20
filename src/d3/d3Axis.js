@@ -3,7 +3,6 @@ import * as d3 from 'd3'
 const create = (el, props) => {
     //
     if (el && props.axis) {
-        const { dimensions } = props
         draw(el, props)
         resize(el, props)
     }
@@ -32,7 +31,6 @@ const resize = (el, props) => {
     let tickF
     let tickA
     let legendLinePoints
-    let transformation
     if (type === 'Bottom') {
         axeLength = dimensions.width
         legendLinePoints = { x1: 0, y1: 0.5, x2: -30, y2: 0.5 }

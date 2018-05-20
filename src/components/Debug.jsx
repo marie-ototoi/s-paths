@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
@@ -33,6 +34,10 @@ class Debug extends React.Component {
             {yLines}
         </g>)
     }
+}
+
+Debug.propTypes = {
+    display: PropTypes.string
 }
 
 function mapStateToProps (state) {

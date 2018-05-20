@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
@@ -45,14 +46,22 @@ class History extends React.PureComponent {
         </g>)
     }
     componentDidMount () {
-        d3History.create(this.refs[this.state.elementName], { ...this.props, ...this.customState })
+        d3History.create(this[this.state.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3History.update(this.refs[this.state.elementName], { ...this.props, ...this.customState })
+        d3History.update(this[this.state.elementName], { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3History.destroy(this.refs[this.state.elementName], { ...this.props, ...this.customState })
+        d3History.destroy(this[this.state.elementName], { ...this.props, ...this.customState })
     }
+}
+
+History.propTypes = {
+    configs: PropTypes.object,
+    display: PropTypes.object,
+    offset: PropTypes.number,
+    zone: PropTypes.string,
+    jump: PropTypes.func,
 }
 
 function mapStateToProps (state) {

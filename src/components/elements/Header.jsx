@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 // import pluralize from 'pluralize'
 import { connect } from 'react-redux'
@@ -23,30 +24,14 @@ class Header extends React.PureComponent {
                 />
             </g>
         )
-        /* return (<foreignObject
-            transform = { `translate(${x}, ${y})` }
-            width = { width }
-            height = { height }
-        >
-            <h1 >
-                <strong
-                    data-toggle="tooltip" data-placement="bottom"
-                    title = { dataset.labels[0].comment || '' }
-                >
-                    { pluralize(dataset.labels[0].label || dataset.labels[0].prefUri, data.length) }
-                </strong><br />
-                <span>{ dataset.labels[0].comment }</span>
-            </h1>
-        </foreignObject>) */
-        // <span> in </span>
-        // { this.props.dataset.endpoint }
     }
-    componentDidMount () {
-    }
-    componentDidUpdate () {
-    }
-    componentWillUnmount () {
-    }
+}
+
+Header.propTypes = {
+    config: PropTypes.object,
+    dataset: PropTypes.object,
+    display: PropTypes.object,
+    zone: PropTypes.string,
 }
 
 function mapStateToProps (state) {

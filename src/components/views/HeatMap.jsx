@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
@@ -7,7 +8,7 @@ import Header from '../elements/Header'
 import History from '../elements/History'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
-import PlainAxis from '../elements/PlainAxis'
+import Axis from '../elements/Axis'
 import PropSelector from '../elements/PropSelector'
 import SelectionZone from '../elements/SelectionZone'
 // d3
@@ -36,9 +37,6 @@ class HeatMap extends React.Component {
             selectElements: this.selectElements,
             handleMouseUp: this.handleMouseUp
         }
-    }
-
-    componentWillMount () {
         this.prepareData(this.props)
     }
     componentWillUpdate (nextProps, nextState) {
@@ -54,19 +52,6 @@ class HeatMap extends React.Component {
         const { config, data, dataset, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
-        /* let coverageFormatProp1
-        let nestedCoverage1
-        if (display.unitDimensions[zone][role] &&
-            display.unitDimensions[zone][role].nestedCoverage1) {
-            nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
-        } else {
-            nestedCoverage1 = nestData(coverage, [{
-                propName: 'prop1',
-                category: config.matches[0].properties[0].category,
-                max: 50
-            }])
-            this.props.setUnitDimensions({ nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
-        } */
 
         // First prop to be displayed in the bottom axis
         let categoryProp1 = selectedConfig.properties[0].category
@@ -74,10 +59,7 @@ class HeatMap extends React.Component {
             propName: 'prop1',
             category: categoryProp1,
             max: 50
-            // forceGroup: nestedCoverage1[0].group
         }, { propName: 'prop2', category: 'text' }])
-
-        // const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
         const axisBottom = getAxis(nestedProp1, 'prop1', categoryProp1)
         const categoryProp2 = selectedConfig.properties[1].category
         const nestedProp2 = nestData(deduplicate(data, ['prop1', 'prop2']), [{
@@ -118,7 +100,7 @@ class HeatMap extends React.Component {
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = d3HeatMap.getElementsInZone(this.refs.HeatMap, this.props)
+        const elements = d3HeatMap.getElementsInZone(this.refHeatMap, this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
@@ -126,7 +108,6 @@ class HeatMap extends React.Component {
         const { axisBottom, axisLeft, legend } = this.customState
         const { config, display, role, selections, step, zone } = this.props
         const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
-
         return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` } >
             <SelectionZone
                 zone = { zone }
@@ -138,7 +119,7 @@ class HeatMap extends React.Component {
             { step !== 'changing' &&
             <g
                 transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
-                ref = "HeatMap"
+                ref = {(c) => { this.refHeatMap = c }}
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.handleMouseDown }
@@ -171,14 +152,14 @@ class HeatMap extends React.Component {
                     legend = { legend }
                     selectElements = { this.selectElements }
                 />
-                <PlainAxis
+                <Axis
                     type = "Bottom"
                     zone = { zone }
                     axis = { axisBottom }
                     propIndex = { 0 }
                     selectElements = { this.selectElements }
                 />
-                <PlainAxis
+                <Axis
                     type = "Left"
                     zone = { zone }
                     axis = { axisLeft }
@@ -213,7 +194,7 @@ class HeatMap extends React.Component {
     }
 
     selectElements (prop, value, category) {
-        const elements = d3HeatMap.getElements(this.refs.HeatMap, prop, value, category)
+        const elements = d3HeatMap.getElements(this.refHeatMap, prop, value, category)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }
@@ -223,14 +204,28 @@ class HeatMap extends React.Component {
     }
 
     componentDidMount () {
-        d3HeatMap.create(this.refs.HeatMap, { ...this.props, ...this.customState })
+        d3HeatMap.create(this.refHeatMap, { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3HeatMap.update(this.refs.HeatMap, { ...this.props, ...this.customState })
+        d3HeatMap.update(this.refHeatMap, { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3HeatMap.destroy(this.refs.HeatMap, { ...this.props, ...this.customState })
+        d3HeatMap.destroy(this.refHeatMap, { ...this.props, ...this.customState })
     }
+}
+
+HeatMap.propTypes = {
+    config: PropTypes.object,
+    display: PropTypes.object,
+    selections: PropTypes.array,
+    role: PropTypes.string,
+    step: PropTypes.string,
+    zone: PropTypes.string,
+    handleMouseDown: PropTypes.func,
+    handleMouseMove: PropTypes.func,
+    handleMouseUp: PropTypes.func,
+    handleTransition: PropTypes.func,
+    select: PropTypes.func
 }
 
 function mapStateToProps (state) {

@@ -112,10 +112,10 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
                         main: { ...dataMain },
                         aside: { ...dataAside },
                         mainDelta: dataDeltaMain,
-                        asideDelta: dataDeltaAside,
+                        asideDelta: dataDeltaAside// ,
                         // mainCoverage: coverageMain,
                         // asideCoverage: coverageAside,
-                        resetUnitDimensions: 'all'
+                        // resetUnitDimensions: 'all'
                     })
                 })
                 .catch(error => {
@@ -150,15 +150,15 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
     })
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, config, dataset, zone)
-    const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
+    // const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
     let reset = (propIndex === 0 ||
         (propIndex === 1 && getSelectedConfig(config).properties[1].category !== getSelectedConfig(updatedConfig).properties[1].category && (getSelectedConfig(config).properties[1].category === 'datetime' || getSelectedConfig(updatedConfig).properties[1].category === 'datetime')))
     Promise.all([
         getData(endpoint, newQuery, prefixes),
-        getData(endpoint, queryTransition, prefixes),
-        (reset) ? getData(endpoint, coverageQuery, prefixes) : {}
+        getData(endpoint, queryTransition, prefixes) // ,
+        // (reset) ? getData(endpoint, coverageQuery, prefixes) : {}
     ])
-        .then(([newData, newDelta, newCoverage]) => {
+        .then(([newData, newDelta]) => { // newCoverage
             // console.log(newData, newDelta)
             const action = {
                 type: types.SET_DATA,
@@ -167,7 +167,7 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
             }
             action[zone] = newData
             action[zone + 'Delta'] = newDelta
-            action[zone + 'Coverage'] = newCoverage
+            // action[zone + 'Coverage'] = newCoverage
             dispatch(action)
         })
         .catch(error => {

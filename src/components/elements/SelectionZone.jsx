@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
@@ -16,6 +17,14 @@ class SelectionZone extends React.PureComponent {
             transform = { `translate(${dimensions.x}, ${dimensions.y})` }
         ></rect>)
     }
+}
+
+SelectionZone.propTypes = {
+    dimensions: PropTypes.object,
+    zone: PropTypes.string,
+    handleMouseDown: PropTypes.func,
+    handleMouseUp: PropTypes.func,
+    handleMouseMove: PropTypes.func
 }
 
 function mapStateToProps (state) {

@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
@@ -9,7 +10,7 @@ import History from '../elements/History'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import PropSelector from '../elements/PropSelector'
-import PlainAxis from '../elements/PlainAxis'
+import Axis from '../elements/Axis'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 import d3Timeline from '../../d3/d3Timeline'
@@ -22,7 +23,7 @@ import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
 import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
 
-class Timeline extends React.PureComponent {
+class Timeline extends React.Component {
     constructor (props) {
         super(props)
         this.handleMouseDown = this.handleMouseDown.bind(this)
@@ -36,8 +37,6 @@ class Timeline extends React.PureComponent {
             selectElements: this.selectElements,
             handleMouseUp: this.handleMouseUp
         }
-    }
-    componentWillMount () {
         this.prepareData(this.props)
     }
     componentWillUpdate (nextProps, nextState) {
@@ -66,7 +65,6 @@ class Timeline extends React.PureComponent {
         const categoryProp1 = selectedConfig.properties[0].category
         const axisBottom = getAxis(nestedProp1, 'prop1', categoryProp1)
         // Second prop to be displayed in the legend
-
         const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
         const pathProp2 = selectedConfig.properties[1].path
         const categoryProp2 = selectedConfig.properties[1].category
@@ -95,7 +93,7 @@ class Timeline extends React.PureComponent {
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = d3Timeline.getElementsInZone(this.refs.Timeline, this.props)
+        const elements = d3Timeline.getElementsInZone(this.refTimeline, this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
@@ -116,7 +114,7 @@ class Timeline extends React.PureComponent {
             { step !== 'changing' &&
             <g
                 transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
-                ref = "Timeline"
+                ref = {(c) => { this.refTimeline = c }}
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.handleMouseDown }
@@ -146,7 +144,7 @@ class Timeline extends React.PureComponent {
                     legend = { legend }
                     selectElements = { this.selectElements }
                 />
-                <PlainAxis
+                <Axis
                     type = "Bottom"
                     zone = { zone }
                     axis = { axisBottom }
@@ -181,7 +179,7 @@ class Timeline extends React.PureComponent {
         </g>)
     }
     selectElements (prop, value, category) {
-        const elements = d3Timeline.getElements(this.refs.Timeline, prop, value, category)
+        const elements = d3Timeline.getElements(this.refTimeline, prop, value, category)
         // console.log(prop, value, elements)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
@@ -192,7 +190,7 @@ class Timeline extends React.PureComponent {
     }
     componentDidMount () {
         // console.log(this.props.data)
-        d3Timeline.create(this.refs.Timeline, { ...this.props, ...this.customState })
+        d3Timeline.create(this.refTimeline, { ...this.props, ...this.customState })
         if (this.props.role === 'target') {
             this.render()
             // console.log('called once when transition data are loaded and displayed')
@@ -200,17 +198,30 @@ class Timeline extends React.PureComponent {
     }
     componentDidUpdate () {
         // console.log('update', this.props.selections)
-        d3Timeline.update(this.refs.Timeline, { ...this.props, ...this.customState })
+        d3Timeline.update(this.refTimeline, { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3Timeline.destroy(this.refs.Timeline, { ...this.props, ...this.customState })
+        d3Timeline.destroy(this.refTimeline, { ...this.props, ...this.customState })
     }
+}
+
+Timeline.propTypes = {
+    config: PropTypes.object,
+    data: PropTypes.array,
+    display: PropTypes.object,
+    selections: PropTypes.array,
+    role: PropTypes.string,
+    step: PropTypes.string,
+    zone: PropTypes.string,
+    handleMouseDown: PropTypes.func,
+    handleMouseMove: PropTypes.func,
+    handleMouseUp: PropTypes.func,
+    select: PropTypes.func
 }
 
 function mapStateToProps (state) {
     return {
         dataset: state.dataset,
-        configs: state.configs,
         display: state.display,
         palettes: state.palettes
     }

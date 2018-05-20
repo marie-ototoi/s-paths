@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { createStore } from 'redux'
-import { Provider, connect } from 'react-redux'
+import { Provider } from 'react-redux'
 import reducers from './reducers'
 import App from './components/App'
 
@@ -17,7 +17,7 @@ if (module.hot) {
 
 // mode = main / aside / full / dev
 const init = () => {
-    ReactDOM.render(<Provider store = { store }><App mode = "full" /></Provider>, document.getElementById('discover'))
+    ReactDOM.render(<Provider store = { store }><App mode = "main" /></Provider>, document.getElementById('discover'))
 }
 init()
 

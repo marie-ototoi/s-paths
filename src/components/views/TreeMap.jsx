@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
@@ -7,7 +8,6 @@ import Header from '../elements/Header'
 import History from '../elements/History'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
-import PropSelector from '../elements/PropSelector'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 import d3TreeMap from '../../d3/d3TreeMap'
@@ -34,9 +34,6 @@ class TreeMap extends React.Component {
             selectElements: this.selectElements,
             handleMouseUp: this.handleMouseUp
         }
-    }
-
-    componentWillMount () {
         this.prepareData(this.props)
     }
     componentWillUpdate (nextProps, nextState) {
@@ -87,7 +84,7 @@ class TreeMap extends React.Component {
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = d3TreeMap.getElementsInZone(this.refs.TreeMap, this.props)
+        const elements = d3TreeMap.getElementsInZone(this.refTreeMap, this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
@@ -106,7 +103,7 @@ class TreeMap extends React.Component {
             { step !== 'changing' &&
             <g
                 transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
-                ref = "TreeMap"
+                ref = {(c) => { this.refTreeMap = c }}
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.handleMouseDown }
@@ -148,7 +145,7 @@ class TreeMap extends React.Component {
     }
 
     selectElements (prop, value, category) {
-        const elements = d3TreeMap.getElements(this.refs.TreeMap, prop, value, category)
+        const elements = d3TreeMap.getElements(this.refTreeMap, prop, value, category)
         // console.log(prop, value, elements, category)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
@@ -160,14 +157,28 @@ class TreeMap extends React.Component {
     }
 
     componentDidMount () {
-        d3TreeMap.create(this.refs.TreeMap, { ...this.props, ...this.customState })
+        d3TreeMap.create(this.refTreeMap, { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3TreeMap.update(this.refs.TreeMap, { ...this.props, ...this.customState })
+        d3TreeMap.update(this.refTreeMap, { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3TreeMap.destroy(this.refs.TreeMap, { ...this.props, ...this.customState })
+        d3TreeMap.destroy(this.refTreeMap, { ...this.props, ...this.customState })
     }
+}
+
+TreeMap.propTypes = {
+    config: PropTypes.object,
+    data: PropTypes.array,
+    display: PropTypes.object,
+    selections: PropTypes.array,
+    role: PropTypes.string,
+    step: PropTypes.string,
+    zone: PropTypes.string,
+    handleMouseDown: PropTypes.func,
+    handleMouseMove: PropTypes.func,
+    handleMouseUp: PropTypes.func,
+    select: PropTypes.func
 }
 
 function mapStateToProps (state) {

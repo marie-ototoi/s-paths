@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
@@ -56,6 +57,17 @@ class Nav extends React.PureComponent {
             }) }
         </g>)
     }
+}
+
+Nav.propTypes = {
+    config: PropTypes.object,
+    configs: PropTypes.object,
+    dataset: PropTypes.object,
+    display: PropTypes.object,
+    offset: PropTypes.object,
+    propsLists: PropTypes.array,
+    zone: PropTypes.string,
+    selectView: PropTypes.func,
 }
 
 function mapStateToProps (state) {
