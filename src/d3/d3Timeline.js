@@ -153,20 +153,14 @@ const getElementsInZone = (el, props) => {
 const resize = (el, props) => {
     const { nestedProp1, display, role, zone } = props
     let maxUnitsPerYear
-    if (display.unitDimensions[zone][role] &&
-        display.unitDimensions[zone][role].maxUnitsPerYear) {
-        maxUnitsPerYear = display.unitDimensions[zone][role].maxUnitsPerYear
-    } else if (props.maxUnitsPerYear) {
-        maxUnitsPerYear = props.maxUnitsPerYear
-    } else {
-        maxUnitsPerYear = 1
-        d3.select(el)
-            .selectAll('g.time')
-            .each(d => {
-                if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
-            })
-    }
 
+    maxUnitsPerYear = 1
+    d3.select(el)
+        .selectAll('g.time')
+        .each(d => {
+            if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
+        })
+    
     const xScale = d3.scaleLinear()
         .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
         //.domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
@@ -177,8 +171,8 @@ const resize = (el, props) => {
         .attr('transform', d => `translate(${xScale(Number(d.key))}, 0)`)
     //console.log(maxUnitsPerYear, zone, role)
     //const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedCoverage1, 'datetime'))
-    const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedProp1, 'datetime'))
-    const unitHeight = Math.floor(display.viz.useful_height / maxUnitsPerYear)
+    const unitWidth = (display.viz.useful_width / dataLib.getNumberOfUnits(nestedProp1, 'datetime'))
+    const unitHeight = (display.viz.useful_height / maxUnitsPerYear)
     const group = nestedProp1[0].group
     d3.select(el).selectAll('g.time').selectAll('.elements')
         .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
