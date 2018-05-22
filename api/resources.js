@@ -38,12 +38,17 @@ const getResources = async (opt) => {
         await pathModel.deleteMany({ endpoint })
         await resourceModel.deleteMany({ endpoint })
     }
-    let query = queryLib.makeQueryResources(options)
-    let result = await queryLib.getData(endpoint, query, {})
-    let resources = result.results.bindings.map(resource => {
-        return { total: Number(resource.occurrences.value), type: resource.type.value, endpoint, graph: defaultGraph }
-    })
-    await resourceModel.createOrUpdate(resources)
+    let resources = await resourceModel.find({ endpoint: endpoint, graph: defaultGraph }).exec()
+    if (resources.length > 0) {
+        resources = resources.map(resource => resource._doc)
+    } else {
+        let query = queryLib.makeQueryResources(options)
+        let result = await queryLib.getData(endpoint, query, {})
+        resources = result.results.bindings.map(resource => {
+            return { total: Number(resource.occurrences.value), type: resource.type.value, endpoint, graph: defaultGraph }
+        })
+        await resourceModel.createOrUpdate(resources)
+    }
     let labels = await getLabels(resources.map(resource => {
         return { uri: resource.type }
     }))
