@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 
 import d3Legend from '../../d3/d3Legend'

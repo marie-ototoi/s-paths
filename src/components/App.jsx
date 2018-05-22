@@ -1,11 +1,13 @@
 import PropTypes from 'prop-types'
 import React from 'react'
+import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 // components
 import HeatMap from './views/HeatMap'
 import Timeline from './views/Timeline'
 import TreeMap from './views/TreeMap'
 import GeoMap from './views/GeoMap'
+// import URIWheel from './views/URIWheel'
 import Transition from './elements/Transition'
 import Debug from './Debug'
 // libs
@@ -79,7 +81,7 @@ class App extends React.Component {
         this.setState({ [`${zone}_step`]: 'done', [`${zone}_target`]: [] })
         if (!this.props.configs.future.length > 0) this.props.endTransition(zone)
     }
-    componentWillUpdate (nextProps, nextState) {
+    shouldComponentUpdate (nextProps, nextState) {
         // console.log('foutu ?', getCurrentState(this.props.data, 'main'), getCurrentState(nextProps.data, 'main'))
         if (getCurrentState(this.props.data, 'main') === 'active' && getCurrentState(nextProps.data, 'main') === 'transition') {
             // console.log('1 - ON LANCE main')
@@ -89,9 +91,10 @@ class App extends React.Component {
             // console.log('1 - ON LANCE aside')
             this.setState({ [`aside_step`]: 'launch' })
         }
+        return !shallowEqual(this.props, nextProps)
     }
     render () {
-        const { configs, data, dataset, display, mode, selections } = this.props
+        const { configs, data, /* dataset, */display, mode, selections } = this.props
         // debug logs
         // console.log('env', env)
         // console.log('mode', mode)
@@ -105,7 +108,8 @@ class App extends React.Component {
             'HeatMap': HeatMap,
             'Timeline': Timeline,
             'TreeMap': TreeMap,
-            'GeoMap': GeoMap
+            'GeoMap': GeoMap// ,
+            // 'URIWheel': URIWheel
         }
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')

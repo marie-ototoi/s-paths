@@ -1,5 +1,4 @@
 import * as d3 from 'd3'
-import { nest } from 'd3'
 import shallowEqual from 'shallowequal'
 
 const areLoaded = (data, zone, status) => {

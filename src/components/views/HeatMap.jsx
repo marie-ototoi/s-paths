@@ -45,7 +45,6 @@ class HeatMap extends React.Component {
         }
         return !shallowEqual(this.props, nextProps)
     }
-
     prepareData (nextProps) {
         const { config, data, dataset, zone } = nextProps
         // prepare the data for display
