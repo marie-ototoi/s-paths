@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
-import d3History from '../../d3/d3History'
+import * as d3History from '../../d3/d3History'
 
 import { getDimensions } from '../../lib/scaleLib'
 

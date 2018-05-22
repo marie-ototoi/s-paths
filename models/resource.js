@@ -37,6 +37,4 @@ resourceSchema.statics = {
     }
 }
 
-const Model = mongoose.model('Resource', resourceSchema)
-
-module.exports = Model
+export default mongoose.model('Resource', resourceSchema)

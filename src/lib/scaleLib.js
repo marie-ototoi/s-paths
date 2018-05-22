@@ -1,11 +1,11 @@
 
-const scaleStage = (viewBoxDef, screen) => {
+export const scaleStage = (viewBoxDef, screen) => {
     let width = Math.floor(screen.width * 100 / viewBoxDef.width)
     let height = Math.floor(screen.height * 100 / viewBoxDef.height)
     return { width, height }
 }
 
-const scaleViewBox = (viewBoxDef, stage) => {
+export const scaleViewBox = (viewBoxDef, stage) => {
     let x = Math.floor(stage.width * viewBoxDef.x / 100)
     let y = Math.floor(stage.height * viewBoxDef.y / 100)
     let width = Math.floor(stage.width * viewBoxDef.width / 100)
@@ -13,7 +13,7 @@ const scaleViewBox = (viewBoxDef, stage) => {
     return { x, y, width, height }
 }
 
-const getZones = (zonesDef, stage) => {
+export const getZones = (zonesDef, stage) => {
     return {
         main: scaleViewBox(zonesDef.main, stage),
         aside: scaleViewBox(zonesDef.aside, stage),
@@ -22,14 +22,14 @@ const getZones = (zonesDef, stage) => {
     }
 }
 
-const getScreen = () => {
+export const getScreen = () => {
     return {
         height: window.innerHeight - 5,
         width: window.innerWidth - 5
     }
 }
 
-const getViz = (vizDef, stage) => {
+export const getViz = (vizDef, stage) => {
     return {
         useful_width: scaleX(vizDef.useful_width, stage),
         useful_height: scaleY(vizDef.useful_height, stage),
@@ -38,7 +38,7 @@ const getViz = (vizDef, stage) => {
     }
 }
 
-const getZoneCoord = (zone, mode, zonesDefPercent, screen) => {
+export const getZoneCoord = (zone, mode, zonesDefPercent, screen) => {
     // find top left of the zone
     let factorX = zonesDefPercent[mode].width
     let factorY = zonesDefPercent[mode].height
@@ -50,21 +50,21 @@ const getZoneCoord = (zone, mode, zonesDefPercent, screen) => {
     return { x: offsetX, y: offsetY }
 }
 
-const scaleX = (xPoint, stage) => {
+export const scaleX = (xPoint, stage) => {
     return Math.floor(stage.width * xPoint / 100)
 }
 
-const scaleY = (yPoint, stage) => {
+export const scaleY = (yPoint, stage) => {
     return Math.floor(stage.height * yPoint / 100)
 }
 
-const getGrid = (gridDef, stage) => {
+export const getGrid = (gridDef, stage) => {
     let xPoints = gridDef.xPoints.map(point => scaleX(point, stage))
     let yPoints = gridDef.yPoints.map(point => scaleY(point, stage))
     return { xPoints, yPoints }
 }
 
-const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, height: 0 }) => {
+export const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, height: 0 }) => {
     switch (element) {
     case 'core':
         return {
@@ -145,14 +145,3 @@ const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, he
         }
     }
 }
-
-exports.getDimensions = getDimensions
-exports.getGrid = getGrid
-exports.getScreen = getScreen
-exports.getViz = getViz
-exports.getZoneCoord = getZoneCoord
-exports.getZones = getZones
-exports.scaleStage = scaleStage
-exports.scaleViewBox = scaleViewBox
-exports.scaleX = scaleX
-exports.scaleY = scaleY

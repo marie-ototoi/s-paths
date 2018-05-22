@@ -1,7 +1,7 @@
 import express from 'express'
 import pathModel from '../models/path'
 import { getPropsLabels } from '../src/lib/labelLib'
-import queryLib from '../src/lib/queryLib'
+import * as queryLib from '../src/lib/queryLib'
 // import { error } from 'util';
 
 const router = express.Router()

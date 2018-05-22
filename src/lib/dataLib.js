@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
 import shallowEqual from 'shallowequal'
 
-const areLoaded = (data, zone, status) => {
+export const areLoaded = (data, zone, status) => {
     data = getCurrentData(data, status)
     const filtered = data.filter(d => (d.zone === zone && d.status === status))
     return filtered.length > 0 &&
@@ -9,7 +9,7 @@ const areLoaded = (data, zone, status) => {
         filtered[0].statements.results.bindings.length > 0
 }
 
-const getCurrentState = (data, zone) => {
+export const getCurrentState = (data, zone) => {
     const filtered = data.present.filter(d => (d.zone === zone))
     if (filtered[0].statements.length === 0) {
         return 'loading'
@@ -18,7 +18,7 @@ const getCurrentState = (data, zone) => {
     }
 }
 
-const getDict = (arrayWithKeys) => {
+export const getDict = (arrayWithKeys) => {
     let dico = {}
     arrayWithKeys.forEach((entry, index) => {
         dico[entry.key] = index
@@ -26,7 +26,7 @@ const getDict = (arrayWithKeys) => {
     return dico
 }
 
-const getThresholdsForLegend = (nestedProps, propName, category, nbOfRanges) => {
+export const getThresholdsForLegend = (nestedProps, propName, category, nbOfRanges) => {
     const values = nestedProps.reduce((acc, curr) => {
         curr.values.forEach(val => {
             if (Number.isInteger(val['count' + propName])) {
@@ -46,7 +46,7 @@ const getThresholdsForLegend = (nestedProps, propName, category, nbOfRanges) => 
     })
 }
 
-const getThresholds = (minValue, maxValue, nbOfRanges) => {
+export const getThresholds = (minValue, maxValue, nbOfRanges) => {
     let diff = maxValue - minValue
     let part = Math.ceil(diff / nbOfRanges)
     // console.log()
@@ -74,7 +74,7 @@ const getThresholds = (minValue, maxValue, nbOfRanges) => {
 }
 
 // const groupAggregateData
-const getDateRange = (key, group) => {
+export const getDateRange = (key, group) => {
     key = Number(key)
     if (group === 'century') {
         return [key, key + 99]
@@ -85,7 +85,7 @@ const getDateRange = (key, group) => {
     }
 }
 
-const getNumberOfUnits = (nestedData, category) => {
+export const getNumberOfUnits = (nestedData, category) => {
     if (category === 'datetime') {
         let dif = Number(nestedData[nestedData.length - 1].key) - Number(nestedData[0].key)
         if (nestedData[0].group === 'decade') {
@@ -120,7 +120,7 @@ const getCurrentData = (data, status) => {
     ]
 }
 
-const getResults = (data, zone, status) => {
+export const getResults = (data, zone, status) => {
     data = getCurrentData(data, status)
     data = data.filter(d => d.zone === zone)
     let statementsType
@@ -135,26 +135,26 @@ const getResults = (data, zone, status) => {
     return (filtered.length > 0 && filtered[0][statementsType].results) ? filtered[0][statementsType].results.bindings : []
 }
 
-const getHeadings = (data, zone, status) => {
+export const getHeadings = (data, zone, status) => {
     data = getCurrentData(data, status)
     const filtered = data.filter(d => (d.zone === zone && d.status === status))
     return (filtered.length > 0 && filtered[0].statements.head) ? filtered[0].statements.head.vars : []
 }
 
-const guid = () => {
+export const guid = () => {
     const s4 = () => {
         return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)
     }
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
 }
 
-const makeId = (textstr) => {
+export const makeId = (textstr) => {
     return textstr.replace(/([/:#_\-.\s])/g, (match, p1) => {
         if (p1) return ''
     }).toLowerCase()
 }
 
-const getLegend = (nestedProps, propName, colors, category) => {
+export const getLegend = (nestedProps, propName, colors, category) => {
     return {
         info: nestedProps.map((p, i) => {
             let label = (p.values && p.values.length > 0 && p.values[0].labelprop2) ? p.values[0].labelprop2.value : p.key
@@ -176,7 +176,7 @@ const getLegend = (nestedProps, propName, colors, category) => {
     }
 }
 
-const getReadablePathsParts = (path, labels) => {
+export const getReadablePathsParts = (path, labels) => {
     const parts = path.split('/')
     // if (!labels) return parts.map(part => { return { label: part } })
     return parts
@@ -190,7 +190,7 @@ const getReadablePathsParts = (path, labels) => {
         })
 }
 
-const splitRectangle = (zone, parts) => {
+export const splitRectangle = (zone, parts) => {
     parts = {
         name: 'main',
         children: parts
@@ -216,7 +216,7 @@ const splitRectangle = (zone, parts) => {
     })
 }
 
-const getDeltaIndex = (dataPiece, elements, options) => {
+export const getDeltaIndex = (dataPiece, elements, options) => {
     let { entrypoint, isTarget } = options
     let indexElement
     elements.forEach((el, indexEl) => {
@@ -298,7 +298,7 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
     }, [])
 }
 
-const deduplicate = (data, props) => {
+export const deduplicate = (data, props) => {
     /* return data.reduce((acc, cur) => {
         let alreadyIn = acc.filter(dt => {
             let conditions = props.map(prop => {
@@ -337,7 +337,7 @@ const deduplicate = (data, props) => {
     }, [])
 }
 
-const getTransitionElements = (originElements, targetElements, originConfig, targetConfig, deltaData, zone) => {
+export const getTransitionElements = (originElements, targetElements, originConfig, targetConfig, deltaData, zone) => {
     // console.log('before', zone, originElements, targetElements, originConfig, targetConfig, deltaData)
     deltaData = deltaData.map(data => {
         let indexOrigin = getDeltaIndex(data, originElements, { entrypoint: originConfig.entrypoint, isTarget: false })
@@ -378,7 +378,7 @@ const getTransitionElements = (originElements, targetElements, originConfig, tar
     return { origin: originElements, target: targetElements }
 }
 
-const getAxis = (nestedProps, propName, category) => {
+export const getAxis = (nestedProps, propName, category) => {
     return {
         info: nestedProps.map(p => {
             let range
@@ -404,7 +404,7 @@ const getAxis = (nestedProps, propName, category) => {
     }
 }
 
-const nestData = (data, props) => {
+export const nestData = (data, props) => {
     // first level
     let dataToNest = nestDataLevel(data, props)
     // second level
@@ -523,23 +523,3 @@ const nestDataLevel = (data, props, parent) => {
     }
     return nestedData
 }
-
-exports.areLoaded = areLoaded
-exports.deduplicate = deduplicate
-exports.getAxis = getAxis
-exports.getCurrentState = getCurrentState
-exports.getDateRange = getDateRange
-exports.getDeltaIndex = getDeltaIndex
-exports.getDict = getDict
-exports.getHeadings = getHeadings
-exports.getLegend = getLegend
-exports.getNumberOfUnits = getNumberOfUnits
-exports.getReadablePathsParts = getReadablePathsParts
-exports.getTransitionElements = getTransitionElements
-exports.makeId = makeId
-exports.nestData = nestData
-exports.getThresholds = getThresholds
-exports.getThresholdsForLegend = getThresholdsForLegend
-exports.getResults = getResults
-exports.splitRectangle = splitRectangle
-exports.guid = guid

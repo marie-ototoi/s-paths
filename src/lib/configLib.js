@@ -1,36 +1,36 @@
 import * as d3 from 'd3'
-import dataLib from './dataLib'
+import * as dataLib from './dataLib'
 
-const getSelectedConfig = (config, zone) => {
+export const getSelectedConfig = (config, zone) => {
     return config.matches.filter(m => m.selected === true)[0]
 }
-const getConfigs = (configs, zone) => {
+export const getConfigs = (configs, zone) => {
     return configs.filter(c => c.zone === zone)[0].views
 }
-const getConfig = (configs, zone) => {
+export const getConfig = (configs, zone) => {
     return configs.filter(c => c.zone === zone)[0].views.filter(v => v.selected)[0]
 }
-const getCurrentConfigs = (configs, status) => {
+export const getCurrentConfigs = (configs, status) => {
     if (configs.present[0].status === 'transition') {
         return (status === 'active') ? configs.past[configs.past.length - 1] : configs.present
     } else {
         return configs.present
     }
 }
-const getViewDef = (views, id) => {
+export const getViewDef = (views, id) => {
     // console.log(views, id)
     return views.filter(c => c.id === id)[0] || {}
 }
-const inRange = (val, range) => {
+export const inRange = (val, range) => {
     return (val >= range[0] && val <= range[1])
 }
-const underRange = (val, range) => {
+export const underRange = (val, range) => {
     return (val < range[0])
 }
-const overRange = (val, range) => {
+export const overRange = (val, range) => {
     return (val > range[1])
 }
-const getDeviationCost = (min, max, optimal, score) => {
+export const getDeviationCost = (min, max, optimal, score) => {
     if (!optimal || (!min && !max)) return 0
     const gapMin = (min) ? optimal[0] - min : null
     const gapMax = (max) ? max - optimal[1] : null
@@ -86,7 +86,7 @@ const scoreMatch = (match, entrypointFactor) => {
     // domain rules to add values for some properties : TO DO
     return score * entrypointFactor
 }
-const findAllMatches = (inputList, addList) => {
+export const findAllMatches = (inputList, addList) => {
     return inputList.map(match => {
         // console.log('match', match)
         return addList.map(addElt => {
@@ -100,7 +100,7 @@ const findAllMatches = (inputList, addList) => {
         return a.concat(b)
     }, [])
 }
-const defineConfigs = (views, stats) => {
+export const defineConfigs = (views, stats) => {
     const configSetUp = views.map(view => {
         let propList = []
         // make a list of all possible properties for each constrained prop zone
@@ -185,7 +185,7 @@ const defineConfigs = (views, stats) => {
         { zone: 'aside', views: [...configSetUp] }
     ]
 }
-const activateDefaultConfigs = (configs) => {
+export const activateDefaultConfigs = (configs) => {
     // console.log('activateDefaultConfigs', configs)
     return configs.map((config, cIndex) => {
         return {
@@ -219,7 +219,7 @@ const activateDefaultConfigs = (configs) => {
     })
 }
 
-const getPropsLists = (configs, zone, labels) => {
+export const getPropsLists = (configs, zone, labels) => {
     const maxPropIndex = d3.max(configs.matches.map(m => m.properties.length))
     return Array.from(Array(maxPropIndex).keys()).map(propIndex => {
         return configs.matches
@@ -246,7 +246,7 @@ const getPropsLists = (configs, zone, labels) => {
     })
 }
 
-const selectProperty = (config, zone, propIndex, path) => {
+export const selectProperty = (config, zone, propIndex, path) => {
     let selectedMatch = getSelectedConfig(config, zone)
     // console.log(config, zone, selectedMatch)
     let possibleConfigs = config.matches.map((match, index) => {
@@ -285,7 +285,7 @@ const selectProperty = (config, zone, propIndex, path) => {
     }
 }
 
-const selectView = (id, configs) => {
+export const selectView = (id, configs) => {
     return configs.map(config => {
         return {
             ...config,
@@ -299,19 +299,3 @@ const selectView = (id, configs) => {
         }
     })
 }
-
-exports.activateDefaultConfigs = activateDefaultConfigs
-exports.defineConfigs = defineConfigs
-exports.findAllMatches = findAllMatches
-exports.getConfig = getConfig
-exports.getConfigs = getConfigs
-exports.getCurrentConfigs = getCurrentConfigs
-exports.getDeviationCost = getDeviationCost
-exports.getPropsLists = getPropsLists
-exports.getSelectedConfig = getSelectedConfig
-exports.getViewDef = getViewDef
-exports.inRange = inRange
-exports.overRange = overRange
-exports.selectProperty = selectProperty
-exports.selectView = selectView
-exports.underRange = underRange

@@ -1,9 +1,9 @@
 // import * as d3 from 'd3'
 // import moment from 'moment'
 import { SparqlClient } from 'sparql-client-2'
-import configLib from './configLib'
+import * as configLib from './configLib'
 
-const addSmallestPrefix = (url, prefixes) => {
+export const addSmallestPrefix = (url, prefixes) => {
     const root = getRoot(url)
     const flatRoot = createPrefix(root)
     const checkRoot = (len) => {
@@ -19,20 +19,20 @@ const addSmallestPrefix = (url, prefixes) => {
     return prefixes
 }
 
-const createPrefix = (uri) => {
+export const createPrefix = (uri) => {
     return uri.replace(/([/:#_\-.]|purl|org|data|http|www)/g, (match, p1) => {
         if (p1) return ''
     }).toLowerCase()
 }
 
-const convertPath = (fullPath, prefixes) => {
+export const convertPath = (fullPath, prefixes) => {
     var uriRegex = /<[\w\d:.#_\-/#]+>?/gi
     return fullPath.replace(uriRegex, (match, p1) => {
         if (match) return usePrefix(match.substr(1, match.length - 2), prefixes)
     })
 }
 
-const defineGroup = (prop, options) => {
+export const defineGroup = (prop, options) => {
     const { property, datatype, isiri, isliteral, language } = prop
     const { ignoreList } = options
     let propName = getPropName(property)
@@ -76,7 +76,7 @@ const defineGroup = (prop, options) => {
     }
 }
 
-const FSL2SPARQL = (FSLpath, options) => {
+export const FSL2SPARQL = (FSLpath, options) => {
     let { constraints, entrypointName, entrypointType, graph, hierarchical, optional, propName, sample } = options
     let pathParts = FSLpath.split('/')
     let query = ``
@@ -111,7 +111,7 @@ const FSL2SPARQL = (FSLpath, options) => {
     return `${optional ? 'OPTIONAL { ' : ''}${query}${queryHierarchical}${optional ? '} . ' : ''}`
 }
 
-const getData = (endpoint, query, prefixes) => {
+export const getData = (endpoint, query, prefixes) => {
     const client = new SparqlClient(endpoint)
         .registerCommon('rdf', 'rdfs')
         .register(prefixes)
@@ -125,7 +125,7 @@ const getPropName = (uri) => {
     return uri.replace(root, '')
 }
 
-const getRoot = (uri) => {
+export const getRoot = (uri) => {
     if (uri.slice(-1) === '/') uri = uri.slice(0, uri.length - 1)
     const splitSlash = uri.split('/')
     const slashEnd = splitSlash[splitSlash.length - 1]
@@ -139,14 +139,14 @@ const getRoot = (uri) => {
     }
 }
 
-const ignorePromise = (promise) => {
+export const ignorePromise = (promise) => {
     return promise.catch(e => {
         // console.error(e)
         return undefined
     })
 }
 
-const makePath = (prop, previousProp, level, options) => {
+export const makePath = (prop, previousProp, level, options) => {
     const { property } = prop
     const { prefixes } = options
     const fullPath = `${previousProp.fullPath}/<${property.value}>/*`
@@ -161,7 +161,7 @@ const makePath = (prop, previousProp, level, options) => {
     }
 }
 
-const makePropQuery = (prop, options, queryType) => {
+export const makePropQuery = (prop, options, queryType) => {
     // queryType: count, type, char
     const { constraints, defaultGraph } = options
     const { path } = prop
@@ -213,7 +213,7 @@ ${bindProps}
 }${limit}`
 }
 
-const makePropsQuery = (entitiesClass, options, level) => {
+export const makePropsQuery = (entitiesClass, options, level) => {
     // this is valid only for first level
     const { constraints, defaultGraph } = options
     const pathQuery = FSL2SPARQL(entitiesClass, {
@@ -235,7 +235,7 @@ const makePropsQuery = (entitiesClass, options, level) => {
     } */
 }
 
-const makeQueryFromConstraint = (constraint) => {
+export const makeQueryFromConstraint = (constraint) => {
     const { category, group, propName, value } = constraint
     if (category === 'datetime') {
         // console.log(value, Number(value))
@@ -254,7 +254,7 @@ const makeQueryFromConstraint = (constraint) => {
     }
 }
 
-const makeSelectionConstraints = (selections, selectedConfig, zone) => {
+export const makeSelectionConstraints = (selections, selectedConfig, zone) => {
     const uriSelections = selections.filter(sel => sel.query.type === 'uri' && sel.zone === zone)
     const uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
     // add constraints for constrained groups of entities (heatmap)
@@ -290,7 +290,7 @@ const makeSelectionConstraints = (selections, selectedConfig, zone) => {
 }
 
 // to do : take constraints into account
-const makeQuery = (entrypoint, configZone, zone, options) => {
+export const makeQuery = (entrypoint, configZone, zone, options) => {
     const { defaultGraph, constraints, prop1only } = options
     // console.log(configZone)
     let selectedConfig = configLib.getSelectedConfig(configZone, zone)
@@ -343,7 +343,7 @@ const makeGeoNamesQuery = (options) => {
     let service = (getRoot(defaultGraph) !== getRoot(geograph)) ? ` { service <${geograph}> }` : ``
 }
 
-const makeQueryResources = (options) => {
+export const makeQueryResources = (options) => {
     const { defaultGraph } = options
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     return `SELECT DISTINCT ?type (COUNT(?type) as ?occurrences) ${graph}
@@ -353,7 +353,7 @@ const makeQueryResources = (options) => {
     ORDER BY DESC(?occurrences)`
 }
 
-const makeTotalQuery = (entitiesClass, options) => {
+export const makeTotalQuery = (entitiesClass, options) => {
     let { constraints, defaultGraph } = options
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     return `SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) ${graph}
@@ -362,7 +362,7 @@ WHERE {
 }`
 }
 
-const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
+export const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
     // let newConstraints = newOptions.constraints
     // newConstraints = newConstraints.replace('?', '?new')
     const { defaultGraph, constraints } = options
@@ -427,7 +427,7 @@ const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
     ORDER BY ${orderList}`
 }
 
-const mergeStatsWithProps = (props, countStats, typeStats, totalEntities) => {
+export const mergeStatsWithProps = (props, countStats, typeStats, totalEntities) => {
     return props.map((prop, index) => {
         if (countStats[index] && countStats[index].results.bindings[0]) {
             let countStat = countStats[index].results.bindings[0]
@@ -455,7 +455,7 @@ const mergeStatsWithProps = (props, countStats, typeStats, totalEntities) => {
     })
 }
 
-const prefixDefined = (uri, prefixes) => {
+export const prefixDefined = (uri, prefixes) => {
     let root = getRoot(uri)
     let rootList = []
     for (let pref in prefixes) {
@@ -464,7 +464,7 @@ const prefixDefined = (uri, prefixes) => {
     return rootList.includes(root)
 }
 
-const useFullUri = (path, prefixes) => {
+export const useFullUri = (path, prefixes) => {
     return path.replace(path, (match, offset, string) => {
         for (var pref in prefixes) {
             let splittedUri = match.split(pref + ':')
@@ -474,7 +474,7 @@ const useFullUri = (path, prefixes) => {
     })
 }
 
-const usePrefix = (uri, prefixes) => {
+export const usePrefix = (uri, prefixes) => {
     return uri.replace(uri, (match, offset, string) => {
         for (var pref in prefixes) {
             let splittedUri = match.split(prefixes[pref])
@@ -484,30 +484,7 @@ const usePrefix = (uri, prefixes) => {
     })
 }
 
-const usesPrefix = (uri, prefixes) => {
+export const usesPrefix = (uri, prefixes) => {
     const parts = uri.split(':')
     return uri.match(/:/g) && !uri.match(/\//g) && prefixes[parts[0]] !== undefined
 }
-
-exports.convertPath = convertPath
-exports.createPrefix = createPrefix
-exports.defineGroup = defineGroup
-exports.FSL2SPARQL = FSL2SPARQL
-exports.getData = getData
-exports.getRoot = getRoot
-exports.ignorePromise = ignorePromise
-exports.makeQuery = makeQuery
-exports.makeQueryFromConstraint = makeQueryFromConstraint
-exports.makeQueryResources = makeQueryResources
-exports.makePath = makePath
-exports.makePropQuery = makePropQuery
-exports.makePropsQuery = makePropsQuery
-exports.makeSelectionConstraints = makeSelectionConstraints
-exports.makeTotalQuery = makeTotalQuery
-exports.makeTransitionQuery = makeTransitionQuery
-exports.mergeStatsWithProps = mergeStatsWithProps
-exports.prefixDefined = prefixDefined
-exports.addSmallestPrefix = addSmallestPrefix
-exports.useFullUri = useFullUri
-exports.usePrefix = usePrefix
-exports.usesPrefix = usesPrefix

@@ -1,7 +1,7 @@
 import * as types from '../constants/ActionTypes'
-import scale from '../lib/scaleLib'
+import * as scale from '../lib/scaleLib'
 
-const setDisplay = (dispatch) => ({ env, mode, zonesDef, gridDef, screen, vizDef }) => {
+export const setDisplay = (dispatch) => ({ env, mode, zonesDef, gridDef, screen, vizDef }) => {
     let viewBoxDef = (env === 'dev') ? zonesDef.dev : zonesDef[mode || 'full']
     let stage = scale.scaleStage(viewBoxDef, screen)
     let viewBox = scale.scaleViewBox(viewBoxDef, stage)
@@ -19,5 +19,3 @@ const setDisplay = (dispatch) => ({ env, mode, zonesDef, gridDef, screen, vizDef
         viz
     })
 }
-
-exports.setDisplay = setDisplay

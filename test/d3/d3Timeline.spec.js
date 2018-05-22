@@ -7,7 +7,7 @@ chai.use(chaiEnzyme())
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
-import d3Timeline from '../../src/d3/d3Timeline'
+import * as d3Timeline from '../../src/d3/d3Timeline'
 import { load, loadEmpty, loadError } from '../data/nobel'
 
 describe('d3Timeline', function () {
@@ -34,6 +34,6 @@ describe('d3Timeline', function () {
         // resize
     })
     it('should trigger the setLegend function once the legend is calculated', function () {
-        // makeLegend 
+        // makeLegend
     })
 })

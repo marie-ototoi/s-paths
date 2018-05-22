@@ -2,23 +2,23 @@ import chai, {expect} from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
-import palette from '../../src/lib/paletteLib'
+import * as palette from '../../src/lib/paletteLib'
 
-const state1 = [{ 
+const state1 = [{
     properties: [],
     colors: ['#e8bcbd', '#e39d9d']
 },{
     properties: [],
     colors: ['#f58ea9', '#e35168']
 }]
-const state2 = [{ 
+const state2 = [{
     properties: ['path1'],
     colors: ['#e8bcbd', '#e39d9d']
 },{
     properties: [],
     colors: ['#f58ea9', '#e35168']
 }]
-const state3 = [{ 
+const state3 = [{
     properties: ['path1', 'path1'],
     colors: ['#e8bcbd', '#e39d9d']
 },{

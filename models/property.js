@@ -57,6 +57,4 @@ propertySchema.statics = {
     }
 }
 
-const Model = mongoose.model('Property', propertySchema)
-
-module.exports = Model
+export default mongoose.model('Property', propertySchema)

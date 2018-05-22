@@ -2,7 +2,7 @@ import chai, {expect} from 'chai'
 import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 chai.use(sinonChai)
-import scale from '../../src/lib/scaleLib'
+import * as scale from '../../src/lib/scaleLib'
 
 const displayDef = {
     dev: { x: 0, y: 0, width: 100, height: 100 },
@@ -35,7 +35,7 @@ describe('lib/scale', () => {
     })
 
     it('should return the actual dimensions of the viewbox based on the viewbox definition in percentage and the stage dimensions', () => {
-        
+
         let vb1 = scale.scaleViewBox(displayDef.dev, stages[0])
         let vb2 = scale.scaleViewBox(displayDef.full, stages[0])
         let vb3 = scale.scaleViewBox(displayDef.main, stages[1])

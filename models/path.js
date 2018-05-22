@@ -59,6 +59,4 @@ pathSchema.statics = {
     }
 }
 
-const Model = mongoose.model('Path', pathSchema)
-
-module.exports = Model
+export default mongoose.model('Path', pathSchema)
