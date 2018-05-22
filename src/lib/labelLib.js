@@ -3,7 +3,7 @@ import rdflib from 'rdflib'
 import propertyModel from '../../models/property'
 import queryLib, { ignorePromise } from './queryLib'
 
-const getPropsLabels = (prefixes, props) => {
+const getPropsLabels = async (prefixes, props) => {
     // find all classes and props used in paths
     let urisToLabel = props.reduce((acc, curr) => {
         let pathParts = curr.path.split('/')
