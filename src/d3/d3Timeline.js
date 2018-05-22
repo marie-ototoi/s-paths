@@ -63,7 +63,7 @@ const draw = (el, props) => {
         .classed('selected', d => d.selected)
         .attr('fill', d => d.color)
         .attr('opacity', d => {
-            d.opacity = (selections.length > 0 && d.selected !== true) ? 0.5 : 1
+            d.opacity = (selections.filter(s => s.zone === zone).length > 0 && d.selected !== true) ? 0.5 : 1
             return d.opacity
         })
         .on('mouseup', d => {
@@ -151,7 +151,7 @@ const getElementsInZone = (el, props) => {
 // const retrieveValues
 
 const resize = (el, props) => {
-    const { nestedProp1, display, role, zone } = props
+    const { nestedProp1, display } = props
     let maxUnitsPerYear
 
     maxUnitsPerYear = 1

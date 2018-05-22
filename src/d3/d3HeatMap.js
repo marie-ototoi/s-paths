@@ -72,7 +72,7 @@ const draw = (el, props) => {
         .attr('id', d => d.selection.selector) // only needed to better understand html source code
         .classed('selected', d => d.selected)
         .attr('fill', d => d.color)
-        .attr('opacity', d => (selections.length > 0 && d.selected !== true) ? 0.5 : 1)
+        .attr('opacity', d => (selections.filter(s => s.zone === zone).length > 0 && d.selected !== true) ? 0.5 : 1)
         .on('mouseup', d => {
             props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, zone)
         })

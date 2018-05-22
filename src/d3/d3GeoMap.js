@@ -63,7 +63,7 @@ const draw = (el, props) => {
         .classed('selected', d => d.selected)
         // .attr('fill', d => d.color)
         .attr('opacity', d => {
-            return (selections.length > 0 && d.selected !== true) ? 0.5 : 1
+            return (selections.filter(s => s.zone === zone).length > 0 && d.selected !== true) ? 0.5 : 1
         })
         .on('mouseup', d => {
             props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, zone)
