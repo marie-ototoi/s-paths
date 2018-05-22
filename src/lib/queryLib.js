@@ -26,7 +26,7 @@ export const createPrefix = (uri) => {
 }
 
 export const convertPath = (fullPath, prefixes) => {
-    var uriRegex = /<[\w\d:.#_\-/#]+>?/gi
+    const uriRegex = /<[\w\d:.#_\-/]+>?/gi
     return fullPath.replace(uriRegex, (match, p1) => {
         if (match) return usePrefix(match.substr(1, match.length - 2), prefixes)
     })
@@ -49,14 +49,14 @@ export const defineGroup = (prop, options) => {
         category = 'uri'
     } else if ((datatype && datatype === 'http://www.w3.org/2001/XMLSchema#date') ||
         propName.match(/year|date|birthday/gi) ||
-        propName.match(/(\/|#)(birth|death|created|modified)$/gi)) {
+        propName.match(/[/#](birth|death|created|modified)$/gi)) {
         category = 'datetime'
     } else if (propName.match(/latitude/gi) ||
-        propName.match(/(\/|#)(lat)$/gi)) {
+        propName.match(/[/#](lat)$/gi)) {
         category = 'geo'
         subcategory = 'latitude'
     } else if (propName.match(/longitude/gi) ||
-        propName.match(/(\/|#)(long)$/gi)) {
+        propName.match(/[/#](long)$/gi)) {
         category = 'geo'
         subcategory = 'longitude'
     } else if (propName.match(/place|country|city/gi)) {
