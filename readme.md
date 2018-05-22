@@ -48,6 +48,8 @@ $ mkdir -p /data/db
 $ mongod
 ```
 
+The path to MongoDb database must be set in .env file (see .env.example file)
+
 ### virtuoso
 
 sparql endpoint can be distant: in `/src/reducers/dataset.js` set:
