@@ -78,7 +78,7 @@ const getStats = async (opt) => {
 
         // last parameter is for first time query, should be changed dynamically
         // get human readable rdfs:labels and rdfs:comments of all properties listed
-        let newlabels = (labels.length > 0) ? labels : getPropsLabels(paths.options.prefixes, paths.statements)
+        let newlabels = (labels.length > 0) ? labels : await getPropsLabels(paths.options.prefixes, paths.statements)
         return {
             statements: paths.statements.sort((a, b) => a.level - b.level),
             totalInstances,
