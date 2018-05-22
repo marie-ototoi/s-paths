@@ -39,13 +39,10 @@ class Timeline extends React.Component {
         }
         this.prepareData(this.props)
     }
-    componentWillUpdate (nextProps, nextState) {
-        // console.log('equal ?', shallowEqual(this.props.data, nextProps.data), this.props, nextProps)
+    shouldComponentUpdate (nextProps, nextState) {
         if (!shallowEqual(this.props, nextProps)) {
             this.prepareData(nextProps)
         }
-    }
-    shouldComponentUpdate (nextProps, nextState) {
         // console.log('equal ?', shallowEqual(this.props, nextProps), shallowEqual(this.props.data, nextProps.data))
         return !shallowEqual(this.props, nextProps)
     }
@@ -55,7 +52,7 @@ class Timeline extends React.Component {
         const selectedConfig = getSelectedConfig(config, zone)
         // First prop to be displayed in the bottom axis
         let maxUnitsPerYear
-        const nestedProp1 = nestData(deduplicate(data, ['entrypoint']), [{
+        const nestedProp1 = nestData(data, [{
             propName: 'prop1',
             category: 'datetime',
             max: 50,

@@ -39,12 +39,10 @@ class HeatMap extends React.Component {
         }
         this.prepareData(this.props)
     }
-    componentWillUpdate (nextProps, nextState) {
+    shouldComponentUpdate (nextProps, nextState) {
         if (!shallowEqual(this.props, nextProps)) {
             this.prepareData(nextProps)
         }
-    }
-    shouldComponentUpdate (nextProps, nextState) {
         return !shallowEqual(this.props, nextProps)
     }
 

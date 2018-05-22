@@ -24,9 +24,6 @@ class Legend extends React.PureComponent {
         >
         </g>)
     }
-    shouldComponentUpdate (nextProps, nextState) {
-        return !shallowEqual(this.props, nextProps)
-    }
     componentDidMount () {
         const { type } = this.props
         if (type === 'plain') {
