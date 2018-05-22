@@ -1,14 +1,11 @@
-import * as d3 from 'd3'
 import React from 'react'
-import { shallow, mount, render } from 'enzyme'
 import chai, {expect} from 'chai'
 import chaiEnzyme from 'chai-enzyme'
-chai.use(chaiEnzyme())
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-chai.use(sinonChai)
 import * as d3Timeline from '../../src/d3/d3Timeline'
-import { load, loadEmpty, loadError } from '../data/nobel'
+
+chai.use(chaiEnzyme())
+chai.use(sinonChai)
 
 describe('d3Timeline', function () {
     it('should trigger select method on click', function () {

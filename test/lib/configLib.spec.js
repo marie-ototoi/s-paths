@@ -1,8 +1,8 @@
 import chai, {expect} from 'chai'
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-chai.use(sinonChai)
 import * as config from '../../src/lib/configLib'
+
+chai.use(sinonChai)
 
 describe('lib/config', () => {
     it('should return a combined list of matches', () => {

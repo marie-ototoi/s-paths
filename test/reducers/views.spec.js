@@ -1,5 +1,4 @@
 import chai, {expect} from 'chai'
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import views from '../../src/reducers/views'
 
@@ -19,7 +18,7 @@ describe('reducers/views', () => {
         expect(views(undefined, { })[0].id).to.equal('Timeline')
     })
     /* lit('should handle SELECT_VIEWS', () => {
-        et action =  { 
+        et action =  {
             type: 'SELECT_VIEWS',
             stats: []
         }

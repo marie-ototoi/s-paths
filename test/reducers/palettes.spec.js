@@ -1,12 +1,11 @@
 import chai, {expect} from 'chai'
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import palettes from '../../src/reducers/palettes'
 
 chai.use(sinonChai)
 
 const savedState = [
-    { 
+    {
         properties: [],
         colors: ['#e8bcbd', '#e39d9d', '#e17d7f', '#c65454']
     },{

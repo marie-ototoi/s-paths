@@ -102,7 +102,7 @@ class App extends React.Component {
         // console.log('views', views)
         // console.log('dataset', dataset)
         // console.log('configs', configs)
-        // console.log('data', data,  this.state.main_step )
+        // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
             'HeatMap': HeatMap,

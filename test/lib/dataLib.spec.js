@@ -1,8 +1,8 @@
 import chai, {expect} from 'chai'
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-chai.use(sinonChai)
 import * as data from '../../src/lib/dataLib'
+
+chai.use(sinonChai)
 
 const dataSet1 = {
     present: [

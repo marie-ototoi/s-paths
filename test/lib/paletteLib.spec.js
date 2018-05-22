@@ -1,8 +1,8 @@
 import chai, {expect} from 'chai'
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-chai.use(sinonChai)
 import * as palette from '../../src/lib/paletteLib'
+
+chai.use(sinonChai)
 
 const state1 = [{
     properties: [],
