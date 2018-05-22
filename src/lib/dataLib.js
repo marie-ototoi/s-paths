@@ -443,7 +443,7 @@ const nestDataLevel = (data, props, parent) => {
     if (category === 'datetime') {
         let dataToNest = data.map(d => {
             let dateProp = new Date(d[propName].value)
-            if (dateProp == 'Invalid Date') return false
+            if (dateProp === 'Invalid Date') return false
             return {
                 ...d,
                 dateProp,

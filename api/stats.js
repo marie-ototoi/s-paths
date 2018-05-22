@@ -233,7 +233,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                                 let countInvalid = 0
                                 sampleData.results.bindings.forEach(element => {
                                     let thedate = new Date(element.object.value)
-                                    if (thedate == 'Invalid Date') countInvalid++ // with === the condition is false when the date is invalid :(((
+                                    if (thedate === 'Invalid Date') countInvalid++ // with === the condition is false when the date is invalid :(((
                                     // console.log(thedate == 'Invalid Date', element.object.value, thedate.getFullYear())
                                 })
                                 let category = (countInvalid > 5) ? 'text' : prop.category
