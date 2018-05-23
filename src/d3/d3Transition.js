@@ -21,7 +21,6 @@ const draw = (el, props) => {
 const drawShapes = (el, props, shapes, type) => {
     // console.log(`|||||drawRectangles`, props.zone, type)
     if (shapes.length > 0) {
-        let shape = shapes[0].shape
         const shapesSelection = d3.select(el).selectAll('rect')
             .data(shapes, (d) => {
                 return (d.signature) ? d.signature : d.query.value

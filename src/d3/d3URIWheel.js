@@ -1,5 +1,4 @@
 import * as d3 from 'd3'
-import dataLib from '../lib/dataLib'
 import * as selectionLib from '../lib/selectionLib'
 
 const create = (el, props) => {
@@ -19,7 +18,7 @@ const destroy = (el) => {
 }
 
 const draw = (el, props) => {
-    const { nestedProp1, legend, selections, zone } = props
+    const { nestedProp1, selections, zone } = props
     //console.log(selections)
     const radii = d3.select(el)
         .selectAll('g.radius')
