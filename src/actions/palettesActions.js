@@ -1,7 +1,7 @@
 import * as types from '../constants/ActionTypes'
-import paletteLib from '../lib/paletteLib'
+import * as paletteLib from '../lib/paletteLib'
 
-const getPropPalette = (dispatch) => (palettes, propPath, length) => {
+export const getPropPalette = (dispatch) => (palettes, propPath, length) => {
     let palette = palettes.filter(p => {
         return p.properties.includes(propPath)
     })
@@ -18,5 +18,3 @@ const getPropPalette = (dispatch) => (palettes, propPath, length) => {
     }
     return paletteLib.selectColorsInPalette(palette.colors, length)
 }
-
-exports.getPropPalette = getPropPalette

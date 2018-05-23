@@ -1,8 +1,8 @@
 import chai, {expect} from 'chai'
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
+import * as data from '../../src/lib/dataLib'
+
 chai.use(sinonChai)
-import data from '../../src/lib/dataLib'
 
 const dataSet1 = {
     present: [
@@ -117,7 +117,7 @@ describe('lib/data', () => {
         expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 150).length).to.deep.equal(113)
         expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 100).length).to.deep.equal(12)
         expect(data.groupTimeData(dataSet2, 'prop1', 'Y', 5).length).to.deep.equal(2)
-    }) 
+    })
     it('should add values of specified props when grouped', () => {
         expect(data.groupTimeData(dataSet1, 'prop1', 'Y', 150, ['countprop2', 'countprop3'])[0].countprop2).to.equal(6)
         expect(data.groupTimeData(dataSet1, 'prop1', 'Y', 150, ['countprop2', 'countprop3'])[2].countprop2).to.equal(7)

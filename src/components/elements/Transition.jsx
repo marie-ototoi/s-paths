@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-import d3Transition from '../../d3/d3Transition'
+import * as d3Transition from '../../d3/d3Transition'
 
 class Transition extends React.PureComponent {
     render () {

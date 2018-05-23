@@ -13,7 +13,7 @@ import PropSelector from '../elements/PropSelector'
 import Axis from '../elements/Axis'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import d3Timeline from '../../d3/d3Timeline'
+import * as d3Timeline from '../../d3/d3Timeline'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
 import { deduplicate, getAxis, getLegend, nestData } from '../../lib/dataLib'

@@ -1,12 +1,12 @@
 import * as d3 from 'd3'
 
-const create = (el, props) => {
+export const create = (el, props) => {
     // console.log('create', props.elements)
     if (el && props) {
         draw(el, props)
     }
 }
-const destroy = (el, props) => {
+export const destroy = (el, props) => {
     d3.select(el).selectAll('rect')
         .remove()
 }
@@ -61,6 +61,3 @@ const drawRectangles = (el, props, rectangles, type) => {
     if (type === 'target') window.setTimeout(() => { props.endTransition(props.zone) }, 1000)
     // console.log('drawn')
 }
-
-exports.create = create
-exports.destroy = destroy

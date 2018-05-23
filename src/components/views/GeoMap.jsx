@@ -1,9 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-import d3GeoMap from '../../d3/d3GeoMap'
-import Legend from '../elements/Legend'
-import History from '../elements/History'
+import * as d3GeoMap from '../../d3/d3GeoMap'
 import { select } from '../../actions/selectionActions'
 import { getPropPalette } from '../../actions/palettesActions'
 

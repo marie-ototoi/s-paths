@@ -1,5 +1,5 @@
 
-const getNextPaletteIndex = (palettes) => {
+export const getNextPaletteIndex = (palettes) => {
     let index
     let max = 0
     while (index === undefined) {
@@ -13,14 +13,14 @@ const getNextPaletteIndex = (palettes) => {
     return index
 }
 
-const getQuantitativeColors = (length = 6) => {
+export const getQuantitativeColors = (length = 6) => {
     const colors = [
         '#FDD835', '#FBC02D', '#FF8F00', '#FF6F00', '#E65100', '#BF360C'
     ]
     return selectColorsInPalette(colors, length)
 }
 
-const selectColorsInPalette = (colors, length) => {
+export const selectColorsInPalette = (colors, length) => {
     // return colors.slice(0, length)
     const step = Math.floor(colors.length / length)
     const rest = colors.length % length
@@ -29,7 +29,7 @@ const selectColorsInPalette = (colors, length) => {
 
 // create a patern equivalent to the string parameter (ex:lines) with the specified color,
 // add it to the element 'el' and then return the url (ex: attr('fill', url))
-const colorPattern = (el, pattern, color) => {
+export const colorPattern = (el, pattern, color) => {
     const stringify = require('virtual-dom-stringify')
     let resultPattern
     let patternLib
@@ -156,13 +156,7 @@ const colorPattern = (el, pattern, color) => {
 }
 
 // return list of string that are used for pattern
-const getPatternsPalette = (length) => {
+export const getPatternsPalette = (length) => {
     const patterns = ['lines', 'circles', 'rhombic', 'crosses', 'hexagons', 'nylon', 'rhombic', 'squares', 'waves', 'woven', 'lines2', 'circles2', 'rhombic3d']
     return patterns.slice(0, length)
 }
-
-exports.getNextPaletteIndex = getNextPaletteIndex
-exports.getQuantitativeColors = getQuantitativeColors
-exports.selectColorsInPalette = selectColorsInPalette
-exports.colorPattern = colorPattern
-exports.getPatternsPalette = getPatternsPalette

@@ -1,15 +1,15 @@
 import React from 'react'
 import { createStore } from 'redux'
-import { Provider, connect } from 'react-redux'
+import { Provider } from 'react-redux'
 import reducers from '../../src/reducers'
-import { shallow, mount, render } from 'enzyme'
+import { mount } from 'enzyme'
 import chai, {expect} from 'chai'
 import chaiEnzyme from 'chai-enzyme'
-chai.use(chaiEnzyme())
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-chai.use(sinonChai)
 import { default as Debug } from '../../src/components/Debug'
+
+chai.use(chaiEnzyme())
+chai.use(sinonChai)
 
 const store = createStore(reducers)
 

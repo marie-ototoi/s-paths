@@ -1,8 +1,8 @@
 import chai, {expect} from 'chai'
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
+import * as selectionLib from '../../src/lib/selectionLib'
+
 chai.use(sinonChai)
-import selectionLib from '../../src/lib/selectionLib'
 
 const selections = [
     { selector: 'book_137', zone: 'main' },

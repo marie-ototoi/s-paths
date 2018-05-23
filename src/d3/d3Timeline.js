@@ -1,8 +1,8 @@
 import * as d3 from 'd3'
-import dataLib from '../lib/dataLib'
-import selectionLib from '../lib/selectionLib'
+import * as dataLib from '../lib/dataLib'
+import * as selectionLib from '../lib/selectionLib'
 
-const create = (el, props) => {
+export const create = (el, props) => {
     // console.log('create')
     if (el && props.data) {
         // console.log('||||||||||||||||||||||||', props.role, props.nestedProp1)
@@ -11,7 +11,7 @@ const create = (el, props) => {
     }
 }
 
-const destroy = (el) => {
+export const destroy = (el) => {
     //
     d3.select(el)
         .selectAll('g.time')
@@ -71,7 +71,7 @@ const draw = (el, props) => {
         })
 }
 
-const drawSelection = (el, props) => {
+export const drawSelection = (el, props) => {
     const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
     const selectedZone = {
         x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
@@ -95,7 +95,7 @@ const drawSelection = (el, props) => {
         .attr('y', selectedZone.y1)
 }
 
-const getElements = (el, propName, value, propCategory) => {
+export const getElements = (el, propName, value, propCategory) => {
     const isArray = Array.isArray(value)
     let elements = []
     d3.select(el).selectAll('.elements').each(d => {
@@ -131,7 +131,7 @@ const getElementsForTransition = (el, props) => {
     return results
 }
 
-const getElementsInZone = (el, props) => {
+export const getElementsInZone = (el, props) => {
     const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
     const selectedZone = {
         x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
@@ -160,7 +160,7 @@ const resize = (el, props) => {
         .each(d => {
             if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
         })
-    
+
     const xScale = d3.scaleLinear()
         .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
         //.domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
@@ -198,7 +198,7 @@ const resize = (el, props) => {
     props.handleTransition(props, getElementsForTransition(el, props))
 }
 
-const update = (el, props) => {
+export const update = (el, props) => {
     //
     if (el && props.data) {
         draw(el, props)
@@ -211,10 +211,3 @@ const update = (el, props) => {
         }
     }
 }
-
-exports.create = create
-exports.destroy = destroy
-exports.drawSelection = drawSelection
-exports.getElements = getElements
-exports.getElementsInZone = getElementsInZone
-exports.update = update

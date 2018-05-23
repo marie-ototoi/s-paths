@@ -1,7 +1,7 @@
 import chai, {expect} from 'chai'
 // import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-import queryLib from '../../src/lib/queryLib'
+import * as queryLib from '../../src/lib/queryLib'
 
 chai.use(sinonChai)
 

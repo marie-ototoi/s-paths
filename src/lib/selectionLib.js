@@ -1,12 +1,12 @@
-const getSelections = (selections, zone) => {
+export const getSelections = (selections, zone) => {
     return selections.filter(s => s.zone === zone)
 }
-const isSelected = (el, zone, selections) => {
+export const isSelected = (el, zone, selections) => {
     // console.log(selections)
     let listSelections = selections.filter(s => s.zone === zone).map(s => s.selector)
     return listSelections.includes(el.selector)
 }
-const areSelected = (elements, zone, selections) => {
+export const areSelected = (elements, zone, selections) => {
     let listSelections = selections.filter(s => s.zone === zone).map(s => s.selector)
     // console.log('list', elements, listSelections)
     let allSelected = 0
@@ -18,14 +18,14 @@ const areSelected = (elements, zone, selections) => {
     })
     return allSelected === elements.length
 }
-const detectRectCollision = (rect1, rect2) => {
+export const detectRectCollision = (rect1, rect2) => {
     return (rect1.x1 < rect2.x2 &&
         rect1.x2 > rect2.x1 &&
         rect1.y1 < rect2.y2 &&
         rect1.y2 > rect2.y1)
 }
 
-const getRectSelection = (selection) => {
+export const getRectSelection = (selection) => {
     const { x1, y1, x2, y2 } = selection
     const selectionX1 = (x1 < x2) ? x1 : x2
     const selectionY1 = (y1 < y2) ? y1 : y2
@@ -38,9 +38,3 @@ const getRectSelection = (selection) => {
         y2: selectionY2
     }
 }
-
-exports.areSelected = areSelected
-exports.detectRectCollision = detectRectCollision
-exports.getRectSelection = getRectSelection
-exports.getSelections = getSelections
-exports.isSelected = isSelected

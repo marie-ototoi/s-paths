@@ -1,14 +1,11 @@
-import * as d3 from 'd3'
 import React from 'react'
-import { shallow, mount, render } from 'enzyme'
 import chai, {expect} from 'chai'
 import chaiEnzyme from 'chai-enzyme'
-chai.use(chaiEnzyme())
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
+import * as d3Timeline from '../../src/d3/d3Timeline'
+
+chai.use(chaiEnzyme())
 chai.use(sinonChai)
-import d3Timeline from '../../src/d3/d3Timeline'
-import { load, loadEmpty, loadError } from '../data/nobel'
 
 describe('d3Timeline', function () {
     it('should trigger select method on click', function () {
@@ -34,6 +31,6 @@ describe('d3Timeline', function () {
         // resize
     })
     it('should trigger the setLegend function once the legend is calculated', function () {
-        // makeLegend 
+        // makeLegend
     })
 })
