@@ -5,65 +5,81 @@ import selectionLib from '../lib/selectionLib'
 const create = (el, props) => {
     // console.log('create')
     if (el && props.data) {
+        // console.log('||||||||||||||||||||||||', props.role, props.nestedProp1)
         draw(el, props)
         resize(el, props)
-        // props.handleTransition(props, getElementsForTransition(el, props))
     }
 }
 
 const destroy = (el) => {
-
+    //
+    d3.select(el)
+        .selectAll('g.radius')
+        .remove()
 }
 
 const draw = (el, props) => {
-    const { nestedProp1, selectedConfig, selections, zone } = props
-    // console.log(nestedProp1)
-    const units = d3.select(el)
-        .selectAll('g.units')
+    const { nestedProp1, legend, selections, zone } = props
+    //console.log(selections)
+    const radii = d3.select(el)
+        .selectAll('g.radius')
         .data(nestedProp1)
-    const unitsEnter = units
+        // .data(nestedProp1.slice(0,3))
+    const newradii = radii
         .enter()
         .append('g')
-        .attr('class', 'units')
-
-    unitsEnter
-        .append('rect')
-    unitsEnter
+        .attr('class', 'radius')
+    const grad = d3.select(el)
+        .append('linearGradient')
+        .attr('id', 'gradientWheel' + zone)
+    grad.append('stop')
+        .attr('offset', '0%')
+        .attr('stop-color', '#bbb')
+    grad.append('stop')
+        .attr('offset', '60%')
+        .attr('stop-color', '#bbb')
+    grad.append('stop')
+        .attr('offset', '100%')
+        .attr('stop-color', '#f00')
+    newradii
+        .append('path')
+        .attr('fill', 'none')
+        .attr('id', (d, i) => 'radius' + i + 'zone' )
+    newradii
         .append('text')
+        .attr('width', 250)
+        .append('textPath')
+        .attr('xlink:xlink:href', (d, i) => '#radius' + i + 'zone')
+        .attr('fill', `url(#${'gradientWheel' + zone})`)
         .text(d => d.key)
-    units
+    radii
         .exit()
         .remove()
 
     d3.select(el)
-        .selectAll('g.units')
+        .selectAll('g.radius')
         .each((d, i) => {
-            // console.log(d)
-            // d.color = legend.info.filter(p => (p.key === d.values[0].prop2.value || (d.values[0].labelprop2 && p.key === d.values[0].labelprop2.value)))[0].color
-            d.color = '#444'
+            d.color = '#CCC'
             d.selection = {
-                selector: `treemap_element_p1_${dataLib.makeId(d.key)}`,
-                count: (d.values.length > 0) ? Number(d.values[0].countprop1.value) : 1,
+                selector: 'radius' + i + 'zone',
                 query: {
                     type: 'set',
                     value: [{
-                        category: selectedConfig.properties[0].category,
+                        category: 'uri',
                         value: d.key,
                         propName: 'prop1'
                     }]
                 }
             }
-            // console.log(d.selection.selector)
-            d.shape = 'rectangle'
+            d.shape = 'textPath'
             d.zone = {}
             d.selected = selectionLib.areSelected([d.selection], zone, selections)
-            // console.log(d)
         })
         .attr('id', d => d.selection.selector) // only needed to better understand html source code
         .classed('selected', d => d.selected)
-        // .attr('fill', d => d.color)
         .attr('opacity', d => {
-            return (selections.length > 0 && d.selected !== true) ? 0.5 : 1
+            d.opacity = (selections.filter(s => s.zone === zone).length > 0 && d.selected !== true) ? 0.5 : 1
+            return d.opacity
         })
         .on('mouseup', d => {
             props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, zone)
@@ -72,7 +88,6 @@ const draw = (el, props) => {
 
 const drawSelection = (el, props) => {
     const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
-    // console.log(zoneDimensions)
     const selectedZone = {
         x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
         y1: zoneDimensions.y1 - props.display.viz.vertical_margin,
@@ -96,24 +111,9 @@ const drawSelection = (el, props) => {
 }
 
 const getElements = (el, propName, value, propCategory) => {
-    const isArray = Array.isArray(value)
     let elements = []
-    d3.select(el).selectAll('g.units').each(d => {
-        let propValue
-        if (propCategory === 'datetime') {
-            propValue = Number(d.parent.key)
-        } else if (propCategory === 'text' || propCategory === 'uri') {
-            propValue = d.key
-        } else if (propCategory === 'number') {
-            propValue = Number(d[propName].value)
-        } else if (propCategory === 'aggregate') {
-            propValue = Number(d[propName])
-        }
-        if (isArray) {
-            if (propValue >= value[0] && propValue <= value[1]) {
-                elements.push(d.selection)
-            }
-        } else if (propValue === value) {
+    d3.select(el).selectAll('.elements').each(d => {
+        if (d.key === value) {
             elements.push(d.selection)
         }
     })
@@ -122,8 +122,8 @@ const getElements = (el, propName, value, propCategory) => {
 
 const getElementsForTransition = (el, props) => {
     let results = []
-    d3.select(el).selectAll('g.units').each(d => {
-        results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity, shape: d.shape, rotation: 0 })
+    d3.select(el).selectAll('.radius').each(d => {
+        results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity, shape: d.shape, rotation: d.rotation })
     })
     // console.log(results)
     return results
@@ -138,51 +138,77 @@ const getElementsInZone = (el, props) => {
         y2: zoneDimensions.y2 - props.display.viz.vertical_margin
     }
     let selectedElements = []
-    d3.select(el).selectAll('g.units')
+    d3.select(el).selectAll('.radius path')
         .each(function (d, i) {
             // console.log(d.zone)
-            // console.log(selectionLib.detectRectCollision(selectedZone, elementZone), d3.select(this).node().parentNode.getAttribute('id'), d.selection)
-            if (selectionLib.detectRectCollision(selectedZone, d.zone)) selectedElements.push(d.selection)
+            if (selectionLib.detectPathCollision(d.controlPoints, selectedZone)) selectedElements.push(d.selection)
         })
-    // console.log(selectedElements, selectedZone)
     return selectedElements
 }
 
+// const retrieveValues
+
 const resize = (el, props) => {
     const { display, nestedProp1 } = props
-    let width = display.viz.useful_width
-    let height = display.viz.useful_height // Math.floor(display.viz.useful_height * displayedInstances / dataset.stats.selectionInstances)
-    if (height > display.viz.useful_height) height = display.viz.useful_height
-    let map = dataLib.splitRectangle({ x1: 0, y1: 0, width, height }, nestedProp1.map(propgroup => {
-        return (propgroup.values.length > 0) ? {
-            name: propgroup.key,
-            size: Number(propgroup.values[0].countprop1.value)
-        } : propgroup
-    }))
-    // console.log(display.viz.useful_height, displayedInstances, dataset.stats.selectionInstances, height)
-    d3.select(el).selectAll('g.units')
+
+    let angle = 360 / (nestedProp1.length - 1)
+    // console.log(angle)
+    let center = { x: display.viz.useful_width/2, y: display.viz.useful_height/2 }
+    d3.select(el).selectAll('.radius')
+        .attr('transform', (d, i) => `translate(${center.x}, ${center.y}) rotate(${(i * angle)} 0 0)`)
+    // let witnesses = []
+    let path = [
+        {x: 0, y: 0},
+        {x: 36, y: -168},
+        {x: 202, y: -42},
+        {x: 272, y: 2},
+        {x: 283, y:85}
+    ]
+    d3.select(el).selectAll('.radius')
         .each((d, i) => {
+            // console.log(i * angle, selectionLib.getRotatedPoints(path, (i * angle) - 2, center))
             d.zone = {
-                ...map[i].zone,
-                y1: (display.viz.useful_height - height) + map[i].zone.y1
+                x1: path[0].x + center.x,
+                y1: path[0].y + center.y,
+                x2: path[4].x + center.x,
+                y2: path[4].y + center.y,
+                width: path[4].x - path[0].x,
+                height: path[4].y - path[0].y
             }
+            d.rotation = (i * angle)
+            d.controlPoints = selectionLib.extrapolatePath(selectionLib.getRotatedPoints(path, (i * angle) - 2, center))
+            // witnesses.push(d.zone)
         })
-        .attr('transform', (d, i) => `translate(${map[i].zone.x1}, ${(display.viz.useful_height - height) + map[i].zone.y1})`)
-    d3.select(el).selectAll('g.units rect')
-        .attr('width', (d, i) => map[i].zone.width)
-        .attr('height', (d, i) => map[i].zone.height)
-        .attr('fill', d => d.color)
-    d3.select(el).selectAll('g.units text')
-        .attr('x', 5)
-        .attr('y', 20)
-        .attr('fill', '#fff')
+    
+    d3.select(el).selectAll('.radius path')
+        .attr('d', (d, i) => {
+            // let path = d.zone 
+            return `M${path[0].x},${path[0].y}Q${path[1].x},${path[1].y},${path[2].x},${path[2].y}Q${path[3].x},${path[3].y},${path[4].x},${path[4].y}`
+        })
+        
+    /* d3.select(el).selectAll('.witness')
+        .data(witnesses)
+        .enter()
+        .append('g')
+        .attr('class', 'witness')
+        .selectAll('circle')
+        .data((d, i) => d)
+        .enter()
+        .append('circle')
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y)
+        .attr('r', 5)
+        .attr('fill', 'black')
+        // console.log('||||', props.role, props.zone, getElementsForTransition(el, props)) */
     props.handleTransition(props, getElementsForTransition(el, props))
 }
 
 const update = (el, props) => {
+    //
     if (el && props.data) {
         draw(el, props)
         resize(el, props)
+        //
         if (props.display.selectedZone.x1 !== null) {
             drawSelection(el, props)
         } else {

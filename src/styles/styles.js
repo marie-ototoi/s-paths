@@ -13,5 +13,6 @@ module.exports = {
     tooltip: require('../styles/tooltip.css'),
     propSelector: require('../styles/propSelector.css'),
     selection: require('../styles/selection.css'),
-    transition: require('../styles/transition.css')
+    transition: require('../styles/transition.css'),
+    uriwheel: require('../styles/uriwheel.css')
 }

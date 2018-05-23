@@ -125,7 +125,7 @@ const getElements = (el, propName, value, propCategory) => {
 const getElementsForTransition = (el, props) => {
     let results = []
     d3.select(el).selectAll('.elements').each(d => {
-        results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity, shape: d.shape })
+        results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity, shape: d.shape, rotation: 0 })
     })
     // console.log(results)
     return results

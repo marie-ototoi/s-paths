@@ -286,7 +286,8 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
                         indexOrigin: cur.indexOrigin,
                         indexTarget: cur.indexTarget,
                         signature: `${zone}_origin${cur.indexOrigin}_target${cur.indexTarget}`,
-                        size
+                        size,
+                        rotation: element.rotation
                     })
                 }
                 return acc

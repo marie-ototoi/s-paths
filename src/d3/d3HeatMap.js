@@ -131,7 +131,7 @@ const getElements = (el, propName, value, propCategory) => {
 const getElementsForTransition = (el, props) => {
     let results = []
     d3.select(el).selectAll('.yUnits').each(d => {
-        results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity, shape: d.shape })
+        results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity, shape: d.shape, rotation: 0 })
     })
     // console.log(results)
     return results
@@ -213,6 +213,7 @@ const resize = (el, props) => {
         .attr('width', d => unitWidth - 1)
         .attr('y', 0)
         .attr('height', d => unitHeight - 1)
+    // console.log('ici ??????', props, getElementsForTransition(el, props))
     props.handleTransition(props, getElementsForTransition(el, props))
 }
 

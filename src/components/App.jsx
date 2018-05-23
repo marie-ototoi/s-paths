@@ -7,7 +7,7 @@ import HeatMap from './views/HeatMap'
 import Timeline from './views/Timeline'
 import TreeMap from './views/TreeMap'
 import GeoMap from './views/GeoMap'
-// import URIWheel from './views/URIWheel'
+import URIWheel from './views/URIWheel'
 import Transition from './elements/Transition'
 import Debug from './Debug'
 // libs
@@ -61,6 +61,7 @@ class App extends React.Component {
         // console.log(role, status, zone, elements)
         if (role === 'origin') {
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_origin`])) {
+                // console.log('c est parti', elements)
                 this.setState({ [`${zone}_origin`]: elements })
             }
             if (this.state[`${zone}_step`] === 'done' && status === 'active') {
@@ -86,10 +87,12 @@ class App extends React.Component {
         if (getCurrentState(this.props.data, 'main') === 'active' && getCurrentState(nextProps.data, 'main') === 'transition') {
             // console.log('1 - ON LANCE main')
             this.setState({ [`main_step`]: 'launch' })
+            return true
         }
         if (getCurrentState(this.props.data, 'aside') === 'active' && getCurrentState(nextProps.data, 'aside') === 'transition') {
             // console.log('1 - ON LANCE aside')
             this.setState({ [`aside_step`]: 'launch' })
+            return true
         }
         return !shallowEqual(this.props, nextProps)
     }
@@ -102,14 +105,14 @@ class App extends React.Component {
         // console.log('views', views)
         // console.log('dataset', dataset)
         // console.log('configs', configs)
-        // console.log('data', data,  this.state.main_step )
+        // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
             'HeatMap': HeatMap,
             'Timeline': Timeline,
             'TreeMap': TreeMap,
-            'GeoMap': GeoMap// ,
-            // 'URIWheel': URIWheel
+            'GeoMap': GeoMap,
+            'URIWheel': URIWheel
         }
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')

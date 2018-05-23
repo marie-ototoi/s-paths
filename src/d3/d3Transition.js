@@ -1,7 +1,6 @@
 import * as d3 from 'd3'
 
 const create = (el, props) => {
-    // console.log('create', props.elements)
     if (el && props) {
         draw(el, props)
     }
@@ -12,20 +11,18 @@ const destroy = (el, props) => {
 }
 
 const draw = (el, props) => {
-    const originRectangles = props.elements.origin.filter(el => el.shape === 'rectangle')
-    const targetRectangles = props.elements.target.filter(el => el.shape === 'rectangle')
-    drawRectangles(el, props, originRectangles, 'origin')
-    // console.log('draw A', props.zone, originRectangles)
-    drawRectangles(el, props, targetRectangles, 'target')
+    drawShapes(el, props, props.elements.origin, 'origin')
+    drawShapes(el, props, props.elements.target, 'target')
     // console.log('draw B', targetRectangles)
     // console.log('meoui', originRectangles)
 }
 
-const drawRectangles = (el, props, rectangles, type) => {
+const drawShapes = (el, props, shapes, type) => {
     // console.log(`|||||drawRectangles`, props.zone, type)
-    if (rectangles.length > 0) {
-        const rectanglesSelection = d3.select(el).selectAll('rect')
-            .data(rectangles, (d) => {
+    if (shapes.length > 0) {
+        let shape = shapes[0].shape
+        const shapesSelection = d3.select(el).selectAll('rect')
+            .data(shapes, (d) => {
                 return (d.signature) ? d.signature : d.query.value
             })
 
@@ -35,7 +32,7 @@ const drawRectangles = (el, props, rectangles, type) => {
         const tRemove = d3.transition()
             .duration(250)
 
-        rectanglesSelection
+        shapesSelection
             .enter()
             .append('rect')
             .attr('x', d => d.zone.x1)
@@ -43,20 +40,23 @@ const drawRectangles = (el, props, rectangles, type) => {
             .attr('width', d => d.zone.width)
             .attr('height', d => d.zone.height)
             .attr('fill', d => d.color)
+            .attr('transform', d => `rotate(${d.rotation})`)
             .attr('fill-opacity', d => d.opacity)
-
-        rectanglesSelection.exit()
+        
+        shapesSelection.exit()
             .transition(tRemove)
             .attr('fill-opacity', 0)
             .remove()
-        rectanglesSelection
+        shapesSelection
             .transition(tChange)
             .attr('x', d => d.zone.x1)
             .attr('y', d => d.zone.y1)
             .attr('width', d => d.zone.width)
             .attr('height', d => d.zone.height)
+            .attr('transform', d => `rotate(${d.rotation})`)
             .attr('fill', d => d.color)
             .attr('fill-opacity', 1)
+        
     }
     if (type === 'target') window.setTimeout(() => { props.endTransition(props.zone) }, 1000)
     // console.log('drawn')
