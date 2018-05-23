@@ -19,7 +19,7 @@ import * as selectionLib from '../lib/selectionLib'
 import { setDisplay } from '../actions/displayActions'
 import { endTransition, loadData, loadResources } from '../actions/dataActions'
 
-class App extends React.Component {
+class App extends React.PureComponent {
     constructor (props) {
         super(props)
         // resize handled in the app component only: it updates display reducer that triggers rerender if needed
@@ -82,19 +82,16 @@ class App extends React.Component {
         this.setState({ [`${zone}_step`]: 'done', [`${zone}_target`]: [] })
         if (!this.props.configs.future.length > 0) this.props.endTransition(zone)
     }
-    shouldComponentUpdate (nextProps, nextState) {
+    UNSAFE_componentWillUpdate (nextProps, nextState) {
         // console.log('foutu ?', getCurrentState(this.props.data, 'main'), getCurrentState(nextProps.data, 'main'))
         if (getCurrentState(this.props.data, 'main') === 'active' && getCurrentState(nextProps.data, 'main') === 'transition') {
             // console.log('1 - ON LANCE main')
             this.setState({ [`main_step`]: 'launch' })
-            return true
         }
         if (getCurrentState(this.props.data, 'aside') === 'active' && getCurrentState(nextProps.data, 'aside') === 'transition') {
             // console.log('1 - ON LANCE aside')
             this.setState({ [`aside_step`]: 'launch' })
-            return true
         }
-        return !shallowEqual(this.props, nextProps)
     }
     render () {
         const { configs, data, /* dataset, */display, mode, selections } = this.props
