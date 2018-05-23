@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
 import shallowEqual from 'shallowequal'
 
-const create = (el, props) => {
+export const create = (el, props) => {
     // console.log('create', configs)
     if (el) {
         draw(el, props)
@@ -37,14 +37,14 @@ const draw = (el, props) => {
         })
 }
 
-const update = (el, props) => {
+export const update = (el, props) => {
     if (el && props.configs) {
         draw(el, props)
         resize(el, props)
     }
 }
 
-const destroy = (el) => {
+export const destroy = (el) => {
     //
 }
 
@@ -56,7 +56,3 @@ const resize = (el, props) => {
         .attr('y', -unitHeight)
         .attr('height', d => unitHeight) */
 }
-
-exports.create = create
-exports.destroy = destroy
-exports.update = update

@@ -2,8 +2,8 @@ import express from 'express'
 import pathModel from '../models/path'
 import resourceModel from '../models/resource'
 import { getLabels } from '../src/lib/labelLib'
-import queryLib from '../src/lib/queryLib'
-import dataLib from '../src/lib/dataLib'
+import * as queryLib from '../src/lib/queryLib'
+import * as dataLib from '../src/lib/dataLib'
 // import { error } from 'util';
 
 const router = express.Router()

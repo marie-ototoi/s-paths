@@ -1,7 +1,6 @@
 import chai, {expect} from 'chai'
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
-import selectionLib from '../../src/lib/selectionLib'
+import * as selectionLib from '../../src/lib/selectionLib'
 chai.use(sinonChai)
 
 const selections = [

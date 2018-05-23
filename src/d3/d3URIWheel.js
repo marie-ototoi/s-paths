@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
 import dataLib from '../lib/dataLib'
-import selectionLib from '../lib/selectionLib'
+import * as selectionLib from '../lib/selectionLib'
 
 const create = (el, props) => {
     // console.log('create')

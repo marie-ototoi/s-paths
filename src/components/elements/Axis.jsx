@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
-import d3Axis from '../../d3/d3Axis'
+import * as d3Axis from '../../d3/d3Axis'
 
 import { getDimensions } from '../../lib/scaleLib'
 

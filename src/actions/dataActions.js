@@ -3,7 +3,7 @@ import * as types from '../constants/ActionTypes'
 import { activateDefaultConfigs, defineConfigs, getConfig, getSelectedConfig, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
 import { getData, makeQuery, makeTransitionQuery } from '../lib/queryLib'
 
-const endTransition = (dispatch) => (zone) => {
+export const endTransition = (dispatch) => (zone) => {
     return dispatch({
         zone,
         type: types.END_TRANSITION
@@ -33,7 +33,7 @@ const getResources = (options) => {
         .then((resp) => resp.json())
 }
 
-const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
+export const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
     // console.log('load Data ', dataset.constraints)
     let { constraints, endpoint, entrypoint, prefixes } = dataset
     let newOptions
@@ -128,7 +128,7 @@ const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions
         })
 }
 
-const loadResources = (dispatch) => (dataset) => {
+export const loadResources = (dispatch) => (dataset) => {
     return getResources(dataset)
         .then(resources => {
             dispatch({
@@ -139,7 +139,7 @@ const loadResources = (dispatch) => (dataset) => {
         })
 }
 
-const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) => {
+export const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) => {
     // console.log('select property')
     const { endpoint, entrypoint, prefixes } = dataset
     const updatedConfig = selectPropertyConfig(config, zone, propIndex, path)
@@ -175,7 +175,7 @@ const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) =>
         })
 }
 
-const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => {
+export const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => {
     const { endpoint, entrypoint, prefixes } = dataset
     // console.log(selectedConfigs)
     const updatedConfigs = selectViewConfig(id, selectedConfigs)
@@ -213,7 +213,7 @@ const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => {
         })
 }
 
-const setUnitDimensions = (dispatch) => (dimensions, zone, configId, role, setTarget) => {
+export const setUnitDimensions = (dispatch) => (dimensions, zone, configId, role, setTarget) => {
     // console.log(dimensions, zone, configId, role)
     dispatch({
         type: types.SET_UNIT_DIMENSIONS,
@@ -232,10 +232,3 @@ const setUnitDimensions = (dispatch) => (dimensions, zone, configId, role, setTa
         })
     }
 }
-
-exports.endTransition = endTransition
-exports.loadData = loadData
-exports.loadResources = loadResources
-exports.selectProperty = selectProperty
-exports.selectView = selectView
-exports.setUnitDimensions = setUnitDimensions

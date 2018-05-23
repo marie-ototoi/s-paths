@@ -10,11 +10,11 @@ import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import d3TreeMap from '../../d3/d3TreeMap'
+import * as d3TreeMap from '../../d3/d3TreeMap'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
 import { deduplicate, nestData } from '../../lib/dataLib'
-import scaleLib, { getDimensions } from '../../lib/scaleLib'
+import { getDimensions, getZoneCoord } from '../../lib/scaleLib'
 // redux functions
 import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
@@ -73,11 +73,11 @@ class TreeMap extends React.Component {
     }
     handleMouseDown (e) {
         const { display, zone } = this.props
-        this.props.handleMouseDown(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
+        this.props.handleMouseDown(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
     }
     handleMouseMove (e) {
         const { display, zone } = this.props
-        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
+        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props

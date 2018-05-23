@@ -12,12 +12,12 @@ import Axis from '../elements/Axis'
 import PropSelector from '../elements/PropSelector'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import d3HeatMap from '../../d3/d3HeatMap'
+import * as d3HeatMap from '../../d3/d3HeatMap'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
 import { deduplicate, getAxis, getLegend, getThresholdsForLegend, nestData } from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
-import scaleLib, { getDimensions } from '../../lib/scaleLib'
+import { getDimensions, getZoneCoord } from '../../lib/scaleLib'
 // redux functions
 import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
@@ -90,11 +90,11 @@ class HeatMap extends React.Component {
     }
     handleMouseDown (e) {
         const { display, zone } = this.props
-        this.props.handleMouseDown(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
+        this.props.handleMouseDown(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
     }
     handleMouseMove (e) {
         const { display, zone } = this.props
-        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
+        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props

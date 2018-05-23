@@ -14,7 +14,7 @@ import Debug from './Debug'
 import { getScreen } from '../lib/scaleLib'
 import { areLoaded, getCurrentState, getResults, getTransitionElements } from '../lib/dataLib'
 import { getConfig, getCurrentConfigs } from '../lib/configLib'
-import selectionLib from '../lib/selectionLib'
+import * as selectionLib from '../lib/selectionLib'
 // redux actions
 import { setDisplay } from '../actions/displayActions'
 import { endTransition, loadData, loadResources } from '../actions/dataActions'

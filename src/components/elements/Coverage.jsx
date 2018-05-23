@@ -3,7 +3,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 import { getCurrentConfigs, getSelectedConfig } from '../../lib/configLib'
-import queryLib from '../../lib/queryLib'
+import * as queryLib from '../../lib/queryLib'
 import { getDimensions } from '../../lib/scaleLib'
 
 import { loadData } from '../../actions/dataActions'

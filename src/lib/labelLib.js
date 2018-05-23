@@ -1,9 +1,9 @@
 import fetch from 'rdf-fetch'
 import rdflib from 'rdflib'
 import propertyModel from '../../models/property'
-import queryLib, { ignorePromise } from './queryLib'
+import { ignorePromise, useFullUri } from './queryLib'
 
-const getPropsLabels = async (prefixes, props) => {
+export const getPropsLabels = async (prefixes, props) => {
     // find all classes and props used in paths
     let urisToLabel = props.reduce((acc, curr) => {
         let pathParts = curr.path.split('/')
@@ -14,13 +14,13 @@ const getPropsLabels = async (prefixes, props) => {
         return acc
     }, []).map(prop => {
         return {
-            uri: queryLib.useFullUri(prop, prefixes)
+            uri: useFullUri(prop, prefixes)
         }
     })
     return getLabels(urisToLabel, prefixes)
 }
 
-const getLabels = async (urisToLabel, prefixes) => {
+export const getLabels = async (urisToLabel, prefixes) => {
     let missingUris
     // create a local graph
     let graph = new rdflib.IndexedFormula()
@@ -57,7 +57,7 @@ const getLabels = async (urisToLabel, prefixes) => {
     })
 }
 
-const getLabelsFromGraph = (uris, graph) => {
+export const getLabelsFromGraph = (uris, graph) => {
     let labels = uris.map(prop => graph.any(rdflib.sym(prop.uri), rdflib.sym('http://www.w3.org/2000/01/rdf-schema#label')))
     labels.forEach((label, index) => {
         if (label) uris[index].label = label.value
@@ -69,7 +69,7 @@ const getLabelsFromGraph = (uris, graph) => {
     return uris
 }
 
-const loadUri = (uri, graph) => {
+export const loadUri = (uri, graph) => {
     // console.log('load ontology', url)
     return fetch(uri, { redirect: 'follow', headers: { 'Accept': 'Accept: text/turtle, application/rdf+xml, text/ntriples, application/ld+json' } }).then(response => {
         if (response.ok) {
@@ -93,8 +93,3 @@ const loadUri = (uri, graph) => {
         }
     })
 }
-
-exports.getLabels = getLabels
-exports.getLabelsFromGraph = getLabelsFromGraph
-exports.getPropsLabels = getPropsLabels
-exports.loadUri = loadUri

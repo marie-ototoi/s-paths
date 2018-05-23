@@ -14,7 +14,7 @@ import d3URIWheel from '../../d3/d3URIWheel'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
 import { deduplicate, nestData } from '../../lib/dataLib'
-import scaleLib, { getDimensions } from '../../lib/scaleLib'
+import * as scaleLib from '../../lib/scaleLib'
 // redux functions
 import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
@@ -88,7 +88,7 @@ class URIWheel extends React.Component {
     render () {
         const { legend, propsLists } = this.customState
         const { config, display, role, selections, step, zone } = this.props
-        const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
+        const coreDimensions = scaleLib.getDimensions('core', display.zones[zone], display.viz)
         return (<g className = { `URIWheel ${this.customState.elementName} role_${role}` } >
             <SelectionZone
                 zone = { zone }

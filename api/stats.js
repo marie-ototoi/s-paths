@@ -1,7 +1,7 @@
 import express from 'express'
 import pathModel from '../models/path'
 import { getPropsLabels } from '../src/lib/labelLib'
-import queryLib from '../src/lib/queryLib'
+import * as queryLib from '../src/lib/queryLib'
 // import { error } from 'util';
 
 const router = express.Router()
@@ -233,7 +233,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                                 let countInvalid = 0
                                 sampleData.results.bindings.forEach(element => {
                                     let thedate = new Date(element.object.value)
-                                    if (thedate == 'Invalid Date') countInvalid++ // with === the condition is false when the date is invalid :(((
+                                    if (thedate.toString() === 'Invalid Date') countInvalid++ // with === the condition is false when the date is invalid :(((
                                     // console.log(thedate == 'Invalid Date', element.object.value, thedate.getFullYear())
                                 })
                                 let category = (countInvalid > 5) ? 'text' : prop.category

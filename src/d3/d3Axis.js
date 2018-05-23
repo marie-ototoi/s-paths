@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
 
-const create = (el, props) => {
+export const create = (el, props) => {
     //
     if (el && props.axis) {
         draw(el, props)
@@ -11,7 +11,7 @@ const create = (el, props) => {
 const draw = (el, props) => {
 }
 
-const update = (el, props) => {
+export const update = (el, props) => {
     //
     if (el && props.axis) {
         draw(el, props)
@@ -19,7 +19,7 @@ const update = (el, props) => {
     }
 }
 
-const destroy = (el, props) => {
+export const destroy = (el, props) => {
     //
 }
 
@@ -41,7 +41,7 @@ const resize = (el, props) => {
     //
     const scale = d3.scaleLinear().range([0, axeLength])
     //
-    
+
     if (category === 'number') {
         scale.domain([info[0].key, info[info.length - 1].key])
         tickV = info.map(v => Number(v.key))
@@ -61,7 +61,7 @@ const resize = (el, props) => {
         let ticksNumber = (Number(info[info.length - 1].key) - Number(info[0].key)) / minDif
         tickF = d3.format('.0f')
         tickA = ticksNumber
-        // to be fixed : if there's many empty values on the scale 
+        // to be fixed : if there's many empty values on the scale
         // and the length of the info array is closer to a multiple, there might be only one out of two ticks
     } else if (category === 'text' || category === 'uri') {
         scale.domain([0, info.length - 1])
@@ -93,7 +93,7 @@ const resize = (el, props) => {
     const tickHeight = (type === 'Bottom') ? 7 : Math.floor(dimensions.height / (ticks.size() - 1))
     const tickX = (type === 'Bottom') ? 0 : -7
     const tickY = (type === 'Bottom') ? 2 : 0
-    
+
     // console.log(dimensions.height, tickX, tickY, tickWidth, tickHeight)
     ticks.append('rect')
         .classed('reactzone', true)
@@ -133,7 +133,3 @@ const resize = (el, props) => {
         })
         //
 }
-
-exports.create = create
-exports.destroy = destroy
-exports.update = update
