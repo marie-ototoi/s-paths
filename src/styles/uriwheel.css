@@ -1,9 +1,10 @@
-.URIWheel text, .URIWheel textPath {
+.URIWheel .radius text, .URIWheel .radius textPath {
     -webkit-user-select: none; /* Chrome all / Safari all */
     -moz-user-select: none; /* Firefox all */
     -ms-user-select: none; /* IE 10+ */
     user-select: none;
+    font-family: monospace;
 }
-svg text::selection, svg textPath::selection {
+.URIWheel .radius text::selection, .URIWheel .radius textPath::selection {
     background: none;
 }

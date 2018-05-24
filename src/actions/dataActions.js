@@ -190,7 +190,8 @@ export const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => 
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, selectedConfig, dataset, zone)
     // const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
-    // console.log('test', newQuery)
+    // console.log('newQuery', newQuery)
+    // console.log('queryTransition', queryTransition)
     Promise.all([
         getData(endpoint, newQuery, prefixes),
         getData(endpoint, queryTransition, prefixes)// ,
@@ -209,6 +210,7 @@ export const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => 
             dispatch(action)
         })
         .catch(error => {
+            // to do : get back to state previous transition
             console.error('Error getting data after view update', error)
         })
 }

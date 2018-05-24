@@ -34,7 +34,7 @@ class TreeMap extends React.Component {
             selectElements: this.selectElements,
             handleMouseUp: this.handleMouseUp
         }
-        this.prepareData(this.props)
+        this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
         if (!shallowEqual(this.props, nextProps)) {
@@ -43,7 +43,7 @@ class TreeMap extends React.Component {
         return !shallowEqual(this.props, nextProps)
     }
     prepareData (nextProps) {
-        const { config, data, dataset, zone } = nextProps
+        const { config, data, dataset, getPropPalette, palettes, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
 
@@ -53,6 +53,7 @@ class TreeMap extends React.Component {
             category: 'text'
         }])
 
+        const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
         const propsLists = getPropsLists(config, zone, dataset.labels)
 
         const displayedInstances = nestedProp1.reduce((acc, cur) => {
@@ -65,6 +66,7 @@ class TreeMap extends React.Component {
         // Save to reuse in render
         this.customState = {
             ...this.customState,
+            color,
             displayedInstances,
             selectedConfig,
             nestedProp1,

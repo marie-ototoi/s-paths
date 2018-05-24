@@ -37,7 +37,7 @@ class Timeline extends React.Component {
             selectElements: this.selectElements,
             handleMouseUp: this.handleMouseUp
         }
-        this.prepareData(this.props)
+        this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
         if (!shallowEqual(this.props, nextProps)) {
@@ -66,6 +66,7 @@ class Timeline extends React.Component {
         const pathProp2 = selectedConfig.properties[1].path
         const categoryProp2 = selectedConfig.properties[1].category
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
+        // console.log(colors)
         const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
         const propsLists = getPropsLists(config, zone, dataset.labels)
         // console.log(propsLists)

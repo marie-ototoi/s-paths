@@ -1,4 +1,5 @@
 import * as d3 from 'd3'
+import * as queryLib from '../lib/queryLib'
 import * as selectionLib from '../lib/selectionLib'
 
 const create = (el, props) => {
@@ -18,7 +19,7 @@ const destroy = (el) => {
 }
 
 const draw = (el, props) => {
-    const { nestedProp1, selections, zone } = props
+    const { color, nestedProp1, selections, zone } = props
     //console.log(selections)
     const radii = d3.select(el)
         .selectAll('g.radius')
@@ -28,7 +29,7 @@ const draw = (el, props) => {
         .enter()
         .append('g')
         .attr('class', 'radius')
-    const grad = d3.select(el)
+    /* const grad = d3.select(el)
         .append('linearGradient')
         .attr('id', 'gradientWheel' + zone)
     grad.append('stop')
@@ -39,18 +40,47 @@ const draw = (el, props) => {
         .attr('stop-color', '#bbb')
     grad.append('stop')
         .attr('offset', '100%')
-        .attr('stop-color', '#f00')
+        .attr('stop-color', '#f00') */
     newradii
         .append('path')
         .attr('fill', 'none')
         .attr('id', (d, i) => 'radius' + i + 'zone' )
+    const grad = newradii
+        .append('linearGradient')
+        .attr('id', (d, i) => 'gradientWheel' + zone + d.key)
+    grad.append('stop')
+        .attr('offset', '0%')
+        .attr('stop-color', '#bbb')
+    grad.append('stop')
+        .attr('offset', (d) => {
+            const startUri = queryLib.getRoot(d.key)
+            console.log(d.key, startUri, startUri.length, d.key.length, (startUri.length / d.key.length * 100))
+            let percent = (startUri.length / d.key.length * 100)
+            if (startUri.length === 0 || d.key.length === 0 || !(percent > 0)) {
+                percent = 60
+            } else if (percent > 20) {
+                //
+            }
+            d.percent = percent
+            return `${percent}%`
+        })
+        .attr('stop-color', '#bbb')
+    grad.append('stop')
+        .attr('offset', d => `${(d.percent + 1)}%`)
+        .attr('stop-color', color)
+    grad.append('stop')
+        .attr('offset', '100%')
+        .attr('stop-color', color)
     newradii
         .append('text')
         .attr('width', 250)
         .append('textPath')
         .attr('xlink:xlink:href', (d, i) => '#radius' + i + 'zone')
-        .attr('fill', `url(#${'gradientWheel' + zone})`)
+        .attr('fill', (d, i) => `url(#${'gradientWheel' + zone + d.key})`)
         .text(d => d.key)
+
+    radii
+        .attr('fill', (d, i) => `url(#${'gradientWheel' + zone + d.key})`)
     radii
         .exit()
         .remove()
@@ -58,7 +88,7 @@ const draw = (el, props) => {
     d3.select(el)
         .selectAll('g.radius')
         .each((d, i) => {
-            d.color = '#CCC'
+            d.color = color
             d.selection = {
                 selector: 'radius' + i + 'zone',
                 query: {
@@ -161,7 +191,10 @@ const resize = (el, props) => {
         {x: 36, y: -168},
         {x: 202, y: -42},
         {x: 272, y: 2},
-        {x: 283, y:85}
+        {x: 283, y:85},
+        {x: 303, y:208},
+        {x: 201, y:232}
+
     ]
     d3.select(el).selectAll('.radius')
         .each((d, i) => {
@@ -182,7 +215,7 @@ const resize = (el, props) => {
     d3.select(el).selectAll('.radius path')
         .attr('d', (d, i) => {
             // let path = d.zone 
-            return `M${path[0].x},${path[0].y}Q${path[1].x},${path[1].y},${path[2].x},${path[2].y}Q${path[3].x},${path[3].y},${path[4].x},${path[4].y}`
+            return `M${path[0].x},${path[0].y}Q${path[1].x},${path[1].y},${path[2].x},${path[2].y}Q${path[3].x},${path[3].y},${path[4].x},${path[4].y}Q${path[5].x},${path[5].y},${path[6].x},${path[6].y}`
         })
         
     /* d3.select(el).selectAll('.witness')

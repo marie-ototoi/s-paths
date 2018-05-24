@@ -16,7 +16,7 @@ export const destroy = (el) => {
 }
 
 const draw = (el, props) => {
-    const { nestedProp1, selectedConfig, selections, zone } = props
+    const { color, nestedProp1, selectedConfig, selections, zone } = props
     // console.log(nestedProp1)
     const units = d3.select(el)
         .selectAll('g.units')
@@ -40,7 +40,7 @@ const draw = (el, props) => {
         .each((d, i) => {
             // console.log(d)
             // d.color = legend.info.filter(p => (p.key === d.values[0].prop2.value || (d.values[0].labelprop2 && p.key === d.values[0].labelprop2.value)))[0].color
-            d.color = '#444'
+            d.color = color
             d.selection = {
                 selector: `treemap_element_p1_${dataLib.makeId(d.key)}`,
                 count: (d.values.length > 0) ? Number(d.values[0].countprop1.value) : 1,

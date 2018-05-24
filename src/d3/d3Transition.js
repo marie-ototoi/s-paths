@@ -40,7 +40,7 @@ const drawShapes = (el, props, shapes, type) => {
             .attr('width', d => d.zone.width)
             .attr('height', d => d.zone.height)
             .attr('fill', d => d.color)
-            .attr('transform', d => `rotate(${d.rotation})`)
+            .attr('transform', d => `rotate(${d.rotation} ${d.zone.x1} ${d.zone.y1})`)
             .attr('fill-opacity', d => d.opacity)
         
         shapesSelection.exit()
@@ -53,7 +53,7 @@ const drawShapes = (el, props, shapes, type) => {
             .attr('y', d => d.zone.y1)
             .attr('width', d => d.zone.width)
             .attr('height', d => d.zone.height)
-            .attr('transform', d => `rotate(${d.rotation})`)
+            .attr('transform', d => `rotate(${d.rotation} ${d.zone.x1} ${d.zone.y1})`)
             .attr('fill', d => d.color)
             .attr('fill-opacity', 1)
         

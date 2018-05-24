@@ -58,9 +58,12 @@ const extrapolatePath = (points) => {
     let extrapolatePath1 = getInterpolatedPoints(path1, 8)
     let path2 = points.slice(2, 5)
     let extrapolatePath2 = getInterpolatedPoints(path2, 5).slice(1)
+    let path3 = points.slice(2, 5)
+    let extrapolatePath3 = getInterpolatedPoints(path3, 5).slice(1)
     return [ 
         ...extrapolatePath1,
-        ...extrapolatePath2
+        ...extrapolatePath2,
+        ...extrapolatePath3
     ]
 }
 const getInterpolatedPoints = (path, numberOfPoints) => {

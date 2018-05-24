@@ -83,7 +83,7 @@ const defaultState = [
                 {
                     category: 'uri',
                     avg: { max: 250, optimal: [30, 100] },
-                    unique: { min: 4, max: 250, optimal: [10, 150] }
+                    unique: { min: 25, max: 250, optimal: [50, 150] }
                 }
             ]
         ]

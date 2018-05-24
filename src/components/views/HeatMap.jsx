@@ -37,7 +37,7 @@ class HeatMap extends React.Component {
             selectElements: this.selectElements,
             handleMouseUp: this.handleMouseUp
         }
-        this.prepareData(this.props)
+        this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
         if (!shallowEqual(this.props, nextProps)) {
