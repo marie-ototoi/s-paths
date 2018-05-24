@@ -13,7 +13,6 @@ router.post('/', (req, res) => {
     } else {
         getStats(req.body)
             .then(props => {
-                console.log('API stats', props)
                 res.json(props)
                 res.end()
             })
