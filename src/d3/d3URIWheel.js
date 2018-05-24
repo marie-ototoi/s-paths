@@ -54,7 +54,7 @@ const draw = (el, props) => {
     grad.append('stop')
         .attr('offset', (d) => {
             const startUri = queryLib.getRoot(d.key)
-            console.log(d.key, startUri, startUri.length, d.key.length, (startUri.length / d.key.length * 100))
+            // console.log(d.key, startUri, startUri.length, d.key.length, (startUri.length / d.key.length * 100))
             let percent = (startUri.length / d.key.length * 100)
             if (startUri.length === 0 || d.key.length === 0 || !(percent > 0)) {
                 percent = 60

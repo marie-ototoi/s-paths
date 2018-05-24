@@ -20,10 +20,9 @@ class Axis extends React.PureComponent {
     render () {
         const { display, offset, type, zone } = this.props
         this.customState.dimensions = getDimensions('axis' + type, display.zones[zone], display.viz, offset)
-        const { x, y, width } = this.customState.dimensions
-        const x1 = (type === 'Bottom') ? x : x + width
+        const { x, y } = this.customState.dimensions
         return (<g className = "Axis"
-            transform = { `translate(${x1}, ${y})` }
+            transform = { `translate(${x}, ${y})` }
             ref = {(c) => { this[this.customState.elementName] = c }}
         >
         </g>)

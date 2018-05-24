@@ -1,4 +1,5 @@
 import * as d3 from 'd3'
+import { Transform } from 'stream';
 
 export const create = (el, props) => {
     //
@@ -33,10 +34,10 @@ const resize = (el, props) => {
     let legendLinePoints
     if (type === 'Bottom') {
         axeLength = dimensions.width
-        legendLinePoints = { x1: 0, y1: 0.5, x2: -30, y2: 0.5 }
+        legendLinePoints = { x1: dimensions.height, y1: 0.5, x2: -30, y2: 0.5 }
     } else {
         axeLength = dimensions.height
-        legendLinePoints = { x1: 0, y1: dimensions.height + 20, x2: 0, y2: dimensions.height + 35 }
+        legendLinePoints = { x1: dimensions.width, y1: dimensions.height + 20, x2: dimensions.width, y2: dimensions.height + 35 }
     }
     //
     const scale = d3.scaleLinear().range([0, axeLength])
@@ -132,4 +133,8 @@ const resize = (el, props) => {
             }
         })
         //
+    d3.select(el).select(`.domain`).attr('transform', d => {
+        let offset = (type === 'Left') ? dimensions.width : 0
+        return `translate(${offset},0)`
+    })
 }

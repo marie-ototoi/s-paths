@@ -124,7 +124,7 @@ export const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width
         }
     case 'legendAxisLeft':
         return {
-            x: origin.x + viz.horizontal_margin + offset.x,
+            x: origin.x + offset.x,
             y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
             width: viz.horizontal_margin + offset.width,
             height: 20 + offset.height

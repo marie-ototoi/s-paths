@@ -179,6 +179,7 @@ class HeatMap extends React.Component {
                     key = { zone + '_propselector_22' }
                     propList = { this.customState.propsLists[1] }
                     config = { config }
+                    align = "right"
                     dimensions = { getDimensions('legendAxisLeft', display.zones[zone], display.viz, { x: 0, y: 30, width: 0, height: 0 }) }
                     propIndex = { 1 }
                     zone = { zone }
