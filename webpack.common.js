@@ -2,13 +2,13 @@ const path = require('path')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 
 module.exports = {
-    entry: {
-        discover: path.join(__dirname, 'src/discover'),
-        styles: path.join(__dirname, 'src/styles/styles')
-    },
+    entry: [
+        path.join(__dirname, 'src/discover'),
+        path.join(__dirname, 'src/styles/styles')
+    ],
     output: {
-        path: path.join(__dirname, 'public'),
-        filename: 'scripts/[name].js',
+        path: path.join(__dirname, 'public/'),
+        filename: "[name].js",
         devtoolModuleFilenameTemplate: 'webpack:///[resource-path]',
         library: '[name]',
         publicPath: '/'
@@ -19,7 +19,9 @@ module.exports = {
                 test: /\.(jsx?)$/,
                 loader: 'babel-loader',
                 exclude: /node_modules/,
-                options: { presets: ['react', 'env'] }
+                options: {
+                    presets: ['react', 'env']
+                }
             },
             {
                 test: /\.css$/,
@@ -30,15 +32,15 @@ module.exports = {
             },
             {
                 test: /\.(eot|svg|ttf|woff2?)$/,
-                loader: 'file-loader?name=fonts/[name].[ext]'
+                loader: 'file-loader'
             }
         ]
     },
     plugins: [
-        new MiniCssExtractPlugin({ filename: 'styles/discover.css' })
+        new MiniCssExtractPlugin()
     ],
     resolve: {
-        extensions: ['.js', '.jsx']
+        extensions: ['.js', '.jsx', '.json', '.css']
     },
     node: {
         console: false,
