@@ -1,6 +1,6 @@
 rect.selection {
     stroke-dasharray: 2, 2;
-    stroke-width: 1;
+    stroke-width: 1px;
     fill: transparent;
     stroke: #000000;
 }

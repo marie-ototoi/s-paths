@@ -3,7 +3,7 @@
 }
 .Axis .legendline{
     stroke: #000;
-    stroke-width: 0.5px;
+    stroke-width: 1px;
 }
 .Axis text{
     fill: #666;
