@@ -68,7 +68,7 @@ class HeatMap extends React.Component {
         const colors = getQuantitativeColors()
         const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
         const legend = getLegend(thresholds, 'countprop2', colors, 'aggregate')
-        const propsLists = getPropsLists(config, zone, dataset.labels)
+        const propsLists = getPropsLists(config, zone, dataset)
         // console.log(propsLists,  dataset.labels)
         const displayedInstances = data.reduce((acc, cur) => {
             acc += Number(cur.countprop2.value)

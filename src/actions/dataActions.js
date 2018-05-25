@@ -188,6 +188,7 @@ export const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => 
         config: updatedConfig
     })
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
+    const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset })
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, selectedConfig, dataset, zone)
     // const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
     // console.log('newQuery', newQuery)

@@ -299,6 +299,7 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
     if (prop1only === true) properties = [properties[0]]
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     let propList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
+    propList = propList.concat(`(COUNT(DISTINCT ?entrypoint) AS ?displayed) `)
     let groupList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
     let defList = ``
     let orderList = ``

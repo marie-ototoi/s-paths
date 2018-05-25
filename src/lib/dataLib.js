@@ -1,5 +1,6 @@
 import * as d3 from 'd3'
 import shallowEqual from 'shallowequal'
+import * as queryLib from './queryLib'
 
 export const areLoaded = (data, zone, status) => {
     data = getCurrentData(data, status)
@@ -176,13 +177,13 @@ export const getLegend = (nestedProps, propName, colors, category) => {
     }
 }
 
-export const getReadablePathsParts = (path, labels) => {
+export const getReadablePathsParts = (path, labels, prefixes) => {
     const parts = path.split('/')
     // if (!labels) return parts.map(part => { return { label: part } })
     return parts
         .filter((part, index) => index !== 0 && part !== '*')
         .map(part => {
-            let prop = labels.filter(l => l.prefUri === part)
+            let prop = labels.filter(l => l.uri === queryLib.useFullUri(part, prefixes))
             return {
                 label: (prop[0] && prop[0].label) ? prop[0].label : part,
                 comment: (prop[0] && prop[0].comment) ? prop[0].comment : undefined

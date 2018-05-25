@@ -52,7 +52,7 @@ class URIWheel extends React.Component {
             category: 'text'
         }])
 
-        const propsLists = getPropsLists(config, zone, dataset.labels)
+        const propsLists = getPropsLists(config, zone, dataset)
 
         const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
         

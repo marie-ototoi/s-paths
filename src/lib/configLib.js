@@ -219,7 +219,8 @@ export const activateDefaultConfigs = (configs) => {
     })
 }
 
-export const getPropsLists = (configs, zone, labels) => {
+export const getPropsLists = (configs, zone, dataset) => {
+    const { labels, prefixes } = dataset
     const maxPropIndex = d3.max(configs.matches.map(m => m.properties.length))
     return Array.from(Array(maxPropIndex).keys()).map(propIndex => {
         return configs.matches
@@ -227,7 +228,7 @@ export const getPropsLists = (configs, zone, labels) => {
             .map(config => {
                 return {
                     path: config.properties[propIndex].path,
-                    readablePath: dataLib.getReadablePathsParts(config.properties[propIndex].path, labels),
+                    readablePath: dataLib.getReadablePathsParts(config.properties[propIndex].path, labels, prefixes),
                     selected: config.selected
                 }
             }).reduce((configAcc, config) => {

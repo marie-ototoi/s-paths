@@ -29,11 +29,16 @@ export const getLabels = async (urisToLabel, prefixes) => {
     // if already defined, do not keep in queried prefixes
     // propertyModel.find({ uri: uri }).exec()
     let propsInDatabase = await Promise.all(urisToLabel.map(prop => {
-        return propertyModel.findOne({ uri: prop.uri }).exec()
-    }).map(ignorePromise))
+        console.log('ah ', prop.uri, propertyModel.findOne({ property: prop.uri }).exec())
+        return propertyModel.findOne({ property: prop.uri }).exec()
+    }))
     propsInDatabase.forEach((prop, index) => {
         if (prop) {
-            urisToLabel[index].label = prop.label
+            if (prop.label !== '') {
+                urisToLabel[index].label = prop.label
+            } else if (prop.loadAttempts > 10 && new Date(prop.modifiedAt) < new Date().setDate(-2)) {
+                urisToLabel[index].label = urisToLabel[index].uri
+            }
             urisToLabel[index].comment = prop.comment
         }
     })
@@ -51,7 +56,7 @@ export const getLabels = async (urisToLabel, prefixes) => {
             if (missing.length > 0) {
                 return missing[0]
             } else {
-                return prop
+                return { ...prop, label: prop.uri }
             }
         }
     })
