@@ -2,7 +2,7 @@ import * as d3 from 'd3'
 import * as queryLib from '../lib/queryLib'
 import * as selectionLib from '../lib/selectionLib'
 
-const create = (el, props) => {
+export const create = (el, props) => {
     // console.log('create')
     if (el && props.data) {
         // console.log('||||||||||||||||||||||||', props.role, props.nestedProp1)
@@ -11,7 +11,7 @@ const create = (el, props) => {
     }
 }
 
-const destroy = (el) => {
+export const destroy = (el) => {
     //
     d3.select(el)
         .selectAll('g.radius')
@@ -115,7 +115,7 @@ const draw = (el, props) => {
         })
 }
 
-const drawSelection = (el, props) => {
+export const drawSelection = (el, props) => {
     const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
     const selectedZone = {
         x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
@@ -139,7 +139,7 @@ const drawSelection = (el, props) => {
         .attr('y', selectedZone.y1)
 }
 
-const getElements = (el, propName, value, propCategory) => {
+export const getElements = (el, propName, value, propCategory) => {
     let elements = []
     d3.select(el).selectAll('.elements').each(d => {
         if (d.key === value) {
@@ -158,7 +158,7 @@ const getElementsForTransition = (el, props) => {
     return results
 }
 
-const getElementsInZone = (el, props) => {
+export const getElementsInZone = (el, props) => {
     const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
     const selectedZone = {
         x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
@@ -211,13 +211,13 @@ const resize = (el, props) => {
             d.controlPoints = selectionLib.extrapolatePath(selectionLib.getRotatedPoints(path, (i * angle) - 2, center))
             // witnesses.push(d.zone)
         })
-    
+
     d3.select(el).selectAll('.radius path')
         .attr('d', (d, i) => {
-            // let path = d.zone 
+            // let path = d.zone
             return `M${path[0].x},${path[0].y}Q${path[1].x},${path[1].y},${path[2].x},${path[2].y}Q${path[3].x},${path[3].y},${path[4].x},${path[4].y}Q${path[5].x},${path[5].y},${path[6].x},${path[6].y}`
         })
-        
+
     /* d3.select(el).selectAll('.witness')
         .data(witnesses)
         .enter()
@@ -235,7 +235,7 @@ const resize = (el, props) => {
     props.handleTransition(props, getElementsForTransition(el, props))
 }
 
-const update = (el, props) => {
+export const update = (el, props) => {
     //
     if (el && props.data) {
         draw(el, props)
@@ -248,10 +248,3 @@ const update = (el, props) => {
         }
     }
 }
-
-exports.create = create
-exports.destroy = destroy
-exports.drawSelection = drawSelection
-exports.getElements = getElements
-exports.getElementsInZone = getElementsInZone
-exports.update = update

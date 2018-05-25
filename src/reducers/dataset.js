@@ -1,4 +1,4 @@
-import * as types from '../constants/ActionTypes'
+import types from '../constants/ActionTypes'
 
 const initialState = {
     endpoint: 'http://localhost:8890/sparql',
