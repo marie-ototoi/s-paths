@@ -13,7 +13,7 @@ class History extends React.PureComponent {
         super(props)
         this.jumpHistory = this.jumpHistory.bind(this)
         this.state = {
-            elementName: `${props.zone}_history`
+            element_name: `${props.zone}_history`
         }
         this.customState = {
             jumpHistory: this.jumpHistory
@@ -40,19 +40,19 @@ class History extends React.PureComponent {
         const { x, y } = dimensions
         return (<g
             className = "History"
-            ref = { this.state.elementName }
+            ref = {(c) => { this[this.state.element_name] = c }}
             transform = { `translate(${x}, ${y})` }
         >
         </g>)
     }
     componentDidMount () {
-        d3History.create(this[this.state.elementName], { ...this.props, ...this.customState })
+        d3History.create(this[this.state.element_name], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3History.update(this[this.state.elementName], { ...this.props, ...this.customState })
+        d3History.update(this[this.state.element_name], { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3History.destroy(this[this.state.elementName], { ...this.props, ...this.customState })
+        d3History.destroy(this[this.state.element_name], { ...this.props, ...this.customState })
     }
 }
 
