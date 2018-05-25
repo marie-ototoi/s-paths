@@ -3,8 +3,8 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
     entry: [
-        path.join(__dirname, 'src/discover'),
-        path.join(__dirname, 'src/styles/styles')
+        path.join(__dirname, 'src'),
+        path.join(__dirname, 'src/styles')
     ],
     output: {
         path: path.join(__dirname, 'public/'),
@@ -16,12 +16,15 @@ module.exports = {
     module: {
         rules: [
             {
+                enforce: 'pre',
                 test: /\.jsx?$/,
-                loader: 'babel-loader',
                 exclude: /node_modules/,
-                options: {
-                    presets: ['react', 'env']
-                }
+                loader: 'eslint-loader',
+            },
+            {
+                test: /\.jsx?$/,
+                exclude: /node_modules/,
+                loader: 'babel-loader'
             },
             {
                 test: /\.css$/,

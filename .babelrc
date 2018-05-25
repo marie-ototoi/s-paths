@@ -1,9 +1,11 @@
 {
     "presets": [
+        ["env", { "modules": false }],
         "react",
-        "env"
+        "stage-1"
     ],
     "plugins": [
+        "react-hot-loader/babel",
         "transform-object-rest-spread"
     ]
 }
