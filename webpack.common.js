@@ -1,5 +1,5 @@
 const path = require('path')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
     entry: [
@@ -37,7 +37,12 @@ module.exports = {
         ]
     },
     plugins: [
-        new MiniCssExtractPlugin()
+        new HtmlWebpackPlugin({
+            inject: false,
+            template: require('html-webpack-template'),
+            appMountId: 'root',
+            title: 'Discover - semantic data sets exploratory tool'
+        })
     ],
     resolve: {
         extensions: ['.js', '.jsx', '.json', '.css']
