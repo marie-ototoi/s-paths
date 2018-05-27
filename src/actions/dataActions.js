@@ -72,9 +72,11 @@ export const loadData = (dispatch) => (dataset, views, previousConfigs, previous
         .then(configs => {
             const configMain = getConfig(configs, 'main')
             const queryMain = makeQuery(entrypoint, configMain, 'main', dataset)
+            const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
             // const coverageQueryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, prop1only: true })
             const configAside = getConfig(configs, 'aside')
             const queryAside = makeQuery(entrypoint, configAside, 'aside', dataset)
+            const queryAsideUnique = makeQuery(entrypoint, configAside, 'aside', { ...dataset, unique: true })
             // const coverageQueryAside = makeQuery(entrypoint, configAside, 'aside', { ...dataset, prop1only: true })
             let deltaMain
             let deltaAside
@@ -99,11 +101,11 @@ export const loadData = (dispatch) => (dataset, views, previousConfigs, previous
                 getData(endpoint, queryMain, prefixes),
                 getData(endpoint, queryAside, prefixes),
                 deltaMain,
-                deltaAside // ,
-                // getData(endpoint, coverageQueryMain, prefixes),
-                // getData(endpoint, coverageQueryAside, prefixes)
+                deltaAside,
+                getData(endpoint, queryMainUnique, prefixes),
+                getData(endpoint, queryAsideUnique, prefixes)
             ])
-                .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside]) => { // , coverageMain, coverageAside
+                .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside, uniqueMain, uniqueAside]) => { // , coverageMain, coverageAside
                     // console.log(dataMain, dataAside)
                     // console.log('dataTransitionMain', dataTransitionMain)
                     // console.log('dataTransitionAside', dataTransitionAside)
@@ -112,10 +114,9 @@ export const loadData = (dispatch) => (dataset, views, previousConfigs, previous
                         main: { ...dataMain },
                         aside: { ...dataAside },
                         mainDelta: dataDeltaMain,
-                        asideDelta: dataDeltaAside// ,
-                        // mainCoverage: coverageMain,
-                        // asideCoverage: coverageAside,
-                        // resetUnitDimensions: 'all'
+                        asideDelta: dataDeltaAside,
+                        mainDisplayed: Number(uniqueMain.results.bindings[0].displayed.value),
+                        asideDisplayed: Number(uniqueAside.results.bindings[0].displayed.value)
                     })
                 })
                 .catch(error => {
@@ -150,16 +151,17 @@ export const selectProperty = (dispatch) => (propIndex, path, config, dataset, z
     })
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, config, dataset, zone)
+    const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
     // const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
     let reset = (propIndex === 0 ||
         (propIndex === 1 && getSelectedConfig(config).properties[1].category !== getSelectedConfig(updatedConfig).properties[1].category && (getSelectedConfig(config).properties[1].category === 'datetime' || getSelectedConfig(updatedConfig).properties[1].category === 'datetime')))
     Promise.all([
         getData(endpoint, newQuery, prefixes),
-        getData(endpoint, queryTransition, prefixes) // ,
-        // (reset) ? getData(endpoint, coverageQuery, prefixes) : {}
+        getData(endpoint, queryTransition, prefixes),
+        getData(endpoint, queryUnique, prefixes)
     ])
-        .then(([newData, newDelta]) => { // newCoverage
-            // console.log(newData, newDelta)
+        .then(([newData, newDelta, newUnique]) => {
+            // console.log('queryUnique', newUnique.results.bindings[0].displayed.value, queryUnique)
             const action = {
                 type: types.SET_DATA,
                 resetUnitDimensions: (reset) ? 'zone' : null,
@@ -167,7 +169,7 @@ export const selectProperty = (dispatch) => (propIndex, path, config, dataset, z
             }
             action[zone] = newData
             action[zone + 'Delta'] = newDelta
-            // action[zone + 'Coverage'] = newCoverage
+            action[zone + 'Displayed'] = Number(newUnique.results.bindings[0].displayed.value)
             dispatch(action)
         })
         .catch(error => {
@@ -181,25 +183,23 @@ export const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => 
     const updatedConfigs = selectViewConfig(id, selectedConfigs)
     const selectedConfig = selectedConfigs.filter(c => c.selected)[0]
     const updatedConfig = updatedConfigs.filter(c => c.selected)[0]
-    // console.log(selectedConfig)
     dispatch({
         type: types.SET_CONFIG,
         zone,
         config: updatedConfig
     })
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
-    const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset })
+    const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, selectedConfig, dataset, zone)
-    // const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
-    // console.log('newQuery', newQuery)
+    // console.log('queryUnique', queryUnique)
     // console.log('queryTransition', queryTransition)
     Promise.all([
         getData(endpoint, newQuery, prefixes),
-        getData(endpoint, queryTransition, prefixes)// ,
-        // getData(endpoint, coverageQuery, prefixes)
+        getData(endpoint, queryTransition, prefixes),// ,
+        getData(endpoint, queryUnique, prefixes)
     ])
-        .then(([newData, newDelta, newCoverage]) => {
-            // console.log(newData, newDelta)
+        .then(([newData, newDelta, newUnique]) => {
+            // console.log(newUnique.results.bindings[0].displayed.value)
             const action = {
                 type: types.SET_DATA,
                 resetUnitDimensions: 'zone',
@@ -207,7 +207,7 @@ export const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => 
             }
             action[zone] = newData
             action[zone + 'Delta'] = newDelta
-            // action[zone + 'Coverage'] = newCoverage
+            action[zone + 'Displayed'] = Number(newUnique.results.bindings[0].displayed.value)
             dispatch(action)
         })
         .catch(error => {

@@ -291,18 +291,19 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone) => {
 
 // to do : take constraints into account
 export const makeQuery = (entrypoint, configZone, zone, options) => {
-    const { defaultGraph, constraints, prop1only } = options
+    const { defaultGraph, constraints, prop1only, unique } = options
     // console.log(configZone)
     let selectedConfig = configLib.getSelectedConfig(configZone, zone)
     // console.log(selectedConfig)
     let properties = selectedConfig.properties
     if (prop1only === true) properties = [properties[0]]
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
-    let propList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
-    propList = propList.concat(`(COUNT(DISTINCT ?entrypoint) AS ?displayed) `)
-    let groupList = (configZone.entrypoint === undefined) ? `` : `?entrypoint `
+    let propList = (configZone.entrypoint === undefined || unique) ? `` : `?entrypoint `
+    if (unique) propList = propList.concat(`(COUNT(DISTINCT ?entrypoint) AS ?displayed) `)
+    let groupList = unique ?  `` : `GROUP BY `
+    if (configZone.entrypoint !== undefined && !unique) groupList = groupList.concat(`?entrypoint `)
     let defList = ``
-    let orderList = ``
+    let orderList = unique ? `` : `ORDER BY `
     properties.forEach((prop, index) => {
         index += 1
         let hierarchical = false
@@ -310,14 +311,18 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
             // deactivate retrieval of hierarchy between concepts
             // hierarchical = prop.category === 'text' ? 'previous' : 'last'
         }
-        propList = propList.concat(`?prop${index} `)
-        if (hierarchical) propList = propList.concat(`?directlink `)
-        orderList = orderList.concat(`?prop${index} `)
-        if (configZone.entrypoint === undefined) {
-            propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
-            orderList = orderList.concat(`?countprop${index} `)
+        if( !unique) {
+            propList = propList.concat(`?prop${index} `)
+            if (hierarchical) propList = propList.concat(`?directlink `)
+            orderList = orderList.concat(`?prop${index} `)
+            
+            if (configZone.entrypoint === undefined) {
+                propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
+                orderList = orderList.concat(`?countprop${index} `)
+            }
+        
+            groupList = groupList.concat(`?prop${index} `)
         }
-        groupList = groupList.concat(`?prop${index} `)
         if (hierarchical) groupList = groupList.concat(`?directlink `)
         const optional = configZone.constraints[index - 1] && configZone.constraints[index - 1][0].optional
         defList = defList.concat(FSL2SPARQL(prop.path, {
@@ -336,13 +341,13 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
 WHERE {
 ${constraints}
 ${defList}
-} GROUP BY ${groupList}ORDER BY ${orderList}`
+} ${groupList} ${orderList}`
 }
 
-const makeGeoNamesQuery = (options) => {
+/* const makeGeoNamesQuery = (options) => {
     const { defaultGraph, geograph } = options
     let service = (getRoot(defaultGraph) !== getRoot(geograph)) ? ` { service <${geograph}> }` : ``
-}
+} */
 
 export const makeQueryResources = (options) => {
     const { defaultGraph } = options

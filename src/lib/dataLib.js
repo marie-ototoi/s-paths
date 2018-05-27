@@ -136,6 +136,16 @@ export const getResults = (data, zone, status) => {
     return (filtered.length > 0 && filtered[0][statementsType].results) ? filtered[0][statementsType].results.bindings : []
 }
 
+export const getNbDisplayed = (data, zone, status) => {
+    data = getCurrentData(data, status)
+    data = data.filter(d => d.zone === zone)
+    if (status === 'delta') {
+        status = 'transition'
+    }
+    const filtered = data.filter(d => (d.status === status))
+    return (filtered.length > 0 && filtered[0].displayed) ? filtered[0].displayed : 0
+}
+
 export const getHeadings = (data, zone, status) => {
     data = getCurrentData(data, status)
     const filtered = data.filter(d => (d.zone === zone && d.status === status))

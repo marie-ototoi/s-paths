@@ -3,12 +3,13 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 import { getCurrentConfigs, getSelectedConfig } from '../../lib/configLib'
+import * as dataLib from '../../lib/dataLib'
 import * as queryLib from '../../lib/queryLib'
 import { getDimensions } from '../../lib/scaleLib'
 
 import { loadData } from '../../actions/dataActions'
 
-class Coverage extends React.PureComponent {
+class Coverage extends React.Component {
     constructor (props) {
         super(props)
         this.exploreSelection = this.exploreSelection.bind(this)
@@ -27,17 +28,17 @@ class Coverage extends React.PureComponent {
         }
     }
     render () {
-        const { dataset, displayedInstances, display, offset, selectedInstances, zone } = this.props
+        const { data, dataset, display, offset, zone } = this.props
         // const activeConfigs = getCurrentConfigs(configs, 'active')
         const dimensions = getDimensions('coverage', display.zones[zone], display.viz, offset)
         const { x, y, width } = dimensions
-        // console.log(dataset.stats)
         let options = [
             { label: 'dataset', total: dataset.stats.totalInstances },
             { label: 'queried', total: dataset.stats.selectionInstances },
-            { label: 'displayed', total: displayedInstances },
-            { label: 'selected', total: selectedInstances }
+            { label: 'displayed', total:  dataLib.getNbDisplayed(data, zone, 'active') }/* ,
+            { label: 'selected', total: selectedInstances } */
         ]
+        // console.log('render', dataLib.getNbDisplayed(data, zone, 'active'))
         const itemWidth = width / 6
         // const itemHeight = itemWidth * 3 / 4
         const margin = itemWidth / 6
@@ -49,7 +50,9 @@ class Coverage extends React.PureComponent {
             ref = { `coverage_${zone}` }
         >
             { options.map((option, i) => {
-                const barWidth = maxBarWidth * option.total / options[0].total
+                let percent = option.total / options[0].total
+                if (percent > 1) percent = 1
+                let barWidth = maxBarWidth * percent
                 return <g key = { zone + '_summary_' + i }>
                     <rect width = { maxBarWidth } height = { 12 } y = { 15 + margin + i * 16 } x = { margin * 2 + itemWidth } fill = "#E0E0E0"></rect>
                     <rect width = { barWidth } height = { 6 } y = { 18 + margin + i * 16 } x = { margin * 2 + itemWidth } fill = "#666666"></rect>
@@ -69,6 +72,7 @@ class Coverage extends React.PureComponent {
 Coverage.propTypes = {
     config: PropTypes.object,
     configs: PropTypes.object,
+    data: PropTypes.object,
     dataset: PropTypes.object,
     display: PropTypes.object,
     displayedInstances: PropTypes.number,
