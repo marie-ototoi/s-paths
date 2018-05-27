@@ -21,13 +21,13 @@ app.use('/', express.static('public'))
 app.use('/', index)
 
 // Development configuration
-console.log('salut', process.env.NODE_ENV)
+// console.log('salut', process.env.NODE_ENV)
 if (process.env.NODE_ENV === 'development') {
     const config = require('./webpack.dev');
 
     const compiler = require('webpack')(config);
     const {publicPath} = config.output;
-    console.log(publicPath)
+    // console.log(publicPath)
     require('webpack-hot-client')(compiler, {});
     app.use(require('webpack-dev-middleware')(compiler, {
         publicPath
