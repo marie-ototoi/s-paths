@@ -10,7 +10,7 @@ import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import d3URIWheel from '../../d3/d3URIWheel'
+import * as d3URIWheel from '../../d3/d3URIWheel'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
 import { deduplicate, nestData } from '../../lib/dataLib'
@@ -55,7 +55,7 @@ class URIWheel extends React.Component {
         const propsLists = getPropsLists(config, zone, dataset)
 
         const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
-        
+
         const displayedInstances = nestedProp1.reduce((acc, cur) => {
             cur.values.forEach(val => {
                 acc += Number(val.countprop1.value)
@@ -73,7 +73,7 @@ class URIWheel extends React.Component {
             propsLists
         }
     }
-  
+
     handleMouseDown (e) {
         const { display, zone } = this.props
         this.props.handleMouseDown(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))

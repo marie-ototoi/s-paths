@@ -1,14 +1,14 @@
 const path = require('path')
-const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
-    entry: {
-        discover: path.join(__dirname, 'src/discover'),
-        styles: path.join(__dirname, 'src/styles/styles')
-    },
+    entry: [
+        path.join(__dirname, 'src'),
+        path.join(__dirname, 'src/styles')
+    ],
     output: {
-        path: path.join(__dirname, 'public'),
-        filename: 'scripts/[name].js',
+        path: path.join(__dirname, 'public/'),
+        filename: "[name].js",
         devtoolModuleFilenameTemplate: 'webpack:///[resource-path]',
         library: '[name]',
         publicPath: '/'
@@ -16,29 +16,39 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.(jsx?)$/,
-                loader: 'babel-loader',
+                enforce: 'pre',
+                test: /\.jsx?$/,
                 exclude: /node_modules/,
-                options: { presets: ['react', 'env'] }
+                loader: 'eslint-loader',
+            },
+            {
+                test: /\.jsx?$/,
+                exclude: /node_modules/,
+                loader: 'babel-loader'
             },
             {
                 test: /\.css$/,
                 use: [
-                    MiniCssExtractPlugin.loader,
+                    'style-loader',
                     'css-loader'
                 ]
             },
             {
                 test: /\.(eot|svg|ttf|woff2?)$/,
-                loader: 'file-loader?name=fonts/[name].[ext]'
+                loader: 'file-loader'
             }
         ]
     },
     plugins: [
-        new MiniCssExtractPlugin({ filename: 'styles/discover.css' })
+        new HtmlWebpackPlugin({
+            inject: false,
+            template: require('html-webpack-template'),
+            appMountId: 'root',
+            title: 'Discover - semantic data sets exploratory tool'
+        })
     ],
     resolve: {
-        extensions: ['.js', '.jsx']
+        extensions: ['.js', '.jsx', '.json', '.css']
     },
     node: {
         console: false,

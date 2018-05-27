@@ -1,5 +1,5 @@
 import fetch from 'node-fetch'
-import * as types from '../constants/ActionTypes'
+import types from '../constants/ActionTypes'
 import { activateDefaultConfigs, defineConfigs, getConfig, getSelectedConfig, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
 import { getData, makeQuery, makeTransitionQuery } from '../lib/queryLib'
 

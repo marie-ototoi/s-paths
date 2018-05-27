@@ -1,4 +1,4 @@
-import * as types from '../constants/ActionTypes'
+import types from '../constants/ActionTypes'
 import * as selectionLib from '../lib/selectionLib'
 
 export const handleMouseDown = (dispatch) => (e, zone, offset) => {

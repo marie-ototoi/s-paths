@@ -15,7 +15,6 @@ router.post('/', (req, res) => {
     } else {
         getResources(req.body)
             .then(resources => {
-                console.log('API resources', resources)
                 res.json(resources)
                 res.end()
             })

@@ -1,4 +1,4 @@
-import * as types from '../constants/ActionTypes'
+import types from '../constants/ActionTypes'
 import { ActionCreators } from 'redux-undo'
 
 export const jump = (dispatch) => (newIndex, oldIndex) => {

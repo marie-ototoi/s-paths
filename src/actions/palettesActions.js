@@ -1,4 +1,4 @@
-import * as types from '../constants/ActionTypes'
+import types from '../constants/ActionTypes'
 import * as paletteLib from '../lib/paletteLib'
 
 export const getPropPalette = (dispatch) => (palettes, propPath, length) => {

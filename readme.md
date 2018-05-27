@@ -2,15 +2,9 @@
 
 ## Installation
 
-* Install local dependencies:
-  ```bash
-  $ npm install
-  ```
-
-* Build assets: (to be done at least once before running `devserver`)
-  ```bash
-  $ npm run build
-  ```
+```bash
+$ npm install
+```
 
 ## Usage
 
@@ -18,21 +12,11 @@
 $ npm start
 ```
 
-Launches the Webpack Dev Server and the API server.
+In a production environment, you need to build assets before running the server.
 
-### Advanced
-
-To take control over the two parts of the process, you can run them separately:
-
-* Run webpack dev on http://localhost:3000/, watches and rebuild
-  ```bash
-  $ npm run devserver
-  ```
-
-* Run API server on http://localhost:5000/
-  ```bash
-  $ npm run server
-  ```
+```bash
+$ npm run build
+```
 
 ## Databases
 

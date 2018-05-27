@@ -1,4 +1,4 @@
-import * as types from '../constants/ActionTypes'
+import types from '../constants/ActionTypes'
 import * as scale from '../lib/scaleLib'
 
 export const setDisplay = (dispatch) => ({ env, mode, zonesDef, gridDef, screen, vizDef }) => {
