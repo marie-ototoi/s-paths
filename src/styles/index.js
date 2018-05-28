@@ -1,4 +1,4 @@
-// import 'bootstrap/dist/css/bootstrap.css'
+import 'normalize.css'
 import './legend.css'
 import './main.css'
 import './debug.css'
