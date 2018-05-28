@@ -37,7 +37,7 @@ const resize = (el, props) => {
         legendLinePoints = { x1: dimensions.height, y1: 0.5, x2: -30, y2: 0.5 }
     } else {
         axeLength = dimensions.height
-        legendLinePoints = { x1: dimensions.width, y1: dimensions.height + 20, x2: dimensions.width, y2: dimensions.height + 35 }
+        legendLinePoints = { x1: 0, y1: dimensions.height + 20, x2: 0, y2: dimensions.height + 35 }
     }
     //
     const scale = d3.scaleLinear().range([0, axeLength])
