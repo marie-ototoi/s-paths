@@ -133,8 +133,7 @@ const resize = (el, props) => {
             }
         })
         //
-    d3.select(el).select(`.domain`).attr('transform', d => {
-        let offset = (type === 'Left') ? dimensions.width : 0
-        return `translate(${offset},0)`
+    d3.select(el).select(`.axisLeft`).attr('transform', d => {
+        return `translate(${dimensions.width},0)`
     })
 }
