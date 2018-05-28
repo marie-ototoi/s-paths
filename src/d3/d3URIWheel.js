@@ -1,4 +1,5 @@
 import * as d3 from 'd3'
+import * as dataLib from '../lib/dataLib'
 import * as queryLib from '../lib/queryLib'
 import * as selectionLib from '../lib/selectionLib'
 
@@ -47,20 +48,19 @@ const draw = (el, props) => {
         .attr('id', (d, i) => 'radius' + i + 'zone' )
     const grad = newradii
         .append('linearGradient')
-        .attr('id', (d, i) => 'gradientWheel' + zone + d.key)
+        .attr('id', (d, i) => 'gradientWheel' + zone + dataLib.makeId(d.key))
     grad.append('stop')
         .attr('offset', '0%')
         .attr('stop-color', '#bbb')
     grad.append('stop')
         .attr('offset', (d) => {
             const startUri = queryLib.getRoot(d.key)
-            // console.log(d.key, startUri, startUri.length, d.key.length, (startUri.length / d.key.length * 100))
+            
             let percent = (startUri.length / d.key.length * 100)
-            if (startUri.length === 0 || d.key.length === 0 || !(percent > 0)) {
-                percent = 60
-            } else if (percent > 20) {
-                //
+            if (startUri.length === 0 || d.key.length === 0 || !(percent > 0) || d.key.length > 49) {
+                percent = (startUri.length / 49 * 100)
             }
+            // console.log(d.key, startUri, startUri.length, d.key.length, (startUri.length / d.key.length * 100), percent)
             d.percent = percent
             return `${percent}%`
         })
@@ -76,11 +76,8 @@ const draw = (el, props) => {
         .attr('width', 250)
         .append('textPath')
         .attr('xlink:xlink:href', (d, i) => '#radius' + i + 'zone')
-        .attr('fill', (d, i) => `url(#${'gradientWheel' + zone + d.key})`)
         .text(d => d.key)
 
-    radii
-        .attr('fill', (d, i) => `url(#${'gradientWheel' + zone + d.key})`)
     radii
         .exit()
         .remove()
@@ -178,13 +175,18 @@ export const getElementsInZone = (el, props) => {
 // const retrieveValues
 
 const resize = (el, props) => {
-    const { display, nestedProp1 } = props
-
+    const { display, nestedProp1, zone } = props
     let angle = 360 / (nestedProp1.length - 1)
     // console.log(angle)
     let center = { x: display.viz.useful_width/2, y: display.viz.useful_height/2 }
     d3.select(el).selectAll('.radius')
         .attr('transform', (d, i) => `translate(${center.x}, ${center.y}) rotate(${(i * angle)} 0 0)`)
+
+    // d3.select(el).selectAll('.radius linearGradient')
+        //.attr('gradientTransform', (d, i) => `rotate(0)`)
+    
+    d3.select(el).selectAll('.radius textPath')
+        .attr('fill', (d, i) => `url(#${'gradientWheel' + zone + dataLib.makeId(d.key)})`)
     // let witnesses = []
     let path = [
         {x: 0, y: 0},
@@ -194,8 +196,8 @@ const resize = (el, props) => {
         {x: 283, y:85},
         {x: 303, y:208},
         {x: 201, y:232}
-
     ]
+
     d3.select(el).selectAll('.radius')
         .each((d, i) => {
             // console.log(i * angle, selectionLib.getRotatedPoints(path, (i * angle) - 2, center))

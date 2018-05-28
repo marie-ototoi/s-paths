@@ -1,10 +1,10 @@
 import types from '../constants/ActionTypes'
 
 const initialState = {
-    endpoint: 'http://localhost:8890/sparql',
+    endpoint: 'http://bnf.lri.fr:8890/sparql',
     // 'http://eventmedia.eurecom.fr/sparql', //'http://bnf.lri.fr:8890/sparql'
     entrypoint: '',
-    defaultGraph: 'http://localhost:8890/nobel',
+    defaultGraph: 'http://nobel.bnf.fr',
     // null,  'http://localhost:8890/data10', 'http://data10.bnf.fr', 'http://data01.bnf.fr','http://data.bnf.fr',
     constraints: '',
     forceUpdate: false,
