@@ -160,7 +160,7 @@ export const guid = () => {
 }
 
 export const makeId = (textstr) => {
-    return textstr.replace(/([/:#_\-.\s])/g, (match, p1) => {
+    return textstr.replace(/([/:#%_\-.\s])/g, (match, p1) => {
         if (p1) return ''
     }).toLowerCase()
 }
