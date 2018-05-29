@@ -14,6 +14,7 @@ const defaultState = [
             [
                 {
                     category: 'text',
+                    avg: { max: 100, optimal: [30, 50] },
                     unique: { min: 2, max: 50, optimal: [4, 6] }
                 },
                 {
@@ -45,6 +46,7 @@ const defaultState = [
                 },
                 {
                     category: 'text',
+                    avg: { max: 100, optimal: [30, 50] },
                     unique: { min: 2, max: 150 }
                 }
             ],
@@ -82,13 +84,17 @@ const defaultState = [
             [
                 {
                     category: 'uri',
-                    avg: { max: 250, optimal: [30, 100] },
+                    avg: { max: 120, optimal: [30, 70] },
                     unique: { min: 25, max: 250, optimal: [50, 150] }
                 }
             ]
         ]
-    }
-    /* ,
+    },
+    {
+        id: 'SingleItem',
+        entrypoint: { min: 1, max: 1 },
+        constraints: []
+    },
     {
         id: 'GeoMap',
         constraints: [
@@ -115,7 +121,7 @@ const defaultState = [
                 }
             ]
         ]
-    } */
+    }
 ]
 
 const view = (state = {}, action) => {

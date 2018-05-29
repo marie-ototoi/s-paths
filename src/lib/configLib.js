@@ -103,16 +103,19 @@ export const findAllMatches = (inputList, addList) => {
 export const defineConfigs = (views, stats) => {
     const configSetUp = views.map(view => {
         let propList = []
+        if (view.entrypoint) {
+            if (view.entrypoint.min > stats.selectionInstances || view.entrypoint.max < stats.selectionInstances) return { matches: [] }
+        }
         // make a list of all possible properties for each constrained prop zone
         view.constraints.forEach(constraintSet => {
             let propSet = []
             stats.statements.forEach(prop => {
                 constraintSet.forEach(constraint => {
                     // generic conditions
-                    if ((prop.category === constraint.category) &&
+                    if ((prop.category === constraint.category || constraint.category === '*') &&
                     (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
-                    (!constraint.unique.min || (constraint.unique.min && (prop.unique > constraint.unique.min))) &&
-                    (!constraint.unique.max || (constraint.unique.max && prop.unique < constraint.unique.max))
+                    (!constraint.unique.min || (constraint.unique.min && (prop.unique >= constraint.unique.min))) &&
+                    (!constraint.unique.max || (constraint.unique.max && prop.unique <= constraint.unique.max))
                     ) {
                         propSet.push({
                             ...prop,
@@ -125,9 +128,9 @@ export const defineConfigs = (views, stats) => {
                 return b.score - a.score
             }))
         })
+        if (propList.length === 0 || propList[0].length === 0) return { matches: [] }
         // find all possible combinations
         let matches = propList[0].map(prop => [prop])
-        // console.log(matches, propList)
         if (propList.length > 1 && propList[1].length > 0) {
             for (let i = 1; i < propList.length; i++) {
                 matches = findAllMatches(matches, propList[i])
@@ -147,14 +150,13 @@ export const defineConfigs = (views, stats) => {
             let unique = new Set(match.map(m => m.property))
             return !missingProp && unique.size === match.length && validgeo && match.length === view.constraints.length
         })
+        if (matches.length === 0) return { matches }
+
         // if the view is supposed to display each entity
         let entrypointFactor = 1
         if (view.entrypoint) {
             const { min, max, optimal } = view.entrypoint
-            if (!inRange(stats.totalInstances, [min, max])) {
-                // will result in each score being 0, so discard the view
-                entrypointFactor = 0
-            } else {
+            if (optimal) {
                 // will higher each score
                 entrypointFactor += getCost(stats.totalInstances, min, max, optimal, 0.3)
             }
