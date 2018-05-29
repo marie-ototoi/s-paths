@@ -272,9 +272,14 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone) => {
                 })
             }
             if (constraint.category === 'datetime') {
+    
                 const conditions = constraint.value.map((r, iR) => {
-                    const theDate = new Date(r, (iR === 0) ? 0 : 11, (iR === 0) ? 1 : 31)
-                    return `xsd:date(?${propName}) ${(iR === 0) ? '>=' : '<='} xsd:date('${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}')`
+                    let theDate = new Date(r, (iR === 0) ? 0 : 11, (iR === 0) ? 1 : 31)
+                    if (String(r).match(/\d{4}/)) {
+                        return `xsd:integer(?${propName}) ${(iR === 0) ? '>=' : '<='} xsd:integer('${theDate.getFullYear()}')`
+                    } else { 
+                        return `xsd:date(?${propName}) ${(iR === 0) ? '>=' : '<='} xsd:date('${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}')`
+                    }                    
                 }).join(' && ')
                 return `(${conditions})`
             } else if (constraint.category === 'text' || constraint.category === 'uri' || (constraint.category === 'geo' && constraint.subcategory === 'name')) {
