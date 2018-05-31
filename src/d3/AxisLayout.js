@@ -1,7 +1,7 @@
 import * as d3 from 'd3'
-import * as AbstractLayout from './AbstractLayout'
+import AbstractLayout from './AbstractLayout'
 
-export class AxisLayout extends AbstractLayout {
+class AxisLayout extends AbstractLayout {
     draw (props) {
         const { legend, selectElements } = props
         const items = d3.select(this.el).selectAll('g.legenditem')
@@ -35,3 +35,5 @@ export class AxisLayout extends AbstractLayout {
             .text(d => d.label)
     }
 }
+
+export default AxisLayout

@@ -2,8 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
-import * as d3Axis from '../../d3/d3Axis'
-// import * as d3Axis from '../../d3/AxisLayout'
+import AxisLayout from '../../d3/AxisLayout'
 
 import { getDimensions } from '../../lib/scaleLib'
 
@@ -29,16 +28,13 @@ class Axis extends React.PureComponent {
         </g>)
     }
     componentDidMount () {
-        d3Axis.create(this[this.customState.elementName], { ...this.props, ...this.customState })
-        // this.layout = new d3Axis(this[this.customState.elementName], { ...this.props, ...this.customState })
+        this.layout = new AxisLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3Axis.update(this[this.customState.elementName], { ...this.props, ...this.customState })
-        // this.layout.update({ ...this.props, ...this.customState })
+        this.layout.update({ ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3Axis.destroy(this[this.customState.elementName], { ...this.props, ...this.customState })
-        // this.layout.destroy()
+        this.layout.destroy()
     }
 }
 

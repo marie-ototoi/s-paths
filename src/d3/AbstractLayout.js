@@ -1,6 +1,6 @@
-// import * as d3 from 'd3'
+import * as d3 from 'd3'
 
-export class AbstractLayout { 
+class AbstractLayout {
     constructor (el, props) {
         if (el) {
             this.el = el
@@ -15,12 +15,12 @@ export class AbstractLayout {
         }
     }
     destroy () {
-        // d3.select(this.el)
-            // .selectAll('*')
-            // .remove()
+        d3.select(this.el)
+            .selectAll('*')
+            .remove()
     }
-    draw (props) {
-    }
-    resize (props) {
-    }
+    draw (props) {}
+    resize (props) {}
 }
+
+export default AbstractLayout
