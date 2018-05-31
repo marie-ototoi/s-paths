@@ -83,7 +83,7 @@ class TreeMap extends React.Component {
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = this.layout.getElementsInZone(this.refTreeMap, this.props)
+        const elements = this.layout.getElementsInZone(this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
@@ -144,7 +144,7 @@ class TreeMap extends React.Component {
     }
 
     selectElements (prop, value, category) {
-        const elements = this.layout.getElements(this.refTreeMap, prop, value, category)
+        const elements = this.layout.getElements(prop, value, category)
         // console.log(prop, value, elements, category)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)

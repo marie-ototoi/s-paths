@@ -84,7 +84,7 @@ class URIWheel extends React.Component {
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = this.layout.getElementsInZone(this[this.customState.elementName], this.props)
+        const elements = this.layout.getElementsInZone(this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }

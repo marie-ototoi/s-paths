@@ -91,7 +91,7 @@ class Timeline extends React.Component {
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = this.layout.getElementsInZone(this.refTimeline, this.props)
+        const elements = this.layout.getElementsInZone(this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
@@ -177,7 +177,7 @@ class Timeline extends React.Component {
         </g>)
     }
     selectElements (prop, value, category) {
-        const elements = this.layout.getElements(this.refTimeline, prop, value, category)
+        const elements = this.layout.getElements(prop, value, category)
         // console.log(prop, value, elements)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)

@@ -67,31 +67,6 @@ class HeatMapLayout extends AbstractLayout {
             })
     }
 
-    drawSelection (props) {
-        const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
-        // console.log(zoneDimensions)
-        const selectedZone = {
-            x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
-            y1: zoneDimensions.y1 - props.display.viz.vertical_margin,
-            x2: zoneDimensions.x2 - props.display.viz.horizontal_margin,
-            y2: zoneDimensions.y2 - props.display.viz.vertical_margin
-        }
-        d3.select(this.el).selectAll('rect.selection')
-            .data([selectedZone])
-            .enter()
-            .append('rect')
-            .attr('class', 'selection')
-            .on('mouseup', d => {
-                props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, props.zone)
-            })
-
-        d3.select(this.el).select('rect.selection')
-            .attr('width', selectedZone.x2 - selectedZone.x1)
-            .attr('height', selectedZone.y2 - selectedZone.y1)
-            .attr('x', selectedZone.x1)
-            .attr('y', selectedZone.y1)
-    }
-
     getElements (propName, value, propCategory) {
         const isArray = Array.isArray(value)
         let elements = []
@@ -202,7 +177,7 @@ class HeatMapLayout extends AbstractLayout {
             .attr('width', d => unitWidth - 1)
             .attr('y', 0)
             .attr('height', d => unitHeight - 1)
-        props.handleTransition(props, this.getElementsForTransition(this.el, props))
+        props.handleTransition(props, this.getElementsForTransition(props))
     }
 
     checkSelection (props) {
