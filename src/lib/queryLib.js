@@ -86,6 +86,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
         query = query.concat(entryDef)
     }
     let levels = Math.floor(pathParts.length / 2)
+    let prevSubjects = []
     for (let index = 1; index < pathParts.length; index += 2) {
         let predicate = pathParts[index]
         let objectType = pathParts[index + 1]
@@ -97,6 +98,14 @@ export const FSL2SPARQL = (FSLpath, options) => {
         if (objectType !== '*') {
             query = query.concat(`?${thisObject} rdf:type ${objectType} . `)
         }
+        prevSubjects.push(thisSubject)
+        query = query.concat(`FILTER (`)
+        for (let j = prevSubjects.length; j > 0; j--) {
+            query = query.concat(`?${thisObject} != ?${prevSubjects[(j-1)]}`)
+            if (j !== 1) query = query.concat(` && `)
+        }
+        query = query.concat(`) . `)
+        
     }
     let queryHierarchical = ''
     if (hierarchical) {
