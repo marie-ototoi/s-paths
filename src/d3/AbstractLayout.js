@@ -12,6 +12,7 @@ class AbstractLayout {
         if (this.el) {
             this.draw(props)
             this.resize(props)
+            this.checkSelection(props)
         }
     }
     destroy () {
@@ -21,6 +22,7 @@ class AbstractLayout {
     }
     draw (props) {}
     resize (props) {}
+    checkSelection (props) {}
 }
 
 export default AbstractLayout

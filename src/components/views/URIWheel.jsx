@@ -10,7 +10,7 @@ import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import * as d3URIWheel from '../../d3/d3URIWheel'
+import URIWheelLayout from '../../d3/URIWheelLayout'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
 import { deduplicate, nestData } from '../../lib/dataLib'
@@ -84,7 +84,7 @@ class URIWheel extends React.Component {
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = d3URIWheel.getElementsInZone(this[this.customState.elementName], this.props)
+        const elements = this.layout.getElementsInZone(this[this.customState.elementName], this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
@@ -145,7 +145,7 @@ class URIWheel extends React.Component {
     }
 
     selectElements (prop, value, category) {
-        const elements = d3URIWheel.getElements(this[this.customState.elementName], prop, value, category)
+        const elements = this.layout.getElements(this[this.customState.elementName], prop, value, category)
         // console.log(prop, value, elements, category)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
@@ -157,13 +157,13 @@ class URIWheel extends React.Component {
     }
 
     componentDidMount () {
-        d3URIWheel.create(this[this.customState.elementName], { ...this.props, ...this.customState })
+        this.layout = new URIWheelLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3URIWheel.update(this[this.customState.elementName], { ...this.props, ...this.customState })
+        this.layout.update({ ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3URIWheel.destroy(this[this.customState.elementName], { ...this.props, ...this.customState })
+        this.layout.destroy()
     }
 }
 

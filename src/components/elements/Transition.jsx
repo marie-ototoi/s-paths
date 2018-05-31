@@ -1,26 +1,29 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-import * as d3Transition from '../../d3/d3Transition'
+import TransitionLayout from '../../d3/TransitionLayout'
 
 class Transition extends React.PureComponent {
+    constructor (props) {
+        super(props)
+        this.customState = {
+            elementName: `${props.zone}_history`
+        }
+    }
     render () {
         // console.log('ici')
         const { display, zone } = this.props
         return (<g className = "Transition"
             transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
-            ref = {(c) => { this[`refTransition_${zone}`] = c }}
+            ref = {(c) => { this[this.customState.elementName] = c }}
         >
         </g>)
     }
     componentDidMount () {
-        // console.log('bonjour component Transition')
-        const { zone } = this.props
-        d3Transition.create(this[`refTransition_${zone}`], this.props)
+        this.layout = new TransitionLayout(this[this.customState.elementName], this.props)
     }
     componentWillUnMount () {
-        const { zone } = this.props
-        d3Transition.destroy(this[`refTransition_${zone}`], this.props)
+        this.layout.destroy()
     }
 }
 

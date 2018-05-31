@@ -13,7 +13,7 @@ import PropSelector from '../elements/PropSelector'
 import Axis from '../elements/Axis'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import * as d3Timeline from '../../d3/d3Timeline'
+import TimelineLayout from '../../d3/TimelineLayout'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
 import { deduplicate, getAxis, getLegend, nestData } from '../../lib/dataLib'
@@ -91,7 +91,7 @@ class Timeline extends React.Component {
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = d3Timeline.getElementsInZone(this.refTimeline, this.props)
+        const elements = this.layout.getElementsInZone(this.refTimeline, this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
@@ -112,7 +112,7 @@ class Timeline extends React.Component {
             { step !== 'changing' &&
             <g
                 transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
-                ref = {(c) => { this.refTimeline = c }}
+                ref = {(c) => { this[this.customState.elementName] = c }}
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.handleMouseDown }
@@ -177,7 +177,7 @@ class Timeline extends React.Component {
         </g>)
     }
     selectElements (prop, value, category) {
-        const elements = d3Timeline.getElements(this.refTimeline, prop, value, category)
+        const elements = this.layout.getElements(this.refTimeline, prop, value, category)
         // console.log(prop, value, elements)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
@@ -188,18 +188,17 @@ class Timeline extends React.Component {
     }
     componentDidMount () {
         // console.log(this.props.data)
-        d3Timeline.create(this.refTimeline, { ...this.props, ...this.customState })
+        this.layout = new TimelineLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
         if (this.props.role === 'target') {
             this.render()
             // console.log('called once when transition data are loaded and displayed')
         }
     }
     componentDidUpdate () {
-        // console.log('update', this.props.selections)
-        d3Timeline.update(this.refTimeline, { ...this.props, ...this.customState })
+        this.layout.update({ ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3Timeline.destroy(this.refTimeline, { ...this.props, ...this.customState })
+        this.layout.destroy()
     }
 }
 

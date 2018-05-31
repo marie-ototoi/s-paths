@@ -10,7 +10,7 @@ import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import * as d3TreeMap from '../../d3/d3TreeMap'
+import TreeMapLayout from '../../d3/TreeMapLayout'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
 import { deduplicate, nestData } from '../../lib/dataLib'
@@ -83,7 +83,7 @@ class TreeMap extends React.Component {
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = d3TreeMap.getElementsInZone(this.refTreeMap, this.props)
+        const elements = this.layout.getElementsInZone(this.refTreeMap, this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
@@ -102,7 +102,7 @@ class TreeMap extends React.Component {
             { step !== 'changing' &&
             <g
                 transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
-                ref = {(c) => { this.refTreeMap = c }}
+                ref = {(c) => { this[this.customState.elementName] = c }}
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.handleMouseDown }
@@ -144,7 +144,7 @@ class TreeMap extends React.Component {
     }
 
     selectElements (prop, value, category) {
-        const elements = d3TreeMap.getElements(this.refTreeMap, prop, value, category)
+        const elements = this.layout.getElements(this.refTreeMap, prop, value, category)
         // console.log(prop, value, elements, category)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
@@ -156,13 +156,13 @@ class TreeMap extends React.Component {
     }
 
     componentDidMount () {
-        d3TreeMap.create(this.refTreeMap, { ...this.props, ...this.customState })
+        this.layout = new TreeMapLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3TreeMap.update(this.refTreeMap, { ...this.props, ...this.customState })
+        this.layout.update({ ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3TreeMap.destroy(this.refTreeMap, { ...this.props, ...this.customState })
+        this.layout.destroy()
     }
 }
 

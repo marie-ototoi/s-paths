@@ -1,7 +1,7 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-import * as d3GeoMap from '../../d3/d3GeoMap'
+import GeoMapLayout from '../../d3/GeoMapLayout'
 import { select } from '../../actions/selectionActions'
 import { getPropPalette } from '../../actions/palettesActions'
 
@@ -46,15 +46,13 @@ class GeoMap extends React.Component {
         select(elements, zone, selections)
     }
     componentDidMount () {
-        // console.log(this.props.data)
-        d3GeoMap.create(this[this.state.elementName], { ...this.props, ...this.state })
+        this.layout = new GeoMapLayout(this[this.state.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        // console.log('update')
-        d3GeoMap.update(this[this.state.elementName], { ...this.props, ...this.state })
+        this.layout.update({ ...this.props, ...this.state })
     }
     componentWillUnmount () {
-        d3GeoMap.destroy(this[this.state.elementName], { ...this.props, ...this.state })
+        this.layout.destroy()
     }
 }
 

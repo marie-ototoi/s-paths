@@ -12,7 +12,7 @@ import Axis from '../elements/Axis'
 import PropSelector from '../elements/PropSelector'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import * as d3HeatMap from '../../d3/d3HeatMap'
+import HeatMapLayout from '../../d3/HeatMapLayout'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
 import { getAxis, getLegend, getThresholdsForLegend, nestData } from '../../lib/dataLib'
@@ -98,7 +98,7 @@ class HeatMap extends React.Component {
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = d3HeatMap.getElementsInZone(this.refHeatMap, this.props)
+        const elements = this.layout.getElementsInZone(this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
@@ -106,7 +106,7 @@ class HeatMap extends React.Component {
         const { axisBottom, axisLeft, legend } = this.customState
         const { config, display, role, selections, step, zone } = this.props
         const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
-        return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` } >
+        return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` }>
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
@@ -117,7 +117,7 @@ class HeatMap extends React.Component {
             { step !== 'changing' &&
             <g
                 transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
-                ref = {(c) => { this.refHeatMap = c }}
+                ref = {(c) => { this[this.customState.elementName] = c }}
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.handleMouseDown }
@@ -193,7 +193,7 @@ class HeatMap extends React.Component {
     }
 
     selectElements (prop, value, category) {
-        const elements = d3HeatMap.getElements(this.refHeatMap, prop, value, category)
+        const elements = this.layout.getElements(prop, value, category)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }
@@ -203,13 +203,13 @@ class HeatMap extends React.Component {
     }
 
     componentDidMount () {
-        d3HeatMap.create(this.refHeatMap, { ...this.props, ...this.customState })
+        this.layout = new HeatMapLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3HeatMap.update(this.refHeatMap, { ...this.props, ...this.customState })
+        this.layout.update( { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3HeatMap.destroy(this.refHeatMap, { ...this.props, ...this.customState })
+        this.layout.destroy()
     }
 }
 
