@@ -91,11 +91,6 @@ const defaultState = [
         ]
     },
     {
-        id: 'SingleItem',
-        entrypoint: { min: 1, max: 1 },
-        constraints: []
-    },
-    {
         id: 'GeoMap',
         constraints: [
             [
