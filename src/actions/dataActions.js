@@ -34,7 +34,7 @@ const getResources = (options) => {
 }
 
 export const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
-    console.log('load Data ', dataset.constraints)
+    // console.log('load Data ', dataset.constraints)
     let { constraints, endpoint, entrypoint, prefixes } = dataset
     let newOptions
     if (constraints !== '') dataset.forceUpdate = false
@@ -98,7 +98,7 @@ export const loadData = (dispatch) => (dataset, views, previousConfigs, previous
                 deltaMainPromise = {}
                 deltaAsidePromise = {}
             }
-            console.log('queryMain', queryMain)
+            // console.log('queryMain', queryMain)
             // console.log('coverageQueryMain', coverageQueryMain)
             // console.log('queryAside', queryAside)
             // console.log('coverageQueryAside', coverageQueryAside)

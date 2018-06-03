@@ -44,10 +44,8 @@ class Coverage extends React.Component {
     handleKeyDown (e) {
         const { data, selections, zone } = this.props
         if (e === 'enter' && selections.length > 0) {
-            console.log('You pressed a key!', e)
             this.exploreSelection()
         } else if (e === 'ctrl+enter' && selections.length > 0  && dataLib.getNbDisplayed(data, zone, 'active') < 1000) {
-            console.log('You pressed a key!', e)
             this.detailSelection()
         }
     }

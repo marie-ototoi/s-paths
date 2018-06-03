@@ -161,10 +161,10 @@ class URIWheel extends React.Component {
         this.layout = new URIWheelLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        this.layout.update({ ...this.props, ...this.customState })
+        this.layout.update(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        this.layout.destroy()
+        this.layout.destroy(this[this.customState.elementName])
     }
 }
 

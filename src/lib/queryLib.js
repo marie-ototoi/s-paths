@@ -374,11 +374,6 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
             
         })
     }
-    console.log(`SELECT DISTINCT ${propList}${graph}
-    WHERE {
-    ${constraints}
-    ${defList}
-    } ${groupList} ${orderList}`)
     return `SELECT DISTINCT ${propList}${graph}
 WHERE {
 ${constraints}

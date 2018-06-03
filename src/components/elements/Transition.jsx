@@ -23,7 +23,7 @@ class Transition extends React.PureComponent {
         this.layout = new TransitionLayout(this[this.customState.elementName], this.props)
     }
     componentWillUnMount () {
-        this.layout.destroy()
+        this.layout.destroy(this[this.customState.elementName])
     }
 }
 

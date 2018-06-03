@@ -32,7 +32,7 @@ class HeatMap extends React.Component {
         this.selectElement = this.selectElement.bind(this)
         this.selectElements = this.selectElements.bind(this)
         this.customState = {
-            elementName: `HeatMap_${props.zone}`,
+            elementName: `HeatMap_${props.zone}_${props.role}`,
             selectElement: this.selectElement,
             selectElements: this.selectElements,
             handleMouseUp: this.handleMouseUp
@@ -113,7 +113,6 @@ class HeatMap extends React.Component {
                 handleMouseDown = { this.handleMouseDown }
                 handleMouseMove = { this.handleMouseMove }
                 handleMouseUp = { this.handleMouseUp }
-                handleKeyDown = { this.props.handleKeyDown }
             />
             }
             { step !== 'changing' &&
@@ -208,10 +207,10 @@ class HeatMap extends React.Component {
         this.layout = new HeatMapLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        this.layout.update( { ...this.props, ...this.customState })
+        this.layout.update(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        this.layout.destroy()
+        this.layout.destroy(this[this.customState.elementName])
     }
 }
 

@@ -49,10 +49,10 @@ class GeoMap extends React.Component {
         this.layout = new GeoMapLayout(this[this.state.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        this.layout.update({ ...this.props, ...this.state })
+        this.layout.update(this[this.customState.elementName], { ...this.props, ...this.state })
     }
     componentWillUnmount () {
-        this.layout.destroy()
+        this.layout.destroy(this[this.customState.elementName])
     }
 }
 

@@ -14,7 +14,7 @@ const defaultState = [
             [
                 {
                     category: 'text',
-                    avg: { max: 100, optimal: [30, 50] },
+                    avg: { max: 50, optimal: [10, 40] },
                     unique: { min: 2, max: 50, optimal: [4, 6] }
                 },
                 {
@@ -46,14 +46,14 @@ const defaultState = [
                 },
                 {
                     category: 'text',
-                    avg: { max: 100, optimal: [30, 50] },
+                    avg: { max: 50, optimal: [10, 40] },
                     unique: { min: 2, max: 150 }
                 }
             ],
             [
                 {
                     category: 'text',
-                    unique: { min: 2, max: 50, optimal: [6, 15] }
+                    unique: { min: 2, max: 50, optimal: [10, 40] }
                 }
             ]
         ]
@@ -65,7 +65,7 @@ const defaultState = [
                 {
                     category: 'text',
                     hierarchical: true,
-                    avg: { max: 100, optimal: [30, 50] },
+                    avg: { max: 50, optimal: [10, 40] },
                     unique: { min: 5, max: 40, optimal: [10, 30] }
                 },
                 {
