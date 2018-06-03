@@ -97,11 +97,11 @@ class Timeline extends React.Component {
     }
     render () {
         const { axisBottom, legend } = this.customState
-        const { config, data, display, role, selections, step, zone } = this.props
+        const { config, data, dimensions, display, role, selections, step, zone } = this.props
         // display settings
         const classN = `Timeline ${this.customState.elementName} role_${role}`
-        const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
         return (<g className = { classN } >
+            { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
@@ -109,9 +109,10 @@ class Timeline extends React.Component {
                 handleMouseMove = { this.handleMouseMove }
                 handleMouseUp = { this.handleMouseUp }
             />
+            }
             { step !== 'changing' &&
             <g
-                transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
+                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
                 ref = {(c) => { this[this.customState.elementName] = c }}
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
@@ -205,6 +206,7 @@ class Timeline extends React.Component {
 Timeline.propTypes = {
     config: PropTypes.object,
     data: PropTypes.array,
+    dimensions: PropTypes.object,
     display: PropTypes.object,
     selections: PropTypes.array,
     role: PropTypes.string,

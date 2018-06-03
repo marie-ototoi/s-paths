@@ -89,9 +89,9 @@ class TreeMap extends React.Component {
     }
     render () {
         const { legend, propsLists } = this.customState
-        const { config, display, role, selections, step, zone } = this.props
-        const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
+        const { config, dimensions, display, role, selections, step, zone } = this.props
         return (<g className = { `TreeMap ${this.customState.elementName} role_${role}` } >
+            { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
@@ -99,9 +99,10 @@ class TreeMap extends React.Component {
                 handleMouseMove = { this.handleMouseMove }
                 handleMouseUp = { this.handleMouseUp }
             />
+            }
             { step !== 'changing' &&
             <g
-                transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
+                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
                 ref = {(c) => { this[this.customState.elementName] = c }}
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
@@ -169,6 +170,7 @@ class TreeMap extends React.Component {
 TreeMap.propTypes = {
     config: PropTypes.object,
     data: PropTypes.array,
+    dimensions: PropTypes.object,
     display: PropTypes.object,
     selections: PropTypes.array,
     role: PropTypes.string,

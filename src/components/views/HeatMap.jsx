@@ -104,19 +104,21 @@ class HeatMap extends React.Component {
     }
     render () {
         const { axisBottom, axisLeft, legend } = this.customState
-        const { config, display, role, selections, step, zone } = this.props
-        const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
+        const { config, display, dimensions, role, selections, step, zone } = this.props
         return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` }>
+            { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
                 handleMouseDown = { this.handleMouseDown }
                 handleMouseMove = { this.handleMouseMove }
                 handleMouseUp = { this.handleMouseUp }
+                handleKeyDown = { this.props.handleKeyDown }
             />
+            }
             { step !== 'changing' &&
             <g
-                transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
+                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
                 ref = {(c) => { this[this.customState.elementName] = c }}
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
@@ -215,11 +217,13 @@ class HeatMap extends React.Component {
 
 HeatMap.propTypes = {
     config: PropTypes.object,
+    dimensions: PropTypes.object,
     display: PropTypes.object,
     selections: PropTypes.array,
     role: PropTypes.string,
     step: PropTypes.string,
     zone: PropTypes.string,
+    handleKeyDown: PropTypes.func,
     handleMouseDown: PropTypes.func,
     handleMouseMove: PropTypes.func,
     handleMouseUp: PropTypes.func,

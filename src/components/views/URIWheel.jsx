@@ -90,9 +90,9 @@ class URIWheel extends React.Component {
     }
     render () {
         const { legend, propsLists } = this.customState
-        const { config, display, role, selections, step, zone } = this.props
-        const coreDimensions = scaleLib.getDimensions('core', display.zones[zone], display.viz)
+        const { config, dimensions, display, role, selections, step, zone } = this.props
         return (<g className = { `URIWheel ${this.customState.elementName} role_${role}` } >
+            { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
@@ -100,9 +100,10 @@ class URIWheel extends React.Component {
                 handleMouseMove = { this.handleMouseMove }
                 handleMouseUp = { this.handleMouseUp }
             />
+            }
             { step !== 'changing' &&
             <g
-                transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
+                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
                 ref = {(c) => { this[this.customState.elementName] = c }}
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
@@ -170,11 +171,13 @@ class URIWheel extends React.Component {
 URIWheel.propTypes = {
     config: PropTypes.object,
     data: PropTypes.array,
+    dimensions: PropTypes.array,
     display: PropTypes.object,
     selections: PropTypes.array,
     role: PropTypes.string,
     step: PropTypes.string,
     zone: PropTypes.string,
+    handleKeyDown: PropTypes.func,
     handleMouseDown: PropTypes.func,
     handleMouseMove: PropTypes.func,
     handleMouseUp: PropTypes.func,
