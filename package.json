@@ -27,6 +27,7 @@
     "d3-drag": "^1.2.1",
     "express": "^4.16.2",
     "fetch": "^1.1.0",
+    "format-message": "^6.0.3",
     "mongodb": "^3.0.8",
     "mongoose": "^5.1.2",
     "node-fetch": "^2.1.2",
@@ -34,6 +35,7 @@
     "pluralize": "^7.0.0",
     "rdf-fetch": "^1.0.0",
     "rdflib": "^0.16.9",
+    "react-keymaster": "^0.3.1",
     "request": "^2.87.0",
     "rewire": "^4.0.1",
     "shallowequal": "^1.0.2"
@@ -49,6 +51,7 @@
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-1": "^6.24.1",
     "body-parser": "^1.18.3",
+    "bulma": "^0.7.1",
     "chai": "^4.1.2",
     "chai-datetime": "^1.4.1",
     "chai-enzyme": "^0.8.0",

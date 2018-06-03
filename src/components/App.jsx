@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
+import Detail from './elements/Detail'
 import HeatMap from './views/HeatMap'
 import Timeline from './views/Timeline'
 import TreeMap from './views/TreeMap'
@@ -10,7 +11,7 @@ import URIWheel from './views/URIWheel'
 import Transition from './elements/Transition'
 import Debug from './Debug'
 // libs
-import { getScreen } from '../lib/scaleLib'
+import { getDimensions, getScreen } from '../lib/scaleLib'
 import { areLoaded, getCurrentState, getResults, getTransitionElements } from '../lib/dataLib'
 import { getConfig, getCurrentConfigs } from '../lib/configLib'
 import * as selectionLib from '../lib/selectionLib'
@@ -27,10 +28,6 @@ class App extends React.PureComponent {
         // transition state is handled locally in the component, to avoid re-rendering
         this.handleTransition = this.handleTransition.bind(this)
         this.handleEndTransition = this.handleEndTransition.bind(this)
-        /* this.customState = {
-            main_target: [], // these info might change often and are updated after each render
-            main_origin: [] // putting them in the regular state would result in a infinite loop
-        } */
         this.state = {
             main_step: 'active',
             aside_step: 'active',
@@ -93,13 +90,13 @@ class App extends React.PureComponent {
         }
     }
     render () {
-        const { configs, data, /* dataset, */display, mode, selections } = this.props
+        const { configs, data, display, mode, selections } = this.props
         // debug logs
         // console.log('env', env)
         // console.log('mode', mode)
         // console.log('display', display)
         // console.log('views', views)
-        // console.log('dataset', dataset)
+        // console.log('dataset', this.props.dataset)
         // console.log('configs', configs)
         // console.log('data', data)
         // console.log('selections', selections)
@@ -122,13 +119,15 @@ class App extends React.PureComponent {
         const asideTransitionConfig = getConfig(getCurrentConfigs(configs, 'transition'), 'aside')
         const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
         const SideTransitionComponent = asideTransitionConfig ? componentIds[asideTransitionConfig.id] : ''
+        const coreDimensionsMain = getDimensions('core', display.zones['main'], display.viz)
+        const coreDimensionsAside = getDimensions('core', display.zones['aside'], display.viz)
         // to do : avoid recalculate transition data at each render
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
         >
             <svg
-                ref = {(c) => { this.refView = c }}
+                ref = {(c) => { this['refView'] = c }}
                 width = { display.screen.width }
                 height = { display.screen.height }
                 viewBox = { `${display.viewBox.x}, ${display.viewBox.y}, ${display.viewBox.width}, ${display.viewBox.height}` }
@@ -144,6 +143,7 @@ class App extends React.PureComponent {
                         role = "target"
                         zone = "main"
                         status = { statusMain }
+                        dimensions = { coreDimensionsMain }
                         data = { getResults(data, 'main', 'transition') }
                         // coverage = { getResults(data, 'main', 'coverage') }
                         config = { getConfig(getCurrentConfigs(configs, 'transition'), 'main') }
@@ -156,6 +156,7 @@ class App extends React.PureComponent {
                 { mainConfig && this.state.main_step === 'changing' &&
                     <Transition
                         zone = "main"
+                        dimensions = { coreDimensionsMain }
                         elements = { this.state.main_transition }
                         endTransition = { this.handleEndTransition }
                     />
@@ -167,12 +168,22 @@ class App extends React.PureComponent {
                         zone = "main"
                         step = { this.state.main_step }
                         status = { statusMain }
+                        dimensions = { coreDimensionsMain }
                         // coverage = { getResults(data, 'main', 'coverage') }
                         data = { getResults(data, 'main', 'active') }
                         config = { mainConfig }
                         selections = { selectionLib.getSelections(selections, 'main', 'active') }
                         ref = {(c) => { this.refMain = c }}
                         handleTransition = { this.handleTransition }
+                        handleKeyDown = { this.handleKeyDown }
+                    />
+                }
+                
+                { display.detail.main &&
+                    <Detail
+                        zone = "main"
+                        dimensions = { getDimensions('core', display.zones['main'], display.viz, { x: 5, y:5, width: -10, height: -10 }) }
+                        elements = { getResults(data, 'main', 'detail') }
                     />
                 }
 
@@ -181,6 +192,7 @@ class App extends React.PureComponent {
                         role = "target"
                         zone = "aside"
                         status = { statusAside }
+                        dimensions = { coreDimensionsAside }
                         data = { getResults(data, 'aside', 'transition') }
                         // coverage = { getResults(data, 'aside', 'coverage') }
                         config = { getConfig(getCurrentConfigs(configs, 'transition'), 'aside') }
@@ -193,6 +205,7 @@ class App extends React.PureComponent {
                 { asideConfig && this.state.aside_step === 'changing' &&
                     <Transition
                         zone = "aside"
+                        dimensions = { coreDimensionsAside }
                         elements = { this.state.aside_transition }
                         endTransition = { this.handleEndTransition }
                     />
@@ -202,6 +215,7 @@ class App extends React.PureComponent {
                     <SideComponent
                         zone = "aside"
                         role = "origin"
+                        dimensions = { coreDimensionsAside }
                         step = { this.state.aside_step }
                         status = { statusAside }
                         data = { getResults(data, 'aside', 'active') }
@@ -210,6 +224,15 @@ class App extends React.PureComponent {
                         selections = { selectionLib.getSelections(selections, 'aside', 'active') }
                         ref = {(c) => { this.refAside = c }}
                         handleTransition = { this.handleTransition }
+                        handleKeyDown = { this.handleKeyDown }
+                    />
+                }
+
+                { display.detail.aside &&
+                    <Detail
+                        zone = "aside"
+                        dimensions = { getDimensions('core', display.zones['aside'], display.viz, { x: 5, y:5, width: -10, height: -10 }) }
+                        elements = { getResults(data, 'aside', 'detail') }
                     />
                 }
             </svg>

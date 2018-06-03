@@ -70,6 +70,10 @@ const defaultState = {
             origin: null,
             target: null
         }
+    },
+    detail: {
+        main: false,
+        aside: false
     }
 }
 
@@ -181,6 +185,25 @@ const display = (state = defaultState, action) => {
                     origin: null,
                     target: null
                 }
+            }
+        }
+    }
+    case types.SET_DETAIL: {
+        return {
+            ...state,
+            detail: {
+                main: (action.zone === 'main'),
+                aside: (action.zone === 'aside')
+            }
+        }
+    }
+    case types.HIDE_DETAIL: {
+        console.log(action.zone)
+        return {
+            ...state,
+            detail: {
+                main: (action.zone === 'main') ? false : state.detail.main,
+                aside: (action.zone === 'aside') ? false : state.detail.aside
             }
         }
     }

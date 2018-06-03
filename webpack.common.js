@@ -44,7 +44,20 @@ module.exports = {
             inject: false,
             template: require('html-webpack-template'),
             appMountId: 'root',
-            title: 'Discover - semantic data sets exploratory tool'
+            title: 'Discover - semantic data sets exploratory tool',
+            links: [{
+                href: 'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css',
+                rel: 'stylesheet',
+                type: 'text/css'
+            }],
+            meta: [{
+                name: 'viewport',
+                content: 'width=device-width, initial-scale=1'
+            }],
+            scripts: [{
+                defer: true,
+                src: 'https://use.fontawesome.com/releases/v5.0.7/js/all.js'
+            }]
         })
     ],
     resolve: {

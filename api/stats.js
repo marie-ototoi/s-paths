@@ -112,7 +112,7 @@ const getMaxRequest = (parentQuantities) => {
 
 const getProps = async (categorizedProps, level, options, instances) => {
     let { constraints, defaultGraph, entrypoint, endpoint, prefixes, maxLevel } = options
-    let { totalInstances } = instances
+    let { totalInstances, selectionInstances } = instances
     let maxRequests = getMaxRequest(totalInstances)
     let newCategorizedProps = []
     const queriedProps = categorizedProps.filter(prop => {
@@ -196,7 +196,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 })))
             // console.log('b', level, i, elementsToSlice, maxRequests)
             countStats.push(...temp)
-            if (props.length === 0) {
+            if (props.length === 0 && selectionInstances > 1) {
                 temp = await Promise.all(newCategorizedProps
                     .slice(i, i + elementsToSlice)
                     .map(prop => {

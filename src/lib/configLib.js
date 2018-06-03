@@ -106,82 +106,92 @@ export const defineConfigs = (views, stats) => {
         if (view.entrypoint) {
             if (view.entrypoint.min > stats.selectionInstances || view.entrypoint.max < stats.selectionInstances) return { matches: [] }
         }
-        // make a list of all possible properties for each constrained prop zone
-        view.constraints.forEach(constraintSet => {
-            let propSet = []
-            stats.statements.forEach(prop => {
-                constraintSet.forEach(constraint => {
-                    // generic conditions
-                    if ((prop.category === constraint.category || constraint.category === '*') &&
-                    (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
-                    (!constraint.unique.min || (constraint.unique.min && (prop.unique >= constraint.unique.min))) &&
-                    (!constraint.unique.max || (constraint.unique.max && prop.unique <= constraint.unique.max))
-                    ) {
-                        propSet.push({
-                            ...prop,
-                            score: scoreProp(prop, constraint)
-                        })
-                    }
-                })
-            })
-            propList.push(propSet.sort((a, b) => {
-                return b.score - a.score
-            }))
-        })
-        if (propList.length === 0 || propList[0].length === 0) return { matches: [] }
-        // find all possible combinations
-        let matches = propList[0].map(prop => [prop])
-        if (propList.length > 1 && propList[1].length > 0) {
-            for (let i = 1; i < propList.length; i++) {
-                matches = findAllMatches(matches, propList[i])
-            }
-        }
-        // console.log(matches, propList)
-        // remove combinations where a mandatory prop is missing
-        // or where latitude and longitude are not coordinated
-        matches = matches.filter(match => {
-            let missingProp = false
-            let geo = []
-            match.forEach((prop, index) => {
-                missingProp = ((prop.path === '') && (!view.constraints[index][0].optional))
-                if (prop.category === 'geo') geo.push(prop.subcategory)
-            })
-            let validgeo = (geo.length === 0 || (geo.length === 1 && geo[0] === 'name') || (geo[0] === 'latitude' && geo[1] === 'longitude'))
-            let unique = new Set(match.map(m => m.property))
-            return !missingProp && unique.size === match.length && validgeo && match.length === view.constraints.length
-        })
-        if (matches.length === 0) return { matches }
-
-        // if the view is supposed to display each entity
-        let entrypointFactor = 1
-        if (view.entrypoint) {
-            const { min, max, optimal } = view.entrypoint
-            if (optimal) {
-                // will higher each score
-                entrypointFactor += getCost(stats.totalInstances, min, max, optimal, 0.3)
-            }
-        }
-        // remove combinations where a mandatory prop is missing
-        let scoredMatches = matches.map(match => {
+        if (stats.selectionInstances === 1) {
             return {
-                properties: match,
-                entrypointFactor,
-                score: scoreMatch(match, entrypointFactor) /*,
-                entrypoint: (view.entrypoint !== undefined) */
+                ...view,
+                matches: view.allProperties ? stats.statements.sort((a, b) => {
+                    return b.level - a.level
+                }) : []
             }
-        })
-        // sort by score and return
-        return {
-            ...view,
-            matches: scoredMatches.sort((a, b) => {
-                return b.score - a.score
+        } else {
+            // make a list of all possible properties for each constrained prop zone
+            view.constraints.forEach(constraintSet => {
+                let propSet = []
+                stats.statements.forEach(prop => {
+                    constraintSet.forEach(constraint => {
+                        // generic conditions
+                        if ((prop.category === constraint.category || constraint.category === '*') &&
+                        (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
+                        (!constraint.unique.min || (constraint.unique.min && (prop.unique >= constraint.unique.min && stats.selectionInstances >= constraint.unique.min))) &&
+                        (!constraint.unique.max || (constraint.unique.max && prop.unique <= constraint.unique.max))
+                        ) {
+                            propSet.push({
+                                ...prop,
+                                score: scoreProp(prop, constraint)
+                            })
+                        }
+                    })
+                })
+                propList.push(propSet.sort((a, b) => {
+                    return b.score - a.score
+                }))
             })
+            if (propList.length === 0 || propList[0].length === 0) return { matches: [] }
+            // find all possible combinations
+            let matches = propList[0].map(prop => [prop])
+            if (propList.length > 1 && propList[1].length > 0) {
+                for (let i = 1; i < propList.length; i++) {
+                    matches = findAllMatches(matches, propList[i])
+                }
+            }
+            // console.log(matches, propList)
+            // remove combinations where a mandatory prop is missing
+            // or where latitude and longitude are not coordinated
+            matches = matches.filter(match => {
+                let missingProp = false
+                let geo = []
+                match.forEach((prop, index) => {
+                    missingProp = ((prop.path === '') && (!view.constraints[index][0].optional))
+                    if (prop.category === 'geo') geo.push(prop.subcategory)
+                })
+                let validgeo = (geo.length === 0 || (geo.length === 1 && geo[0] === 'name') || (geo[0] === 'latitude' && geo[1] === 'longitude'))
+                let unique = new Set(match.map(m => m.property))
+                return !missingProp && unique.size === match.length && validgeo && match.length === view.constraints.length
+            })
+            if (matches.length === 0) return { matches }
+
+            // if the view is supposed to display each entity
+            let entrypointFactor = 1
+            if (view.entrypoint) {
+                const { min, max, optimal } = view.entrypoint
+                if (optimal) {
+                    // will higher each score
+                    entrypointFactor += getCost(stats.totalInstances, min, max, optimal, 0.3)
+                }
+            }
+            // remove combinations where a mandatory prop is missing
+            let scoredMatches = matches.map(match => {
+                return {
+                    properties: match,
+                    entrypointFactor,
+                    score: scoreMatch(match, entrypointFactor) /*,
+                    entrypoint: (view.entrypoint !== undefined) */
+                }
+            })
+            // sort by score and return
+            return {
+                ...view,
+                matches: scoredMatches.sort((a, b) => {
+                    return b.score - a.score
+                })
+            }
         }
     })
         .filter(view => view.matches.length > 0)
         .sort((a, b) => {
             return b.matches[0].score - a.matches[0].score
         })
+    if (configSetUp.matches) console.log('salut la config', configSetUp.matches.map(p => p.fullPath))
     return [
         { zone: 'main', views: [...configSetUp] },
         { zone: 'aside', views: [...configSetUp] }

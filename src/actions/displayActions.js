@@ -19,3 +19,10 @@ export const setDisplay = (dispatch) => ({ env, mode, zonesDef, gridDef, screen,
         viz
     })
 }
+
+export const hideDetail = (dispatch) => (zone) => {
+    dispatch({
+        type: types.HIDE_DETAIL,
+        zone
+    })
+}

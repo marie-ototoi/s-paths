@@ -305,52 +305,80 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone) => {
 
 // to do : take constraints into account
 export const makeQuery = (entrypoint, configZone, zone, options) => {
-    const { defaultGraph, constraints, prop1only, unique } = options
+    const { defaultGraph, constraints, maxDepth, prop1only, unique } = options
     // console.log(configZone)
-    let selectedConfig = configLib.getSelectedConfig(configZone, zone)
-    // console.log(selectedConfig)
-    let properties = selectedConfig.properties
-    if (prop1only === true) properties = [properties[0]]
-    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
-    let propList = (configZone.entrypoint === undefined || unique) ? `` : `?entrypoint `
-    if (unique) propList = propList.concat(`(COUNT(DISTINCT ?entrypoint) AS ?displayed) `)
-    let groupList = unique ?  `` : `GROUP BY `
-    if (configZone.entrypoint !== undefined && !unique) groupList = groupList.concat(`?entrypoint `)
     let defList = ``
+    let groupList = unique ?  `` : `GROUP BY `
+    let propList = ``
     let orderList = unique ? `` : `ORDER BY `
-    properties.forEach((prop, index) => {
-        index += 1
-        let hierarchical = false
-        if (index === 1 && configZone.constraints[index - 1][0].hierarchical === true) {
-            // deactivate retrieval of hierarchy between concepts
-            // hierarchical = prop.category === 'text' ? 'previous' : 'last'
-        }
-        if( !unique) {
-            propList = propList.concat(`?prop${index} `)
-            if (hierarchical) propList = propList.concat(`?directlink `)
-            orderList = orderList.concat(`?prop${index} `)
-            
-            if (configZone.entrypoint === undefined) {
-                propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
-                orderList = orderList.concat(`?countprop${index} `)
+    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    if (maxDepth) {
+        propList = `?entrypoint ?path1 ?prop1 `
+        if (!unique) groupList = groupList.concat(`?prop1 `)
+        defList = `?entrypoint rdf:type <${entrypoint}> .
+        OPTIONAL { ?entrypoint ?path1 ?prop1 .
+        FILTER (?prop1 != ?entrypoint) .`
+        for (let i = 1; i < maxDepth; i ++ ) {
+            defList = defList.concat(`?prop${i} ?path${(i + 1)} ?prop${(i + 1)} . `)        
+            defList = defList.concat(`FILTER (`)
+            for (let j = i; j >= 1; j--) {
+                defList = defList.concat(`?prop${(i + 1)} != ?prop${j}`)
+                if (j !== 1) defList = defList.concat(` && `)
             }
-        
-            groupList = groupList.concat(`?prop${index} `)
+            defList = defList.concat(`) . `)
+            propList = propList.concat(`?path${(i + 1)} ?prop${(i + 1)} `)
+            if (!unique) groupList = groupList.concat(`?path${(i + 1)} ?prop${(i + 1)} `)
+            
         }
-        if (hierarchical) groupList = groupList.concat(`?directlink `)
-        const optional = configZone.constraints[index - 1] && configZone.constraints[index - 1][0].optional
-        defList = defList.concat(FSL2SPARQL(prop.path, {
-            propName: `prop${index}`,
-            entrypointName: 'entrypoint',
-            entrypointType: (index === 1),
-            optional,
-            hierarchical
-        }))
-        if (prop.category === 'geo' && prop.subcategory === 'name') {
-            groupList = groupList.concat(`?latitude ?longitude ?geoname `)
-            defList = defList.concat('SELECT * FROM')
-        }
-    })
+        orderList = orderList.concat(`?prop${maxDepth} `)
+        defList = defList.concat(`}`)
+    } else {
+        let selectedConfig = configLib.getSelectedConfig(configZone, zone)
+        // console.log(selectedConfig)
+    
+        let properties = selectedConfig.properties
+        if (prop1only === true) properties = [properties[0]]
+        propList = (configZone.entrypoint === undefined || unique) ? `` : `?entrypoint `
+        if (unique) propList = propList.concat(`(COUNT(DISTINCT ?entrypoint) AS ?displayed) `)
+        if (configZone.entrypoint !== undefined && !unique) groupList = groupList.concat(`?entrypoint `)
+        properties.forEach((prop, index) => {
+            index += 1
+            let hierarchical = false
+            if (!configZone.allProperties && index === 1 && configZone.constraints[index - 1][0].hierarchical === true) {
+                // deactivate retrieval of hierarchy between concepts
+                // hierarchical = prop.category === 'text' ? 'previous' : 'last'
+            }
+            if( !unique) {
+                propList = propList.concat(`?prop${index} `)
+                if (hierarchical) propList = propList.concat(`?directlink `)
+                orderList = orderList.concat(`?prop${index} `)
+                if (configZone.entrypoint === undefined) {
+                    propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
+                    orderList = orderList.concat(`?countprop${index} `)
+                }
+                groupList = groupList.concat(`?prop${index} `)
+            }
+            if (hierarchical) groupList = groupList.concat(`?directlink `)
+            const optional = !configZone.allProperties && (configZone.constraints[index - 1] && configZone.constraints[index - 1][0].optional)
+            defList = defList.concat(FSL2SPARQL(prop.path, {
+                propName: `prop${index}`,
+                entrypointName: 'entrypoint',
+                entrypointType: (index === 1),
+                optional,
+                hierarchical
+            }))
+            if (prop.category === 'geo' && prop.subcategory === 'name') {
+                groupList = groupList.concat(`?latitude${index} ?longitude${index} ?geoname${index} `)
+                //defList = defList.concat('?latitude ?longitude ?geoname ') // FIND IN GEONAMES GRAPH
+            }
+            
+        })
+    }
+    console.log(`SELECT DISTINCT ${propList}${graph}
+    WHERE {
+    ${constraints}
+    ${defList}
+    } ${groupList} ${orderList}`)
     return `SELECT DISTINCT ${propList}${graph}
 WHERE {
 ${constraints}
@@ -388,56 +416,63 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
     const { defaultGraph, constraints } = options
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     //
-    let selectedConfig = configLib.getSelectedConfig(config, zone)
+    
     let propList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``
     let groupList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``
     let defList = ``
     let orderList = ``
-    selectedConfig.properties.forEach((prop, index) => {
-        if (prop.path !== '') {
-            index += 1
-            propList = propList.concat(`?prop${index} `)
-            orderList = orderList.concat(`?prop${index} `)
-            if (config.entrypoint === undefined) {
-                propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
-                orderList = orderList.concat(`?countprop${index} `)
+    if (!config.allProperties) {
+        let selectedConfig = configLib.getSelectedConfig(config, zone)
+        selectedConfig.properties.forEach((prop, index) => {
+            if (prop.path !== '') {
+                index += 1
+                propList = propList.concat(`?prop${index} `)
+                orderList = orderList.concat(`?prop${index} `)
+                if (config.entrypoint === undefined) {
+                    propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
+                    orderList = orderList.concat(`?countprop${index} `)
+                }
+                groupList = groupList.concat(`?prop${index} `)
+                const optional = config.constraints[index - 1] && config.constraints[index - 1][0].optional
+                defList = defList.concat(FSL2SPARQL(prop.path, {
+                    propName: `prop${index}`,
+                    entrypointName: 'entrypoint',
+                    entrypointType: (index === 1),
+                    optional
+                }))
             }
-            groupList = groupList.concat(`?prop${index} `)
-            const optional = config.constraints[index - 1] && config.constraints[index - 1][0].optional
-            defList = defList.concat(FSL2SPARQL(prop.path, {
-                propName: `prop${index}`,
-                entrypointName: 'entrypoint',
-                entrypointType: (index === 1),
-                optional
-            }))
-        }
-    })
+        })
+    }
     //
     let newdefList = ``
-    let newSelectedConfig = configLib.getSelectedConfig(newConfig, zone)
-    propList.concat((newConfig.entrypoint === undefined) ? `` : `?entrypoint `)
-    groupList.concat((newConfig.entrypoint === undefined) ? `` : `?entrypoint `)
-    newSelectedConfig.properties.forEach((prop, index) => {
-        if (prop.path !== '') {
-            index += 1
-            propList = propList.concat(`?newprop${index} `)
-            orderList = orderList.concat(`?newprop${index} `)
-            if (config.entrypoint === undefined) {
-                propList = propList.concat(`(COUNT(?newprop${index}) as ?newcountprop${index}) `)
-                orderList = orderList.concat(`?newcountprop${index} `)
+    
+    propList.concat((newConfig.entrypoint && !config.entrypoint) ? `?entrypoint ` : ``)
+    groupList.concat((newConfig.entrypoint && !config.entrypoint) ? `?entrypoint ` : ``)
+    if(!newConfig.allProperties) {
+        let newSelectedConfig = configLib.getSelectedConfig(newConfig, zone)
+        newSelectedConfig.properties.forEach((prop, index) => {
+            if (prop.path !== '') {
+                index += 1
+                propList = propList.concat(`?newprop${index} `)
+                orderList = orderList.concat(`?newprop${index} `)
+                if (config.entrypoint === undefined) {
+                    propList = propList.concat(`(COUNT(?newprop${index}) as ?newcountprop${index}) `)
+                    orderList = orderList.concat(`?newcountprop${index} `)
+                }
+                groupList = groupList.concat(`?newprop${index} `)
+                newdefList = newdefList.concat(FSL2SPARQL(prop.path, {
+                    propName: `newprop${index}`,
+                    entrypointName: 'entrypoint',
+                    entrypointType: (index === 1),
+                    optional: false
+                }))
             }
-            groupList = groupList.concat(`?newprop${index} `)
-            newdefList = newdefList.concat(FSL2SPARQL(prop.path, {
-                propName: `newprop${index}`,
-                entrypointName: 'entrypoint',
-                entrypointType: (index === 1),
-                optional: false
-            }))
-        }
-    })
+        })
+    }
     return `SELECT DISTINCT ${propList}${graph}
     WHERE {
         ${constraints}
+        ${newOptions.constraints}
         ${defList}
         OPTIONAL {
             ${newdefList}

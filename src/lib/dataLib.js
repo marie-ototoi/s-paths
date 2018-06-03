@@ -128,10 +128,12 @@ export const getResults = (data, zone, status) => {
     if (status === 'delta') {
         status = 'transition'
         statementsType = 'deltaStatements'
+    } else if (status === 'detail') {
+        statementsType = 'detailStatements'
+        status = 'active'
     } else {
         statementsType = 'statements'
     }
-    // console.log(data, status, statementsType)
     const filtered = data.filter(d => (d.status === status))
     return (filtered.length > 0 && filtered[0][statementsType].results) ? filtered[0][statementsType].results.bindings : []
 }
@@ -310,6 +312,57 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
     }, [])
 }
 
+export const prepareDetailData = (data, dataset) => {
+    let { entrypoint, labels, prefixes } = dataset
+    let newData = []
+    newData.push(d3.nest().key(prop => prop.entrypoint.value).entries(data).map(prop => prop.key))
+    let maxLevel = data.sort((a, b) => b.level - a.level)[0].level
+    for (let i = 1; i <= maxLevel; i++) {
+        let filtered = data
+            .filter(d => d.level === i)
+            .reduce((acc, cur)=>{
+                let fullPath = `<${entrypoint}>/`
+                for(let j = 1; j <= i; j++) {
+                    fullPath = fullPath.concat(`<` + cur[`path${j}`].value + `>/*/`)
+                }
+                let checkPathIndex
+                let checkValueIndex
+                let someIndex = acc.some((d, index) => {
+                    if (d.fullPath === fullPath) checkPathIndex = index
+                    return d.fullPath === fullPath
+                })
+                if (someIndex) {
+                    let someValue = acc[checkPathIndex][`prop${i}`].some((v, index) => {
+                        if (v.value === cur[`prop${i}`].value) checkValueIndex = index
+                        // console.log(v.value, cur[`prop${i}`].value, v.value === cur[`prop${i}`].value)
+                        return v.value === cur[`prop${i}`].value
+                    })
+                    // console.log(checkValueIndex, someIndex, checkValueIndex, someValue)
+                    if (someValue) {
+                        // console.log()
+                        acc[checkPathIndex][`prop${i}`][checkValueIndex].count++
+                    } else {
+                        acc[checkPathIndex][`prop${i}`].push({ value: cur[`prop${i}`].value, count: 1 })
+                    }
+                } else {
+                    let newItem = cur
+                    newItem.path = queryLib.convertPath(fullPath, prefixes)
+                    newItem.readablePath = getReadablePathsParts(newItem.path, labels, prefixes)
+                    newItem.fullPath = fullPath
+                    newItem[`prop${i}`] = Array.isArray(newItem[`prop${i}`]) ? newItem[`prop${i}`] : [newItem[`prop${i}`]]
+                    newItem[`prop${i}`] = newItem[`prop${i}`].map(v => {
+                        return { value: v.value, count: 1 }
+                    }) 
+                    acc.push(newItem)
+                }
+                return acc
+            },[])
+            .sort((a, b) => a.path.localeCompare(b.path))
+        newData.push(filtered)
+    }
+    return newData
+}
+
 export const deduplicate = (data, props) => {
     /* return data.reduce((acc, cur) => {
         let alreadyIn = acc.filter(dt => {
@@ -328,7 +381,11 @@ export const deduplicate = (data, props) => {
         acc.forEach((dt, index) => {
             let conditions = props.map(prop => {
                 // console.log(prop, cur[prop], dt[prop])
-                return cur[prop].value === dt[prop].value
+                if (cur[prop] && dt[prop]) {
+                    return cur[prop].value === dt[prop].value
+                } else {
+                    return false
+                }
             })
             if (!conditions.includes(false)) alreadyInIndex = index
         })

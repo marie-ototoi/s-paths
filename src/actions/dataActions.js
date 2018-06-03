@@ -34,7 +34,7 @@ const getResources = (options) => {
 }
 
 export const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
-    // console.log('load Data ', dataset.constraints)
+    console.log('load Data ', dataset.constraints)
     let { constraints, endpoint, entrypoint, prefixes } = dataset
     let newOptions
     if (constraints !== '') dataset.forceUpdate = false
@@ -63,7 +63,8 @@ export const loadData = (dispatch) => (dataset, views, previousConfigs, previous
                         ...dataset,
                         entrypoint: stats.options.entrypoint,
                         prefixes: stats.options.prefixes,
-                        constraints: stats.options.constraints
+                        constraints: stats.options.constraints,
+                        selectionInstances: stats.selectionInstances
                     }
                     resolve(configs)
                 }
@@ -78,43 +79,44 @@ export const loadData = (dispatch) => (dataset, views, previousConfigs, previous
             const queryAside = makeQuery(entrypoint, configAside, 'aside', dataset)
             const queryAsideUnique = makeQuery(entrypoint, configAside, 'aside', { ...dataset, unique: true })
             // const coverageQueryAside = makeQuery(entrypoint, configAside, 'aside', { ...dataset, prop1only: true })
-            let deltaMain
-            let deltaAside
+            let mainPromise = getData(endpoint, queryMain, prefixes)
+            let asidePromise = (queryMain === queryAside) ? null : getData(endpoint, queryAside, prefixes)
+            let deltaMainPromise
+            let deltaAsidePromise
+            let totalMainPromise = (newOptions.selectionInstances === 1) ? { results: { bindings: [ { displayed: { value: 1 } } ] } } : getData(endpoint, queryMainUnique, prefixes)
+            let totalAsidePromise = (newOptions.selectionInstances === 1) ? { results: { bindings: [ { displayed: { value: 1 } } ] } } : getData(endpoint, queryAsideUnique, prefixes)
             if (previousConfigs.length > 0) {
                 const previousConfigMain = getConfig(previousConfigs, 'main')
                 const previousConfigAside = getConfig(previousConfigs, 'aside')
                 let queryTransitionMain = makeTransitionQuery(configMain, newOptions, previousConfigMain, previousOptions, 'main')
-                deltaMain = getData(endpoint, queryTransitionMain, prefixes)
+                deltaMainPromise = getData(endpoint, queryTransitionMain, prefixes)
                 let queryTransitionAside = makeTransitionQuery(configAside, newOptions, previousConfigAside, previousOptions, 'aside')
-                deltaAside = getData(endpoint, queryTransitionAside, prefixes)
+                deltaAsidePromise = (queryTransitionMain === queryTransitionAside) ? null : getData(endpoint, queryTransitionAside, prefixes)
                 // console.log('queryTransitionMain', queryTransitionMain)
                 // console.log('queryTransitionAside', queryTransitionAside)
             } else {
-                deltaMain = {}
-                deltaAside = {}
+                deltaMainPromise = {}
+                deltaAsidePromise = {}
             }
-            // console.log('queryMain', queryMain)
+            console.log('queryMain', queryMain)
             // console.log('coverageQueryMain', coverageQueryMain)
             // console.log('queryAside', queryAside)
             // console.log('coverageQueryAside', coverageQueryAside)
             return Promise.all([
-                getData(endpoint, queryMain, prefixes),
-                getData(endpoint, queryAside, prefixes),
-                deltaMain,
-                deltaAside,
-                getData(endpoint, queryMainUnique, prefixes),
-                getData(endpoint, queryAsideUnique, prefixes)
+                mainPromise,
+                asidePromise,
+                deltaMainPromise,
+                deltaAsidePromise,
+                totalMainPromise,
+                totalAsidePromise
             ])
                 .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside, uniqueMain, uniqueAside]) => { // , coverageMain, coverageAside
-                    // console.log(dataMain, dataAside)
-                    // console.log('dataTransitionMain', dataTransitionMain)
-                    // console.log('dataTransitionAside', dataTransitionAside)
                     dispatch({
                         type: types.SET_DATA,
                         main: { ...dataMain },
-                        aside: { ...dataAside },
+                        aside: dataAside ? { ...dataAside } : { ...dataMain },
                         mainDelta: dataDeltaMain,
-                        asideDelta: dataDeltaAside,
+                        asideDelta: dataDeltaAside ? dataDeltaAside : dataDeltaMain,
                         mainDisplayed: Number(uniqueMain.results.bindings[0].displayed.value),
                         asideDisplayed: Number(uniqueAside.results.bindings[0].displayed.value)
                     })
@@ -127,6 +129,35 @@ export const loadData = (dispatch) => (dataset, views, previousConfigs, previous
             if (error === 'no_results') return { statements: [] }
             console.error('Error getting data', error)
         })
+}
+
+export const loadDetail = (dispatch) => (dataset, configs, zone) => {
+    // console.log('load Detail ', dataset.constraints)
+    // would like to use async await rather than imbricated promise but compilation fails
+    let { endpoint, entrypoint, maxLevel, prefixes } = dataset
+    const configMain = getConfig(configs, 'main')
+    let queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: 1 } )
+    getData(endpoint, queryMain, prefixes)
+        .then(data => {
+            dispatch({
+                type: types.SET_DETAIL,
+                level: 1,
+                zone,
+                elements: data
+            })
+            for (let i = 1; i < maxLevel; i ++) {
+                queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: i } )
+                getData(endpoint, queryMain, prefixes)
+                    .then(newdata => {
+                        dispatch({
+                            type: types.SET_DETAIL,
+                            level: i,
+                            zone,
+                            elements: newdata
+                        })
+                    })
+            }
+        })   
 }
 
 export const loadResources = (dispatch) => (dataset) => {
