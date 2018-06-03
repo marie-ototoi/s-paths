@@ -1,4 +1,4 @@
-span:not([title=""]), strong:not([title=""]) {
+span[title]:not([title=""]), strong[title]:not([title=""]) {
   text-decoration: underline #bbb dashed;
   cursor: pointer;
 }
