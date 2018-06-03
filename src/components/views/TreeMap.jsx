@@ -56,18 +56,11 @@ class TreeMap extends React.Component {
         const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
         const propsLists = getPropsLists(config, zone, dataset)
 
-        const displayedInstances = nestedProp1.reduce((acc, cur) => {
-            cur.values.forEach(val => {
-                acc += Number(val.countprop1.value)
-            })
-            return acc
-        }, 0)
         // console.log(nestedProp1)
         // Save to reuse in render
         this.customState = {
             ...this.customState,
             color,
-            displayedInstances,
             selectedConfig,
             nestedProp1,
             propsLists

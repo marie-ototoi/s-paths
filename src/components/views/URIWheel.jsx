@@ -56,18 +56,11 @@ class URIWheel extends React.Component {
 
         const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
 
-        const displayedInstances = nestedProp1.reduce((acc, cur) => {
-            cur.values.forEach(val => {
-                acc += Number(val.countprop1.value)
-            })
-            return acc
-        }, 0)
         // console.log(nestedProp1)
         // Save to reuse in render
         this.customState = {
             ...this.customState,
             color,
-            displayedInstances,
             selectedConfig,
             nestedProp1,
             propsLists
@@ -171,7 +164,7 @@ class URIWheel extends React.Component {
 URIWheel.propTypes = {
     config: PropTypes.object,
     data: PropTypes.array,
-    dimensions: PropTypes.array,
+    dimensions: PropTypes.object,
     display: PropTypes.object,
     selections: PropTypes.array,
     role: PropTypes.string,

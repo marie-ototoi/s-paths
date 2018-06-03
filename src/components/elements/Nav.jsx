@@ -14,36 +14,37 @@ class Nav extends React.PureComponent {
         const { config, configs, dataset, display, offset, zone } = this.props
         // console.log(propsLists)
         const activeConfigs = getConfigs(getCurrentConfigs(configs, 'active'), zone)
-        const dimensions = getDimensions('nav', display.zones[zone], display.viz, offset)
-        const { x, y, width } = dimensions
+        const dimensions = getDimensions('nav', display.zones[zone], display.viz, { x:0, y:10, width: 0, height: 0 })
+        const { x, y, width, height } = dimensions
         // console.log(activeConfigs)
         const itemWidth = width / 6
-        const itemHeight = itemWidth * 3 / 4
-        const margin = itemWidth / 6
 
         return (<g className = "Nav"
             transform = { `translate(${x}, ${y})` }
             ref = { `nav_${zone}` }
         >
-            { activeConfigs.map((option, i) => {
-                let selected = (config.id === option.id)
-                return <g
-                    key = { zone + '_thumb_' + i }
-                    transform = { `translate(${(margin * (i)) + (itemWidth * i)}, ${50 - itemHeight})` }
-                    onClick = { e => this.props.selectView(option.id, zone, activeConfigs, dataset) }
-                >
-                    <rect
-                        width = { itemWidth }
-                        height = { itemHeight }
-                        fill = { selected ? '#333333' : '#E0E0E0' }
-                    />
-                    <text
-                        y = "10"
-                        x = "4"
-                        fill = { selected ? '#E0E0E0' : '#333333' }
-                    >{ option.id.substr(0, 1) }</text>
-                </g>
-            }) }
+            <foreignObject                 
+                width = { width }
+                height = { height }
+            >
+           
+                { activeConfigs.map((option, i) => {
+                    let selected = (config.id === option.id)
+                    
+                    return <span
+                        key = { zone + '_thumb_' + i }
+                        style = {{ minWidth: '65px',minHeight: '45px', display: 'inline-block' }}
+                        
+                    >
+                        <a
+                            className = { selected ? "button is-info is-active" : "button is-light has-background-grey-light is-active" }
+                            onClick = { e => this.props.selectView(option.id, zone, activeConfigs, dataset) }
+                        >
+                            <img width="30" src = { option.thumb } />
+                        </a>
+                    </span>
+                }) }
+            </foreignObject>            
             { config.constraints.map((prop, i) => {
                 return <PropSelector
                     selected = { true }

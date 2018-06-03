@@ -50,7 +50,7 @@ class Coverage extends React.Component {
         }
     }
     render () {
-        const { data, dataset, display, offset, selections, zone } = this.props
+        const { data, dataset, display, selections, zone } = this.props
         // const activeConfigs = getCurrentConfigs(configs, 'active')
         const dimensions = getDimensions('coverage', display.zones[zone], display.viz, { x: 5, y: 5, width: -10, height: 0 })
         const { x, y, width } = dimensions
@@ -64,12 +64,15 @@ class Coverage extends React.Component {
         const itemWidth = width / 6
         // const itemHeight = itemWidth * 3 / 4
         const margin = itemWidth / 6
-        const maxBarWidth = (itemWidth * 3) + (margin * 2)
+        // const maxBarWidth = (itemWidth * 3) + (margin * 2)
 
         let selectionDisabled = (selections.length > 0) ?  {} : { 'disabled' : 'disabled' }
-        let detailClass = (dataLib.getNbDisplayed(data, zone, 'active') < 500) ?  { 'className': 'button is-link is-small' } : { 'className': 'button is-link is-small is-invisible' }
+        let detailClass = (dataLib.getNbDisplayed(data, zone, 'active') < 1000) ?  { 'className': 'button is-small is-info' } : { 'className': 'button is-info is-small is-invisible' }
         // console.log(configs)
         return (<g
+            transform = { `translate(${x}, ${y})` }
+            className = "Coverage"
+            ref = { `coverage_${zone}` }
         >
             { ( (display.mode === 'main' && zone === 'main') || 
                 (display.mode === 'aside' && zone === 'aside') ||
@@ -85,35 +88,35 @@ class Coverage extends React.Component {
                     />
                 </g>
             }
-            <foreignObject 
-                transform = { `translate(${x}, ${y})` }
-                className = "Coverage"           
-                ref = { `coverage_${zone}` }
+            <foreignObject                 
                 width = { width }
-                height = { 200 }
-                
+                height = { 500 }
             >
-                { options.map((option, i) => {
-                    let percent = option.total / options[0].total
-                    if (percent > 1) percent = 1
-                    let barWidth = maxBarWidth * percent
-                    return (<div key = { `progress_${zone}_${i}` }>
-                        <p className = "is-size-7">{ option.label } <span className = "is-pulled-right">{ option.total }</span></p>
-                        <progress className = "progress is-small" value = { option.total } max = { options[0].total }>{ percent }%</progress>
-                    </div>)
-                }) }
-            
-                <div className = "buttons" style = {{ 'padding': '20px 40% 0 7px' }}>
-                    <a
-                        className = "button is-link is-small"
-                        onMouseUp = { this.exploreSelection } 
-                        {...selectionDisabled}
-                    >Explore [return]</a><br />
-                    <a
-                        {...detailClass}
-                        onMouseUp = { this.detailSelection }
-                        {...selectionDisabled}
-                    >Show detail [i]</a>
+                <div className = "bars">
+                    { options.map((option, i) => {
+                        let percent = option.total / options[0].total
+                        if (percent > 1) percent = 1
+                        return (<div key = { `progress_${zone}_${i}` }>
+                            <p className = "is-size-7">{ option.label } <span className = "is-pulled-right">{ option.total }</span></p>
+                            <progress className = "progress is-small" value = { option.total } max = { options[0].total }>{ percent }%</progress>
+                        </div>)
+                    }) }
+                </div>
+                <div style = {{ paddingTop: '10px' }}>
+                    <div style = {{ minWidth: '105px',minHeight: '45px', display: 'inline-block' }}>
+                        <a
+                            className = "button is-small is-info"
+                            onMouseUp = { this.exploreSelection } 
+                            {...selectionDisabled}
+                        >Explore [⏎]</a>
+                    </div>
+                    <div style = {{ minWidth: '105px',minHeight: '45px', display: 'inline-block' }}>
+                        <a
+                            {...detailClass}
+                            onMouseUp = { this.detailSelection }
+                            {...selectionDisabled}
+                        >Show detail [Ctrl+⏎]</a>
+                    </div>
                 </div>
             </foreignObject>
         </g>)

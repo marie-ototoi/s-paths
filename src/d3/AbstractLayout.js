@@ -3,7 +3,7 @@ import * as selectionLib from '../lib/selectionLib'
 
 class AbstractLayout {
     constructor (el, props) {
-        console.log('create', el)
+        // console.log('create', el)
         if (el) {
             this.el = el
             this.draw(props)
@@ -11,18 +11,18 @@ class AbstractLayout {
         }
     }
     update (el, props) {
-        console.log('update', this.el)
+        // console.log('update', this.el)
         if (el) {
             this.el = el
             this.draw(props)
             this.resize(props)
             this.checkSelection(props)
         }
-        console.log('vidé ?', this.el)
+        // console.log('vidé ?', this.el)
     }
     destroy (el) {
         this.el = el
-        console.log('destroy', this.el)
+        // console.log('destroy', this.el)
         d3.select(this.el)
             .selectAll('*')
             .remove()
