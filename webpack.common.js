@@ -1,5 +1,6 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
     entry: [
@@ -58,7 +59,13 @@ module.exports = {
                 defer: true,
                 src: 'https://use.fontawesome.com/releases/v5.0.7/js/all.js'
             }]
-        })
+        }),
+        new CopyWebpackPlugin([
+            {
+                from:  path.join(__dirname, 'assets'),
+                to: path.join(__dirname, 'public/')
+            }
+        ])
     ],
     resolve: {
         extensions: ['.js', '.jsx', '.json', '.css']
