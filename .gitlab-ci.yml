@@ -1,4 +1,4 @@
-#image: node:9.11-alpine
+image: node:9.11-jessie
 
 #before_script:
 #  - npm install
