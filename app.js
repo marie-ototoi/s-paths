@@ -27,7 +27,7 @@ if (process.env.NODE_ENV === 'development') {
 
     const compiler = require('webpack')(config);
     const {publicPath} = config.output;
-    console.log(publicPath)
+//    console.log(publicPath)
     require('webpack-hot-client')(compiler, {});
     app.use(require('webpack-dev-middleware')(compiler, {
         publicPath
