@@ -1,0 +1,21 @@
+image: node:9.11-alpine
+
+before_script:
+  - npm install
+
+cache:
+    paths:
+    - node_modules/
+
+services:
+  - mongo:3.2-jessie
+  
+job_build:
+  stage: build
+  script:
+    - npm run build
+
+job_test:
+  stage: test
+  script:
+    - npm test
