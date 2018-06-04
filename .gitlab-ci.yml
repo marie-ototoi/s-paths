@@ -1,7 +1,7 @@
 image: node:9.11-alpine
 
-before_script:
-  - npm install
+#before_script:
+#  - npm install
 
 cache:
     paths:
@@ -18,4 +18,5 @@ cache:
 job_test:
   stage: test
   script:
+    - npm install
     - npm test
