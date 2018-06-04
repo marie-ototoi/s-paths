@@ -467,7 +467,7 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
     return `SELECT DISTINCT ${propList}${graph}
     WHERE {
         ${constraints}
-        ${newOptions.constraints}
+        ${(constraints !== newOptions.constraints) ? newOptions.constraints : ''}
         ${defList}
         OPTIONAL {
             ${newdefList}
