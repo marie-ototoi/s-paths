@@ -18,5 +18,5 @@
 job_test:
   stage: test
   script:
-    - npm install
+    - npm install --production
     - npm test
