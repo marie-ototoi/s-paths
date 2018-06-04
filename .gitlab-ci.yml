@@ -1,7 +1,7 @@
-image: node:9.11-jessie
+#image: node:9.11-jessie
 
-#before_script:
-#  - npm install
+before_script:
+  - npm install
 
 #cache:
 #    paths:
@@ -18,5 +18,4 @@ image: node:9.11-jessie
 job_test:
   stage: test
   script:
-    - npm install --production
     - npm test
