@@ -3,9 +3,9 @@
 #before_script:
 #  - npm install
 
-cache:
-    paths:
-    - node_modules/
+#cache:
+#    paths:
+#    - node_modules/
 
 #services:
 #  - mongo:3.2-jessie
