@@ -25,3 +25,4 @@ job_build_docker:
   script:
     - docker build -t discover .
     - docker run discover
+# tr
