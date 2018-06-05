@@ -21,11 +21,7 @@ cache:
 #    - npm run build
     
 job_build_docker:
-  tags:
-    - bnf 
-    - docker 
-    - deploy
   script:
     - docker build -t discover .
-    - docker run discover
+    - docker run discover -p 8081:5000
 # tr
