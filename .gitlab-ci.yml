@@ -1,7 +1,7 @@
 image: node:9.11-jessie
 
-#before_script:
-#  - npm install
+before_script:
+  - npm install
 
 cache:
     paths:
