@@ -10,10 +10,10 @@ cache:
 #services:
 #  - mongo:3.2-jessie
 
-job_test:
-  stage: test
-  script:
-    - npm test
+#job_test:
+#  stage: test
+#  script:
+#    - npm test
   
 #job_build:
 #  stage: build
@@ -21,6 +21,7 @@ job_test:
 #    - npm run build
     
 job_build_docker:
+  tags: deploy
   script:
     - docker build -t discover .
     - docker run discover
