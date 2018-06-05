@@ -21,8 +21,8 @@ cache:
 #    - npm run build
     
 job_build_docker:
-  tags: 
-    - deploy
+  tags:
+    - deployrunnerbnf
   script:
     - docker build -t discover .
     - docker run discover
