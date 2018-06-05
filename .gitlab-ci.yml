@@ -22,7 +22,9 @@ cache:
     
 job_build_docker:
   tags:
-    - deployrunnerbnf
+    - bnf 
+    - docker 
+    - deploy
   script:
     - docker build -t discover .
     - docker run discover
