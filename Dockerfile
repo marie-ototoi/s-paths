@@ -12,3 +12,4 @@ RUN mv .env.example .env
 RUN npm install #--production
 
 EXPOSE 5000
+EXPOSE 8081
