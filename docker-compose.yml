@@ -8,7 +8,7 @@ services:
      - "27017:27107"
     network_mode: "host"
   discover:
-    image: registry.gitlab.inria.fr/ilda-semantic/discover:server
+    image: registry.gitlab.inria.fr/ilda-semantic/discover:latest
     container_name: discover_server
     command: ["npm", "start"]
     ports:
