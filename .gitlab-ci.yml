@@ -1,26 +1,35 @@
-image: node:9.11-jessie
+.image: node:9.11-jessie
 
-before_script:
+.before_script:
   - npm install
 
-cache:
+.cache:
     paths:
     - node_modules/
 
 #services:
 #  - mongo:3.2-jessie
 
-job_test:
+.job_test:
   stage: test
   script:
     - npm test
   
-job_build:
+.job_build:
   stage: build
   script:
     - npm run build
     
-#job_build_docker:
-#  script:
-#    - docker build -t discover .
-#    - docker run discover -p 8081:5000
+services:
+ - docker:dind
+
+build_docker:
+  tags:
+   - docker
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
+    - docker build -t registry.gitlab.inria.fr/ilda-semantic/discover .
+    - docker push registry.gitlab.inria.fr/ilda-semantic/discover:latest
+  only:
+   - master
+
