@@ -15,6 +15,6 @@ RUN npm install --production
 RUN ls -al -R
 
 # Enable monitor server
-RUN pm2 install pm2-server-monit
+#RUN pm2 install pm2-server-monit
 
 CMD [ "pm2-runtime", "start", "pm2.json" ]
