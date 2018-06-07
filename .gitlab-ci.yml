@@ -46,6 +46,10 @@ UT:
 
 #Production:
 #  <<: *node
+#  stage: deploy
+#  script:
+#  only:
+#    - master
 #  when: manual
 #  environment:
 #    name: production
