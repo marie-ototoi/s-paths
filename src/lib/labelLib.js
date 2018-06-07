@@ -1,13 +1,9 @@
 import fetch from 'rdf-fetch'
-import promiseSettle from 'promise-settle'
-import promiseLimit from 'promise-limit'
 import rdflib from 'rdflib'
 import propertyModel from '../../models/property'
-import queryLib, { ignorePromise } from './queryLib'
+import { ignorePromise, useFullUri } from './queryLib'
 
-const limit = promiseLimit(10)
-
-const getPropsLabels = async (prefixes, props) => {
+export const getPropsLabels = async (prefixes, props) => {
     // find all classes and props used in paths
     let urisToLabel = props.reduce((acc, curr) => {
         let pathParts = curr.path.split('/')
@@ -18,36 +14,42 @@ const getPropsLabels = async (prefixes, props) => {
         return acc
     }, []).map(prop => {
         return {
-            uri: queryLib.useFullUri(prop, prefixes)
+            uri: useFullUri(prop, prefixes)
         }
     })
     return getLabels(urisToLabel, prefixes)
 }
 
-const getLabels = async (urisToLabel, prefixes) => {
+export const getLabels = async (urisToLabel, prefixes) => {
     let missingUris
     // create a local graph
     let graph = new rdflib.IndexedFormula()
-    // to add 
+    // to add
     // try to get props labels and comments in database
     // if already defined, do not keep in queried prefixes
     // propertyModel.find({ uri: uri }).exec()
     let propsInDatabase = await Promise.all(urisToLabel.map(prop => {
-        return propertyModel.findOne({ uri: prop.uri }).exec()
-    }).map(ignorePromise))
+        // console.log('ah ', prop.uri, propertyModel.findOne({ property: prop.uri }).exec())
+        return propertyModel.findOne({ property: prop.uri }).exec()
+    }))
+    let today = new Date()
+    let limitDate = today.setDate(today.getDate()-2)
     propsInDatabase.forEach((prop, index) => {
         if (prop) {
-            urisToLabel[index].label = prop.label
+            if (prop.label && prop.label !== '') {
+                urisToLabel[index].label = prop.label
+            } else if (prop.loadAttempts > 10 && new Date(prop.modifiedAt) > limitDate) {
+                urisToLabel[index].label = prop.property
+            }
             urisToLabel[index].comment = prop.comment
         }
     })
     missingUris = urisToLabel.filter(prop => !prop.label)
-    // load 
+    // load
     await Promise.all(missingUris.map(prop => loadUri(prop.uri, graph)).map(ignorePromise))
-    missingUris = await getLabelsFromGraph(missingUris, graph)
+    missingUris = await Promise.all(getLabelsFromGraph(missingUris, graph))
     propertyModel.createOrUpdate(missingUris)
     //
-    
     return urisToLabel.map(prop => {
         if (prop.label) {
             return prop
@@ -56,13 +58,13 @@ const getLabels = async (urisToLabel, prefixes) => {
             if (missing.length > 0) {
                 return missing[0]
             } else {
-                return prop
+                return { ...prop, label: prop.uri }
             }
         }
     })
 }
 
-const getLabelsFromGraph = async (uris, graph) => {
+export const getLabelsFromGraph = (uris, graph) => {
     let labels = uris.map(prop => graph.any(rdflib.sym(prop.uri), rdflib.sym('http://www.w3.org/2000/01/rdf-schema#label')))
     labels.forEach((label, index) => {
         if (label) uris[index].label = label.value
@@ -74,17 +76,15 @@ const getLabelsFromGraph = async (uris, graph) => {
     return uris
 }
 
-const loadUri = (uri, graph) => {
+export const loadUri = (uri, graph) => {
     // console.log('load ontology', url)
     return fetch(uri, { redirect: 'follow', headers: { 'Accept': 'Accept: text/turtle, application/rdf+xml, text/ntriples, application/ld+json' } }).then(response => {
-        
         if (response.ok) {
-            
             // if succesful, parse it and add it to the graph
             let mediaType = response.headers.get('Content-type')
             // little hack to be removed -> warn hosts that the mime type is wrong
             if (mediaType === 'text/xml') mediaType = 'application/rdf+xml'
-            // check for parsable ontologies type (to avoid app crash)    
+            // check for parsable ontologies type (to avoid app crash)
             if (mediaType &&
             (mediaType.indexOf('application/ld+json') >= 0 ||
             mediaType.indexOf('application/rdf+xml') >= 0 ||
@@ -100,8 +100,3 @@ const loadUri = (uri, graph) => {
         }
     })
 }
-
-exports.getLabels = getLabels
-exports.getLabelsFromGraph = getLabelsFromGraph
-exports.getPropsLabels = getPropsLabels
-exports.loadUri = loadUri

@@ -26,8 +26,8 @@ propertySchema.statics = {
                             modifiedAt: Date.now()
                         },
                         $setOnInsert: {
-                            createdAt: Date.now(),
-                            property: prop.uri
+                            property: prop.uri,
+                            createdAt: Date.now()
                         }
                     },
                     { upsert: true }
@@ -57,6 +57,4 @@ propertySchema.statics = {
     }
 }
 
-const Model = mongoose.model('Property', propertySchema)
-
-module.exports = Model
+export default mongoose.model('Property', propertySchema)

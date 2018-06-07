@@ -1,8 +1,8 @@
+import PropTypes from 'prop-types'
 import React from 'react'
-import pluralize from 'pluralize'
 import { connect } from 'react-redux'
 
-import d3History from '../../d3/d3History'
+import HistoryLayout from '../../d3/HistoryLayout'
 
 import { getDimensions } from '../../lib/scaleLib'
 
@@ -12,22 +12,19 @@ class History extends React.PureComponent {
     constructor (props) {
         super(props)
         this.jumpHistory = this.jumpHistory.bind(this)
-        this.state = {
-            elementName: `${props.zone}_history`
-        }
         this.customState = {
+            elementName: `${props.zone}_history`,
             jumpHistory: this.jumpHistory
         }
     }
     jumpHistory (index) {
-        //console.log(index, this.customState.currentIndex)
+        // console.log(index, this.customState.currentIndex)
         this.props.jump(index, this.customState.currentIndex)
     }
     render () {
         const { configs, display, offset, zone } = this.props
-        
         this.customState.currentIndex = configs.past.length
-        //console.log(this.customState.currentIndex)
+        // console.log(this.customState.currentIndex)
         this.customState.configs = [
             ...configs.past,
             configs.present,
@@ -41,20 +38,28 @@ class History extends React.PureComponent {
         const { x, y } = dimensions
         return (<g
             className = "History"
-            ref = { this.state.elementName }
+            ref = {(c) => { this[this.customState.elementName] = c }}
             transform = { `translate(${x}, ${y})` }
         >
         </g>)
     }
     componentDidMount () {
-        d3History.create(this.refs[this.state.elementName], { ...this.props, ...this.customState })
+        this.layout = new HistoryLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3History.update(this.refs[this.state.elementName], { ...this.props, ...this.customState })
+        this.layout.update(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3History.destroy(this.refs[this.state.elementName], { ...this.props, ...this.customState })
+        this.layout.destroy(this[this.customState.elementName])
     }
+}
+
+History.propTypes = {
+    configs: PropTypes.object,
+    display: PropTypes.object,
+    offset: PropTypes.number,
+    zone: PropTypes.string,
+    jump: PropTypes.func,
 }
 
 function mapStateToProps (state) {

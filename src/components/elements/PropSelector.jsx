@@ -1,7 +1,6 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-
-import { getDimensions } from '../../lib/scaleLib'
 
 import { loadData, selectProperty } from '../../actions/dataActions'
 
@@ -10,7 +9,7 @@ class PropSelector extends React.PureComponent {
         super(props)
         this.handleSelect = this.handleSelect.bind(this)
         this.state = {
-            elementName: `${props.zone}_selector_${props.propIndex} propSelector`,
+            elementName: `${props.zone}_selector_${props.propIndex}`,
             selected: props.selected
         }
     }
@@ -21,7 +20,7 @@ class PropSelector extends React.PureComponent {
         })
         let requestedProp = propList[e.target.value]
         if (this.props.type === 'header') {
-            this.props.loadData({ ...dataset, entrypoint: requestedProp.path, totalInstances: requestedProp.total }, views, configs, {})
+            this.props.loadData({ ...dataset, entrypoint: requestedProp.path, totalInstances: requestedProp.total, constraints: `` }, views, configs, {})
         } else {
             this.props.selectProperty(propIndex, requestedProp.path, config, dataset, zone)
         }
@@ -37,7 +36,7 @@ class PropSelector extends React.PureComponent {
         })
         const selectedProp = propList[selectedPropIndex]
         return (
-            <foreignObject className = {this.state.elementName}
+            <foreignObject className = {this.state.elementName + ` propSelector`}
                 transform = { `translate(${x}, ${y})` }
                 ref = { this.state.elementName }
                 width = { width }
@@ -50,7 +49,7 @@ class PropSelector extends React.PureComponent {
                     >
                         { selectedProp && selectedProp.readablePath.map((part, index) => {
                             return <span key = { `${this.state.elementName}_path_${index}` }>
-                                <span title = { part.comment }>{part.label}</span> { (index < selectedProp.readablePath.length - 1) ? ' / ' : '' }
+                                <span title = { part.comment }>&nbsp;{part.label} </span> { (index < selectedProp.readablePath.length - 1) ? ' / ' : '' }
                             </span>
                         }) }
                     </p>
@@ -75,6 +74,22 @@ class PropSelector extends React.PureComponent {
             </foreignObject>
         )
     }
+}
+
+PropSelector.propTypes = {
+    align: PropTypes.string,
+    config: PropTypes.object,
+    configs: PropTypes.object,
+    dataset: PropTypes.object,
+    dimensions: PropTypes.object,
+    propIndex: PropTypes.number,
+    propList: PropTypes.array,
+    selected: PropTypes.bool,
+    type: PropTypes.string,
+    views: PropTypes.array,
+    zone: PropTypes.string,
+    loadData: PropTypes.func,
+    selectProperty: PropTypes.func
 }
 
 function mapStateToProps (state) {

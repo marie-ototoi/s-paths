@@ -1,4 +1,4 @@
-import * as types from '../constants/ActionTypes'
+import types from '../constants/ActionTypes'
 
 const defaultState = {
     screen: {
@@ -70,13 +70,17 @@ const defaultState = {
             origin: null,
             target: null
         }
+    },
+    detail: {
+        main: false,
+        aside: false
     }
 }
 
 const display = (state = defaultState, action) => {
     // console.log(action, state)
     switch (action.type) {
-    case types.SET_DISPLAY:
+    case types.SET_DISPLAY: {
         return {
             ...state,
             mode: action.mode || state.mode,
@@ -87,7 +91,8 @@ const display = (state = defaultState, action) => {
             zones: action.zones || state.zones,
             viz: action.viz || state.viz
         }
-    case types.START_SELECTED_ZONE:
+    }
+    case types.START_SELECTED_ZONE: {
         let newSelectedZoneStart = state.selectedZone
         newSelectedZoneStart[action.zone] = {
             x1: action.x1,
@@ -99,7 +104,8 @@ const display = (state = defaultState, action) => {
             ...state,
             selectedZone: newSelectedZoneStart
         }
-    case types.MOVE_SELECTED_ZONE:
+    }
+    case types.MOVE_SELECTED_ZONE: {
         let newSelectedZoneMove = state.selectedZone
         newSelectedZoneMove[action.zone].x2 = action.x2
         newSelectedZoneMove[action.zone].y2 = action.y2
@@ -107,7 +113,8 @@ const display = (state = defaultState, action) => {
             ...state,
             selectedZone: newSelectedZoneMove
         }
-    case types.CLEAR_SELECTED_ZONE:
+    }
+    case types.CLEAR_SELECTED_ZONE: {
         let newSelectedZoneClear = state.selectedZone
         newSelectedZoneClear[action.zone] = {
             x1: null,
@@ -119,7 +126,8 @@ const display = (state = defaultState, action) => {
             ...state,
             selectedZone: newSelectedZoneClear
         }
-    case types.SET_UNIT_DIMENSIONS:
+    }
+    case types.SET_UNIT_DIMENSIONS: {
         return {
             ...state,
             unitDimensions: {
@@ -133,7 +141,8 @@ const display = (state = defaultState, action) => {
                 }
             }
         }
-    case types.SET_DATA:
+    }
+    case types.SET_DATA: {
         let unitDimensions = {
             main: {
                 origin: state.unitDimensions.main.origin,
@@ -148,7 +157,8 @@ const display = (state = defaultState, action) => {
             ...state,
             unitDimensions
         }
-    case types.END_TRANSITION:
+    }
+    case types.END_TRANSITION: {
         return {
             ...state,
             unitDimensions: {
@@ -162,7 +172,8 @@ const display = (state = defaultState, action) => {
                 }
             }
         }
-    case types.RESET_UNIT_DIMENSIONS:
+    }
+    case types.RESET_UNIT_DIMENSIONS: {
         return {
             ...state,
             unitDimensions: {
@@ -176,6 +187,26 @@ const display = (state = defaultState, action) => {
                 }
             }
         }
+    }
+    case types.SET_DETAIL: {
+        return {
+            ...state,
+            detail: {
+                main: (action.zone === 'main'),
+                aside: (action.zone === 'aside')
+            }
+        }
+    }
+    case types.HIDE_DETAIL: {
+        console.log(action.zone)
+        return {
+            ...state,
+            detail: {
+                main: (action.zone === 'main') ? false : state.detail.main,
+                aside: (action.zone === 'aside') ? false : state.detail.aside
+            }
+        }
+    }
     default:
         return state
     }

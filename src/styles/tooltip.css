@@ -1,6 +1,4 @@
-span[title!=''], strong[title!=''] {
-  text-decoration: underline;
-  text-decoration-style: dashed;
-  text-decoration-color: #bbb;
-  cursor: pointer;  
+span[title]:not([title=""]), strong[title]:not([title=""]) {
+  text-decoration: underline #bbb dashed;
+  cursor: pointer;
 }

@@ -1,8 +1,8 @@
 import chai, {expect} from 'chai'
-import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
+import * as config from '../../src/lib/configLib'
+
 chai.use(sinonChai)
-import config from '../../src/lib/configLib'
 
 describe('lib/config', () => {
     it('should return a combined list of matches', () => {
@@ -150,7 +150,7 @@ describe('lib/config', () => {
             path: 'nobel:LaureateAward/nobel:share/*',
             readablePath: [ { 'comment': undefined, label: 'nobel:share' } ]
         }
-        let propsLists = config.getPropsLists(configEx, 'main', [])
+        let propsLists = config.getPropsLists(configEx, 'main', { labels: [], prefixes: {} })
         expect(propsLists).to.deep.equal([
             [
                 { ...prop1, selected: false },

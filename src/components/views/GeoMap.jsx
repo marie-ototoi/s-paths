@@ -1,12 +1,7 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-import * as d3 from 'd3'
-import d3GeoMap from '../../d3/d3GeoMap'
-import Legend from '../elements/Legend'
-import History from '../elements/History'
-import config from '../../lib/configLib'
-import dataLib from '../../lib/dataLib'
-import selectionLib from '../../lib/selectionLib'
+import GeoMapLayout from '../../d3/GeoMapLayout'
 import { select } from '../../actions/selectionActions'
 import { getPropPalette } from '../../actions/palettesActions'
 
@@ -18,21 +13,17 @@ class GeoMap extends React.Component {
         this.state = {
             setLegend: this.setLegend,
             selectElements: this.selectElements,
-            elementName: `GeoMap_${props.zone}`
+            elementName: `refGeoMap_${props.zone}`
         }
     }
-    componentWillMount () {
-
-    }
-
     render () {
-        console.log('salut GeoMap')
-        const { data, display, zone } = this.props
+        // console.log('salut GeoMap')
+        const { display, zone } = this.props
         const classN = `GeoMap `
         return (<g className = { classN } >
             <g
                 transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.vertical_margin)})` }
-                ref = { this.refs.elementName } >
+                ref = {(c) => { this[this.state.elementName] = c }} >
             </g>
         </g>)
     }
@@ -47,7 +38,6 @@ class GeoMap extends React.Component {
         select(elements, zone, selections)
     }
     */
-
     setLegend (legend) {
         this.setState({ legend })
     }
@@ -56,16 +46,21 @@ class GeoMap extends React.Component {
         select(elements, zone, selections)
     }
     componentDidMount () {
-        // console.log(this.props.data)
-        d3GeoMap.create(this.refs.elementName, { ...this.props, ...this.state })
+        this.layout = new GeoMapLayout(this[this.state.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        // console.log('update')
-        d3GeoMap.update(this.refs.elementName, { ...this.props, ...this.state })
+        this.layout.update(this[this.customState.elementName], { ...this.props, ...this.state })
     }
     componentWillUnmount () {
-        d3GeoMap.destroy(this.refs.elementName, { ...this.props, ...this.state })
+        this.layout.destroy(this[this.customState.elementName])
     }
+}
+
+GeoMap.propTypes = {
+    display: PropTypes.object,
+    selections: PropTypes.array,
+    zone: PropTypes.string,
+    select: PropTypes.func,
 }
 
 function mapStateToProps (state) {

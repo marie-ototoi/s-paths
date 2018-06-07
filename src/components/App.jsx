@@ -1,22 +1,25 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
+import Detail from './elements/Detail'
 import HeatMap from './views/HeatMap'
 import Timeline from './views/Timeline'
 import TreeMap from './views/TreeMap'
 import GeoMap from './views/GeoMap'
+import URIWheel from './views/URIWheel'
 import Transition from './elements/Transition'
 import Debug from './Debug'
 // libs
-import { getScreen } from '../lib/scaleLib'
+import { getDimensions, getScreen } from '../lib/scaleLib'
 import { areLoaded, getCurrentState, getResults, getTransitionElements } from '../lib/dataLib'
 import { getConfig, getCurrentConfigs } from '../lib/configLib'
-import selectionLib from '../lib/selectionLib'
+import * as selectionLib from '../lib/selectionLib'
 // redux actions
 import { setDisplay } from '../actions/displayActions'
 import { endTransition, loadData, loadResources } from '../actions/dataActions'
 
-class App extends React.Component {
+class App extends React.PureComponent {
     constructor (props) {
         super(props)
         // resize handled in the app component only: it updates display reducer that triggers rerender if needed
@@ -25,10 +28,6 @@ class App extends React.Component {
         // transition state is handled locally in the component, to avoid re-rendering
         this.handleTransition = this.handleTransition.bind(this)
         this.handleEndTransition = this.handleEndTransition.bind(this)
-        /* this.customState = {
-            main_target: [], // these info might change often and are updated after each render
-            main_origin: [] // putting them in the regular state would result in a infinite loop
-        } */
         this.state = {
             main_step: 'active',
             aside_step: 'active',
@@ -55,30 +54,32 @@ class App extends React.Component {
     handleTransition (props, elements) {
         const { role, status, zone } = props
         const { data, configs } = this.props
-        // console.log(role, status, zone, elements)
+        // console.log(role, status, zone)
         if (role === 'origin') {
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_origin`])) {
+                // console.log('x - transition ORIGIN LAID OUT', zone, elements)
                 this.setState({ [`${zone}_origin`]: elements })
             }
             if (this.state[`${zone}_step`] === 'done' && status === 'active') {
-                // console.log('on peut faire un reset ?', zone, this.state)
+                // console.log('4 - c est fini, on peut faire un reset ?', zone, this.state)
                 this.setState({ [`${zone}_step`]: 'active' })
             }
         } else if (role === 'target' && elements.length > 0) {
-            // console.log('transition target laid out', zone, role, elements)
+            // console.log('transition target laid out', zone, role)
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_target`])) {
-                // console.log('2 - ON CHANGE ', zone)
+                // console.log('2 - ON CHANGE, les elements sont modifies ', zone)
                 let transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getConfig(getCurrentConfigs(configs, 'active'), zone), getConfig(getCurrentConfigs(configs, 'transition'), zone), getResults(data, zone, 'delta'), zone)
                 this.setState({ [`${zone}_target`]: elements, [`${zone}_transition`]: transitionElements, [`${zone}_step`]: 'changing' })
             }
         }
     }
     handleEndTransition (zone) {
-        // console.log('transition ended', zone)
+        // console.log('3 - transition ended', zone)
         this.setState({ [`${zone}_step`]: 'done', [`${zone}_target`]: [] })
         if (!this.props.configs.future.length > 0) this.props.endTransition(zone)
     }
-    componentWillUpdate (nextProps, nextState) {
+    UNSAFE_componentWillUpdate (nextProps, nextState) {
+        // console.log('foutu ?', getCurrentState(this.props.data, 'main'), getCurrentState(nextProps.data, 'main'))
         if (getCurrentState(this.props.data, 'main') === 'active' && getCurrentState(nextProps.data, 'main') === 'transition') {
             // console.log('1 - ON LANCE main')
             this.setState({ [`main_step`]: 'launch' })
@@ -89,26 +90,26 @@ class App extends React.Component {
         }
     }
     render () {
-        const { configs, data, dataset, display, mode, selections } = this.props
+        const { configs, data, display, mode, selections } = this.props
         // debug logs
         // console.log('env', env)
         // console.log('mode', mode)
         // console.log('display', display)
         // console.log('views', views)
-        // console.log('dataset', dataset)
-         console.log('configs', configs)
+        // console.log('dataset', this.props.dataset)
+        // console.log('configs', configs)
         // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
             'HeatMap': HeatMap,
             'Timeline': Timeline,
             'TreeMap': TreeMap,
-            'GeoMap': GeoMap
+            'GeoMap': GeoMap,
+            'URIWheel': URIWheel
         }
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')
         const statusAside = getCurrentState(this.props.data, 'aside')
-        const statusConfigs = (statusMain === 'transition' || statusAside === 'transition') ? 'transition' : 'active'
         const mainConfig = getConfig(getCurrentConfigs(configs, 'active'), 'main')
         // console.log(getCurrentConfigs(configs, 'transition'))
         const mainTransitionConfig = getConfig(getCurrentConfigs(configs, 'transition'), 'main')
@@ -118,13 +119,15 @@ class App extends React.Component {
         const asideTransitionConfig = getConfig(getCurrentConfigs(configs, 'transition'), 'aside')
         const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
         const SideTransitionComponent = asideTransitionConfig ? componentIds[asideTransitionConfig.id] : ''
+        const coreDimensionsMain = getDimensions('core', display.zones['main'], display.viz)
+        const coreDimensionsAside = getDimensions('core', display.zones['aside'], display.viz)
         // to do : avoid recalculate transition data at each render
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
         >
             <svg
-                ref = "view"
+                ref = {(c) => { this['refView'] = c }}
                 width = { display.screen.width }
                 height = { display.screen.height }
                 viewBox = { `${display.viewBox.x}, ${display.viewBox.y}, ${display.viewBox.width}, ${display.viewBox.height}` }
@@ -140,11 +143,12 @@ class App extends React.Component {
                         role = "target"
                         zone = "main"
                         status = { statusMain }
+                        dimensions = { coreDimensionsMain }
                         data = { getResults(data, 'main', 'transition') }
-                        coverage = { getResults(data, 'main', 'coverage') }
+                        // coverage = { getResults(data, 'main', 'coverage') }
                         config = { getConfig(getCurrentConfigs(configs, 'transition'), 'main') }
                         selections = { selectionLib.getSelections(selections, 'main', 'transition') }
-                        ref = "maintransition"
+                        ref = {(c) => { this.refMainTransition = c }}
                         handleTransition = { this.handleTransition }
                     />
                 }
@@ -152,6 +156,7 @@ class App extends React.Component {
                 { mainConfig && this.state.main_step === 'changing' &&
                     <Transition
                         zone = "main"
+                        dimensions = { coreDimensionsMain }
                         elements = { this.state.main_transition }
                         endTransition = { this.handleEndTransition }
                     />
@@ -163,12 +168,21 @@ class App extends React.Component {
                         zone = "main"
                         step = { this.state.main_step }
                         status = { statusMain }
-                        coverage = { getResults(data, 'main', 'coverage') }
+                        dimensions = { coreDimensionsMain }
+                        // coverage = { getResults(data, 'main', 'coverage') }
                         data = { getResults(data, 'main', 'active') }
                         config = { mainConfig }
                         selections = { selectionLib.getSelections(selections, 'main', 'active') }
-                        ref = "main"
+                        ref = {(c) => { this.refMain = c }}
                         handleTransition = { this.handleTransition }
+                    />
+                }
+                
+                { display.detail.main &&
+                    <Detail
+                        zone = "main"
+                        dimensions = { getDimensions('core', display.zones['main'], display.viz, { x: 5, y:5, width: -10, height: -10 }) }
+                        elements = { getResults(data, 'main', 'detail') }
                     />
                 }
 
@@ -177,11 +191,12 @@ class App extends React.Component {
                         role = "target"
                         zone = "aside"
                         status = { statusAside }
+                        dimensions = { coreDimensionsAside }
                         data = { getResults(data, 'aside', 'transition') }
-                        coverage = { getResults(data, 'aside', 'coverage') }
+                        // coverage = { getResults(data, 'aside', 'coverage') }
                         config = { getConfig(getCurrentConfigs(configs, 'transition'), 'aside') }
                         selections = { selectionLib.getSelections(selections, 'aside', 'transition') }
-                        ref = "asidetransition"
+                        ref = {(c) => { this.refAsideTransition = c }}
                         handleTransition = { this.handleTransition }
                     />
                 }
@@ -189,6 +204,7 @@ class App extends React.Component {
                 { asideConfig && this.state.aside_step === 'changing' &&
                     <Transition
                         zone = "aside"
+                        dimensions = { coreDimensionsAside }
                         elements = { this.state.aside_transition }
                         endTransition = { this.handleEndTransition }
                     />
@@ -198,14 +214,23 @@ class App extends React.Component {
                     <SideComponent
                         zone = "aside"
                         role = "origin"
+                        dimensions = { coreDimensionsAside }
                         step = { this.state.aside_step }
                         status = { statusAside }
                         data = { getResults(data, 'aside', 'active') }
-                        coverage = { getResults(data, 'aside', 'coverage') }
+                        // coverage = { getResults(data, 'aside', 'coverage') }
                         config = { asideConfig }
                         selections = { selectionLib.getSelections(selections, 'aside', 'active') }
-                        ref = "aside"
+                        ref = {(c) => { this.refAside = c }}
                         handleTransition = { this.handleTransition }
+                    />
+                }
+
+                { display.detail.aside &&
+                    <Detail
+                        zone = "aside"
+                        dimensions = { getDimensions('core', display.zones['aside'], display.viz, { x: 5, y:5, width: -10, height: -10 }) }
+                        elements = { getResults(data, 'aside', 'detail') }
                     />
                 }
             </svg>
@@ -223,6 +248,24 @@ class App extends React.Component {
             vizDef: display.vizDefPercent
         })
     }
+}
+
+App.propTypes = {
+    configs: PropTypes.object.isRequired,
+    data: PropTypes.object.isRequired,
+    dataset: PropTypes.object.isRequired,
+    display: PropTypes.object.isRequired,
+    mode: PropTypes.string.isRequired,
+    selections: PropTypes.array.isRequired,
+    role: PropTypes.string,
+    step: PropTypes.string,
+    views: PropTypes.array.isRequired,
+    zone: PropTypes.string,
+    endTransition: PropTypes.func.isRequired,
+    handleTransition: PropTypes.func,
+    loadData: PropTypes.func.isRequired,
+    loadResources: PropTypes.func.isRequired,
+    setDisplay: PropTypes.func.isRequired
 }
 
 function mapStateToProps (state) {

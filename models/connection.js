@@ -1,8 +1,7 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
+
 mongoose.Promise = Promise
 
-module.exports = mongoose.connect(process.env.MONGODB_URI, { useMongoClient: true })
-    .then(
-        () => { /** ready to use. The `mongoose.connect()` promise resolves to undefined. */ },
-        err => { console.error('✘ CANNOT CONNECT TO mongoDB DATABASE !', err) }
-    )
+mongoose
+    .connect(process.env.MONGODB_URI)
+    .catch(err => console.error('✘ CANNOT CONNECT TO MongoDB DATABASE !', err))

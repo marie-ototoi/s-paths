@@ -1,9 +1,8 @@
 import * as d3 from 'd3'
-import { nest } from 'd3'
-import moment from 'moment'
 import shallowEqual from 'shallowequal'
+import * as queryLib from './queryLib'
 
-const areLoaded = (data, zone, status) => {
+export const areLoaded = (data, zone, status) => {
     data = getCurrentData(data, status)
     const filtered = data.filter(d => (d.zone === zone && d.status === status))
     return filtered.length > 0 &&
@@ -11,7 +10,7 @@ const areLoaded = (data, zone, status) => {
         filtered[0].statements.results.bindings.length > 0
 }
 
-const getCurrentState = (data, zone) => {
+export const getCurrentState = (data, zone) => {
     const filtered = data.present.filter(d => (d.zone === zone))
     if (filtered[0].statements.length === 0) {
         return 'loading'
@@ -20,7 +19,7 @@ const getCurrentState = (data, zone) => {
     }
 }
 
-const getDict = (arrayWithKeys) => {
+export const getDict = (arrayWithKeys) => {
     let dico = {}
     arrayWithKeys.forEach((entry, index) => {
         dico[entry.key] = index
@@ -28,7 +27,7 @@ const getDict = (arrayWithKeys) => {
     return dico
 }
 
-const getThresholdsForLegend = (nestedProps, propName, category, nbOfRanges) => {
+export const getThresholdsForLegend = (nestedProps, propName, category, nbOfRanges) => {
     const values = nestedProps.reduce((acc, curr) => {
         curr.values.forEach(val => {
             if (Number.isInteger(val['count' + propName])) {
@@ -48,7 +47,7 @@ const getThresholdsForLegend = (nestedProps, propName, category, nbOfRanges) => 
     })
 }
 
-const getThresholds = (minValue, maxValue, nbOfRanges) => {
+export const getThresholds = (minValue, maxValue, nbOfRanges) => {
     let diff = maxValue - minValue
     let part = Math.ceil(diff / nbOfRanges)
     // console.log()
@@ -76,7 +75,7 @@ const getThresholds = (minValue, maxValue, nbOfRanges) => {
 }
 
 // const groupAggregateData
-const getDateRange = (key, group) => {
+export const getDateRange = (key, group) => {
     key = Number(key)
     if (group === 'century') {
         return [key, key + 99]
@@ -87,7 +86,7 @@ const getDateRange = (key, group) => {
     }
 }
 
-const getNumberOfUnits = (nestedData, category) => {
+export const getNumberOfUnits = (nestedData, category) => {
     if (category === 'datetime') {
         let dif = Number(nestedData[nestedData.length - 1].key) - Number(nestedData[0].key)
         if (nestedData[0].group === 'decade') {
@@ -122,44 +121,53 @@ const getCurrentData = (data, status) => {
     ]
 }
 
-const getResults = (data, zone, status) => {
+export const getResults = (data, zone, status) => {
     data = getCurrentData(data, status)
     data = data.filter(d => d.zone === zone)
     let statementsType
-    if (status === 'coverage') {
-        status = data[0].status
-        statementsType = 'coverageStatements'
-    } else if (status === 'delta') {
+    if (status === 'delta') {
         status = 'transition'
         statementsType = 'deltaStatements'
+    } else if (status === 'detail') {
+        statementsType = 'detailStatements'
+        status = 'active'
     } else {
         statementsType = 'statements'
     }
-    // console.log(data, status, statementsType)
     const filtered = data.filter(d => (d.status === status))
     return (filtered.length > 0 && filtered[0][statementsType].results) ? filtered[0][statementsType].results.bindings : []
 }
 
-const getHeadings = (data, zone, status) => {
+export const getNbDisplayed = (data, zone, status) => {
+    data = getCurrentData(data, status)
+    data = data.filter(d => d.zone === zone)
+    if (status === 'delta') {
+        status = 'transition'
+    }
+    const filtered = data.filter(d => (d.status === status))
+    return (filtered.length > 0 && filtered[0].displayed) ? filtered[0].displayed : 0
+}
+
+export const getHeadings = (data, zone, status) => {
     data = getCurrentData(data, status)
     const filtered = data.filter(d => (d.zone === zone && d.status === status))
     return (filtered.length > 0 && filtered[0].statements.head) ? filtered[0].statements.head.vars : []
 }
 
-const guid = () => {
+export const guid = () => {
     const s4 = () => {
         return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)
     }
     return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4()
 }
 
-const makeId = (textstr) => {
-    return textstr.replace(/([/:#_\-.\s])/g, (match, p1) => {
+export const makeId = (textstr) => {
+    return textstr.replace(/([/:#%_\-.\s])/g, (match, p1) => {
         if (p1) return ''
     }).toLowerCase()
 }
 
-const getLegend = (nestedProps, propName, colors, category) => {
+export const getLegend = (nestedProps, propName, colors, category) => {
     return {
         info: nestedProps.map((p, i) => {
             let label = (p.values && p.values.length > 0 && p.values[0].labelprop2) ? p.values[0].labelprop2.value : p.key
@@ -181,13 +189,13 @@ const getLegend = (nestedProps, propName, colors, category) => {
     }
 }
 
-const getReadablePathsParts = (path, labels) => {
+export const getReadablePathsParts = (path, labels, prefixes) => {
     const parts = path.split('/')
     // if (!labels) return parts.map(part => { return { label: part } })
     return parts
         .filter((part, index) => index !== 0 && part !== '*')
         .map(part => {
-            let prop = labels.filter(l => l.prefUri === part)
+            let prop = labels.filter(l => l.uri === queryLib.useFullUri(part, prefixes))
             return {
                 label: (prop[0] && prop[0].label) ? prop[0].label : part,
                 comment: (prop[0] && prop[0].comment) ? prop[0].comment : undefined
@@ -195,13 +203,11 @@ const getReadablePathsParts = (path, labels) => {
         })
 }
 
-const splitRectangle = (zone, parts) => {
+export const splitRectangle = (zone, parts) => {
     parts = {
         name: 'main',
         children: parts
     }
-    //if (!zone.x0 && zone.x1) zone.x0 = zone.x1
-    //if (!zone.y0 && zone.y1) zone.y0 = zone.y1
     let hierarchy = d3.hierarchy(parts)
     let treemap = d3.treemap()
         .size([zone.width, zone.height])
@@ -223,7 +229,7 @@ const splitRectangle = (zone, parts) => {
     })
 }
 
-const getDeltaIndex = (dataPiece, elements, options) => {
+export const getDeltaIndex = (dataPiece, elements, options) => {
     let { entrypoint, isTarget } = options
     let indexElement
     elements.forEach((el, indexEl) => {
@@ -237,7 +243,7 @@ const getDeltaIndex = (dataPiece, elements, options) => {
                 // console.log('||||||||||||', dataPiece[propName], condition.category)
                 if (dataPiece[propName]) {
                     if (condition.category === 'datetime') {
-                        const cast = (dataPiece[propName].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? Number(dataPiece[propName].value.substr(0,4)) : Number(dataPiece[propName].value)
+                        const cast = (dataPiece[propName].datatype === 'http://www.w3.org/2001/XMLSchema#date') ? Number(dataPiece[propName].value.substr(0, 4)) : Number(dataPiece[propName].value)
                         return cast >= condition.value[0] && cast <= condition.value[1]
                     } else if (condition.category === 'number') {
                         if (Array.isArray(condition.value)) {
@@ -293,7 +299,8 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
                         indexOrigin: cur.indexOrigin,
                         indexTarget: cur.indexTarget,
                         signature: `${zone}_origin${cur.indexOrigin}_target${cur.indexTarget}`,
-                        size
+                        size,
+                        rotation: element.rotation
                     })
                 }
                 return acc
@@ -305,7 +312,58 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
     }, [])
 }
 
-const deduplicate = (data, props) => {
+export const prepareDetailData = (data, dataset) => {
+    let { entrypoint, labels, prefixes } = dataset
+    let newData = []
+    newData.push(d3.nest().key(prop => prop.entrypoint.value).entries(data).map(prop => prop.key))
+    let maxLevel = data.sort((a, b) => b.level - a.level)[0].level
+    for (let i = 1; i <= maxLevel; i++) {
+        let filtered = data
+            .filter(d => d.level === i)
+            .reduce((acc, cur)=>{
+                let fullPath = `<${entrypoint}>/`
+                for(let j = 1; j <= i; j++) {
+                    fullPath = fullPath.concat(`<` + cur[`path${j}`].value + `>/*/`)
+                }
+                let checkPathIndex
+                let checkValueIndex
+                let someIndex = acc.some((d, index) => {
+                    if (d.fullPath === fullPath) checkPathIndex = index
+                    return d.fullPath === fullPath
+                })
+                if (someIndex) {
+                    let someValue = acc[checkPathIndex][`prop${i}`].some((v, index) => {
+                        if (v.value === cur[`prop${i}`].value) checkValueIndex = index
+                        // console.log(v.value, cur[`prop${i}`].value, v.value === cur[`prop${i}`].value)
+                        return v.value === cur[`prop${i}`].value
+                    })
+                    // console.log(checkValueIndex, someIndex, checkValueIndex, someValue)
+                    if (someValue) {
+                        // console.log()
+                        acc[checkPathIndex][`prop${i}`][checkValueIndex].count++
+                    } else {
+                        acc[checkPathIndex][`prop${i}`].push({ value: cur[`prop${i}`].value, count: 1 })
+                    }
+                } else {
+                    let newItem = cur
+                    newItem.path = queryLib.convertPath(fullPath, prefixes)
+                    newItem.readablePath = getReadablePathsParts(newItem.path, labels, prefixes)
+                    newItem.fullPath = fullPath
+                    newItem[`prop${i}`] = Array.isArray(newItem[`prop${i}`]) ? newItem[`prop${i}`] : [newItem[`prop${i}`]]
+                    newItem[`prop${i}`] = newItem[`prop${i}`].map(v => {
+                        return { value: v.value, count: 1 }
+                    }) 
+                    acc.push(newItem)
+                }
+                return acc
+            },[])
+            .sort((a, b) => a.path.localeCompare(b.path))
+        newData.push(filtered)
+    }
+    return newData
+}
+
+export const deduplicate = (data, props) => {
     /* return data.reduce((acc, cur) => {
         let alreadyIn = acc.filter(dt => {
             let conditions = props.map(prop => {
@@ -322,7 +380,12 @@ const deduplicate = (data, props) => {
         let alreadyInIndex = null
         acc.forEach((dt, index) => {
             let conditions = props.map(prop => {
-                return cur[prop].value === dt[prop].value
+                // console.log(prop, cur[prop], dt[prop])
+                if (cur[prop] && dt[prop]) {
+                    return cur[prop].value === dt[prop].value
+                } else {
+                    return false
+                }
             })
             if (!conditions.includes(false)) alreadyInIndex = index
         })
@@ -343,7 +406,7 @@ const deduplicate = (data, props) => {
     }, [])
 }
 
-const getTransitionElements = (originElements, targetElements, originConfig, targetConfig, deltaData, zone) => {
+export const getTransitionElements = (originElements, targetElements, originConfig, targetConfig, deltaData, zone) => {
     // console.log('before', zone, originElements, targetElements, originConfig, targetConfig, deltaData)
     deltaData = deltaData.map(data => {
         let indexOrigin = getDeltaIndex(data, originElements, { entrypoint: originConfig.entrypoint, isTarget: false })
@@ -379,12 +442,12 @@ const getTransitionElements = (originElements, targetElements, originConfig, tar
     }
     // console.log('after', originElements, targetElements)
     // pour chaque zone d'arrivée identifier tous les points de départ
-    // diviser la zone d'arrivée et la remplacer par le nombre de zones nécessaires 
-    // en donnant le nom de la zone de départ 
+    // diviser la zone d'arrivée et la remplacer par le nombre de zones nécessaires
+    // en donnant le nom de la zone de départ
     return { origin: originElements, target: targetElements }
 }
 
-const getAxis = (nestedProps, propName, category) => {
+export const getAxis = (nestedProps, propName, category) => {
     return {
         info: nestedProps.map(p => {
             let range
@@ -410,7 +473,7 @@ const getAxis = (nestedProps, propName, category) => {
     }
 }
 
-const nestData = (data, props) => {
+export const nestData = (data, props) => {
     // first level
     let dataToNest = nestDataLevel(data, props)
     // second level
@@ -418,7 +481,7 @@ const nestData = (data, props) => {
         dataToNest = dataToNest.map(group => {
             return {
                 ...group,
-                values: (group.values.length > 0) ? nestDataLevel(group.values, props, group.key) : []
+                values: (group.values.length > 0) ? nestDataLevel(group.values, props, group) : []
             }
         })
     }
@@ -441,23 +504,25 @@ const sortData = (data, sortOn, sortOrder) => {
 
 const nestDataLevel = (data, props, parent) => {
     let index = parent ? 1 : 0
-    let { forceGroup, format, category, max, propName, sortKey, sortKeyOrder, sortValues, sortValuesOrder } = props[index]
-    // console.log(data, propName, format, max)
+    let { forceGroup, category, max, propName, sortKey, sortKeyOrder, sortValues, sortValuesOrder } = props[index]
+    // console.log(data, propName, max)
     let nestedData
     let additionalValue
+    let group
     if (category === 'datetime') {
-        let group
         let dataToNest = data.map(d => {
-            let dateProp = moment(d[propName].value, format)
-            if (!dateProp.isValid()) throw new Error('Cannot use time format')
+            let dateProp = new Date(d[propName].value)
+            if (dateProp.toString() === 'Invalid Date') return false
             return {
                 ...d,
                 dateProp,
-                year: dateProp.format('Y'),
-                decade: Math.floor(Number(dateProp.format('Y')) / 10) * 10,
-                century: Math.floor(Number(dateProp.format('Y')) / 100) * 100
+                year: dateProp.getFullYear(),
+                decade: Math.floor((dateProp.getFullYear()) / 10) * 10,
+                century: Math.floor((dateProp.getFullYear()) / 100) * 100
             }
-        }).sort((a, b) => a.year - b.year)
+        })
+            .filter(prop => prop !== false)
+            .sort((a, b) => a.year - b.year)
 
         let yearNest = d3.nest().key(prop => prop.year).entries(dataToNest)
         let yearNumber = Number(yearNest[yearNest.length - 1].key) - Number(yearNest[0].key)
@@ -481,6 +546,7 @@ const nestDataLevel = (data, props, parent) => {
         nestedData = nest.map(keygroup => {
             let yearStart = Number(keygroup.key)
             let range = getDateRange(yearStart, group)
+            // console.log(yearStart, range)
             return {
                 ...keygroup,
                 group,
@@ -497,7 +563,8 @@ const nestDataLevel = (data, props, parent) => {
     } else {
         nestedData = nestedData.map(elt => {
             elt['count' + propName] = 0
-            elt.parent = parent
+            elt.parent = parent.key
+            elt.range = parent.range
             elt.values = elt.values.map(groupElt => {
                 groupElt.key = groupElt[propName].value
                 groupElt.parent = { key: elt.key }
@@ -525,23 +592,3 @@ const nestDataLevel = (data, props, parent) => {
     }
     return nestedData
 }
-
-exports.areLoaded = areLoaded
-exports.deduplicate = deduplicate
-exports.getAxis = getAxis
-exports.getCurrentState = getCurrentState
-exports.getDateRange = getDateRange
-exports.getDeltaIndex = getDeltaIndex
-exports.getDict = getDict
-exports.getHeadings = getHeadings
-exports.getLegend = getLegend
-exports.getNumberOfUnits = getNumberOfUnits
-exports.getReadablePathsParts = getReadablePathsParts
-exports.getTransitionElements = getTransitionElements
-exports.makeId = makeId
-exports.nestData = nestData
-exports.getThresholds = getThresholds
-exports.getThresholdsForLegend = getThresholdsForLegend
-exports.getResults = getResults
-exports.splitRectangle = splitRectangle
-exports.guid = guid

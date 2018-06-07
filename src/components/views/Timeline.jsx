@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
@@ -9,10 +10,10 @@ import History from '../elements/History'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import PropSelector from '../elements/PropSelector'
-import PlainAxis from '../elements/PlainAxis'
+import Axis from '../elements/Axis'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import d3Timeline from '../../d3/d3Timeline'
+import TimelineLayout from '../../d3/TimelineLayout'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
 import { deduplicate, getAxis, getLegend, nestData } from '../../lib/dataLib'
@@ -22,7 +23,7 @@ import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
 import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
 
-class Timeline extends React.PureComponent {
+class Timeline extends React.Component {
     constructor (props) {
         super(props)
         this.handleMouseDown = this.handleMouseDown.bind(this)
@@ -36,75 +37,44 @@ class Timeline extends React.PureComponent {
             selectElements: this.selectElements,
             handleMouseUp: this.handleMouseUp
         }
+        this.prepareData(props)
     }
-    componentWillMount () {
-        this.prepareData(this.props)
-    }
-    componentWillUpdate (nextProps, nextState) {
-        // console.log('equal ?', shallowEqual(this.props.data, nextProps.data), this.props, nextProps)
+    shouldComponentUpdate (nextProps, nextState) {
         if (!shallowEqual(this.props, nextProps)) {
             this.prepareData(nextProps)
         }
-    }
-    shouldComponentUpdate (nextProps, nextState) {
         // console.log('equal ?', shallowEqual(this.props, nextProps), shallowEqual(this.props.data, nextProps.data))
         return !shallowEqual(this.props, nextProps)
     }
     prepareData (nextProps) {
-        const { data, config, configs, coverage, dataset, display, getPropPalette, palettes, role, zone } = nextProps
+        const { data, config, dataset, getPropPalette, palettes, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
         // First prop to be displayed in the bottom axis
-        let coverageFormatProp1
-        let nestedCoverage1
         let maxUnitsPerYear
-        if (display.unitDimensions[zone][role] &&
-            display.unitDimensions[zone][role].nestedCoverage1) {
-            nestedCoverage1 = display.unitDimensions[zone][role].nestedCoverage1
-        } else {
-            coverageFormatProp1 = config.matches[0].properties[0].format || 'YYYY-MM-DD'
-            //nestedCoverage1 = groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', { format: coverageFormatProp1, max: 50 })
-            nestedCoverage1 = nestData(deduplicate(data, ['entrypoint']), [{ propName: 'prop1', category: 'datetime', format: coverageFormatProp1, max: 50 }])
-            maxUnitsPerYear = 1
-            nestedCoverage1.forEach(d => {
-                if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
-            })
-            this.props.setUnitDimensions({ maxUnitsPerYear, nestedCoverage1 }, zone, config.id, role, (configs.past.length === 1))
-        }
-        const formatProp1 = selectedConfig.properties[0].format || 'YYYY-MM-DD'
-        const nestedProp1 = nestData(deduplicate(data, ['entrypoint']), [{
+        const nestedProp1 = nestData(data, [{
             propName: 'prop1',
             category: 'datetime',
-            format: formatProp1,
             max: 50,
-            forceGroup: nestedCoverage1[0].group,
             sortValues: 'prop2',
             sortValuesOrder: 'DESC'
         }])
-        /*
-        groupTimeData(deduplicate(data, ['entrypoint']), 'prop1', {
-            format: formatProp1,
-            max: 50,
-            forceGroup: nestedCoverage1[0].group
-        })
-        */
         const categoryProp1 = selectedConfig.properties[0].category
-        const axisBottom = getAxis(nestedCoverage1, 'prop1', categoryProp1)
+        const axisBottom = getAxis(nestedProp1, 'prop1', categoryProp1)
         // Second prop to be displayed in the legend
-
         const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
         const pathProp2 = selectedConfig.properties[1].path
         const categoryProp2 = selectedConfig.properties[1].category
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
+        // console.log(colors)
         const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
-        const propsLists = getPropsLists(config, zone, dataset.labels)
-        console.log(propsLists)
+        const propsLists = getPropsLists(config, zone, dataset)
+        // console.log(propsLists)
         // Save to reuse in render
         this.customState = {
             ...this.customState,
             propsLists,
             maxUnitsPerYear,
-            nestedCoverage1,
             selectedConfig,
             nestedProp1,
             legend,
@@ -121,17 +91,17 @@ class Timeline extends React.PureComponent {
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = d3Timeline.getElementsInZone(this.refs.Timeline, this.props)
+        const elements = this.layout.getElementsInZone(this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
     render () {
         const { axisBottom, legend } = this.customState
-        const { config, data, dataset, display, role, selections, step, zone } = this.props
+        const { config, data, dimensions, display, role, selections, step, zone } = this.props
         // display settings
         const classN = `Timeline ${this.customState.elementName} role_${role}`
-        const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
         return (<g className = { classN } >
+            { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
@@ -139,10 +109,11 @@ class Timeline extends React.PureComponent {
                 handleMouseMove = { this.handleMouseMove }
                 handleMouseUp = { this.handleMouseUp }
             />
+            }
             { step !== 'changing' &&
             <g
-                transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
-                ref = "Timeline"
+                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
+                ref = {(c) => { this[this.customState.elementName] = c }}
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.handleMouseDown }
@@ -172,7 +143,7 @@ class Timeline extends React.PureComponent {
                     legend = { legend }
                     selectElements = { this.selectElements }
                 />
-                <PlainAxis
+                <Axis
                     type = "Bottom"
                     zone = { zone }
                     axis = { axisBottom }
@@ -207,7 +178,7 @@ class Timeline extends React.PureComponent {
         </g>)
     }
     selectElements (prop, value, category) {
-        const elements = d3Timeline.getElements(this.refs.Timeline, prop, value, category)
+        const elements = this.layout.getElements(prop, value, category)
         // console.log(prop, value, elements)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
@@ -218,25 +189,38 @@ class Timeline extends React.PureComponent {
     }
     componentDidMount () {
         // console.log(this.props.data)
-        d3Timeline.create(this.refs.Timeline, { ...this.props, ...this.customState })
+        this.layout = new TimelineLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
         if (this.props.role === 'target') {
             this.render()
             // console.log('called once when transition data are loaded and displayed')
         }
     }
     componentDidUpdate () {
-        // console.log('update', this.props.selections)
-        d3Timeline.update(this.refs.Timeline, { ...this.props, ...this.customState })
+        this.layout.update(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3Timeline.destroy(this.refs.Timeline, { ...this.props, ...this.customState })
+        this.layout.destroy(this[this.customState.elementName])
     }
+}
+
+Timeline.propTypes = {
+    config: PropTypes.object,
+    data: PropTypes.array,
+    dimensions: PropTypes.object,
+    display: PropTypes.object,
+    selections: PropTypes.array,
+    role: PropTypes.string,
+    step: PropTypes.string,
+    zone: PropTypes.string,
+    handleMouseDown: PropTypes.func,
+    handleMouseMove: PropTypes.func,
+    handleMouseUp: PropTypes.func,
+    select: PropTypes.func
 }
 
 function mapStateToProps (state) {
     return {
         dataset: state.dataset,
-        configs: state.configs,
         display: state.display,
         palettes: state.palettes
     }

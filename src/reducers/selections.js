@@ -1,4 +1,4 @@
-import * as types from '../constants/ActionTypes'
+import types from '../constants/ActionTypes'
 
 const defaultState = []
 /* const exSelection = {
@@ -24,14 +24,17 @@ const selection = (state, action) => {
 }
 
 const selections = (state = defaultState, action) => {
+    let elements2Add
+    let elementsAdded
+    let elements2Remove
     switch (action.type) {
     case types.ADD_SELECTION:
-        const elements2Add = action.elements.filter(el => {
+        elements2Add = action.elements.filter(el => {
             return state.filter(sel =>
                 (sel.selector === el.selector && sel.zone === action.zone)
             ).length === 0
         })
-        const elementsAdded = elements2Add.map(el => {
+        elementsAdded = elements2Add.map(el => {
             return selection(undefined, { ...action, query: el.query, selector: el.selector, count: el.count })
         })
         return [
@@ -39,7 +42,7 @@ const selections = (state = defaultState, action) => {
             ...elementsAdded
         ]
     case types.REMOVE_SELECTION:
-        const elements2Remove = action.elements.map(s => s.selector)
+        elements2Remove = action.elements.map(s => s.selector)
         return state.filter(sel => {
             return !(elements2Remove.includes(sel.selector) && sel.zone === action.zone)
         })

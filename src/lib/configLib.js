@@ -1,36 +1,36 @@
 import * as d3 from 'd3'
-import dataLib from './dataLib'
+import * as dataLib from './dataLib'
 
-const getSelectedConfig = (config, zone) => {
+export const getSelectedConfig = (config, zone) => {
     return config.matches.filter(m => m.selected === true)[0]
 }
-const getConfigs = (configs, zone) => {
+export const getConfigs = (configs, zone) => {
     return configs.filter(c => c.zone === zone)[0].views
 }
-const getConfig = (configs, zone) => {
+export const getConfig = (configs, zone) => {
     return configs.filter(c => c.zone === zone)[0].views.filter(v => v.selected)[0]
 }
-const getCurrentConfigs = (configs, status) => {
+export const getCurrentConfigs = (configs, status) => {
     if (configs.present[0].status === 'transition') {
         return (status === 'active') ? configs.past[configs.past.length - 1] : configs.present
     } else {
         return configs.present
     }
 }
-const getViewDef = (views, id) => {
+export const getViewDef = (views, id) => {
     // console.log(views, id)
     return views.filter(c => c.id === id)[0] || {}
 }
-const inRange = (val, range) => {
+export const inRange = (val, range) => {
     return (val >= range[0] && val <= range[1])
 }
-const underRange = (val, range) => {
+export const underRange = (val, range) => {
     return (val < range[0])
 }
-const overRange = (val, range) => {
+export const overRange = (val, range) => {
     return (val > range[1])
 }
-const getDeviationCost = (min, max, optimal, score) => {
+export const getDeviationCost = (min, max, optimal, score) => {
     if (!optimal || (!min && !max)) return 0
     const gapMin = (min) ? optimal[0] - min : null
     const gapMax = (max) ? max - optimal[1] : null
@@ -52,6 +52,7 @@ const scoreProp = (prop, constraint) => {
     // et eventuellement si la prop peut avoir plusieurs valeurs pour une meme instance (specifier dans la vue si c'est souhaite)
     const maxscore = 1
     let cost = 0
+    const { min, max, optimal } = constraint.unique
     switch (prop.category) {
     case 'datetime':
         // repartition
@@ -62,7 +63,6 @@ const scoreProp = (prop, constraint) => {
         break
     case 'text':
         // the closer to the optimal range, the better
-        const { min, max, optimal } = constraint.unique
         cost = getCost(prop.unique, min, max, optimal, maxscore)
         break
     default:
@@ -83,10 +83,10 @@ const scoreMatch = (match, entrypointFactor) => {
     // bonus for each property represented
     score += 0.3 * match.length
     score *= coverage / 10
-    // domain rules to add values for some properties : TO DO 
+    // domain rules to add values for some properties : TO DO
     return score * entrypointFactor
 }
-const findAllMatches = (inputList, addList) => {
+export const findAllMatches = (inputList, addList) => {
     return inputList.map(match => {
         // console.log('match', match)
         return addList.map(addElt => {
@@ -100,92 +100,104 @@ const findAllMatches = (inputList, addList) => {
         return a.concat(b)
     }, [])
 }
-const defineConfigs = (views, stats) => {
+export const defineConfigs = (views, stats) => {
     const configSetUp = views.map(view => {
         let propList = []
-        // make a list of all possible properties for each constrained prop zone
-        view.constraints.forEach(constraintSet => {
-            let propSet = []
-            stats.statements.forEach(prop => {
-                constraintSet.forEach(constraint => {
-                    // generic conditions
-                    if ((prop.category === constraint.category) &&
-                    (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
-                    (!constraint.unique.min || (constraint.unique.min && (prop.unique > constraint.unique.min))) &&
-                    (!constraint.unique.max || (constraint.unique.max && prop.unique < constraint.unique.max))
-                    ) {
-                        propSet.push({
-                            ...prop,
-                            score: scoreProp(prop, constraint)
-                        })
-                    }
-                })
-            })
-            propList.push(propSet.sort((a, b) => {
-                return b.score - a.score
-            }))
-        })
-        // find all possible combinations
-        let matches = propList[0].map(prop => [prop])
-        // console.log(matches, propList)
-        if (propList.length > 1 && propList[1].length > 0) {
-            for (let i = 1; i < propList.length; i++) {
-                matches = findAllMatches(matches, propList[i])
-            }
-        }
-        // console.log(matches, propList)
-        // remove combinations where a mandatory prop is missing
-        // or where latitude and longitude are not coordinated
-        matches = matches.filter(match => {
-            let missingProp = false
-            let geo = []
-            match.forEach((prop, index) => {
-                missingProp = ((prop.path === '') && (!view.constraints[index][0].optional))
-                if (prop.category === 'geo') geo.push(prop.subcategory)
-            })
-            let validgeo = (geo.length === 0 || (geo.length === 1 && geo[0] === 'name') || (geo[0] === 'latitude' && geo[1] === 'longitude') )
-            let unique = new Set(match.map(m => m.property))
-            return !missingProp && unique.size === match.length && validgeo
-        })
-        // if the view is supposed to display each entity
-        let entrypointFactor = 1
         if (view.entrypoint) {
-            const { min, max, optimal } = view.entrypoint
-            if (!inRange(stats.totalInstances, [min, max])) {
-                // will result in each score being 0, so discard the view
-                entrypointFactor = 0
-            } else {
-                // will higher each score
-                entrypointFactor += getCost(stats.totalInstances, min, max, optimal, 0.3)
-            }
+            if (view.entrypoint.min > stats.selectionInstances || view.entrypoint.max < stats.selectionInstances) return { matches: [] }
         }
-        // remove combinations where a mandatory prop is missing
-        let scoredMatches = matches.map(match => {
+        if (stats.selectionInstances === 1) {
             return {
-                properties: match,
-                entrypointFactor,
-                score: scoreMatch(match, entrypointFactor) /*,
-                entrypoint: (view.entrypoint !== undefined) */
+                ...view,
+                matches: view.allProperties ? stats.statements.sort((a, b) => {
+                    return b.level - a.level
+                }) : []
             }
-        })
-        // sort by score and return
-        return {
-            ...view,
-            matches: scoredMatches.sort((a, b) => {
-                return b.score - a.score
+        } else {
+            // make a list of all possible properties for each constrained prop zone
+            view.constraints.forEach(constraintSet => {
+                let propSet = []
+                stats.statements.forEach(prop => {
+                    constraintSet.forEach(constraint => {
+                        // generic conditions
+                        if ((prop.category === constraint.category || constraint.category === '*') &&
+                        (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
+                        (!constraint.unique.min || (constraint.unique.min && (prop.unique >= constraint.unique.min && stats.selectionInstances >= constraint.unique.min))) &&
+                        (!constraint.unique.max || (constraint.unique.max && prop.unique <= constraint.unique.max))
+                        ) {
+                            propSet.push({
+                                ...prop,
+                                score: scoreProp(prop, constraint)
+                            })
+                        }
+                    })
+                })
+                propList.push(propSet.sort((a, b) => {
+                    return b.score - a.score
+                }))
             })
+            if (propList.length === 0 || propList[0].length === 0) return { matches: [] }
+            // find all possible combinations
+            let matches = propList[0].map(prop => [prop])
+            if (propList.length > 1 && propList[1].length > 0) {
+                for (let i = 1; i < propList.length; i++) {
+                    matches = findAllMatches(matches, propList[i])
+                }
+            }
+            // console.log(matches, propList)
+            // remove combinations where a mandatory prop is missing
+            // or where latitude and longitude are not coordinated
+            matches = matches.filter(match => {
+                let missingProp = false
+                let geo = []
+                match.forEach((prop, index) => {
+                    missingProp = ((prop.path === '') && (!view.constraints[index][0].optional))
+                    if (prop.category === 'geo') geo.push(prop.subcategory)
+                })
+                let validgeo = (geo.length === 0 || (geo.length === 1 && geo[0] === 'name') || (geo[0] === 'latitude' && geo[1] === 'longitude'))
+                let unique = new Set(match.map(m => m.property))
+                return !missingProp && unique.size === match.length && validgeo && match.length === view.constraints.length
+            })
+            if (matches.length === 0) return { matches }
+
+            // if the view is supposed to display each entity
+            let entrypointFactor = 1
+            if (view.entrypoint) {
+                const { min, max, optimal } = view.entrypoint
+                if (optimal) {
+                    // will higher each score
+                    entrypointFactor += getCost(stats.totalInstances, min, max, optimal, 0.3)
+                }
+            }
+            // remove combinations where a mandatory prop is missing
+            let scoredMatches = matches.map(match => {
+                return {
+                    properties: match,
+                    entrypointFactor,
+                    score: scoreMatch(match, entrypointFactor) /*,
+                    entrypoint: (view.entrypoint !== undefined) */
+                }
+            })
+            // sort by score and return
+            return {
+                ...view,
+                matches: scoredMatches.sort((a, b) => {
+                    return b.score - a.score
+                })
+            }
         }
     })
         .filter(view => view.matches.length > 0)
         .sort((a, b) => {
             return b.matches[0].score - a.matches[0].score
         })
+    if (configSetUp.matches) console.log('salut la config', configSetUp.matches.map(p => p.fullPath))
     return [
         { zone: 'main', views: [...configSetUp] },
         { zone: 'aside', views: [...configSetUp] }
     ]
 }
-const activateDefaultConfigs = (configs) => {
+export const activateDefaultConfigs = (configs) => {
     // console.log('activateDefaultConfigs', configs)
     return configs.map((config, cIndex) => {
         return {
@@ -200,8 +212,8 @@ const activateDefaultConfigs = (configs) => {
                         selectedMatchIndex = 0
                     } else {
                         selectedMatchIndex = 1
-                        // would be interesting to check that properties for the second choice are different, 
-                        // if possible, from those of the first choice 
+                        // would be interesting to check that properties for the second choice are different,
+                        // if possible, from those of the first choice
                     }
                 }
                 return {
@@ -219,7 +231,8 @@ const activateDefaultConfigs = (configs) => {
     })
 }
 
-const getPropsLists = (configs, zone, labels) => {
+export const getPropsLists = (configs, zone, dataset) => {
+    const { labels, prefixes } = dataset
     const maxPropIndex = d3.max(configs.matches.map(m => m.properties.length))
     return Array.from(Array(maxPropIndex).keys()).map(propIndex => {
         return configs.matches
@@ -227,7 +240,7 @@ const getPropsLists = (configs, zone, labels) => {
             .map(config => {
                 return {
                     path: config.properties[propIndex].path,
-                    readablePath: dataLib.getReadablePathsParts(config.properties[propIndex].path, labels),
+                    readablePath: dataLib.getReadablePathsParts(config.properties[propIndex].path, labels, prefixes),
                     selected: config.selected
                 }
             }).reduce((configAcc, config) => {
@@ -246,7 +259,7 @@ const getPropsLists = (configs, zone, labels) => {
     })
 }
 
-const selectProperty = (config, zone, propIndex, path) => {
+export const selectProperty = (config, zone, propIndex, path) => {
     let selectedMatch = getSelectedConfig(config, zone)
     // console.log(config, zone, selectedMatch)
     let possibleConfigs = config.matches.map((match, index) => {
@@ -285,7 +298,7 @@ const selectProperty = (config, zone, propIndex, path) => {
     }
 }
 
-const selectView = (id, configs) => {
+export const selectView = (id, configs) => {
     return configs.map(config => {
         return {
             ...config,
@@ -299,19 +312,3 @@ const selectView = (id, configs) => {
         }
     })
 }
-
-exports.activateDefaultConfigs = activateDefaultConfigs
-exports.defineConfigs = defineConfigs
-exports.findAllMatches = findAllMatches
-exports.getConfig = getConfig
-exports.getConfigs = getConfigs
-exports.getCurrentConfigs = getCurrentConfigs
-exports.getDeviationCost = getDeviationCost
-exports.getPropsLists = getPropsLists
-exports.getSelectedConfig = getSelectedConfig
-exports.getViewDef = getViewDef
-exports.inRange = inRange
-exports.overRange = overRange
-exports.selectProperty = selectProperty
-exports.selectView = selectView
-exports.underRange = underRange

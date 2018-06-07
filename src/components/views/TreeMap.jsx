@@ -1,5 +1,5 @@
+import PropTypes from 'prop-types'
 import React from 'react'
-import * as d3 from 'd3'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 // components
@@ -8,15 +8,13 @@ import Header from '../elements/Header'
 import History from '../elements/History'
 import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
-import PropSelector from '../elements/PropSelector'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import d3TreeMap from '../../d3/d3TreeMap'
+import TreeMapLayout from '../../d3/TreeMapLayout'
 // libs
 import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
-import { deduplicate, getAxis, getLegend, getThresholdsForLegend, groupTextData, groupTimeData, nestData } from '../../lib/dataLib'
-import { getQuantitativeColors } from '../../lib/paletteLib'
-import scaleLib, { getDimensions } from '../../lib/scaleLib'
+import { deduplicate, nestData } from '../../lib/dataLib'
+import { getDimensions, getZoneCoord } from '../../lib/scaleLib'
 // redux functions
 import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
@@ -36,71 +34,57 @@ class TreeMap extends React.Component {
             selectElements: this.selectElements,
             handleMouseUp: this.handleMouseUp
         }
+        this.prepareData(props)
     }
-
-    componentWillMount () {
-        this.prepareData(this.props)
-    }
-    componentWillUpdate (nextProps, nextState) {
+    shouldComponentUpdate (nextProps, nextState) {
         if (!shallowEqual(this.props, nextProps)) {
             this.prepareData(nextProps)
         }
-    }
-    shouldComponentUpdate (nextProps, nextState) {
         return !shallowEqual(this.props, nextProps)
     }
-
     prepareData (nextProps) {
-        const { config, configs, data, dataset, display, getPropPalette, palettes, role, zone } = nextProps
+        const { config, data, dataset, getPropPalette, palettes, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedConfig(config, zone)
 
-        // First prop 
+        // First prop
         const nestedProp1 = nestData(deduplicate(data, ['prop1']), [{
             propName: 'prop1',
             category: 'text'
         }])
 
-        const propsLists = getPropsLists(config, zone, dataset.labels)
+        const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
+        const propsLists = getPropsLists(config, zone, dataset)
 
-        const displayedInstances = nestedProp1.reduce((acc, cur) => {
-            cur.values.forEach(val => {
-                acc += Number(val.countprop1.value)
-            })
-            
-            return acc
-        }, 0)
         // console.log(nestedProp1)
         // Save to reuse in render
         this.customState = {
             ...this.customState,
-            displayedInstances,
+            color,
             selectedConfig,
             nestedProp1,
-            //legend,
-            //nestedProp2,
             propsLists
         }
     }
     handleMouseDown (e) {
         const { display, zone } = this.props
-        this.props.handleMouseDown(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
+        this.props.handleMouseDown(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
     }
     handleMouseMove (e) {
         const { display, zone } = this.props
-        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
+        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = d3TreeMap.getElementsInZone(this.refs.TreeMap, this.props)
+        const elements = this.layout.getElementsInZone(this.props)
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
     render () {
         const { legend, propsLists } = this.customState
-        const { data, config, display, role, selections, step, zone } = this.props
-        const coreDimensions = getDimensions('core', display.zones[zone], display.viz)
+        const { config, dimensions, display, role, selections, step, zone } = this.props
         return (<g className = { `TreeMap ${this.customState.elementName} role_${role}` } >
+            { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
@@ -108,10 +92,11 @@ class TreeMap extends React.Component {
                 handleMouseMove = { this.handleMouseMove }
                 handleMouseUp = { this.handleMouseUp }
             />
+            }
             { step !== 'changing' &&
             <g
-                transform = { `translate(${coreDimensions.x}, ${coreDimensions.y})` }
-                ref = "TreeMap"
+                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
+                ref = {(c) => { this[this.customState.elementName] = c }}
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.handleMouseDown }
@@ -153,7 +138,7 @@ class TreeMap extends React.Component {
     }
 
     selectElements (prop, value, category) {
-        const elements = d3TreeMap.getElements(this.refs.TreeMap, prop, value, category)
+        const elements = this.layout.getElements(prop, value, category)
         // console.log(prop, value, elements, category)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
@@ -165,14 +150,29 @@ class TreeMap extends React.Component {
     }
 
     componentDidMount () {
-        d3TreeMap.create(this.refs.TreeMap, { ...this.props, ...this.customState })
+        this.layout = new TreeMapLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentDidUpdate () {
-        d3TreeMap.update(this.refs.TreeMap, { ...this.props, ...this.customState })
+        this.layout.update(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
     componentWillUnmount () {
-        d3TreeMap.destroy(this.refs.TreeMap, { ...this.props, ...this.customState })
+        this.layout.destroy(this[this.customState.elementName])
     }
+}
+
+TreeMap.propTypes = {
+    config: PropTypes.object,
+    data: PropTypes.array,
+    dimensions: PropTypes.object,
+    display: PropTypes.object,
+    selections: PropTypes.array,
+    role: PropTypes.string,
+    step: PropTypes.string,
+    zone: PropTypes.string,
+    handleMouseDown: PropTypes.func,
+    handleMouseMove: PropTypes.func,
+    handleMouseUp: PropTypes.func,
+    select: PropTypes.func
 }
 
 function mapStateToProps (state) {

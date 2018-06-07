@@ -1,12 +1,14 @@
-import * as types from '../constants/ActionTypes'
+import types from '../constants/ActionTypes'
 
 const initialState = {
-    endpoint: 'http://localhost:8890/sparql', //'http://wilda.lri.fr:3030/nobel/sparql', // 'http://localhost:8890/sparql', //  'http://localhost:8890/sparql', // , //    'http://slickmem.data.t-mus.org/sparql'
-    entrypoint: 'http://xmlns.com/foaf/0.1/Person', // 'http://xmlns.com/foaf/0.1/Document', // 'http://www.w3.org/2004/02/skos/core#Concept', // 'http://data.nobelprize.org/terms/Laureate', //'http://xmlns.com/foaf/0.1/Person', // //'http://www.ica.org/standards/RiC/ontology#Place', ////, //  'http://xmlns.com/foaf/0.1/Person' //, // 'nobel:Laureate',  //  'nobel:LaureateAward',
-    defaultGraph: 'http://localhost:8890/data10', // 'urn:piaaf:siaf', // null, // ,
-    constraints: '', // '?entrypoint <http://data.nobelprize.org/terms/year> ?year . filter (?year > 1980)',
+    endpoint: 'http://bnf.lri.fr:8890/sparql',
+    // 'http://eventmedia.eurecom.fr/sparql', //'http://bnf.lri.fr:8890/sparql'
+    entrypoint: '',
+    defaultGraph: 'http://nobel.bnf.fr',
+    // null,  'http://localhost:8890/data10', 'http://data10.bnf.fr', 'http://data01.bnf.fr','http://data.bnf.fr',
+    constraints: '',
     forceUpdate: false,
-    maxLevel: 5,
+    maxLevel: 4,
     resources: [],
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',
@@ -41,7 +43,7 @@ const initialState = {
         ore: 'http://www.openarchives.org/ore/terms/',
         rdagroup1elements: 'http://rdvocab.info/Elements/',
         rdagroup2elements: 'http://rdvocab.info/ElementsGr2/',
-        rdarelationships: 'http://rdvocab.info/RDARelationshipsWEMI',
+        rdarelationships: 'http://rdvocab.info/RDARelationshipsWEMI/',
         schemaorg: 'http://schema.org/',
         blt: 'http://www.bl.uk/schemas/bibliographic/blterms#', // t-mus
         event: 'http://purl.org/NET/c4dm/event.owl#',

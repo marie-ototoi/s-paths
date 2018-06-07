@@ -1,7 +1,7 @@
-import * as types from '../constants/ActionTypes'
+import types from '../constants/ActionTypes'
 import { ActionCreators } from 'redux-undo'
 
-const jump = (dispatch) => (newIndex, oldIndex) => {
+export const jump = (dispatch) => (newIndex, oldIndex) => {
     if (newIndex > oldIndex) {
         dispatch(ActionCreators.jumpToFuture(newIndex - oldIndex - 1))
     } else if (newIndex < oldIndex) {
@@ -11,5 +11,3 @@ const jump = (dispatch) => (newIndex, oldIndex) => {
         type: types.RESET_UNIT_DIMENSIONS
     })
 }
-
-exports.jump = jump

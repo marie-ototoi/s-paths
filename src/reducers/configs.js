@@ -1,4 +1,4 @@
-import * as types from '../constants/ActionTypes'
+import types from '../constants/ActionTypes'
 
 const initialConfig = [
     { zone: 'main', views: [] },
@@ -8,7 +8,7 @@ const initialConfig = [
 const configstatus = (state, action) => {
     switch (action.type) {
     case types.END_TRANSITION:
-        //console.log('END_TRANSITION')
+        // console.log('END_TRANSITION')
         if (action.zone === state.zone) {
             return {
                 ...state,

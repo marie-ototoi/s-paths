@@ -1,8 +1,9 @@
-import * as types from '../constants/ActionTypes'
+import types from '../constants/ActionTypes'
 
 const defaultState = [
     {
         id: 'Timeline',
+        thumb : '/images/timeline.svg',
         entrypoint: { min: 2, max: 1000, optimal: [4, 200] },
         constraints: [
             [
@@ -14,6 +15,7 @@ const defaultState = [
             [
                 {
                     category: 'text',
+                    avg: { max: 30, optimal: [10, 20] },
                     unique: { min: 2, max: 50, optimal: [4, 6] }
                 },
                 {
@@ -21,7 +23,6 @@ const defaultState = [
                     subcategory: 'name',
                     unique: { min: 2, max: 50, optimal: [4, 6] }
                 }
-                
             ]/* ,
             [
                 {
@@ -38,6 +39,7 @@ const defaultState = [
     },
     {
         id: 'HeatMap',
+        thumb : '/images/heatmap.svg',
         constraints: [
             [
                 {
@@ -46,25 +48,27 @@ const defaultState = [
                 },
                 {
                     category: 'text',
+                    avg: { max: 50, optimal: [10, 40] },
                     unique: { min: 2, max: 150 }
                 }
             ],
             [
                 {
                     category: 'text',
-                    unique: { min: 2, max: 50, optimal: [6, 15] }
+                    unique: { min: 2, max: 50, optimal: [10, 40] }
                 }
             ]
         ]
     },
     {
         id: 'TreeMap',
+        thumb : '/images/treemap.svg',
         constraints: [
             [
                 {
                     category: 'text',
                     hierarchical: true,
-                    avg: { max: 100, optimal: [30, 50] },
+                    avg: { max: 50, optimal: [10, 40] },
                     unique: { min: 5, max: 40, optimal: [10, 30] }
                 },
                 {
@@ -76,9 +80,23 @@ const defaultState = [
                 }
             ]
         ]
-    }/*,
+    },
+    {
+        id: 'URIWheel',
+        thumb : '/images/uriwheel.svg',
+        constraints: [
+            [
+                {
+                    category: 'uri',
+                    avg: { max: 120, optimal: [30, 70] },
+                    unique: { min: 25, max: 150, optimal: [50, 100] }
+                }
+            ]
+        ]
+    },
     {
         id: 'GeoMap',
+        thumb : '/images/geomap.svg',
         constraints: [
             [
                 {
@@ -103,14 +121,14 @@ const defaultState = [
                 }
             ]
         ]
-    }*/
+    }
 ]
 
 const view = (state = {}, action) => {
+    let relevantProps = state.stats
     switch (action.type) {
     case types.SELECT_VIEWS:
         // for each prop, check if it fits the constraints
-        let relevantProps = state.stats
         return {
             ...state,
             relevantProps
