@@ -25,6 +25,9 @@ stages:
 Assets:
   <<: *node
   stage: build
+  artifacts:
+    paths:
+      - public
 
 # Test stage
 # -> Run each independent test script in parallel
