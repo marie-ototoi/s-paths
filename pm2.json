@@ -1,0 +1,8 @@
+{
+  "name": "discover",
+  "script": "app.js",
+  "instances": "2",
+   "env_production" : {
+    "NODE_ENV": "production"
+   }
+}

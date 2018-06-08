@@ -1,21 +1,69 @@
-image: node:9.11-jessie
+# https://docs.gitlab.com/ce/ci/yaml/README.html
 
-before_script:
-  - npm install
-
-cache:
-    paths:
-    - node_modules/
-
-#services:
-#  - mongo:3.2-jessie
+stages:
+  - build
+  - test
+  - deploy
   
-job_build:
-  stage: build
-  script:
-    - npm run build
+services:
+ - docker:dind
 
-job_test:
+# Environment templates
+# -> Describe common environments to run stages
+
+.node: &node
+  image: node:9
+  before_script:
+    - npm install
+  script: npm run $CI_JOB_STAGE
+  # This folder is cached between builds
+  # https://docs.gitlab.com/ce/ci/yaml/README.html#cache
+  cache:
+    paths:
+      - node_modules/
+
+# Build stage
+# -> Run script to build any artifact needed by the application
+
+Assets:
+  <<: *node
+  stage: build
+  artifacts:
+    paths:
+      - public
+
+# Test stage
+# -> Run each independent test script in parallel
+
+UT:
+  <<: *node
   stage: test
+
+#E2E:
+#  <<: *node
+#  stage: test
+#  script: npm run e2e
+
+# Deploy stage
+# -> Automate deployment and may provide continuous deployment
+
+#Production:
+#  <<: *node
+#  stage: deploy
+#  script:
+#  only:
+#    - master
+#  when: manual
+#  environment:
+#    name: production
+#    url: https://example.com
+
+build_docker:
+  tags:
+   - docker
   script:
-    - npm test
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
+    - docker build -t registry.gitlab.inria.fr/ilda-semantic/discover .
+    - docker push registry.gitlab.inria.fr/ilda-semantic/discover:latest
+  only:
+   - master

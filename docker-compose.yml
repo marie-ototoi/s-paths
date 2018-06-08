@@ -1,0 +1,20 @@
+version: "3.5"
+services:
+  mongo:
+    image: mongo:3.7
+    container_name: discover_mongo
+    restart: on-failure
+    ports:
+     - "27017:27107"
+    network_mode: "host"
+  discover:
+    image: registry.gitlab.inria.fr/ilda-semantic/discover:latest
+    container_name: discover_server
+    command: ["npm", "start"]
+#    environment:
+#     - NODE_ENV="production"
+    ports:
+     - "5000:5000"
+    depends_on:
+     - "mongo"
+    network_mode: "host"
