@@ -338,12 +338,12 @@ export const prepareSinglePropData = (data, category) => {
 }
 
 export const prepareDetailData = (data, dataset) => {
-    console.log('prepare only once', data.length)
+    // console.log('prepare only once', data.length)
     let { entrypoint, labels, prefixes } = dataset
     let newData = []
     newData.push(d3.nest().key(prop => prop.entrypoint.value).entries(data).map(prop => prop.key))
     let maxLevel = Number(data.sort((a, b) => Number(b.level.value) - Number(a.level.value))[0].level.value)
-    console.log(maxLevel)
+    // console.log(maxLevel)
     for (let i = 1; i <= maxLevel; i++) {
         let filtered = data
             .filter(d => Number(d.level.value) === i)
@@ -434,7 +434,7 @@ export const deduplicate = (data, props) => {
 }
 
 export const getTransitionElements = (originElements, targetElements, originConfig, targetSelectedView, deltaData, zone) => {
-    console.log('before', zone, originElements, targetElements, originConfig, targetSelectedView, deltaData)
+    // console.log('before', zone, originElements, targetElements, originConfig, targetSelectedView, deltaData)
     deltaData = deltaData.map(data => {
         let indexOrigin = getDeltaIndex(data, originElements, { entrypoint: originConfig.entrypoint, isTarget: false })
         let indexTarget = getDeltaIndex(data, targetElements, { entrypoint: targetSelectedView.entrypoint, isTarget: true })

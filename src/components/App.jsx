@@ -57,37 +57,37 @@ class App extends React.PureComponent {
                 this.setState({ [`${zone}_origin`]: elements })
             }
             if (this.state[`${zone}_step`] === 'done' && status === 'active') {
-                console.log('4 - c est fini, on peut faire un reset ?', zone, this.state)
+                // console.log('4 - c est fini, on peut faire un reset ?', zone, this.state)
                 this.setState({ [`${zone}_step`]: 'active', [`${zone}_target`]: null })
             }
         } else if (role === 'target') {
-            console.log('transition target laid out', zone, role, elements)
+            // console.log('transition target laid out', zone, role, elements)
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_target`])) {
-                console.log('2 - ON CHANGE, les elements sont modifies ', zone, elements)
+                // console.log('2 - ON CHANGE, les elements sont modifies ', zone, elements)
                 let transitionElements 
                 if (elements.length > 0) {
                     transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getSelectedView(getCurrentConfigs(configs, 'active'), zone), getSelectedView(getCurrentConfigs(configs, 'transition'), zone), getResults(data, zone, 'delta'), zone)
                 } else {
                     transitionElements = { origin:this.state[`${zone}_origin`], target: [] }
                 }
-                console.log(transitionElements)
+                // console.log(transitionElements)
                 this.setState({ [`${zone}_target`]: elements, [`${zone}_transition`]: transitionElements, [`${zone}_step`]: 'changing' })
             }
         }
     }
     handleEndTransition (zone) {
-        console.log('3 - transition ended', zone)
+        // console.log('3 - transition ended', zone)
         this.setState({ [`${zone}_step`]: 'done', [`${zone}_target`]: [] })
         if (!this.props.configs.future.length > 0) this.props.endTransition(zone)
     }
     UNSAFE_componentWillUpdate (nextProps, nextState) {
         // console.log('foutu ?', getCurrentState(this.props.data, 'main'), getCurrentState(nextProps.data, 'main'))
         if (getCurrentState(this.props.data, 'main') === 'active' && getCurrentState(nextProps.data, 'main') === 'transition') {
-            console.log('1 - ON LANCE main')
+            // console.log('1 - ON LANCE main')
             this.setState({ [`main_step`]: 'launch' })
         }
         if (getCurrentState(this.props.data, 'aside') === 'active' && getCurrentState(nextProps.data, 'aside') === 'transition') {
-            console.log('1 - ON LANCE aside')
+            // console.log('1 - ON LANCE aside')
             this.setState({ [`aside_step`]: 'launch' })
         }
     }

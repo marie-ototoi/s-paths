@@ -80,13 +80,13 @@ const data = (state = initialState, action) => {
     case types.SET_RESOURCES:
         // if data are already set, make a transition
         action.status = (state[0].statements.results) ? 'transition' : 'active'
-        console.log('ok on a recu les data', action.status, action)
+        // console.log('ok on a recu les data', action.status, action)
         return state.map(dz => datazone(dz, action))
     case types.SET_DETAIL:
         // if data are already set, make a transition
         return state.map(dz => datadetail(dz, action))
     case types.END_TRANSITION:
-        console.log('en transition')
+        // console.log('en transition')
         return state.map(dz => datastatus(dz, action))
     default:
         return state
