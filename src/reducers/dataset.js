@@ -1,10 +1,10 @@
 import types from '../constants/ActionTypes'
 
 const initialState = {
-    endpoint: 'http://bnf.lri.fr:8890/sparql',
-    // 'http://eventmedia.eurecom.fr/sparql', //'http://bnf.lri.fr:8890/sparql'
+    endpoint: 'http://localhost:8890/sparql',
+    // 'http://eventmedia.eurecom.fr/sparql', //'http://bnf.lri.fr:8890/sparql','http://localhost:8890/sparql',
     entrypoint: '',
-    defaultGraph: 'http://nobel.bnf.fr',
+    defaultGraph: 'http://localhost:8890/nobel',
     // null,  'http://localhost:8890/data10', 'http://data10.bnf.fr', 'http://data01.bnf.fr','http://data.bnf.fr',
     constraints: '',
     forceUpdate: false,
@@ -63,20 +63,25 @@ const dataset = (state = initialState, action) => {
             ...state
         }
     case types.SET_STATS:
+    case types.SET_CONFIGS:
         return {
             ...state,
-            stats: action.stats,
-            entrypoint: action.entrypoint,
-            prefixes: action.prefixes,
-            labels: action.labels,
-            constraints: action.constraints
+            labels: action.labels || state.labels,
+            constraints: action.constraints || state.constraints,
+            totalInstances: action.totalInstances || state.totalInstances,
+            stats: action.stats || state.stats,
+            prefixes: action.prefixes || state.prefixes,
+            entrypoint: action.entrypoint || state.entrypoint
         }
     case types.SET_RESOURCES:
         return {
             ...state,
-            entrypoint: action.resources[0].type,
-            totalInstances: action.resources[0].total,
-            resources: action.resources
+            resources: action.resources,
+            stats: action.stats || state.stats,
+            labels: action.labels || state.labels,
+            entrypoint: action.entrypoint,
+            prefixes: action.prefixes || state.prefixes,
+            constraints: action.constraints
         }
     case types.SET_DATA:
         return {

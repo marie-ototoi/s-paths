@@ -7,3 +7,9 @@ h1 span {
     font-weight: normal;
     color: #777;
 }
+.Header .propSelector p {
+    font-size: 1.5em;
+}
+.Header .propSelector select {
+    margin-top: 18px;
+}

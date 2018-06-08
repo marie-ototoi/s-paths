@@ -1,6 +1,4 @@
-import types from '../constants/ActionTypes'
-
-const defaultState = [
+export const views = [
     {
         id: 'Timeline',
         thumb : '/images/timeline.svg',
@@ -123,53 +121,15 @@ const defaultState = [
         ]
     },
     {
-        id: 'ListAllProps',
-        thumb : '/images/listprop.svg',
-        entrypoint: { min: 1, max: 100, optimal: [1, 40] },
-        constraints: [
-            [
-                {
-                    category: '*',
-                    unique: { min: 1 }
-                }
-            ]
-        ]
-    },
-    {
         id: 'SingleProp',
-        thumb : '/images/listprop.svg',
+        thumb : '/images/singleprop.svg',
         constraints: [
             [
                 {
                     category: '*',
-                    unique: { min: 1 }
+                    unique: { }
                 }
             ]
         ]
     }
 ]
-
-const view = (state = {}, action) => {
-    let relevantProps = state.stats
-    switch (action.type) {
-    case types.SELECT_VIEWS:
-        // for each prop, check if it fits the constraints
-        return {
-            ...state,
-            relevantProps
-        }
-    default:
-        return state
-    }
-}
-
-const views = (state = defaultState, action) => {
-    switch (action.type) {
-    case types.SELECT_VIEWS:
-        return state.map(v => view(v, action))
-    default:
-        return state
-    }
-}
-
-export default views

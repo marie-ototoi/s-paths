@@ -312,15 +312,42 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
     }, [])
 }
 
+export const prepareSinglePropData = (data, category) => {
+    data = d3.nest().key(prop => prop.prop1.value).entries(data)
+        .map(d => d.key)
+        .reduce((acc, cur) => {
+            if (cur) {
+                if (acc[cur]) {
+                    acc[cur] ++
+                } else {
+                    acc[cur] = 1
+                }
+            }
+            return acc
+        }, {})
+    let newData = []
+    for (let d in data) {
+        if (category === 'uri') {
+            let split = queryLib.getSplitUri(d)
+            newData.push({ value: d, root: split.root, name: split.name, count: data[d] })
+        } else {
+            newData.push({ value: d, name: d, count: data[d] })
+        }
+    }
+    return newData
+}
+
 export const prepareDetailData = (data, dataset) => {
+    console.log('prepare only once', data.length)
     let { entrypoint, labels, prefixes } = dataset
     let newData = []
     newData.push(d3.nest().key(prop => prop.entrypoint.value).entries(data).map(prop => prop.key))
-    let maxLevel = data.sort((a, b) => b.level - a.level)[0].level
+    let maxLevel = Number(data.sort((a, b) => Number(b.level.value) - Number(a.level.value))[0].level.value)
+    console.log(maxLevel)
     for (let i = 1; i <= maxLevel; i++) {
         let filtered = data
-            .filter(d => d.level === i)
-            .reduce((acc, cur)=>{
+            .filter(d => Number(d.level.value) === i)
+            .reduce((acc, cur,m)=>{
                 let fullPath = `<${entrypoint}>/`
                 for(let j = 1; j <= i; j++) {
                     fullPath = fullPath.concat(`<` + cur[`path${j}`].value + `>/*/`)
@@ -406,11 +433,11 @@ export const deduplicate = (data, props) => {
     }, [])
 }
 
-export const getTransitionElements = (originElements, targetElements, originConfig, targetConfig, deltaData, zone) => {
-    // console.log('before', zone, originElements, targetElements, originConfig, targetConfig, deltaData)
+export const getTransitionElements = (originElements, targetElements, originConfig, targetSelectedView, deltaData, zone) => {
+    console.log('before', zone, originElements, targetElements, originConfig, targetSelectedView, deltaData)
     deltaData = deltaData.map(data => {
         let indexOrigin = getDeltaIndex(data, originElements, { entrypoint: originConfig.entrypoint, isTarget: false })
-        let indexTarget = getDeltaIndex(data, targetElements, { entrypoint: targetConfig.entrypoint, isTarget: true })
+        let indexTarget = getDeltaIndex(data, targetElements, { entrypoint: targetSelectedView.entrypoint, isTarget: true })
         return {
             indexOrigin,
             indexTarget,
@@ -418,7 +445,7 @@ export const getTransitionElements = (originElements, targetElements, originConf
         }
     })
     // console.log(deltaData)
-    if (!originConfig.entrypoint) {
+    if (!originConfig.entrypoint && originElements.length > 0) {
         originElements = splitTransitionElements(originElements, 'origin', zone, deltaData)
     } else {
         originElements = originElements.map(el => {
@@ -429,7 +456,7 @@ export const getTransitionElements = (originElements, targetElements, originConf
             }
         })
     }
-    if (!targetConfig.entrypoint) {
+    if (!targetSelectedView.entrypoint && targetElements.length > 0) {
         targetElements = splitTransitionElements(targetElements, 'target', zone, deltaData)
     } else {
         targetElements = targetElements.map(el => {

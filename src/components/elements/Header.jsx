@@ -12,7 +12,7 @@ class Header extends React.PureComponent {
         // const { x, y, width, height } = dimensions
         // console.log(dataset.resources)
         return (
-            <g>
+            <g className = "Header">
                 <PropSelector
                     type = "header"
                     selected = { false }

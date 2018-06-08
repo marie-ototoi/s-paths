@@ -140,10 +140,10 @@ class URIWheelLayout extends AbstractLayout {
             {x: 0, y: 0},
             {x: 36, y: -168},
             {x: 202, y: -42},
-            {x: 272, y: 2},
-            {x: 283, y:85},
-            {x: 303, y:208},
-            {x: 201, y:232}
+            {x: 271, y: 14},
+            {x: 283, y:86},
+            {x: 310, y:225},
+            {x: 227, y:312}
         ]
 
         d3.select(this.el).selectAll('.radius')

@@ -25,13 +25,14 @@ const configstatus = (state, action) => {
 const configzone = (state, action) => {
     switch (action.type) {
     case types.SET_CONFIGS:
+    case types.SET_RESOURCES:
     case types.SET_STATS:
-        if (action[state.zone]) {
+        if (action[state.zone + 'Config']) {
             // except at first load a new config is always a transition
             let status = (state.views[0]) ? 'transition' : 'active'
             return {
                 ...state,
-                views: action[state.zone] || state.views,
+                views: action[state.zone + 'Config'],
                 status
             }
         } else {
@@ -64,8 +65,9 @@ const configzone = (state, action) => {
 const configs = (state = initialConfig, action) => {
     switch (action.type) {
     case types.SET_CONFIGS:
-    case types.SET_STATS:
     case types.SET_CONFIG:
+    case types.SET_RESOURCES:
+    case types.SET_STATS:
         return state.map(dz => configzone(dz, action))
     case types.END_TRANSITION:
         return state.map(dz => configstatus(dz, action))

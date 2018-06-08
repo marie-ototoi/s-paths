@@ -7,34 +7,29 @@ import PropSelector from '../elements/PropSelector'
 import { getConfigs, getCurrentConfigs } from '../../lib/configLib'
 import { getDimensions } from '../../lib/scaleLib'
 
-import { loadData, selectView } from '../../actions/dataActions'
+import { selectView } from '../../actions/dataActions'
 
 class Nav extends React.PureComponent {
     render () {
-        const { config, configs, dataset, display, offset, zone } = this.props
+        const { config, configs, dataset, display, zone } = this.props
         // console.log(propsLists)
         const activeConfigs = getConfigs(getCurrentConfigs(configs, 'active'), zone)
         const dimensions = getDimensions('nav', display.zones[zone], display.viz, { x:0, y:10, width: 0, height: 0 })
         const { x, y, width, height } = dimensions
-        // console.log(activeConfigs)
-        const itemWidth = width / 6
-
+        // console.log(dataset)
         return (<g className = "Nav"
             transform = { `translate(${x}, ${y})` }
             ref = { `nav_${zone}` }
         >
-            <foreignObject                 
+            <foreignObject
                 width = { width }
                 height = { height }
             >
-           
                 { activeConfigs.map((option, i) => {
                     let selected = (config.id === option.id)
-                    
                     return <span
                         key = { zone + '_thumb_' + i }
-                        style = {{ minWidth: '65px',minHeight: '45px', display: 'inline-block' }}
-                        
+                        style = {{ minWidth: '65px',minHeight: '35px', display: 'inline-block' }}
                     >
                         <a
                             className = { selected ? "button is-info is-active" : "button is-light has-background-grey-light is-active" }
@@ -45,13 +40,13 @@ class Nav extends React.PureComponent {
                     </span>
                 }) }
             </foreignObject>            
-            { config.constraints.map((prop, i) => {
+            { this.props.propsLists.length > 0 && config.constraints.map((prop, i) => {
                 return <PropSelector
                     selected = { true }
                     key = { zone + '_propselector_' + i }
                     propList = { this.props.propsLists[i] }
                     config = { config }
-                    dimensions = { { x: 0, y: 60 + (i * 25), width: width - 20, height: 50 } }
+                    dimensions = { { x: 0, y: 80 + (i * 25), width: width - 20, height: 50 } }
                     propIndex = { i }
                     zone = { zone }
                 />
@@ -83,7 +78,6 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
-        loadData: loadData(dispatch),
         selectView: selectView(dispatch)
     }
 }

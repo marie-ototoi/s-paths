@@ -2,6 +2,7 @@ import express from 'express'
 import pathModel from '../models/path'
 import { getPropsLabels } from '../src/lib/labelLib'
 import * as queryLib from '../src/lib/queryLib'
+import { views } from './views'
 // import { error } from 'util';
 
 const router = express.Router()
@@ -77,14 +78,14 @@ const getStats = async (opt) => {
 
         // last parameter is for first time query, should be changed dynamically
         // get human readable rdfs:labels and rdfs:comments of all properties listed
-        let newlabels = (labels.length > 0) ? labels : await getPropsLabels(paths.options.prefixes, paths.statements)
+        let newlabels = await getPropsLabels(paths.options.prefixes, paths.statements)
         return {
             statements: paths.statements.sort((a, b) => a.level - b.level),
             totalInstances,
             selectionInstances,
             options: {
                 ...paths.options,
-                labels: newlabels
+                labels: [...labels, ...newlabels]
             }
         }
     }
@@ -212,7 +213,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 // console.log('c', level, i, elementsToSlice, maxRequests)
             }
         }
-        propsWithStats = queryLib.mergeStatsWithProps(newCategorizedProps, countStats, typeStats, totalInstances)
+        propsWithStats = queryLib.mergeStatsWithProps(newCategorizedProps, countStats, typeStats, selectionInstances)
         // console.log('|||||| stop tout bon')
         propsWithStats = propsWithStats.map(prop => {
             // the place to create or fetch a prefix if it does not exist, needed to make the path in defineGroup

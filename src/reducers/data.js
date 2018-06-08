@@ -9,12 +9,15 @@ const initialState = [
 const datazone = (state, action) => {
     switch (action.type) {
     case types.SET_DATA:
+    case types.SET_CONFIGS:
+    case types.SET_RESOURCES:
+    case types.SET_STATS:
         if (action[state.zone] && action[state.zone].results) {
             return {
                 ...state,
                 statements: action[state.zone],
                 status: action.status,
-                deltaStatements: action[state.zone + 'Delta'],
+                deltaStatements: action[state.zone + 'Delta'] || {},
                 displayed: action[state.zone + 'Displayed']
             }
         } else {
@@ -32,7 +35,6 @@ const datadetail = (state, action) => {
         if (action.zone === state.zone) {
             if (action.elements.results.bindings) {
                 newbindings = action.elements.results.bindings.map(el => { return { ...el, level: action.level } })
-                console.log(newbindings)
                 detailStatements = {
                     ...action.elements,
                     results: {
@@ -73,13 +75,18 @@ const datastatus = (state, action) => {
 const data = (state = initialState, action) => {
     switch (action.type) {
     case types.SET_DATA:
+    case types.SET_CONFIGS:
+    case types.SET_STATS:
+    case types.SET_RESOURCES:
         // if data are already set, make a transition
         action.status = (state[0].statements.results) ? 'transition' : 'active'
+        console.log('ok on a recu les data', action.status, action)
         return state.map(dz => datazone(dz, action))
     case types.SET_DETAIL:
         // if data are already set, make a transition
         return state.map(dz => datadetail(dz, action))
     case types.END_TRANSITION:
+        console.log('en transition')
         return state.map(dz => datastatus(dz, action))
     default:
         return state

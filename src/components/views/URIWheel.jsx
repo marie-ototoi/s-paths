@@ -12,7 +12,7 @@ import SelectionZone from '../elements/SelectionZone'
 // d3
 import URIWheelLayout from '../../d3/URIWheelLayout'
 // libs
-import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
+import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
 import { deduplicate, nestData } from '../../lib/dataLib'
 import * as scaleLib from '../../lib/scaleLib'
 // redux functions
@@ -45,7 +45,7 @@ class URIWheel extends React.Component {
     prepareData (nextProps) {
         const { config, data, dataset, getPropPalette, palettes, zone } = nextProps
         // prepare the data for display
-        const selectedConfig = getSelectedConfig(config, zone)
+        const selectedConfig = getSelectedMatch(config, zone)
         // First prop
         const nestedProp1 = nestData(deduplicate(data, ['prop1']), [{
             propName: 'prop1',

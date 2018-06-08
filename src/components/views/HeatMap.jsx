@@ -14,7 +14,7 @@ import SelectionZone from '../elements/SelectionZone'
 // d3
 import HeatMapLayout from '../../d3/HeatMapLayout'
 // libs
-import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
+import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
 import { getAxis, getLegend, getThresholdsForLegend, nestData } from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
 import { getDimensions, getZoneCoord } from '../../lib/scaleLib'
@@ -48,7 +48,7 @@ class HeatMap extends React.Component {
     prepareData (nextProps) {
         const { config, data, dataset, zone } = nextProps
         // prepare the data for display
-        const selectedConfig = getSelectedConfig(config, zone)
+        const selectedConfig = getSelectedMatch(config, zone)
 
         // First prop to be displayed in the bottom axis
         let categoryProp1 = selectedConfig.properties[0].category

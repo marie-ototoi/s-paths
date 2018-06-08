@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
 import AbstractLayout from './AbstractLayout'
-import * as dataLib from '../lib/dataLib'
+// import * as dataLib from '../lib/dataLib'
 import * as selectionLib from '../lib/selectionLib'
 
 class GeoMapLayout extends AbstractLayout {

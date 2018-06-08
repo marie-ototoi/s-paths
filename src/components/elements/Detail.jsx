@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 import formatMessage from 'format-message'
-import { getReadablePathsParts, prepareDetailData } from '../../lib/dataLib'
+import { prepareDetailData } from '../../lib/dataLib'
 import { hideDetail } from '../../actions/displayActions'
 
 class Detail extends React.PureComponent {
@@ -21,8 +21,6 @@ class Detail extends React.PureComponent {
         const { dataset, dimensions, elements, zone } = this.props
         let details = elements.length > 0 ? prepareDetailData(elements, dataset) : [[]]
         const { x, y, width, height } = dimensions
-        console.log(details)
-
         return (<g
             className = "Detail"
             transform = { `translate(${x}, ${y})` }
@@ -44,12 +42,7 @@ class Detail extends React.PureComponent {
                                     key = { `tab_${zone}_${i}` }
                                     onMouseUp = { () => this.setState({ selectedIndex: i }) }
                                 ><a>
-                                        { (i === 0) ? `entities` : formatMessage(`{ level, plural,
-                                            =1 {1st}
-                                            =2 {2nd}
-                                            =3 {3rd}
-                                            other {#th}
-                                        } level`, {
+                                        { (i === 0) ? `entities` : formatMessage(`{ level } level`, {
                                             level: i
                                         })
                                         }
@@ -59,15 +52,22 @@ class Detail extends React.PureComponent {
                         </ul>
                     </div>
                     <div className = "content">
-                        { details[this.state.selectedIndex].map((el, i) => (<p key = { `contenttab_${zone}_${i}` }  className = "is-clipped is-size-7" style = {{ 'maxHeight': 4.3 + 'em' }}>
-                            <strong>{ (this.state.selectedIndex === 0) ? '' : 
-                                el.readablePath.map((part, index) => {
-                                    return <span key = { `${this.state.elementName}_path_${index}` }>
-                                        <span title = { part.comment }>&nbsp;{part.label} </span> { (index < el.readablePath.length - 1) ? '/' : '' }
-                                    </span>
-                                }) }</strong> 
-                            <span>{ (this.state.selectedIndex === 0) ? el : el[`prop${(this.state.selectedIndex)}`].map(v => `${v.value}${(v.count > 1) ? ' (' + v.count + '), ' : ', '}`)}</span>
-                        </p>)) }
+                        { (this.state.selectedIndex > 0) &&
+                            details[this.state.selectedIndex].map((el, i) => (<p key = { `contenttab_${zone}_${i}` }  className = "is-clipped is-size-7" style = {{ 'maxHeight': 4.3 + 'em' }}>
+                                <strong>{ (this.state.selectedIndex === 0) ? '' : 
+                                    el.readablePath.map((part, index) => {
+                                        return <span key = { `${this.state.elementName}_path_${index}` }>
+                                            <span title = { part.comment }>&nbsp;{part.label} </span> { (index < el.readablePath.length - 1) ? '/' : '' }
+                                        </span>
+                                    }) }</strong> 
+                                <span>{ (this.state.selectedIndex === 0) ? el : el[`prop${(this.state.selectedIndex)}`].map(v => `${v.value}${(v.count > 1) ? ' (' + v.count + '), ' : ', '}`)}</span>
+                            </p>)) 
+                        }
+                        { (this.state.selectedIndex === 0) &&
+                            details[this.state.selectedIndex].map((el, i) => (<span key = { `contenttab_${zone}_${i}` }  className = "is-size-7">
+                                {el + ', '} 
+                            </span>))
+                        }
                     </div>
                 </div>
             </foreignObject>

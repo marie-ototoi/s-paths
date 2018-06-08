@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { loadData, selectProperty } from '../../actions/dataActions'
+import { selectResource, selectProperty } from '../../actions/dataActions'
 
 class PropSelector extends React.PureComponent {
     constructor (props) {
@@ -20,7 +20,7 @@ class PropSelector extends React.PureComponent {
         })
         let requestedProp = propList[e.target.value]
         if (this.props.type === 'header') {
-            this.props.loadData({ ...dataset, entrypoint: requestedProp.path, totalInstances: requestedProp.total, constraints: `` }, views, configs, {})
+            this.props.selectResource({ ...dataset, entrypoint: requestedProp.path, totalInstances: requestedProp.total, constraints: `` }, views)
         } else {
             this.props.selectProperty(propIndex, requestedProp.path, config, dataset, zone)
         }
@@ -88,7 +88,7 @@ PropSelector.propTypes = {
     type: PropTypes.string,
     views: PropTypes.array,
     zone: PropTypes.string,
-    loadData: PropTypes.func,
+    selectResource: PropTypes.func,
     selectProperty: PropTypes.func
 }
 
@@ -104,7 +104,7 @@ function mapStateToProps (state) {
 function mapDispatchToProps (dispatch) {
     return {
         selectProperty: selectProperty(dispatch),
-        loadData: loadData(dispatch)
+        selectResource: selectResource(dispatch)
     }
 }
 

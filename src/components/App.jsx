@@ -3,21 +3,23 @@ import React from 'react'
 import { connect } from 'react-redux'
 // components
 import Detail from './elements/Detail'
+import GeoMap from './views/GeoMap'
 import HeatMap from './views/HeatMap'
+import ListAllProps from './views/ListAllProps'
+import SingleProp from './views/SingleProp'
 import Timeline from './views/Timeline'
 import TreeMap from './views/TreeMap'
-import GeoMap from './views/GeoMap'
 import URIWheel from './views/URIWheel'
 import Transition from './elements/Transition'
 import Debug from './Debug'
 // libs
 import { getDimensions, getScreen } from '../lib/scaleLib'
 import { areLoaded, getCurrentState, getResults, getTransitionElements } from '../lib/dataLib'
-import { getConfig, getCurrentConfigs } from '../lib/configLib'
+import { getSelectedView, getCurrentConfigs } from '../lib/configLib'
 import * as selectionLib from '../lib/selectionLib'
 // redux actions
 import { setDisplay } from '../actions/displayActions'
-import { endTransition, loadData, loadResources } from '../actions/dataActions'
+import { endTransition, loadResources } from '../actions/dataActions'
 
 class App extends React.PureComponent {
     constructor (props) {
@@ -31,25 +33,19 @@ class App extends React.PureComponent {
         this.state = {
             main_step: 'active',
             aside_step: 'active',
-            main_target: [],
-            main_origin: [],
-            aside_target: [],
-            aside_origin: [],
-            main_transition: [],
+            main_target: null,
+            main_origin: null,
+            aside_target: null,
+            aside_origin: null,
+            main_transition: null,
             aside_transition: []
         }
     }
     componentDidMount () {
         this.onResize()
-        const { configs, dataset, views } = this.props
+        const { dataset, views } = this.props
         // this is where it all starts
-        this.props.loadResources(dataset)
-            .then(resources => {
-                dataset.entrypoint = resources[0].type
-                dataset.totalInstances = resources[0].total
-                this.props.loadData(dataset, views, configs, {})
-            })
-            .catch(e => console.error('Error fetching data from app', e))
+        this.props.loadResources(dataset, views)
     }
     handleTransition (props, elements) {
         const { role, status, zone } = props
@@ -61,31 +57,37 @@ class App extends React.PureComponent {
                 this.setState({ [`${zone}_origin`]: elements })
             }
             if (this.state[`${zone}_step`] === 'done' && status === 'active') {
-                // console.log('4 - c est fini, on peut faire un reset ?', zone, this.state)
-                this.setState({ [`${zone}_step`]: 'active' })
+                console.log('4 - c est fini, on peut faire un reset ?', zone, this.state)
+                this.setState({ [`${zone}_step`]: 'active', [`${zone}_target`]: null })
             }
-        } else if (role === 'target' && elements.length > 0) {
-            // console.log('transition target laid out', zone, role)
+        } else if (role === 'target') {
+            console.log('transition target laid out', zone, role, elements)
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_target`])) {
-                // console.log('2 - ON CHANGE, les elements sont modifies ', zone)
-                let transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getConfig(getCurrentConfigs(configs, 'active'), zone), getConfig(getCurrentConfigs(configs, 'transition'), zone), getResults(data, zone, 'delta'), zone)
+                console.log('2 - ON CHANGE, les elements sont modifies ', zone, elements)
+                let transitionElements 
+                if (elements.length > 0) {
+                    transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getSelectedView(getCurrentConfigs(configs, 'active'), zone), getSelectedView(getCurrentConfigs(configs, 'transition'), zone), getResults(data, zone, 'delta'), zone)
+                } else {
+                    transitionElements = { origin:this.state[`${zone}_origin`], target: [] }
+                }
+                console.log(transitionElements)
                 this.setState({ [`${zone}_target`]: elements, [`${zone}_transition`]: transitionElements, [`${zone}_step`]: 'changing' })
             }
         }
     }
     handleEndTransition (zone) {
-        // console.log('3 - transition ended', zone)
+        console.log('3 - transition ended', zone)
         this.setState({ [`${zone}_step`]: 'done', [`${zone}_target`]: [] })
         if (!this.props.configs.future.length > 0) this.props.endTransition(zone)
     }
     UNSAFE_componentWillUpdate (nextProps, nextState) {
         // console.log('foutu ?', getCurrentState(this.props.data, 'main'), getCurrentState(nextProps.data, 'main'))
         if (getCurrentState(this.props.data, 'main') === 'active' && getCurrentState(nextProps.data, 'main') === 'transition') {
-            // console.log('1 - ON LANCE main')
+            console.log('1 - ON LANCE main')
             this.setState({ [`main_step`]: 'launch' })
         }
         if (getCurrentState(this.props.data, 'aside') === 'active' && getCurrentState(nextProps.data, 'aside') === 'transition') {
-            // console.log('1 - ON LANCE aside')
+            console.log('1 - ON LANCE aside')
             this.setState({ [`aside_step`]: 'launch' })
         }
     }
@@ -95,7 +97,7 @@ class App extends React.PureComponent {
         // console.log('env', env)
         // console.log('mode', mode)
         // console.log('display', display)
-        // console.log('views', views)
+        // console.log('views', this.props.views)
         // console.log('dataset', this.props.dataset)
         // console.log('configs', configs)
         // console.log('data', data)
@@ -105,22 +107,26 @@ class App extends React.PureComponent {
             'Timeline': Timeline,
             'TreeMap': TreeMap,
             'GeoMap': GeoMap,
-            'URIWheel': URIWheel
+            'URIWheel': URIWheel,
+            'ListAllProps': ListAllProps,
+            'SingleProp': SingleProp
         }
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')
         const statusAside = getCurrentState(this.props.data, 'aside')
-        const mainConfig = getConfig(getCurrentConfigs(configs, 'active'), 'main')
+        const mainConfig = getSelectedView(getCurrentConfigs(configs, 'active'), 'main')
         // console.log(getCurrentConfigs(configs, 'transition'))
-        const mainTransitionConfig = getConfig(getCurrentConfigs(configs, 'transition'), 'main')
+        const mainTransitionConfig = getSelectedView(getCurrentConfigs(configs, 'transition'), 'main')
         const MainComponent = mainConfig ? componentIds[mainConfig.id] : ''
         const MainTransitionComponent = mainTransitionConfig ? componentIds[mainTransitionConfig.id] : ''
-        const asideConfig = getConfig(getCurrentConfigs(configs, 'active'), 'aside')
-        const asideTransitionConfig = getConfig(getCurrentConfigs(configs, 'transition'), 'aside')
+        const asideConfig = getSelectedView(getCurrentConfigs(configs, 'active'), 'aside')
+        const asideTransitionConfig = getSelectedView(getCurrentConfigs(configs, 'transition'), 'aside')
         const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
         const SideTransitionComponent = asideTransitionConfig ? componentIds[asideTransitionConfig.id] : ''
         const coreDimensionsMain = getDimensions('core', display.zones['main'], display.viz)
         const coreDimensionsAside = getDimensions('core', display.zones['aside'], display.viz)
+        // console.log( getResults(data, 'aside', 'active') )
+        // console.log( this.state.main_step)
         // to do : avoid recalculate transition data at each render
         return (<div
             className = "view"
@@ -146,7 +152,7 @@ class App extends React.PureComponent {
                         dimensions = { coreDimensionsMain }
                         data = { getResults(data, 'main', 'transition') }
                         // coverage = { getResults(data, 'main', 'coverage') }
-                        config = { getConfig(getCurrentConfigs(configs, 'transition'), 'main') }
+                        config = { getSelectedView(getCurrentConfigs(configs, 'transition'), 'main') }
                         selections = { selectionLib.getSelections(selections, 'main', 'transition') }
                         ref = {(c) => { this.refMainTransition = c }}
                         handleTransition = { this.handleTransition }
@@ -194,7 +200,7 @@ class App extends React.PureComponent {
                         dimensions = { coreDimensionsAside }
                         data = { getResults(data, 'aside', 'transition') }
                         // coverage = { getResults(data, 'aside', 'coverage') }
-                        config = { getConfig(getCurrentConfigs(configs, 'transition'), 'aside') }
+                        config = { getSelectedView(getCurrentConfigs(configs, 'transition'), 'aside') }
                         selections = { selectionLib.getSelections(selections, 'aside', 'transition') }
                         ref = {(c) => { this.refAsideTransition = c }}
                         handleTransition = { this.handleTransition }
@@ -263,7 +269,6 @@ App.propTypes = {
     zone: PropTypes.string,
     endTransition: PropTypes.func.isRequired,
     handleTransition: PropTypes.func,
-    loadData: PropTypes.func.isRequired,
     loadResources: PropTypes.func.isRequired,
     setDisplay: PropTypes.func.isRequired
 }
@@ -282,7 +287,6 @@ function mapStateToProps (state) {
 function mapDispatchToProps (dispatch) {
     return {
         endTransition: endTransition(dispatch),
-        loadData: loadData(dispatch),
         loadResources: loadResources(dispatch),
         setDisplay: setDisplay(dispatch)
     }

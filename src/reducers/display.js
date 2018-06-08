@@ -151,10 +151,14 @@ const display = (state = defaultState, action) => {
             aside: {
                 origin: state.unitDimensions.aside.origin,
                 target: (action.resetUnitDimensions === 'all' || (action.resetUnitDimensions === 'zone' && action.zone === 'aside')) ? null : state.unitDimensions.aside.target
-            }
+            },
         }
         return {
             ...state,
+            detail: {
+                main: (action.zone === 'main') ? false : state.detail.main,
+                aside: (action.zone === 'aside') ? false : state.detail.aside
+            },
             unitDimensions
         }
     }
@@ -198,7 +202,6 @@ const display = (state = defaultState, action) => {
         }
     }
     case types.HIDE_DETAIL: {
-        console.log(action.zone)
         return {
             ...state,
             detail: {

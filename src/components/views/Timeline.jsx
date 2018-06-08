@@ -15,7 +15,7 @@ import SelectionZone from '../elements/SelectionZone'
 // d3
 import TimelineLayout from '../../d3/TimelineLayout'
 // libs
-import { getPropsLists, getSelectedConfig } from '../../lib/configLib'
+import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
 import { deduplicate, getAxis, getLegend, nestData } from '../../lib/dataLib'
 import { getDimensions, getZoneCoord } from '../../lib/scaleLib'
 // redux functions
@@ -49,7 +49,7 @@ class Timeline extends React.Component {
     prepareData (nextProps) {
         const { data, config, dataset, getPropPalette, palettes, zone } = nextProps
         // prepare the data for display
-        const selectedConfig = getSelectedConfig(config, zone)
+        const selectedConfig = getSelectedMatch(config, zone)
         // First prop to be displayed in the bottom axis
         let maxUnitsPerYear
         const nestedProp1 = nestData(data, [{

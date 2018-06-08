@@ -134,6 +134,11 @@ const getPropName = (uri) => {
     return uri.replace(root, '')
 }
 
+export const getSplitUri = (uri) => {
+    const root = getRoot(uri)
+    return { root, name: uri.replace(root, '') }
+}
+
 export const getRoot = (uri) => {
     if (uri.slice(-1) === '/') uri = uri.slice(0, uri.length - 1)
     const splitSlash = uri.split('/')
@@ -313,7 +318,7 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
     let orderList = unique ? `` : `ORDER BY `
     const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     if (maxDepth) {
-        propList = `?entrypoint ?path1 ?prop1 `
+        propList = `DISTINCT ?entrypoint ?path1 ?prop1 ?level `
         if (!unique) groupList = groupList.concat(`?prop1 `)
         defList = `?entrypoint rdf:type <${entrypoint}> .
         OPTIONAL { ?entrypoint ?path1 ?prop1 .
@@ -331,9 +336,10 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
             
         }
         orderList = orderList.concat(`?prop${maxDepth} `)
+        defList = defList.concat(`BIND (${maxDepth} as ?level) . `)
         defList = defList.concat(`}`)
     } else {
-        let selectedConfig = configLib.getSelectedConfig(configZone, zone)
+        let selectedConfig = configLib.getSelectedMatch(configZone)
         // console.log(selectedConfig)
     
         let properties = selectedConfig.properties
@@ -348,7 +354,7 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
                 // deactivate retrieval of hierarchy between concepts
                 // hierarchical = prop.category === 'text' ? 'previous' : 'last'
             }
-            if( !unique) {
+            if (!unique) {
                 propList = propList.concat(`?prop${index} `)
                 if (hierarchical) propList = propList.concat(`?directlink `)
                 orderList = orderList.concat(`?prop${index} `)
@@ -417,7 +423,7 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
     let defList = ``
     let orderList = ``
     if (!config.allProperties) {
-        let selectedConfig = configLib.getSelectedConfig(config, zone)
+        let selectedConfig = configLib.getSelectedMatch(config, zone)
         selectedConfig.properties.forEach((prop, index) => {
             if (prop.path !== '') {
                 index += 1
@@ -444,7 +450,7 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
     propList.concat((newConfig.entrypoint && !config.entrypoint) ? `?entrypoint ` : ``)
     groupList.concat((newConfig.entrypoint && !config.entrypoint) ? `?entrypoint ` : ``)
     if(!newConfig.allProperties) {
-        let newSelectedConfig = configLib.getSelectedConfig(newConfig, zone)
+        let newSelectedConfig = configLib.getSelectedMatch(newConfig, zone)
         newSelectedConfig.properties.forEach((prop, index) => {
             if (prop.path !== '') {
                 index += 1

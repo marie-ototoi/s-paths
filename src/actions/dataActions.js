@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import types from '../constants/ActionTypes'
-import { activateDefaultConfigs, defineConfigs, getConfig, getSelectedConfig, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
-import { getData, makeQuery, makeTransitionQuery } from '../lib/queryLib'
+import { activateDefaultConfigs, defineConfigs, getSelectedView, getSelectedMatch, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
+import { getData, makePropQuery, makeQuery, makeTransitionQuery } from '../lib/queryLib'
 
 export const endTransition = (dispatch) => (zone) => {
     return dispatch({
@@ -33,109 +33,218 @@ const getResources = (options) => {
         .then((resp) => resp.json())
 }
 
-export const loadData = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
-    // console.log('load Data ', dataset.constraints)
-    let { constraints, endpoint, entrypoint, prefixes } = dataset
-    let newOptions
-    if (constraints !== '') dataset.forceUpdate = false
-    getStats({ ...dataset, stats: [] })
-        .then(stats => {
-            return new Promise((resolve, reject) => {
-                if (stats.totalInstances === 0) {
-                    reject(new Error('no_results'))
-                } else {
-                    entrypoint = stats.options.entrypoint
-                    prefixes = stats.options.prefixes
-                    // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
-                    // for each views, checks which properties ou sets of properties could match and evaluate
-                    let configs = activateDefaultConfigs(defineConfigs(views, stats))
-                    dispatch({
-                        type: types.SET_STATS,
-                        stats,
-                        entrypoint: stats.options.entrypoint,
-                        prefixes: stats.options.prefixes,
-                        labels: stats.options.labels,
-                        constraints: stats.options.constraints,
-                        main: configs[0].views,
-                        aside: configs[1].views
-                    })
-                    newOptions = {
-                        ...dataset,
-                        entrypoint: stats.options.entrypoint,
-                        prefixes: stats.options.prefixes,
-                        constraints: stats.options.constraints,
-                        selectionInstances: stats.selectionInstances
-                    }
-                    resolve(configs)
+const evaluateSubStats = (stats) => {
+    let { selectionInstances, totalInstances, statements } = stats
+    let ratio = selectionInstances / totalInstances
+    return {
+        ...stats,
+        statements: statements.map(statement => {
+            return {
+                ...statement,
+                total: Math.floor(statement.total * ratio),
+                unique: Math.floor(statement.unique * ratio)
+            }
+        })
+    }
+}
+
+const checkStatements = (statements, selectionInstances, dataset) => {
+    return Promise.all(statements.map(prop => {
+        let propQuery = makePropQuery(prop, dataset, 'count')
+        return getData(dataset.endpoint, propQuery, dataset.prefixes)
+    }))
+        .then((results) => {
+            // mix stats and results
+            // add checked property
+            
+            let checked = {}
+            statements.forEach((prop, index) => {
+                let countStat = results[index].results.bindings[0]
+                // console.log('countStat', countStat.total.value, countStat.unique.value, countStat.coverage.value, selectionInstances)
+                checked[prop.fullPath] = {
+                    ...prop,
+                    total: Number(countStat.total.value),
+                    unique: Number(countStat.unique.value),
+                    coverage: Number(countStat.coverage.value) * 100 / selectionInstances
                 }
             })
+            return checked
         })
-        .then(configs => {
-            const configMain = getConfig(configs, 'main')
-            const queryMain = makeQuery(entrypoint, configMain, 'main', dataset)
-            const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
-            // const coverageQueryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, prop1only: true })
-            const configAside = getConfig(configs, 'aside')
-            const queryAside = makeQuery(entrypoint, configAside, 'aside', dataset)
-            const queryAsideUnique = makeQuery(entrypoint, configAside, 'aside', { ...dataset, unique: true })
-            // const coverageQueryAside = makeQuery(entrypoint, configAside, 'aside', { ...dataset, prop1only: true })
-            let mainPromise = getData(endpoint, queryMain, prefixes)
-            let asidePromise = (queryMain === queryAside) ? null : getData(endpoint, queryAside, prefixes)
-            let deltaMainPromise
-            let deltaAsidePromise
-            let totalMainPromise = (newOptions.selectionInstances === 1) ? { results: { bindings: [ { displayed: { value: 1 } } ] } } : getData(endpoint, queryMainUnique, prefixes)
-            let totalAsidePromise = (newOptions.selectionInstances === 1) ? { results: { bindings: [ { displayed: { value: 1 } } ] } } : getData(endpoint, queryAsideUnique, prefixes)
-            if (previousConfigs.length > 0) {
-                const previousConfigMain = getConfig(previousConfigs, 'main')
-                const previousConfigAside = getConfig(previousConfigs, 'aside')
-                let queryTransitionMain = makeTransitionQuery(configMain, newOptions, previousConfigMain, previousOptions, 'main')
-                deltaMainPromise = getData(endpoint, queryTransitionMain, prefixes)
-                let queryTransitionAside = makeTransitionQuery(configAside, newOptions, previousConfigAside, previousOptions, 'aside')
-                deltaAsidePromise = (queryTransitionMain === queryTransitionAside) ? null : getData(endpoint, queryTransitionAside, prefixes)
-                // console.log('queryTransitionMain', queryTransitionMain)
-                // console.log('queryTransitionAside', queryTransitionAside)
-            } else {
-                deltaMainPromise = {}
-                deltaAsidePromise = {}
+}
+
+const checkFirstValidConfigs = (configs, stats, dataset) => {
+    // console.log(configs)
+    let propsToCheck = []
+    let matchesToCheck = {}
+    let views = configs[0].views
+    let double = []
+    let newStats
+    for (let i = 0; i < views.length; i++) {
+        views[i].matches[0].properties.forEach(prop => {
+            if (!double.includes(prop.fullPath)) {
+                propsToCheck.push(prop)
+                double.push(prop)
             }
-            // console.log('queryMain', queryMain)
-            // console.log('coverageQueryMain', coverageQueryMain)
-            // console.log('queryAside', queryAside)
-            // console.log('coverageQueryAside', coverageQueryAside)
-            return Promise.all([
-                mainPromise,
-                asidePromise,
-                deltaMainPromise,
-                deltaAsidePromise,
-                totalMainPromise,
-                totalAsidePromise
-            ])
-                .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside, uniqueMain, uniqueAside]) => { // , coverageMain, coverageAside
-                    dispatch({
-                        type: types.SET_DATA,
-                        main: { ...dataMain },
-                        aside: dataAside ? { ...dataAside } : { ...dataMain },
-                        mainDelta: dataDeltaMain,
-                        asideDelta: dataDeltaAside ? dataDeltaAside : dataDeltaMain,
-                        mainDisplayed: Number(uniqueMain.results.bindings[0].displayed.value),
-                        asideDisplayed: Number(uniqueAside.results.bindings[0].displayed.value)
-                    })
+        })
+        matchesToCheck[views[i].id] = views[i].matches[0].properties
+    }
+    
+    return checkStatements(propsToCheck, stats.selectionInstances, dataset)
+        .then(propsChecked => {
+            newStats = {
+                ...stats,
+                statements: stats.statements.map(prop => {
+                    if (propsChecked[prop.fullPath]) {
+                        return {
+                            ...prop,
+                            ...propsChecked[prop.fullPath],
+                            checked: true
+                        }
+                    } else {
+                        return prop
+                    }
                 })
-                .catch(error => {
-                    console.error('Error getting data main + aside', error)
+            }
+            let newConfigs = defineConfigs(views, newStats)
+            let mainSelected
+            let asideSelected
+            //for (let i = 0; i < newConfigs.length; i++) {
+            for (let i = 0; i < newConfigs[0].views.length; i++) {
+                let check = matchesToCheck[newConfigs[0].views[i].id]
+                if (check) {
+                    for (let j = 0; j < newConfigs[0].views[i].matches.length; j++) {
+                        let match = newConfigs[0].views[i].matches[j].properties
+                        let ok = true
+                        match.forEach((p, index) => {
+                            if (check[index].fullPath !== p.fullPath) ok = false
+                        })
+                        if (ok === true) {
+                            if (!mainSelected) {
+                                mainSelected = true
+                                newConfigs[0].views[i].matches[j].selected = true
+                                for (let k = 0; k < newConfigs[0].views.length; k++) {
+                                    newConfigs[0].views[k].selected = (k === i)
+                                }
+                                if (newConfigs[0].views.length > 1) j++
+                                break
+                            } else if (!asideSelected) {
+                                asideSelected = true
+                                newConfigs[1].views[i].matches[j].selected = true
+                                for (let k = 0; k < newConfigs[1].views.length; k++) {
+                                    newConfigs[1].views[k].selected = (k === i)
+                                }
+                                j = newConfigs[0].views.length
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+            if (!mainSelected || !asideSelected) {
+                for (let i = 0; i < newConfigs[0].views.length; i++) {
+                    if (newConfigs[0].views[i].id === 'ListAllPropss') {
+                        for (let j = 0; j < newConfigs[0].views[i].matches.length; j++) {
+                            let match = newConfigs[0].views[i].matches[j].properties
+                            if (match[0].checked) {
+                                if (!mainSelected) {
+                                    mainSelected = true
+                                    newConfigs[0].views[i].matches[j].selected = true
+                                    for (let k = 0; k < newConfigs[0].views.length; k++) {
+                                        newConfigs[0].views[k].selected = (k === i)
+                                    }
+                                }
+                                if (!asideSelected) {
+                                    asideSelected = true
+                                    newConfigs[1].views[i].matches[j].selected = true
+                                    for (let k = 0; k < newConfigs[1].views.length; k++) {
+                                        newConfigs[1].views[k].selected = (k === i)
+                                    }
+                                }
+                                j = newConfigs[0].views.length
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+            // console.log('la', newConfigs, newStats)
+            return [newConfigs, newStats]
+            // if both main and aside send results
+            // else start from new config keeping checked config if there is one and call recursive
+        })
+}
+
+export const loadSelection = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
+    // console.log('load Data ', dataset.constraints)
+    let { constraints, endpoint, entrypoint, labels, prefixes, stats } = dataset
+    let countInstancesQuery = `SELECT DISTINCT ?entrypoint WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
+    // console.log(countInstancesQuery)
+    getData(endpoint, countInstancesQuery, prefixes)
+        .then(countInstances => {
+            // console.log(countInstances)
+            return new Promise((resolve, reject) => {
+                let selectionInstances = countInstances.results.bindings.length
+                // console.log('selectionInstances', selectionInstances)
+                let configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }))
+                if (selectionInstances === 1) {
+                    resolve([configs, { ...stats, selectionInstances }])
+                } else {
+                    stats = evaluateSubStats({ ...stats, selectionInstances })
+                    // console.log('evaluateSubStats', stats)
+                    // for each views, checks which properties ou sets of properties could match and evaluate
+                    resolve(checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset))
+                }
+            }) 
+                .then(([newConfigs, newStats]) => {
+                    // console.log('then ? ',newConfigs, newStats)
+                    const previousConfigMain = getSelectedView(previousConfigs, 'main')
+                    const previousConfigAside = getSelectedView(previousConfigs, 'aside')
+                    const configMain = getSelectedView(newConfigs, 'main')
+                    // console.log(newConfigs, configMain)
+                    const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
+                    const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
+                    let queryTransitionMain = makeTransitionQuery(configMain, dataset, previousConfigMain, previousOptions, 'main')
+                    const configAside = getSelectedView(newConfigs, 'aside')
+                    const queryAside = makeQuery(entrypoint, configAside, 'aside',  { ...dataset, maxDepth: (configAside.id === 'ListAllProps') ? 1 : null })
+                    const queryAsideUnique = makeQuery(entrypoint, configAside, 'aside', { ...dataset, unique: true })
+                    let queryTransitionAside = makeTransitionQuery(configAside, dataset, previousConfigAside, previousOptions, 'aside')
+
+                    return Promise.all([
+                        getData(endpoint, queryMain, prefixes),
+                        (queryMain === queryAside) ? null : getData(endpoint, queryAside, prefixes),
+                        getData(endpoint, queryTransitionMain, prefixes),
+                        (queryTransitionMain === queryTransitionAside) ? null : getData(endpoint, queryTransitionAside, prefixes),
+                        getData(endpoint, queryMainUnique, prefixes),
+                        (queryMain === queryAside) ? null : getData(endpoint, queryAsideUnique, prefixes)
+                    ])
+                        .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside, uniqueMain, uniqueAside]) => { // , coverageMain, coverageAside
+                            dispatch({
+                                type: types.SET_CONFIGS,
+                                constraints,
+                                main: { ...dataMain },
+                                aside: dataAside ? { ...dataAside } : { ...dataMain },
+                                mainDelta: dataDeltaMain,
+                                asideDelta: dataDeltaAside ? dataDeltaAside : dataDeltaMain,
+                                mainDisplayed: Number(uniqueMain.results.bindings[0].displayed.value),
+                                asideDisplayed: uniqueAside ? Number(uniqueAside.results.bindings[0].displayed.value) : Number(uniqueMain.results.bindings[0].displayed.value),
+                                mainConfig: newConfigs[0].views,
+                                asideConfig: newConfigs[1].views
+                            })
+                        })
                 })
         })
         .catch(error => {
             if (error === 'no_results') return { statements: [] }
-            console.error('Error getting data', error)
+            console.error('Error loading subset data', error)
         })
+            
 }
 
 export const loadDetail = (dispatch) => (dataset, configs, zone) => {
     // console.log('load Detail ', dataset.constraints)
     // would like to use async await rather than imbricated promise but compilation fails
     let { endpoint, entrypoint, maxLevel, prefixes } = dataset
-    const configMain = getConfig(configs, 'main')
+    const configMain = getSelectedView(configs, 'main')
     let queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: 1 } )
     getData(endpoint, queryMain, prefixes)
         .then(data => {
@@ -160,16 +269,110 @@ export const loadDetail = (dispatch) => (dataset, configs, zone) => {
         })   
 }
 
-export const loadResources = (dispatch) => (dataset) => {
+export const loadResources = (dispatch) => (dataset, views) => {
+    let { endpoint, prefixes } = dataset
+    let totalInstances
+    // console.log(dataset)
     return getResources(dataset)
         .then(resources => {
-            dispatch({
-                type: types.SET_RESOURCES,
-                resources
-            })
-            return resources
+            dataset.entrypoint = resources[0].type,
+            dataset.totalInstances = resources[0].total,
+            getStats({ ...dataset, stats: [] })
+                .then(stats => {
+                    prefixes = stats.options.prefixes
+                    // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
+                    // for each views, checks which properties ou sets of properties could match and evaluate
+                    let configs = activateDefaultConfigs(defineConfigs(views, stats))
+                    
+                    const configMain = getSelectedView(configs, 'main')
+                    const queryMain = makeQuery(dataset.entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
+                    const configAside = getSelectedView(configs, 'aside')
+                    const queryAside = makeQuery(dataset.entrypoint, configAside, 'aside', { ...dataset, maxDepth: (configAside.id === 'ListAllProps') ? 1 : null })
+                    const queryMainUnique = makeQuery(dataset.entrypoint, configMain, 'main', { ...dataset, unique: true })
+                    const queryAsideUnique = makeQuery(dataset.entrypoint, configAside, 'aside', { ...dataset, unique: true })
+                    // const coverageQueryAside = makeQuery(entrypoint, configAside, 'aside', { ...dataset, prop1only: true })
+                   
+                    return Promise.all([
+                        getData(endpoint, queryMain, prefixes),
+                        (queryMain === queryAside) ? null : getData(endpoint, queryAside, prefixes),
+                        getData(endpoint, queryMainUnique, prefixes),
+                        (queryMain === queryAside) ? null : getData(endpoint, queryAsideUnique, prefixes)
+                    ])
+                        .then(([dataMain, dataAside, uniqueMainPromise, uniqueAsidePromise]) => { // , coverageMain, coverageAside
+                            // console.log('ok on a bien reçu les promesses')
+                            dispatch({
+                                type: types.SET_RESOURCES,
+                                resources,
+                                stats,
+                                entrypoint: dataset.entrypoint,
+                                totalInstances,
+                                prefixes: stats.options.prefixes,
+                                labels: stats.options.labels,
+                                constraints: '',
+                                mainConfig: configs[0].views,
+                                asideConfig: configs[1].views,
+                                main: { ...dataMain },
+                                aside: dataAside ? { ...dataAside } : { ...dataMain },
+                                mainDisplayed: Number(uniqueMainPromise.results.bindings[0].displayed.value),
+                                asideDisplayed: uniqueAsidePromise ? Number(uniqueAsidePromise.results.bindings[0].displayed.value): Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                            })
+                        })
+                        
+                })
+        })
+        .catch(error => {
+            console.error('Error getting data main + aside', error)
         })
 }
+
+export const selectResource = (dispatch) => (dataset, views) => {
+    let { constraints, endpoint, entrypoint, prefixes, totalInstances } = dataset
+    getStats({ ...dataset, stats: [] })
+        .then(stats => {
+            prefixes = stats.options.prefixes
+            // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
+            // for each views, checks which properties ou sets of properties could match and evaluate
+            let configs = activateDefaultConfigs(defineConfigs(views, stats))
+                            
+            const configMain = getSelectedView(configs, 'main')
+            const queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
+            const configAside = getSelectedView(configs, 'aside')
+            const queryAside = makeQuery(entrypoint, configAside, 'aside', { ...dataset, maxDepth: (configAside.id === 'ListAllProps') ? 1 : null })
+            const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
+            const queryAsideUnique = makeQuery(entrypoint, configAside, 'aside', { ...dataset, unique: true })
+            // const coverageQueryAside = makeQuery(entrypoint, configAside, 'aside', { ...dataset, prop1only: true })
+       
+            return Promise.all([
+                getData(endpoint, queryMain, prefixes),
+                (queryMain === queryAside) ? null : getData(endpoint, queryAside, prefixes),
+                getData(endpoint, queryMainUnique, prefixes),
+                (queryMain === queryAside) ? null : getData(endpoint, queryAsideUnique, prefixes)
+            ])
+                .then(([dataMain, dataAside, uniqueMainPromise, uniqueAsidePromise]) => { // , coverageMain, coverageAside
+                    // console.log('ok on a bien reçu les promesses')
+                    dispatch({
+                        type: types.SET_STATS,
+                        stats,
+                        entrypoint,
+                        totalInstances,
+                        prefixes: stats.options.prefixes,
+                        labels: stats.options.labels,
+                        constraints,
+                        mainConfig: configs[0].views,
+                        asideConfig: configs[1].views,
+                        main: { ...dataMain },
+                        aside: dataAside ? { ...dataAside } : { ...dataMain },
+                        mainDisplayed: Number(uniqueMainPromise.results.bindings[0].displayed.value),
+                        asideDisplayed: uniqueAsidePromise ? Number(uniqueAsidePromise.results.bindings[0].displayed.value): Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                    })
+                })
+                
+        })
+        .catch(error => {
+            console.error('Error getting resource', error)
+        })
+}
+
 
 export const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) => {
     // console.log('select property')
@@ -180,12 +383,12 @@ export const selectProperty = (dispatch) => (propIndex, path, config, dataset, z
         zone,
         config: updatedConfig
     })
-    const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
+    const newQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, maxDepth: (updatedConfig.id === 'ListAllProps') ? 1 : null })
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, config, dataset, zone)
     const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
     // const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
     let reset = (propIndex === 0 ||
-        (propIndex === 1 && getSelectedConfig(config).properties[1].category !== getSelectedConfig(updatedConfig).properties[1].category && (getSelectedConfig(config).properties[1].category === 'datetime' || getSelectedConfig(updatedConfig).properties[1].category === 'datetime')))
+        (propIndex === 1 && getSelectedMatch(config).properties[1].category !== getSelectedMatch(updatedConfig).properties[1].category && (getSelectedMatch(config).properties[1].category === 'datetime' || getSelectedMatch(updatedConfig).properties[1].category === 'datetime')))
     Promise.all([
         getData(endpoint, newQuery, prefixes),
         getData(endpoint, queryTransition, prefixes),
@@ -219,14 +422,15 @@ export const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => 
         zone,
         config: updatedConfig
     })
-    const newQuery = makeQuery(entrypoint, updatedConfig, zone, dataset)
+    const newQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, maxDepth: (updatedConfig.id === 'ListAllProps') ? 1 : null })
     const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, selectedConfig, dataset, zone)
+    // console.log('newQuery', dataset, newQuery)
     // console.log('queryUnique', queryUnique)
-    // console.log('queryTransition', queryTransition)
+    // console.log('selectedConfig', updatedConfig)
     Promise.all([
         getData(endpoint, newQuery, prefixes),
-        getData(endpoint, queryTransition, prefixes),// ,
+        (updatedConfig.id !== 'ListAllProps' && selectedConfig.id !== 'ListAllProps') ? getData(endpoint, queryTransition, prefixes) : null,
         getData(endpoint, queryUnique, prefixes)
     ])
         .then(([newData, newDelta, newUnique]) => {

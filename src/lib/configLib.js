@@ -1,14 +1,18 @@
 import * as d3 from 'd3'
 import * as dataLib from './dataLib'
 
-export const getSelectedConfig = (config, zone) => {
+export const getSelectedMatch = (config) => {
     return config.matches.filter(m => m.selected === true)[0]
 }
 export const getConfigs = (configs, zone) => {
     return configs.filter(c => c.zone === zone)[0].views
 }
-export const getConfig = (configs, zone) => {
+export const getSelectedView = (configs, zone) => {
     return configs.filter(c => c.zone === zone)[0].views.filter(v => v.selected)[0]
+}
+export const getViewByName = (views, name) => {
+    let filtered = views.filter(c => c.id === name)
+    return (filtered.length > 0) ? filtered[0] : null
 }
 export const getCurrentConfigs = (configs, status) => {
     if (configs.present[0].status === 'transition') {
@@ -29,6 +33,9 @@ export const underRange = (val, range) => {
 }
 export const overRange = (val, range) => {
     return (val > range[1])
+}
+export const isMatchValid = (match, config) => {
+    
 }
 export const getDeviationCost = (min, max, optimal, score) => {
     if (!optimal || (!min && !max)) return 0
@@ -76,15 +83,15 @@ const scoreProp = (prop, constraint) => {
     return (score > 0) ? score : 0
 }
 const scoreMatch = (match, entrypointFactor) => {
-    match = match.filter(m => m.score >= 0)
+    match = match.filter(p => p.score >= 0)
     // mean of each property's score
-    let score = match.map(m => m.score).reduce((a, b) => a + b, 0) / match.length
-    let coverage = match.map(m => m.coverage).reduce((a, b) => a + b, 0) / match.length
+    let score = match.map(p => p.score).reduce((a, b) => a + b, 0) / match.length
+    let coverage = match.map(p => isNaN(p.coverage) ? 50 : p.coverage).reduce((a, b) => a + b, 0) / match.length
     // bonus for each property represented
-    score += 0.3 * match.length
+    score += 10 * match.length
     score *= coverage / 10
     // domain rules to add values for some properties : TO DO
-    return score * entrypointFactor
+    return score // * entrypointFactor
 }
 export const findAllMatches = (inputList, addList) => {
     return inputList.map(match => {
@@ -109,8 +116,8 @@ export const defineConfigs = (views, stats) => {
         if (stats.selectionInstances === 1) {
             return {
                 ...view,
-                matches: view.allProperties ? stats.statements.sort((a, b) => {
-                    return b.level - a.level
+                matches: view.id === 'SingleProp' ? stats.statements.sort((a, b) => {
+                    return b.score - a.score
                 }) : []
             }
         } else {
@@ -120,7 +127,8 @@ export const defineConfigs = (views, stats) => {
                 stats.statements.forEach(prop => {
                     constraintSet.forEach(constraint => {
                         // generic conditions
-                        if ((prop.category === constraint.category || constraint.category === '*') &&
+                        if (prop.total > 0 && prop.category !== 'entrypoint' &&
+                        (prop.category === constraint.category || constraint.category === '*') &&
                         (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
                         (!constraint.unique.min || (constraint.unique.min && (prop.unique >= constraint.unique.min && stats.selectionInstances >= constraint.unique.min))) &&
                         (!constraint.unique.max || (constraint.unique.max && prop.unique <= constraint.unique.max))
@@ -166,7 +174,7 @@ export const defineConfigs = (views, stats) => {
                 const { min, max, optimal } = view.entrypoint
                 if (optimal) {
                     // will higher each score
-                    entrypointFactor += getCost(stats.totalInstances, min, max, optimal, 0.3)
+                    entrypointFactor += getCost(stats.selectionInstances, min, max, optimal, 0.3)
                 }
             }
             // remove combinations where a mandatory prop is missing
@@ -230,7 +238,6 @@ export const activateDefaultConfigs = (configs) => {
         }
     })
 }
-
 export const getPropsLists = (configs, zone, dataset) => {
     const { labels, prefixes } = dataset
     const maxPropIndex = d3.max(configs.matches.map(m => m.properties.length))
@@ -258,9 +265,8 @@ export const getPropsLists = (configs, zone, dataset) => {
             }, [])
     })
 }
-
 export const selectProperty = (config, zone, propIndex, path) => {
-    let selectedMatch = getSelectedConfig(config, zone)
+    let selectedMatch = getSelectedMatch(config, zone)
     // console.log(config, zone, selectedMatch)
     let possibleConfigs = config.matches.map((match, index) => {
         let score
@@ -297,7 +303,6 @@ export const selectProperty = (config, zone, propIndex, path) => {
         })
     }
 }
-
 export const selectView = (id, configs) => {
     return configs.map(config => {
         return {

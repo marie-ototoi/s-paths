@@ -3,12 +3,12 @@ import React from 'react'
 import { connect } from 'react-redux'
 import ReactKeymaster from 'react-keymaster'
 
-import { getCurrentConfigs, getSelectedConfig } from '../../lib/configLib'
+import { getCurrentConfigs, getSelectedMatch } from '../../lib/configLib'
 import * as dataLib from '../../lib/dataLib'
 import * as queryLib from '../../lib/queryLib'
 import { getDimensions } from '../../lib/scaleLib'
 
-import { loadData, loadDetail } from '../../actions/dataActions'
+import { loadSelection, loadDetail } from '../../actions/dataActions'
 
 class Coverage extends React.Component {
     constructor (props) {
@@ -21,7 +21,7 @@ class Coverage extends React.Component {
         const { config, configs, dataset, selections, zone } = this.props
         const activeConfigs = getCurrentConfigs(configs, 'active')
         if (selections.length > 0) {
-            const selectedConfig = getSelectedConfig(config, zone)
+            const selectedConfig = getSelectedMatch(config, zone)
             this.props.loadDetail({
                 ...dataset,
                 constraints: queryLib.makeSelectionConstraints(selections, selectedConfig, zone)
@@ -32,13 +32,13 @@ class Coverage extends React.Component {
         const { config, configs, dataset, selections, views, zone } = this.props
         const activeConfigs = getCurrentConfigs(configs, 'active')
         if (selections.length > 0) {
-            const selectedConfig = getSelectedConfig(config, zone)
+            const selectedConfig = getSelectedMatch(config, zone)
             let newConstraints = queryLib.makeSelectionConstraints(selections, selectedConfig, zone)
             let newDataset = {
                 ...dataset,
                 constraints: newConstraints
             }
-            this.props.loadData(newDataset, views, activeConfigs, dataset)
+            this.props.loadSelection(newDataset, views, activeConfigs, dataset)
         }
     }
     handleKeyDown (e) {
@@ -60,11 +60,6 @@ class Coverage extends React.Component {
             { label: 'displayed', total:  dataLib.getNbDisplayed(data, zone, 'active') }/* ,
             { label: 'selected', total: selectedInstances } */
         ]
-        // console.log('render', dataLib.getNbDisplayed(data, zone, 'active'))
-        const itemWidth = width / 6
-        // const itemHeight = itemWidth * 3 / 4
-        const margin = itemWidth / 6
-        // const maxBarWidth = (itemWidth * 3) + (margin * 2)
 
         let selectionDisabled = (selections.length > 0) ?  {} : { 'disabled' : 'disabled' }
         let detailClass = (dataLib.getNbDisplayed(data, zone, 'active') < 1000) ?  { 'className': 'button is-small is-info' } : { 'className': 'button is-info is-small is-invisible' }
@@ -80,10 +75,6 @@ class Coverage extends React.Component {
                 <g>
                     <ReactKeymaster
                         keyName = "enter"
-                        onKeyDown = { this.handleKeyDown }
-                    />
-                    <ReactKeymaster
-                        keyName = "ctrl+enter"
                         onKeyDown = { this.handleKeyDown }
                     />
                 </g>
@@ -103,19 +94,12 @@ class Coverage extends React.Component {
                     }) }
                 </div>
                 <div style = {{ paddingTop: '10px' }}>
-                    <div style = {{ minWidth: '105px',minHeight: '45px', display: 'inline-block' }}>
+                    <div style = {{ minWidth: '105px',minHeight: '30px', display: 'inline-block' }}>
                         <a
                             className = "button is-small is-info"
                             onMouseUp = { this.exploreSelection } 
                             {...selectionDisabled}
                         >Explore [⏎]</a>
-                    </div>
-                    <div style = {{ minWidth: '105px',minHeight: '45px', display: 'inline-block' }}>
-                        <a
-                            {...detailClass}
-                            onMouseUp = { this.detailSelection }
-                            {...selectionDisabled}
-                        >Show detail [Ctrl+⏎]</a>
                     </div>
                 </div>
             </foreignObject>
@@ -134,7 +118,7 @@ Coverage.propTypes = {
     selections: PropTypes.array,
     views: PropTypes.array,
     zone: PropTypes.string,
-    loadData: PropTypes.func,
+    loadSelection: PropTypes.func,
     loadDetail: PropTypes.func,
 }
 
@@ -150,7 +134,7 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
-        loadData: loadData(dispatch),
+        loadSelection: loadSelection(dispatch),
         loadDetail: loadDetail(dispatch)
     }
 }

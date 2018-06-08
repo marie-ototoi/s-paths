@@ -7,8 +7,9 @@
   "scripts": {
     "build": "webpack --config webpack.prod.js --progress --hide-modules",
     "start": "babel-node $NODE_DEBUG_OPTION app --presets env",
+    "start:debug": "npm run start -- --inspect",
     "lint": "eslint --ext .js,.jsx src api models app.js webpack.*.js",
-    "test": "NODE_ENV=test ./node_modules/.bin/mocha --require babel-register test/**/*.js --reporter spec||exit 0", 
+    "test": "NODE_ENV=test ./node_modules/.bin/mocha --require babel-register test/**/*.js --reporter spec||exit 0",
     "coverage": "nyc npm test"
   },
   "engines": {

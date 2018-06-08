@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
+import formatMessage from 'format-message'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 // components
@@ -10,17 +11,18 @@ import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import TreeMapLayout from '../../d3/TreeMapLayout'
+
 // libs
-import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
-import { deduplicate, nestData } from '../../lib/dataLib'
-import { getZoneCoord } from '../../lib/scaleLib'
+import { getSelectedMatch } from '../../lib/configLib'
+import { prepareDetailData } from '../../lib/dataLib'
+import * as scaleLib from '../../lib/scaleLib'
 // redux functions
 import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
 import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
+import { getSplitUri } from '../../lib/queryLib';
 
-class TreeMap extends React.Component {
+class ListAllProps extends React.Component {
     constructor (props) {
         super(props)
         this.handleMouseDown = this.handleMouseDown.bind(this)
@@ -29,61 +31,60 @@ class TreeMap extends React.Component {
         this.selectElement = this.selectElement.bind(this)
         this.selectElements = this.selectElements.bind(this)
         this.customState = {
-            elementName: `TreeMap_${props.zone}`,
+            elementName: `refListProp_${props.zone}`,
             selectElement: this.selectElement,
             selectElements: this.selectElements,
             handleMouseUp: this.handleMouseUp
         }
+        this.state = { selectedIndex: 0 }
         this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
-        if (!shallowEqual(this.props, nextProps)) {
+        if (!shallowEqual(this.props.data, nextProps.data)) {
             this.prepareData(nextProps)
         }
         return !shallowEqual(this.props, nextProps)
     }
     prepareData (nextProps) {
-        const { config, data, dataset, getPropPalette, palettes, zone } = nextProps
+        const { config, data, dataset, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
-
         // First prop
-        const nestedProp1 = nestData(deduplicate(data, ['prop1']), [{
-            propName: 'prop1',
-            category: 'text'
-        }])
 
-        const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
-        const propsLists = getPropsLists(config, zone, dataset)
+        // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
+        let details = prepareDetailData(data, dataset)
+        // console.log('details', details)
+        // 
 
-        // console.log(nestedProp1)
         // Save to reuse in render
         this.customState = {
             ...this.customState,
-            color,
-            selectedConfig,
-            nestedProp1,
-            propsLists
+            details,
+            selectedConfig
         }
     }
+
     handleMouseDown (e) {
         const { display, zone } = this.props
-        this.props.handleMouseDown(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
+        this.props.handleMouseDown(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
     }
     handleMouseMove (e) {
         const { display, zone } = this.props
-        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
+        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
     }
     handleMouseUp (e) {
         const { selections, zone } = this.props
-        const elements = this.layout.getElementsInZone(this.props)
+        const elements = this.getElementsInZone()
         if (elements.length > 0) this.props.select(elements, zone, selections)
         this.props.handleMouseUp(e, zone)
     }
+    getElementsInZone () {
+        return []
+    }
     render () {
-        const { legend, propsLists } = this.customState
         const { config, dimensions, display, role, selections, step, zone } = this.props
-        return (<g className = { `TreeMap ${this.customState.elementName} role_${role}` } >
+       
+        return (<g className = { `ListProp ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
@@ -93,14 +94,58 @@ class TreeMap extends React.Component {
                 handleMouseUp = { this.handleMouseUp }
             />
             }
-            { step !== 'changing' &&
-            <g
+            { step !== 'changing' && this.customState.details &&
+            <foreignObject
                 transform = { `translate(${dimensions.x}, ${dimensions.y})` }
-                ref = {(c) => { this[this.customState.elementName] = c }}
+                with = { dimensions.width }
+                height = { dimensions.height }
                 onMouseMove = { this.handleMouseMove }
                 onMouseUp = { this.handleMouseUp }
                 onMouseDown = { this.handleMouseDown }
-            ></g>
+            >
+                <div className = "box" style = {{ width: dimensions.width + 'px' }}>
+                    <div className = "tabs">
+                        <ul>
+                            { Array.from(Array(this.customState.details.length)).map((el, i) => { return (
+                                <li
+                                    className =  { (i === this.state.selectedIndex) ? `is-active` : `` }
+                                    key = { `tab_${zone}_${i}` }
+                                    onMouseUp = { () => this.setState({ selectedIndex: i }) }
+                                ><a>
+                                        { (i === 0) ? `entities` : formatMessage(`{ level, plural,
+                                            =1 {1st}
+                                            =2 {2nd}
+                                            =3 {3rd}
+                                            other {#th}
+                                        } level`, {
+                                            level: i
+                                        })
+                                        }
+                                    </a>
+                                </li>
+                            )}) }
+                        </ul>
+                    </div>
+                    <div className = "content">
+                        { (this.state.selectedIndex > 0) &&
+                            this.customState.details[this.state.selectedIndex].map((el, i) => (<p key = { `contenttab_${zone}_${i}` }  className = "is-clipped is-size-7" style = {{ 'maxHeight': 4.3 + 'em' }}>
+                                <strong>{ (this.state.selectedIndex === 0) ? '' : 
+                                    el.readablePath.map((part, index) => {
+                                        return <span key = { `${this.state.elementName}_path_${index}` }>
+                                            <span title = { part.comment }>&nbsp;{part.label} </span> { (index < el.readablePath.length - 1) ? '/' : '' }
+                                        </span>
+                                    }) }</strong> 
+                                <span>{ (this.state.selectedIndex === 0) ? el : el[`prop${(this.state.selectedIndex)}`].map(v => `${v.value}${(v.count > 1) ? ' (' + v.count + '), ' : ', '}`)}</span>
+                            </p>)) 
+                        }
+                        { (this.state.selectedIndex === 0) &&
+                            this.customState.details[this.state.selectedIndex].map((el, i) => (<span key = { `contenttab_${zone}_${i}` }  className = "is-size-7">
+                                {el + ', '} 
+                            </span>))
+                        }
+                    </div>
+                </div>
+            </foreignObject>
             }
             { role !== 'target' &&
             <g>
@@ -120,14 +165,7 @@ class TreeMap extends React.Component {
                 <Nav
                     zone = { zone }
                     config = { config }
-                    propsLists = { propsLists }
-                />
-                <Legend
-                    type = "plain"
-                    zone = { zone }
-                    offset = { { x: 10, y: 0, width: -20, height: -30 } }
-                    legend = { legend }
-                    selectElements = { this.selectElements }
+                    propsLists = { [] }
                 />
                 <History
                     zone = { zone }
@@ -136,42 +174,39 @@ class TreeMap extends React.Component {
             }
         </g>)
     }
-
+    componentDidMount () {
+        this.props.handleTransition(this.props, [])
+    }
+    componentDidUpdate () {
+        this.props.handleTransition(this.props, [])
+    }
     selectElements (prop, value, category) {
-        const elements = this.layout.getElements(prop, value, category)
+        const elements = this.layout.getElements(this[this.customState.elementName], prop, value, category)
         // console.log(prop, value, elements, category)
         const { select, zone, selections } = this.props
         select(elements, zone, selections)
     }
-
     selectElement (selection) {
         const { select, zone, selections } = this.props
         select([selection], zone, selections)
     }
-
-    componentDidMount () {
-        this.layout = new TreeMapLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
-    }
-    componentDidUpdate () {
-        this.layout.update(this[this.customState.elementName], { ...this.props, ...this.customState })
-    }
-    componentWillUnmount () {
-        this.layout.destroy(this[this.customState.elementName])
-    }
 }
 
-TreeMap.propTypes = {
+ListAllProps.propTypes = {
     config: PropTypes.object,
     data: PropTypes.array,
+    dataset: PropTypes.object,
     dimensions: PropTypes.object,
     display: PropTypes.object,
     selections: PropTypes.array,
     role: PropTypes.string,
     step: PropTypes.string,
     zone: PropTypes.string,
+    handleKeyDown: PropTypes.func,
     handleMouseDown: PropTypes.func,
     handleMouseMove: PropTypes.func,
     handleMouseUp: PropTypes.func,
+    handleTransition: PropTypes.func,
     select: PropTypes.func
 }
 
@@ -196,6 +231,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const TreeMapConnect = connect(mapStateToProps, mapDispatchToProps)(TreeMap)
+const ListAllPropsConnect = connect(mapStateToProps, mapDispatchToProps)(ListAllProps)
 
-export default TreeMapConnect
+export default ListAllPropsConnect
