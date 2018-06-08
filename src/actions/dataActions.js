@@ -16,7 +16,10 @@ const getStats = (options) => {
         {
             method: 'POST',
             body: JSON.stringify(options),
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
         })
         .then((resp) => resp.json())
     // return rp('http://localhost:5000/stats/' + entrypoint)
@@ -28,7 +31,10 @@ const getResources = (options) => {
         {
             method: 'POST',
             body: JSON.stringify(options),
-            headers: { 'Content-Type': 'application/json' }
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            }
         })
         .then((resp) => resp.json())
 }

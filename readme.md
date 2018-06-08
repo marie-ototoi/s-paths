@@ -58,6 +58,10 @@ $ npm test
 * **display**: settings + calculated scaled values
 * **selections**: elements selected by the user on a screen
 
-## Thanks
+## Many thanks to
 
-to Browserstack for supporting opensource and thus granting us a free open source licence
+* **Léo**
+* **Logilab**, especially Adrien and Tanguy
+* **BnF**, particularly Aude, Raphaëlle and Sébastien
+* **Browserstack**, for supporting opensource and thus granting us a free open source licence
+
