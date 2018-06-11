@@ -10,9 +10,9 @@ services:
   discover:
     image: registry.gitlab.inria.fr/ilda-semantic/discover:latest
     container_name: discover_server
-    command: ["npm", "start"]
-#    environment:
-#     - NODE_ENV="production"
+#    command: ["npm", "start"]
+    environment:
+     - NODE_ENV="production"
     ports:
      - "5000:5000"
     depends_on:
