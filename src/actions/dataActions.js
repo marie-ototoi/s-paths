@@ -12,7 +12,7 @@ export const endTransition = (dispatch) => (zone) => {
 
 const getStats = (options) => {
     // console.log(JSON.stringify(options))
-    return fetch(('http://localhost:5000/stats'),
+    return fetch(('http://bnf.lri.fr:5000/stats'),
         {
             method: 'POST',
             body: JSON.stringify(options),
@@ -27,7 +27,7 @@ const getStats = (options) => {
 
 const getResources = (options) => {
     // console.log(JSON.stringify(options))
-    return fetch(('http://localhost:5000/resources'),
+    return fetch(('http://bnf.lri.fr:5000/resources'),
         {
             method: 'POST',
             body: JSON.stringify(options),
