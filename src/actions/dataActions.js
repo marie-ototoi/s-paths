@@ -18,7 +18,8 @@ const getStats = (options) => {
             body: JSON.stringify(options),
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Access-Control-Allow-Origin': '*'
             }
         })
         .then((resp) => resp.json())
@@ -33,7 +34,8 @@ const getResources = (options) => {
             body: JSON.stringify(options),
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Access-Control-Allow-Origin': '*'
             }
         })
         .then((resp) => resp.json())
