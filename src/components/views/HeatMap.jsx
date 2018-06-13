@@ -17,39 +17,30 @@ import HeatMapLayout from '../../d3/HeatMapLayout'
 import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
 import { getAxis, getLegend, getThresholdsForLegend, nestData } from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
-import { getDimensions, getZoneCoord } from '../../lib/scaleLib'
+import { getDimensions } from '../../lib/scaleLib'
 // redux functions
-import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
-import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
+import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 
 class HeatMap extends React.Component {
     constructor (props) {
         super(props)
-        this.handleMouseDown = this.handleMouseDown.bind(this)
-        this.handleMouseMove = this.handleMouseMove.bind(this)
-        this.handleMouseUp = this.handleMouseUp.bind(this)
-        this.selectElement = this.selectElement.bind(this)
-        this.selectElements = this.selectElements.bind(this)
+        this.selectEnsemble = this.selectEnsemble.bind(this)
         this.customState = {
-            elementName: `HeatMap_${props.zone}_${props.role}`,
-            selectElement: this.selectElement,
-            selectElements: this.selectElements,
-            handleMouseUp: this.handleMouseUp
+            elementName: `HeatMap_${props.zone}_${props.role}`
         }
         this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
-        if (!shallowEqual(this.props, nextProps)) {
+        if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
-        return !shallowEqual(this.props, nextProps)
+        return shallowEqual(this.props.data,nextProps.data)
     }
     prepareData (nextProps) {
         const { config, data, dataset, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
-
         // First prop to be displayed in the bottom axis
         let categoryProp1 = selectedConfig.properties[0].category
         let nestedProp1 = nestData(data, [{
@@ -83,40 +74,27 @@ class HeatMap extends React.Component {
             nestedProp2
         }
     }
-    handleMouseDown (e) {
-        const { display, zone } = this.props
-        this.props.handleMouseDown(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
-    }
-    handleMouseMove (e) {
-        const { display, zone } = this.props
-        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
-    }
-    handleMouseUp (e) {
-        const { selections, zone } = this.props
-        const elements = this.layout.getElementsInZone(this.props)
-        if (elements.length > 0) this.props.select(elements, zone, selections)
-        this.props.handleMouseUp(e, zone)
-    }
     render () {
         const { axisBottom, axisLeft, legend } = this.customState
+        console.log('attrntion')
         const { config, display, dimensions, role, selections, step, zone } = this.props
         return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` }>
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
-                handleMouseDown = { this.handleMouseDown }
-                handleMouseMove = { this.handleMouseMove }
-                handleMouseUp = { this.handleMouseUp }
+                handleMouseMove = { this.props.handleMouseMove }
+                layout = { this.layout }
+                selections = { selections }
             />
             }
             { step !== 'changing' &&
             <g
                 transform = { `translate(${dimensions.x}, ${dimensions.y})` }
-                ref = {(c) => { this[this.customState.elementName] = c }}
-                onMouseMove = { this.handleMouseMove }
-                onMouseUp = { this.handleMouseUp }
-                onMouseDown = { this.handleMouseDown }
+                ref = { (c) => { this[this.customState.elementName] = c } }
+                onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
+                onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this.layout, selections) } }
+                onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             ></g>
             }
             { role !== 'target' &&
@@ -144,21 +122,21 @@ class HeatMap extends React.Component {
                     zone = { zone }
                     offset = { { x: 10, y: 0, width: -20, height: 0 } }
                     legend = { legend }
-                    selectElements = { this.selectElements }
+                    selectElements = { this.selectEnsemble }
                 />
                 <Axis
                     type = "Bottom"
                     zone = { zone }
                     axis = { axisBottom }
                     propIndex = { 0 }
-                    selectElements = { this.selectElements }
+                    selectElements = { this.selectEnsemble }
                 />
                 <Axis
                     type = "Left"
                     zone = { zone }
                     axis = { axisLeft }
                     propIndex = { 1 }
-                    selectElements = { this.selectElements }
+                    selectElements = { this.selectEnsemble }
                 />
                 <PropSelector
                     selected = { false }
@@ -187,17 +165,11 @@ class HeatMap extends React.Component {
             }
         </g>)
     }
-
-    selectElements (prop, value, category) {
+    selectEnsemble (prop, value, category) {
         const elements = this.layout.getElements(prop, value, category)
-        const { select, zone, selections } = this.props
-        select(elements, zone, selections)
+        const { selectElements, zone, selections } = this.props
+        selectElements(elements, zone, selections)
     }
-    selectElement (selection) {
-        const { select, zone, selections } = this.props
-        select([selection], zone, selections)
-    }
-
     componentDidMount () {
         this.layout = new HeatMapLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
     }
@@ -211,18 +183,19 @@ class HeatMap extends React.Component {
 
 HeatMap.propTypes = {
     config: PropTypes.object,
+    configs: PropTypes.object,
+    data: PropTypes.array,
     dimensions: PropTypes.object,
     display: PropTypes.object,
     selections: PropTypes.array,
     role: PropTypes.string,
     step: PropTypes.string,
     zone: PropTypes.string,
-    handleKeyDown: PropTypes.func,
     handleMouseDown: PropTypes.func,
     handleMouseMove: PropTypes.func,
     handleMouseUp: PropTypes.func,
     handleTransition: PropTypes.func,
-    select: PropTypes.func
+    selectElements: PropTypes.func
 }
 
 function mapStateToProps (state) {
@@ -230,8 +203,7 @@ function mapStateToProps (state) {
         configs: state.configs,
         dataset: state.dataset,
         display: state.display,
-        palettes: state.palettes,
-        selections: state.selections
+        palettes: state.palettes
     }
 }
 
@@ -240,9 +212,7 @@ function mapDispatchToProps (dispatch) {
         getPropPalette: getPropPalette(dispatch),
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
-        handleMouseMove: handleMouseMove(dispatch),
-        select: select(dispatch),
-        setUnitDimensions: setUnitDimensions(dispatch)
+        selectElements: selectElements(dispatch)
     }
 }
 

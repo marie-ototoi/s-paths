@@ -6,25 +6,24 @@ import { connect } from 'react-redux'
 import Coverage from '../elements/Coverage'
 import Header from '../elements/Header'
 import History from '../elements/History'
-import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import URIWheelLayout from '../../d3/URIWheelLayout'
+
 // libs
-import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
-import { deduplicate, nestData } from '../../lib/dataLib'
+import { getSelectedMatch } from '../../lib/configLib'
 // redux functions
 import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 
-class URIWheel extends React.Component {
+class Images extends React.Component {
     constructor (props) {
         super(props)
         this.selectEnsemble = this.selectEnsemble.bind(this)
         this.customState = {
-            elementName: `refURIWheel_${props.zone}`
+            elementName: `refListProp_${props.zone}`
         }
+        this.state = { selectedIndex: 0 }
         this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
@@ -34,27 +33,15 @@ class URIWheel extends React.Component {
         return !shallowEqual(this.props, nextProps)
     }
     prepareData (nextProps) {
-        const { config, data, dataset, getPropPalette, palettes, zone } = nextProps
+        const { config, data, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
         // First prop
-        const nestedProp1 = nestData(deduplicate(data, ['prop1']), [{
-            propName: 'prop1',
-            category: 'text'
-        }])
 
-        const propsLists = getPropsLists(config, zone, dataset)
-
-        const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
-
-        // console.log(nestedProp1)
         // Save to reuse in render
         this.customState = {
             ...this.customState,
-            color,
-            selectedConfig,
-            nestedProp1,
-            propsLists
+            selectedConfig
         }
     }
     selectEnsemble (prop, value, category) {
@@ -62,27 +49,41 @@ class URIWheel extends React.Component {
         const { selectElements, zone, selections } = this.props
         selectElements(elements, zone, selections)
     }
+    getElementsInZone () {
+        return []
+    }
     render () {
-        const { legend, propsLists } = this.customState
-        const { config, dimensions, display, role, selections, step, zone } = this.props
-        return (<g className = { `URIWheel ${this.customState.elementName} role_${role}` } >
+        const { config, dimensions, display, data, role, selections, step, zone } = this.props
+       
+        return (<g className = { `ListProp ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
                 handleMouseMove = { this.props.handleMouseMove }
-                layout = { this.layout }
+                layout = { this }
                 selections = { selections }
             />
             }
-            { step !== 'changing' &&
-            <g
+            { step !== 'changing' && this.customState.details &&
+            <foreignObject
                 transform = { `translate(${dimensions.x}, ${dimensions.y})` }
-                ref = {(c) => { this[this.customState.elementName] = c }}
+                with = { dimensions.width }
+                height = { dimensions.height }
                 onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
-                onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this.layout, selections) } }
+                onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
-            ></g>
+            >
+                <div className = "box" style = {{ width: dimensions.width + 'px' }}>
+                    <div className = "content">
+                        { 
+                            data.map((el, i) => 
+                                (<img key = { `img_${zone}_${i}` }  className = "" src = { el.prop1.value } alt = { el.prop2.value } />)
+                            )
+                        }
+                    </div>
+                </div>
+            </foreignObject>
             }
             { role !== 'target' &&
             <g>
@@ -102,14 +103,7 @@ class URIWheel extends React.Component {
                 <Nav
                     zone = { zone }
                     config = { config }
-                    propsLists = { propsLists }
-                />
-                <Legend
-                    type = "plain"
-                    zone = { zone }
-                    offset = { { x: 10, y: 0, width: -20, height: -30 } }
-                    legend = { legend }
-                    selectElements = { this.selectEnsemble }
+                    propsLists = { [] }
                 />
                 <History
                     zone = { zone }
@@ -119,19 +113,17 @@ class URIWheel extends React.Component {
         </g>)
     }
     componentDidMount () {
-        this.layout = new URIWheelLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
+        this.props.handleTransition(this.props, [])
     }
     componentDidUpdate () {
-        this.layout.update(this[this.customState.elementName], { ...this.props, ...this.customState })
-    }
-    componentWillUnmount () {
-        this.layout.destroy(this[this.customState.elementName])
+        this.props.handleTransition(this.props, [])
     }
 }
 
-URIWheel.propTypes = {
+Images.propTypes = {
     config: PropTypes.object,
     data: PropTypes.array,
+    dataset: PropTypes.object,
     dimensions: PropTypes.object,
     display: PropTypes.object,
     selections: PropTypes.array,
@@ -142,6 +134,7 @@ URIWheel.propTypes = {
     handleMouseDown: PropTypes.func,
     handleMouseMove: PropTypes.func,
     handleMouseUp: PropTypes.func,
+    handleTransition: PropTypes.func,
     selectElements: PropTypes.func
 }
 
@@ -164,6 +157,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const URIWheelConnect = connect(mapStateToProps, mapDispatchToProps)(URIWheel)
+const ImagesConnect = connect(mapStateToProps, mapDispatchToProps)(Images)
 
-export default URIWheelConnect
+export default ImagesConnect

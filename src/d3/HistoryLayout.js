@@ -31,10 +31,10 @@ class HistoryLayout extends AbstractLayout {
                 props.jumpHistory(i)
             })
     }
-
     resize (props) {
         d3.select(this.el).selectAll('circle.config')
             .attr('cx', (d, i) => i * 10)
     }
+    checkSelection (props) {}
 }
 export default HistoryLayout

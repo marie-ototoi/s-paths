@@ -1,19 +1,20 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
+import { handleMouseDown, handleMouseUp } from '../../actions/selectionActions'
 
 class SelectionZone extends React.PureComponent {
     render () {
-        const { dimensions, zone } = this.props
+        const { dimensions, display, layout, selections, zone } = this.props
         return (<rect
             className = "SelectionZone"
             ref = { `selectionZone_${zone}` }
             fill = "transparent"
             width = { dimensions.width }
             height = { dimensions.height }
-            onMouseDown = { this.props.handleMouseDown }
-            onMouseUp = { this.props.handleMouseUp }
-            onMouseMove = { this.props.handleMouseMove }
+            onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
+            onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, layout, selections) } }
+            onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
             transform = { `translate(${dimensions.x}, ${dimensions.y})` }
         ></rect>)
     }
@@ -21,6 +22,9 @@ class SelectionZone extends React.PureComponent {
 
 SelectionZone.propTypes = {
     dimensions: PropTypes.object,
+    display: PropTypes.object,
+    layout: PropTypes.object,
+    selections: PropTypes.array,
     zone: PropTypes.string,
     handleMouseDown: PropTypes.func,
     handleMouseUp: PropTypes.func,
@@ -36,6 +40,8 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
+        handleMouseDown: handleMouseDown(dispatch),
+        handleMouseUp: handleMouseUp(dispatch)
     }
 }
 

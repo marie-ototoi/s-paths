@@ -7,7 +7,6 @@ import { connect } from 'react-redux'
 import Coverage from '../elements/Coverage'
 import Header from '../elements/Header'
 import History from '../elements/History'
-import Legend from '../elements/Legend'
 import Nav from '../elements/Nav'
 import SelectionZone from '../elements/SelectionZone'
 // d3
@@ -15,32 +14,22 @@ import SelectionZone from '../elements/SelectionZone'
 // libs
 import { getSelectedMatch } from '../../lib/configLib'
 import { prepareDetailData } from '../../lib/dataLib'
-import * as scaleLib from '../../lib/scaleLib'
 // redux functions
-import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
-import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
-import { getSplitUri } from '../../lib/queryLib';
+import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 
 class ListAllProps extends React.Component {
     constructor (props) {
         super(props)
-        this.handleMouseDown = this.handleMouseDown.bind(this)
-        this.handleMouseMove = this.handleMouseMove.bind(this)
-        this.handleMouseUp = this.handleMouseUp.bind(this)
-        this.selectElement = this.selectElement.bind(this)
-        this.selectElements = this.selectElements.bind(this)
+        this.selectEnsemble = this.selectEnsemble.bind(this)
         this.customState = {
-            elementName: `refListProp_${props.zone}`,
-            selectElement: this.selectElement,
-            selectElements: this.selectElements,
-            handleMouseUp: this.handleMouseUp
+            elementName: `refListProp_${props.zone}`
         }
         this.state = { selectedIndex: 0 }
         this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
-        if (!shallowEqual(this.props.data, nextProps.data)) {
+        if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
         return !shallowEqual(this.props, nextProps)
@@ -53,7 +42,6 @@ class ListAllProps extends React.Component {
 
         // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
         let details = prepareDetailData(data, dataset)
-        // console.log('details', details)
         // 
 
         // Save to reuse in render
@@ -63,20 +51,10 @@ class ListAllProps extends React.Component {
             selectedConfig
         }
     }
-
-    handleMouseDown (e) {
-        const { display, zone } = this.props
-        this.props.handleMouseDown(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
-    }
-    handleMouseMove (e) {
-        const { display, zone } = this.props
-        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
-    }
-    handleMouseUp (e) {
-        const { selections, zone } = this.props
-        const elements = this.getElementsInZone()
-        if (elements.length > 0) this.props.select(elements, zone, selections)
-        this.props.handleMouseUp(e, zone)
+    selectEnsemble (prop, value, category) {
+        const elements = this.layout.getElements(prop, value, category)
+        const { selectElements, zone, selections } = this.props
+        selectElements(elements, zone, selections)
     }
     getElementsInZone () {
         return []
@@ -89,9 +67,9 @@ class ListAllProps extends React.Component {
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
-                handleMouseDown = { this.handleMouseDown }
-                handleMouseMove = { this.handleMouseMove }
-                handleMouseUp = { this.handleMouseUp }
+                handleMouseMove = { this.props.handleMouseMove }
+                layout = { this }
+                selections = { selections }
             />
             }
             { step !== 'changing' && this.customState.details &&
@@ -99,9 +77,9 @@ class ListAllProps extends React.Component {
                 transform = { `translate(${dimensions.x}, ${dimensions.y})` }
                 with = { dimensions.width }
                 height = { dimensions.height }
-                onMouseMove = { this.handleMouseMove }
-                onMouseUp = { this.handleMouseUp }
-                onMouseDown = { this.handleMouseDown }
+                onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
+                onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
+                onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             >
                 <div className = "box" style = {{ width: dimensions.width + 'px' }}>
                     <div className = "tabs">
@@ -180,16 +158,6 @@ class ListAllProps extends React.Component {
     componentDidUpdate () {
         this.props.handleTransition(this.props, [])
     }
-    selectElements (prop, value, category) {
-        const elements = this.layout.getElements(this[this.customState.elementName], prop, value, category)
-        // console.log(prop, value, elements, category)
-        const { select, zone, selections } = this.props
-        select(elements, zone, selections)
-    }
-    selectElement (selection) {
-        const { select, zone, selections } = this.props
-        select([selection], zone, selections)
-    }
 }
 
 ListAllProps.propTypes = {
@@ -207,7 +175,7 @@ ListAllProps.propTypes = {
     handleMouseMove: PropTypes.func,
     handleMouseUp: PropTypes.func,
     handleTransition: PropTypes.func,
-    select: PropTypes.func
+    selectElements: PropTypes.func
 }
 
 function mapStateToProps (state) {
@@ -225,9 +193,7 @@ function mapDispatchToProps (dispatch) {
         getPropPalette: getPropPalette(dispatch),
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
-        handleMouseMove: handleMouseMove(dispatch),
-        select: select(dispatch),
-        setUnitDimensions: setUnitDimensions(dispatch)
+        selectElements: selectElements(dispatch)
     }
 }
 

@@ -138,6 +138,7 @@ const defaultState = [
     {
         id: 'SingleProp',
         thumb : '/images/listprop.svg',
+        entrypoint: { min: 1, max: 200, optimal: [1, 100] },
         constraints: [
             [
                 {

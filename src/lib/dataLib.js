@@ -313,28 +313,15 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
 }
 
 export const prepareSinglePropData = (data, category) => {
-    data = d3.nest().key(prop => prop.prop1.value).entries(data)
-        .map(d => d.key)
-        .reduce((acc, cur) => {
-            if (cur) {
-                if (acc[cur]) {
-                    acc[cur] ++
-                } else {
-                    acc[cur] = 1
-                }
+    return d3.nest().key(prop => prop.prop1.value).entries(data)
+        .map(d => {
+            if (category === 'uri') {
+                let split = queryLib.getSplitUri(d.key)
+                return { value: d.key, root: split.root, name: split.name, count: d.values.length }
+            } else {
+                return { value: d.key, name: d.key, count: d.values.length }
             }
-            return acc
-        }, {})
-    let newData = []
-    for (let d in data) {
-        if (category === 'uri') {
-            let split = queryLib.getSplitUri(d)
-            newData.push({ value: d, root: split.root, name: split.name, count: data[d] })
-        } else {
-            newData.push({ value: d, name: d, count: data[d] })
-        }
-    }
-    return newData
+        })
 }
 
 export const prepareDetailData = (data, dataset) => {

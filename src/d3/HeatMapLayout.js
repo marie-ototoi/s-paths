@@ -62,9 +62,6 @@ class HeatMapLayout extends AbstractLayout {
             .classed('selected', d => d.selected)
             .attr('fill', d => d.color)
             .attr('opacity', d => (selections.filter(s => s.zone === zone).length > 0 && d.selected !== true) ? 0.5 : 1)
-            .on('mouseup', d => {
-                props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, zone)
-            })
     }
 
     getElements (propName, value, propCategory) {
@@ -102,12 +99,11 @@ class HeatMapLayout extends AbstractLayout {
     }
 
     getElementsInZone (props) {
-        const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
         const selectedZone = {
-            x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
-            y1: zoneDimensions.y1 - props.display.viz.vertical_margin,
-            x2: zoneDimensions.x2 - props.display.viz.horizontal_margin,
-            y2: zoneDimensions.y2 - props.display.viz.vertical_margin
+            x1: props.zoneDimensions.x1 - props.display.viz.horizontal_margin,
+            y1: props.zoneDimensions.y1 - props.display.viz.vertical_margin,
+            x2: props.zoneDimensions.x2 - props.display.viz.horizontal_margin,
+            y2: props.zoneDimensions.y2 - props.display.viz.vertical_margin
         }
         let selectedElements = []
         d3.select(this.el).selectAll('.yUnits')
@@ -178,14 +174,6 @@ class HeatMapLayout extends AbstractLayout {
             .attr('y', 0)
             .attr('height', d => unitHeight - 1)
         props.handleTransition(props, this.getElementsForTransition(props))
-    }
-
-    checkSelection (props) {
-        if (props.display.selectedZone.x1 !== null) {
-            this.drawSelection(props)
-        } else {
-            d3.select(this.el).selectAll('rect.selection').remove()
-        }
     }
 }
 

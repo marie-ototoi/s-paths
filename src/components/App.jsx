@@ -1,8 +1,8 @@
+import * as d3 from 'd3'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import Detail from './elements/Detail'
 import GeoMap from './views/GeoMap'
 import HeatMap from './views/HeatMap'
 import ListAllProps from './views/ListAllProps'
@@ -13,13 +13,14 @@ import URIWheel from './views/URIWheel'
 import Transition from './elements/Transition'
 import Debug from './Debug'
 // libs
-import { getDimensions, getScreen } from '../lib/scaleLib'
+import { getDimensions, getScreen, getZoneCoord } from '../lib/scaleLib'
 import { areLoaded, getCurrentState, getResults, getTransitionElements } from '../lib/dataLib'
 import { getSelectedView, getCurrentConfigs } from '../lib/configLib'
 import * as selectionLib from '../lib/selectionLib'
 // redux actions
 import { setDisplay } from '../actions/displayActions'
 import { endTransition, loadResources } from '../actions/dataActions'
+import { handleMouseUp } from '../actions/selectionActions'
 
 class App extends React.PureComponent {
     constructor (props) {
@@ -28,6 +29,7 @@ class App extends React.PureComponent {
         this.onResize = this.onResize.bind(this)
         window.addEventListener('resize', this.onResize)
         // transition state is handled locally in the component, to avoid re-rendering
+        this.handleMouseMove = this.handleMouseMove.bind(this)
         this.handleTransition = this.handleTransition.bind(this)
         this.handleEndTransition = this.handleEndTransition.bind(this)
         this.state = {
@@ -46,6 +48,31 @@ class App extends React.PureComponent {
         const { dataset, views } = this.props
         // this is where it all starts
         this.props.loadResources(dataset, views)
+    }
+    handleMouseMove (e, zone) {
+        /* const { display } = this.props
+        if (display.selectedZone[zone].x1 !== null) {
+            const zoneDimensions = selectionLib.getRectSelection(display.selectedZone[zone])
+            const selectedZone = {
+                x1: zoneDimensions.x1 - this.props.display.viz.horizontal_margin,
+                y1: zoneDimensions.y1 - this.props.display.viz.vertical_margin,
+                x2: zoneDimensions.x2 - this.props.display.viz.horizontal_margin,
+                y2: zoneDimensions.y2 - this.props.display.viz.vertical_margin
+            }
+            d3.select(this['refView']).selectAll('rect.selection')
+                .data([selectedZone])
+                .enter()
+                .append('rect')
+                .attr('class', 'selection')
+                .on('mouseup', d => {
+                    this.props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, zone, display)
+                })
+            d3.select(this['refView']).select('rect.selection')
+                .attr('width', selectedZone.x2 - selectedZone.x1)
+                .attr('height', selectedZone.y2 - selectedZone.y1)
+                .attr('x', selectedZone.x1)
+                .attr('y', selectedZone.y1)
+        } */
     }
     handleTransition (props, elements) {
         const { role, status, zone } = props
@@ -180,15 +207,10 @@ class App extends React.PureComponent {
                         config = { mainConfig }
                         selections = { selectionLib.getSelections(selections, 'main', 'active') }
                         ref = {(c) => { this.refMain = c }}
+                        handleMouseDown = { this.handleMouseDown }
+                        handleMouseMove = { this.handleMouseMove }
+                        handleMouseUp = { this.handleMouseUp }
                         handleTransition = { this.handleTransition }
-                    />
-                }
-                
-                { display.detail.main &&
-                    <Detail
-                        zone = "main"
-                        dimensions = { getDimensions('core', display.zones['main'], display.viz, { x: 5, y:5, width: -10, height: -10 }) }
-                        elements = { getResults(data, 'main', 'detail') }
                     />
                 }
 
@@ -228,15 +250,10 @@ class App extends React.PureComponent {
                         config = { asideConfig }
                         selections = { selectionLib.getSelections(selections, 'aside', 'active') }
                         ref = {(c) => { this.refAside = c }}
+                        handleMouseDown = { this.handleMouseDown }
+                        handleMouseMove = { this.handleMouseMove }
+                        handleMouseUp = { this.handleMouseUp }
                         handleTransition = { this.handleTransition }
-                    />
-                }
-
-                { display.detail.aside &&
-                    <Detail
-                        zone = "aside"
-                        dimensions = { getDimensions('core', display.zones['aside'], display.viz, { x: 5, y:5, width: -10, height: -10 }) }
-                        elements = { getResults(data, 'aside', 'detail') }
                     />
                 }
             </svg>
@@ -269,7 +286,9 @@ App.propTypes = {
     zone: PropTypes.string,
     endTransition: PropTypes.func.isRequired,
     handleTransition: PropTypes.func,
+    handleMouseUp: PropTypes.func,
     loadResources: PropTypes.func.isRequired,
+    select: PropTypes.func,
     setDisplay: PropTypes.func.isRequired
 }
 
@@ -280,6 +299,7 @@ function mapStateToProps (state) {
         dataset: state.dataset,
         views: state.views,
         configs: state.configs,
+        select: state.select,
         selections: state.selections
     }
 }
@@ -288,7 +308,8 @@ function mapDispatchToProps (dispatch) {
     return {
         endTransition: endTransition(dispatch),
         loadResources: loadResources(dispatch),
-        setDisplay: setDisplay(dispatch)
+        setDisplay: setDisplay(dispatch),
+        handleMouseUp: handleMouseUp(dispatch)
     }
 }
 

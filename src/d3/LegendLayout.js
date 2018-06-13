@@ -2,7 +2,6 @@ import * as d3 from 'd3'
 import AbstractLayout from './AbstractLayout'
 
 class LegendLayout extends AbstractLayout {
-
     draw (props) {
         const { legend, selectElements } = props
         if (legend ) {
@@ -25,7 +24,6 @@ class LegendLayout extends AbstractLayout {
                 })
         }
     }
-
     resize (props) {
         let total = d3.select(this.el).selectAll('g.legenditem').size() * 13
         d3.select(this.el).selectAll('g.legenditem').select('rect')
@@ -38,5 +36,6 @@ class LegendLayout extends AbstractLayout {
             .attr('y', (d, i) => props.dimensions.height - total + Math.ceil(i * 13) + 9)
             .text(d => d.label)
     }
+    checkSelection (props) {}
 }
 export default LegendLayout

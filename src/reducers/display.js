@@ -79,8 +79,9 @@ const defaultState = {
 
 const display = (state = defaultState, action) => {
     // console.log(action, state)
+    let newZone
     switch (action.type) {
-    case types.SET_DISPLAY: {
+    case types.SET_DISPLAY:
         return {
             ...state,
             mode: action.mode || state.mode,
@@ -91,78 +92,27 @@ const display = (state = defaultState, action) => {
             zones: action.zones || state.zones,
             viz: action.viz || state.viz
         }
-    }
-    case types.START_SELECTED_ZONE: {
-        let newSelectedZoneStart = state.selectedZone
-        newSelectedZoneStart[action.zone] = {
+    case types.START_SELECTED_ZONE:
+        newZone = { ...state.selectedZone }
+        newZone[action.zone] = {
             x1: action.x1,
-            y1: action.y1,
-            x2: action.x1,
-            y2: action.y1
+            y1: action.y1
         }
         return {
             ...state,
-            selectedZone: newSelectedZoneStart
+            selectedZone: newZone
         }
-    }
-    case types.MOVE_SELECTED_ZONE: {
-        let newSelectedZoneMove = state.selectedZone
-        newSelectedZoneMove[action.zone].x2 = action.x2
-        newSelectedZoneMove[action.zone].y2 = action.y2
-        return {
-            ...state,
-            selectedZone: newSelectedZoneMove
-        }
-    }
-    case types.CLEAR_SELECTED_ZONE: {
-        let newSelectedZoneClear = state.selectedZone
-        newSelectedZoneClear[action.zone] = {
+    case types.CLEAR_SELECTED_ZONE:
+        newZone = { ...state.selectedZone }
+        newZone[action.zone] = {
             x1: null,
-            y1: null,
-            x2: null,
-            y2: null
+            y1: null
         }
         return {
             ...state,
-            selectedZone: newSelectedZoneClear
+            selectedZone: newZone
         }
-    }
-    case types.SET_UNIT_DIMENSIONS: {
-        return {
-            ...state,
-            unitDimensions: {
-                ...state.unitDimensions,
-                [action.zone]: {
-                    ...state.unitDimensions[action.zone],
-                    [action.role]: {
-                        ...state.unitDimensions[action.zone][action.role],
-                        ...action.unitDimensions
-                    }
-                }
-            }
-        }
-    }
-    case types.SET_DATA: {
-        let unitDimensions = {
-            main: {
-                origin: state.unitDimensions.main.origin,
-                target: (action.resetUnitDimensions === 'all' || (action.resetUnitDimensions === 'zone' && action.zone === 'main')) ? null : state.unitDimensions.main.target
-            },
-            aside: {
-                origin: state.unitDimensions.aside.origin,
-                target: (action.resetUnitDimensions === 'all' || (action.resetUnitDimensions === 'zone' && action.zone === 'aside')) ? null : state.unitDimensions.aside.target
-            },
-        }
-        return {
-            ...state,
-            detail: {
-                main: (action.zone === 'main') ? false : state.detail.main,
-                aside: (action.zone === 'aside') ? false : state.detail.aside
-            },
-            unitDimensions
-        }
-    }
-    case types.END_TRANSITION: {
+    case types.END_TRANSITION:
         return {
             ...state,
             unitDimensions: {
@@ -176,40 +126,6 @@ const display = (state = defaultState, action) => {
                 }
             }
         }
-    }
-    case types.RESET_UNIT_DIMENSIONS: {
-        return {
-            ...state,
-            unitDimensions: {
-                main: {
-                    origin: null,
-                    target: null
-                },
-                aside: {
-                    origin: null,
-                    target: null
-                }
-            }
-        }
-    }
-    case types.SET_DETAIL: {
-        return {
-            ...state,
-            detail: {
-                main: (action.zone === 'main'),
-                aside: (action.zone === 'aside')
-            }
-        }
-    }
-    case types.HIDE_DETAIL: {
-        return {
-            ...state,
-            detail: {
-                main: (action.zone === 'main') ? false : state.detail.main,
-                aside: (action.zone === 'aside') ? false : state.detail.aside
-            }
-        }
-    }
     default:
         return state
     }

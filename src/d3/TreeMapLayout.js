@@ -54,9 +54,6 @@ class TreeMapLayout extends AbstractLayout {
             .attr('opacity', d => {
                 return (selections.length > 0 && d.selected !== true) ? 0.5 : 1
             })
-            .on('mouseup', d => {
-                props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, zone)
-            })
     }
 
     getElements (propName, value, propCategory) {
@@ -94,12 +91,11 @@ class TreeMapLayout extends AbstractLayout {
     }
 
     getElementsInZone (props) {
-        const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
         const selectedZone = {
-            x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
-            y1: zoneDimensions.y1 - props.display.viz.vertical_margin,
-            x2: zoneDimensions.x2 - props.display.viz.horizontal_margin,
-            y2: zoneDimensions.y2 - props.display.viz.vertical_margin
+            x1: props.zoneDimensions.x1 - props.display.viz.horizontal_margin,
+            y1: props.zoneDimensions.y1 - props.display.viz.vertical_margin,
+            x2: props.zoneDimensions.x2 - props.display.viz.horizontal_margin,
+            y2: props.zoneDimensions.y2 - props.display.viz.vertical_margin
         }
         let selectedElements = []
         d3.select(this.el).selectAll('g.units')

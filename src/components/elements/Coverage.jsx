@@ -77,6 +77,10 @@ class Coverage extends React.Component {
                         keyName = "enter"
                         onKeyDown = { this.handleKeyDown }
                     />
+                    <ReactKeymaster
+                        keyName = "ctrl+enter"
+                        onKeyDown = { this.handleKeyDown }
+                    />
                 </g>
             }
             <foreignObject                 

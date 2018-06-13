@@ -24,14 +24,6 @@ class TimelineLayout extends AbstractLayout {
             .enter()
             .append('g')
             .attr('class', 'elements')
-            .append('rect')
-            .attr('class', 'element')
-        elementUnits
-            .exit()
-            .remove()
-
-        d3.select(this.el)
-            .selectAll('g.time .elements')
             .each((d, i) => {
                 d.color = legend.info.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
                 // console.log(zone, d)
@@ -44,6 +36,17 @@ class TimelineLayout extends AbstractLayout {
                 }
                 d.shape = 'rectangle'
                 d.zone = {}
+            })
+            .append('rect')
+            .attr('class', 'element')
+            
+        elementUnits
+            .exit()
+            .remove()
+
+        d3.select(this.el)
+            .selectAll('g.time .elements')
+            .each((d, i) => {
                 d.selected = selectionLib.areSelected([d.selection], zone, selections)
             })
             .attr('id', d => d.selection.selector) // only needed to better understand html source code
@@ -52,9 +55,6 @@ class TimelineLayout extends AbstractLayout {
             .attr('opacity', d => {
                 d.opacity = (selections.filter(s => s.zone === zone).length > 0 && d.selected !== true) ? 0.5 : 1
                 return d.opacity
-            })
-            .on('mouseup', d => {
-                props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, zone)
             })
     }
 
@@ -96,12 +96,11 @@ class TimelineLayout extends AbstractLayout {
     }
 
     getElementsInZone (props) {
-        const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
         const selectedZone = {
-            x1: zoneDimensions.x1 - props.display.viz.horizontal_margin,
-            y1: zoneDimensions.y1 - props.display.viz.vertical_margin,
-            x2: zoneDimensions.x2 - props.display.viz.horizontal_margin,
-            y2: zoneDimensions.y2 - props.display.viz.vertical_margin
+            x1: props.zoneDimensions.x1 - props.display.viz.horizontal_margin,
+            y1: props.zoneDimensions.y1 - props.display.viz.vertical_margin,
+            x2: props.zoneDimensions.x2 - props.display.viz.horizontal_margin,
+            y2: props.zoneDimensions.y2 - props.display.viz.vertical_margin
         }
         let selectedElements = []
         d3.select(this.el).selectAll('.elements')
@@ -157,14 +156,6 @@ class TimelineLayout extends AbstractLayout {
             .attr('y', -unitHeight)
             .attr('height', d => unitHeight)
         props.handleTransition(props, this.getElementsForTransition(props))
-    }
-
-    checkSelection (props) {
-        if (props.display.selectedZone.x1 !== null) {
-            this.drawSelection(props)
-        } else {
-            d3.select(this.el).selectAll('rect.selection').remove()
-        }
     }
 }
 

@@ -17,34 +17,30 @@ import TimelineLayout from '../../d3/TimelineLayout'
 // libs
 import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
 import { deduplicate, getAxis, getLegend, nestData } from '../../lib/dataLib'
-import { getDimensions, getZoneCoord } from '../../lib/scaleLib'
+import { getDimensions } from '../../lib/scaleLib'
 // redux functions
-import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
-import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
+import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 
 class Timeline extends React.Component {
     constructor (props) {
         super(props)
-        this.handleMouseDown = this.handleMouseDown.bind(this)
-        this.handleMouseMove = this.handleMouseMove.bind(this)
-        this.handleMouseUp = this.handleMouseUp.bind(this)
-        this.selectElement = this.selectElement.bind(this)
-        this.selectElements = this.selectElements.bind(this)
+        this.selectEnsemble = this.selectEnsemble.bind(this)
         this.customState = {
-            elementName: `Timeline_${props.zone}`,
-            selectElement: this.selectElement,
-            selectElements: this.selectElements,
-            handleMouseUp: this.handleMouseUp
+            elementName: `Timeline_${props.zone}`
         }
         this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
-        if (!shallowEqual(this.props, nextProps)) {
+        if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
         // console.log('equal ?', shallowEqual(this.props, nextProps), shallowEqual(this.props.data, nextProps.data))
-        return !shallowEqual(this.props, nextProps)
+        return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
+            (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
+            (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
+            (! shallowEqual(this.props.display.selectedZone, nextProps.display.selectedZone)) ||
+            (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
         const { data, config, dataset, getPropPalette, palettes, zone } = nextProps
@@ -81,19 +77,10 @@ class Timeline extends React.Component {
             axisBottom
         }
     }
-    handleMouseMove (e) {
-        const { display, zone } = this.props
-        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
-    }
-    handleMouseDown (e) {
-        const { display, zone } = this.props
-        this.props.handleMouseDown(e, zone, getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
-    }
-    handleMouseUp (e) {
-        const { selections, zone } = this.props
-        const elements = this.layout.getElementsInZone(this.props)
-        if (elements.length > 0) this.props.select(elements, zone, selections)
-        this.props.handleMouseUp(e, zone)
+    selectEnsemble (prop, value, category) {
+        const elements = this.layout.getElements(prop, value, category)
+        const { selectElements, zone, selections } = this.props
+        selectElements(elements, zone, selections)
     }
     render () {
         const { axisBottom, legend } = this.customState
@@ -105,18 +92,18 @@ class Timeline extends React.Component {
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
-                handleMouseDown = { this.handleMouseDown }
-                handleMouseMove = { this.handleMouseMove }
-                handleMouseUp = { this.handleMouseUp }
+                handleMouseMove = { this.props.handleMouseMove }
+                layout = { this.layout }
+                selections = { selections }
             />
             }
             { step !== 'changing' &&
             <g
                 transform = { `translate(${dimensions.x}, ${dimensions.y})` }
                 ref = {(c) => { this[this.customState.elementName] = c }}
-                onMouseMove = { this.handleMouseMove }
-                onMouseUp = { this.handleMouseUp }
-                onMouseDown = { this.handleMouseDown }
+                onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
+                onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this.layout, selections) } }
+                onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             ></g>
             }
             { role !== 'target' &&
@@ -141,7 +128,7 @@ class Timeline extends React.Component {
                     zone = { zone }
                     offset = { { x: 10, y: 0, width: -20, height: 0 } }
                     legend = { legend }
-                    selectElements = { this.selectElements }
+                    selectElements = { this.selectEnsemble }
                 />
                 <Axis
                     type = "Bottom"
@@ -149,7 +136,7 @@ class Timeline extends React.Component {
                     axis = { axisBottom }
                     propIndex = { 0 }
                     propList = { this.customState.propsLists[0] }
-                    selectElements = { this.selectElements }
+                    selectElements = { this.selectEnsemble }
                 />
                 <PropSelector
                     selected = { false }
@@ -176,16 +163,6 @@ class Timeline extends React.Component {
             </g>
             }
         </g>)
-    }
-    selectElements (prop, value, category) {
-        const elements = this.layout.getElements(prop, value, category)
-        // console.log(prop, value, elements)
-        const { select, zone, selections } = this.props
-        select(elements, zone, selections)
-    }
-    selectElement (selection) {
-        const { select, zone, selections } = this.props
-        select([selection], zone, selections)
     }
     componentDidMount () {
         // console.log(this.props.data)
@@ -215,14 +192,15 @@ Timeline.propTypes = {
     handleMouseDown: PropTypes.func,
     handleMouseMove: PropTypes.func,
     handleMouseUp: PropTypes.func,
-    select: PropTypes.func
+    selectElements: PropTypes.func
 }
 
 function mapStateToProps (state) {
     return {
         dataset: state.dataset,
         display: state.display,
-        palettes: state.palettes
+        palettes: state.palettes,
+        selections: state.selections
     }
 }
 
@@ -231,9 +209,7 @@ function mapDispatchToProps (dispatch) {
         getPropPalette: getPropPalette(dispatch),
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
-        handleMouseMove: handleMouseMove(dispatch),
-        select: select(dispatch),
-        setUnitDimensions: setUnitDimensions(dispatch)
+        selectElements: selectElements(dispatch)
     }
 }
 

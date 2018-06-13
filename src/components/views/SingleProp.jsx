@@ -13,26 +13,17 @@ import SelectionZone from '../elements/SelectionZone'
 // libs
 import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
 import { prepareSinglePropData } from '../../lib/dataLib'
-import * as scaleLib from '../../lib/scaleLib'
 
 // redux functions
-import { setUnitDimensions } from '../../actions/dataActions'
 import { getPropPalette } from '../../actions/palettesActions'
-import { select, handleMouseDown, handleMouseMove, handleMouseUp } from '../../actions/selectionActions'
+import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 
 class SingleProp extends React.Component {
     constructor (props) {
         super(props)
-        this.handleMouseDown = this.handleMouseDown.bind(this)
-        this.handleMouseMove = this.handleMouseMove.bind(this)
-        this.handleMouseUp = this.handleMouseUp.bind(this)
-        this.selectElement = this.selectElement.bind(this)
-        this.selectElements = this.selectElements.bind(this)
+        this.selectEnsemble = this.selectEnsemble.bind(this)
         this.customState = {
-            elementName: `refSingleProp_${props.zone}`,
-            selectElement: this.selectElement,
-            selectElements: this.selectElements,
-            handleMouseUp: this.handleMouseUp
+            elementName: `refSingleProp_${props.zone}`
         }
         this.prepareData(props)
     }
@@ -63,20 +54,10 @@ class SingleProp extends React.Component {
             selectedConfig
         }
     }
-
-    handleMouseDown (e) {
-        const { display, zone } = this.props
-        this.props.handleMouseDown(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
-    }
-    handleMouseMove (e) {
-        const { display, zone } = this.props
-        if (display.selectedZone[zone].x1 !== null) this.props.handleMouseMove(e, zone, scaleLib.getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen))
-    }
-    handleMouseUp (e) {
-        const { selections, zone } = this.props
-        const elements = this.getElementsInZone()
-        if (elements.length > 0) this.props.select(elements, zone, selections)
-        this.props.handleMouseUp(e, zone)
+    selectEnsemble (prop, value, category) {
+        const elements = this.layout.getElements(prop, value, category)
+        const { selectElements, zone, selections } = this.props
+        selectElements(elements, zone, selections)
     }
     getElementsInZone () {
         return []
@@ -89,9 +70,9 @@ class SingleProp extends React.Component {
             <SelectionZone
                 zone = { zone }
                 dimensions = { display.zones[zone] }
-                handleMouseDown = { this.handleMouseDown }
-                handleMouseMove = { this.handleMouseMove }
-                handleMouseUp = { this.handleMouseUp }
+                handleMouseMove = { this.props.handleMouseMove }
+                layout = { this }
+                selections = { selections }
             />
             }
             { step !== 'changing' && this.customState.nestedProp1 &&
@@ -99,16 +80,16 @@ class SingleProp extends React.Component {
                 transform = { `translate(${dimensions.x}, ${dimensions.y})` }
                 with = { dimensions.width }
                 height = { dimensions.height }
-                onMouseMove = { this.handleMouseMove }
-                onMouseUp = { this.handleMouseUp }
-                onMouseDown = { this.handleMouseDown }
+                onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
+                onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
+                onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             >
                 <div className = "box" style = {{ width: dimensions.width + 'px' }}>
                     <div className = "content">
                         <p style = {{lineHeight: '1em'}}>
                             { this.customState.nestedProp1.map((d, i) => {
                                 return (<span key = { `contentprop_${zone}_${i}` }  className = "is-size-7">
-                                    { d.root ? d.root : '' }<span style = {{ color: this.customState.color[0] }}>{ d.name }</span><span style = {{ color: '#999' }}>{ (d.count > 1) ? `(${d.count}` : `` }</span><br />
+                                    { d.root ? d.root : '' }<span style = {{ color: this.customState.color[0] }}>{ d.name }</span><span style = {{ color: '#999' }}>{ (d.count > 1) ? ` (${d.count})` : `` }</span><br />
                                 </span>)
                             }) 
                             }
@@ -150,16 +131,6 @@ class SingleProp extends React.Component {
     componentDidUpdate () {
         this.props.handleTransition(this.props, [])
     }
-    selectElements (prop, value, category) {
-        const elements = this.layout.getElements(this[this.customState.elementName], prop, value, category)
-        // console.log(prop, value, elements, category)
-        const { select, zone, selections } = this.props
-        select(elements, zone, selections)
-    }
-    selectElement (selection) {
-        const { select, zone, selections } = this.props
-        select([selection], zone, selections)
-    }
 }
 
 SingleProp.propTypes = {
@@ -177,7 +148,7 @@ SingleProp.propTypes = {
     handleMouseMove: PropTypes.func,
     handleMouseUp: PropTypes.func,
     handleTransition: PropTypes.func,
-    select: PropTypes.func
+    selectElements: PropTypes.func
 }
 
 function mapStateToProps (state) {
@@ -195,9 +166,7 @@ function mapDispatchToProps (dispatch) {
         getPropPalette: getPropPalette(dispatch),
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
-        handleMouseMove: handleMouseMove(dispatch),
-        select: select(dispatch),
-        setUnitDimensions: setUnitDimensions(dispatch)
+        selectElements: selectElements(dispatch)
     }
 }
 

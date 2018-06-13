@@ -6,7 +6,6 @@ import AxisLayout from '../../d3/AxisLayout'
 
 import { getDimensions } from '../../lib/scaleLib'
 
-import { select } from '../../actions/selectionActions'
 import { selectProperty } from '../../actions/dataActions'
 
 class Axis extends React.PureComponent {
@@ -55,7 +54,6 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
-        select: select(dispatch),
         selectProperty: selectProperty(dispatch)
     }
 }

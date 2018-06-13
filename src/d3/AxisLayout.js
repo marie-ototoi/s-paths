@@ -115,6 +115,7 @@ class AxisLayout extends AbstractLayout {
             return `translate(${dimensions.width},0)`
         })
     }
+    checkSelection (props) {}
 }
 
 export default AxisLayout
