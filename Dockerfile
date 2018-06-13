@@ -9,7 +9,11 @@ COPY . .
 RUN mv .env.example .env
 
 # Install app dependencies
-RUN npm install #--production
+RUN npm install
+
+# Build for production
+RUN npm run build
 
 EXPOSE 5000
-EXPOSE 8081
+
+CMD [ "npm", "start" ]
