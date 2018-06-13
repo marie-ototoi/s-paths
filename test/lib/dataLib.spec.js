@@ -247,6 +247,6 @@ describe('lib/data', () => {
         expect(origin4).to.equal(3)
         expect(target4).to.equal(undefined)
         expect(origin10).to.equal(7)
-        // expect(target10).to.equal(2)
+        expect(target10).to.equal(2)
     })
 })
