@@ -35,11 +35,9 @@ class Timeline extends React.Component {
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
-        // console.log('equal ?', shallowEqual(this.props, nextProps), shallowEqual(this.props.data, nextProps.data))
         return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
             (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
             (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
-            (! shallowEqual(this.props.display.selectedZone, nextProps.display.selectedZone)) ||
             (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {

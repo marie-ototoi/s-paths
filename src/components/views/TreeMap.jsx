@@ -31,7 +31,10 @@ class TreeMap extends React.Component {
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
-        return !shallowEqual(this.props, nextProps)
+        return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
+            (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
+            (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
+            (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
         const { config, data, dataset, getPropPalette, palettes, zone } = nextProps

@@ -35,7 +35,10 @@ class HeatMap extends React.Component {
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
-        return shallowEqual(this.props.data,nextProps.data)
+        return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
+            (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
+            (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
+            (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
         const { config, data, dataset, zone } = nextProps
@@ -76,7 +79,6 @@ class HeatMap extends React.Component {
     }
     render () {
         const { axisBottom, axisLeft, legend } = this.customState
-        console.log('attrntion')
         const { config, display, dimensions, role, selections, step, zone } = this.props
         return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` }>
             { role !== 'target' &&

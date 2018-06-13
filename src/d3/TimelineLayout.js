@@ -24,6 +24,15 @@ class TimelineLayout extends AbstractLayout {
             .enter()
             .append('g')
             .attr('class', 'elements')
+            .append('rect')
+            .attr('class', 'element')
+            
+        elementUnits
+            .exit()
+            .remove()
+
+        d3.select(this.el)
+            .selectAll('g.time .elements')
             .each((d, i) => {
                 d.color = legend.info.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
                 // console.log(zone, d)
@@ -36,17 +45,6 @@ class TimelineLayout extends AbstractLayout {
                 }
                 d.shape = 'rectangle'
                 d.zone = {}
-            })
-            .append('rect')
-            .attr('class', 'element')
-            
-        elementUnits
-            .exit()
-            .remove()
-
-        d3.select(this.el)
-            .selectAll('g.time .elements')
-            .each((d, i) => {
                 d.selected = selectionLib.areSelected([d.selection], zone, selections)
             })
             .attr('id', d => d.selection.selector) // only needed to better understand html source code

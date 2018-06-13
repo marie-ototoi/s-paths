@@ -31,7 +31,10 @@ class SingleProp extends React.Component {
         if (!shallowEqual(this.props.data, nextProps.data)) {
             this.prepareData(nextProps)
         }
-        return !shallowEqual(this.props, nextProps)
+        return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
+            (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
+            (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
+            (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
         const { config, data, dataset, palettes, zone } = nextProps
