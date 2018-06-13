@@ -15,7 +15,6 @@ services:
   image: node:9
   before_script:
     - npm install
-  script: npm run $CI_JOB_STAGE
   # This folder is cached between builds
   # https://docs.gitlab.com/ce/ci/yaml/README.html#cache
   cache:
@@ -28,6 +27,7 @@ services:
 Assets:
   <<: *node
   stage: build
+  script: npm run build
   artifacts:
     paths:
       - public
@@ -38,6 +38,8 @@ Assets:
 UT:
   <<: *node
   stage: test
+  script: npm test
+
 
 #E2E:
 #  <<: *node
