@@ -2,7 +2,7 @@ FROM node:9.11-jessie
 
 LABEL maintainer="marie.destandau@inria.fr"
 
-WORKDIR /opt/semantic-paths
+WORKDIR ./
 
 COPY . .
 

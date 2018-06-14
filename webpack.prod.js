@@ -6,6 +6,6 @@ module.exports = merge(common, {
     mode: 'production',
     devtool: 'source-map',
     plugins: [
-        new UglifyJsPlugin({ sourceMap: true })
+        new UglifyJsPlugin({ sourceMap: true, test: /\.js($|\?)/i })
     ]
 })
