@@ -63,7 +63,7 @@ build_docker:
    - docker
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
-    - docker build -t registry.gitlab.inria.fr/ilda-semantic/discover .
-    - docker push registry.gitlab.inria.fr/ilda-semantic/discover:latest
+    - docker build -t registry.gitlab.inria.fr/mdestand/semantic-paths .
+    - docker push registry.gitlab.inria.fr/mdestand/semantic-paths:latest
   only:
    - master
