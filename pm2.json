@@ -1,7 +1,7 @@
 {
-  "name": "discover",
+  "name": "semantic-paths",
   "script": "app.js",
-  "instances": "2",
+  "instances": "1",
    "env_production" : {
     "NODE_ENV": "production"
    }

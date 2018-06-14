@@ -8,8 +8,8 @@ services:
      - "27017:27107"
     network_mode: "host"
   discover:
-    image: registry.gitlab.inria.fr/ilda-semantic/discover:latest
-    container_name: discover_server
+    image: registry.gitlab.inria.fr/mdestand/semantic-paths:latest
+    container_name: semantic-paths_server
 #    command: ["npm", "start"]
     environment:
      - NODE_ENV="production"

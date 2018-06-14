@@ -1,8 +1,8 @@
 FROM node:9.11-jessie
 
-LABEL maintainer="hande.gozukan@inria.fr"
+LABEL maintainer="marie.destandau@inria.fr"
 
-WORKDIR /opt/discover
+WORKDIR /opt/semantic-paths
 
 COPY . .
 
