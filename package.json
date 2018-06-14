@@ -82,7 +82,6 @@
     "mock-browser": "^0.92.12",
     "nyc": "^11.7.3",
     "react": "^16.4.0",
-    "react-addons-test-utils": "^15.4.2",
     "react-bootstrap": "^0.32.1",
     "react-dom": "^16.4.0",
     "react-hot-loader": "^4.2.0",
