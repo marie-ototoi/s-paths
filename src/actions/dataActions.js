@@ -3,6 +3,8 @@ import types from '../constants/ActionTypes'
 import { activateDefaultConfigs, defineConfigs, getSelectedView, getSelectedMatch, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
 import { getData, makePropQuery, makeQuery, makeTransitionQuery } from '../lib/queryLib'
 
+console.log(process.env)
+
 export const endTransition = (dispatch) => (zone) => {
     return dispatch({
         zone,
@@ -26,7 +28,7 @@ const getStats = (options) => {
 }
 
 const getResources = (options) => {
-    // console.log(JSON.stringify(options))
+    console.log(process.env.API)
     return fetch((process.env.API + 'resources'),
         {
             method: 'POST',
