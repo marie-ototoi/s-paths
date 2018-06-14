@@ -27,6 +27,8 @@ services:
 
 Assets:
   <<: *node
+  tags:
+   - docker
   stage: build
   artifacts:
     paths:
@@ -37,6 +39,8 @@ Assets:
 
 UT:
   <<: *node
+  tags:
+   - docker
   stage: test
 
 #E2E:
