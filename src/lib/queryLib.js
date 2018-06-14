@@ -64,7 +64,9 @@ export const defineGroup = (prop, options) => {
         subcategory = 'name'
     } else if (datatype && datatype === 'http://www.w3.org/2001/XMLSchema#integer') {
         category = 'number'
-    } else {
+    } else if (propName.match(/depiction|picture/gi)) {
+        category = 'image'
+    }else {
         category = 'text'
     }
     return {

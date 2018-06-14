@@ -4,7 +4,6 @@ import * as dataLib from '../lib/dataLib'
 import * as selectionLib from '../lib/selectionLib'
 
 class TimelineLayout extends AbstractLayout {
-
     draw (props) {
         const { nestedProp1, legend, selections, zone } = props
         //console.log(selections)
@@ -55,8 +54,6 @@ class TimelineLayout extends AbstractLayout {
                 return d.opacity
             })
     }
-
-
     getElements (propName, value, propCategory) {
         const isArray = Array.isArray(value)
         let elements = []
@@ -83,7 +80,6 @@ class TimelineLayout extends AbstractLayout {
         })
         return elements
     }
-
     getElementsForTransition (props) {
         let results = []
         d3.select(this.el).selectAll('.elements').each(d => {
@@ -92,7 +88,6 @@ class TimelineLayout extends AbstractLayout {
         // console.log(results)
         return results
     }
-
     getElementsInZone (props) {
         const selectedZone = {
             x1: props.zoneDimensions.x1 - props.display.viz.horizontal_margin,
@@ -108,7 +103,6 @@ class TimelineLayout extends AbstractLayout {
             })
         return selectedElements
     }
-
     resize (props) {
         const { nestedProp1, display } = props
         let maxUnitsPerYear

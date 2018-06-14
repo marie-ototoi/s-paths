@@ -12,14 +12,13 @@ export const endTransition = (dispatch) => (zone) => {
 
 const getStats = (options) => {
     // console.log(JSON.stringify(options))
-    return fetch(('http://bnf.lri.fr:5000/stats'),
+    return fetch((process.env.API + 'stats'),
         {
             method: 'POST',
             body: JSON.stringify(options),
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Access-Control-Allow-Origin': '*'
+                'Accept': 'application/json'
             }
         })
         .then((resp) => resp.json())
@@ -28,14 +27,13 @@ const getStats = (options) => {
 
 const getResources = (options) => {
     // console.log(JSON.stringify(options))
-    return fetch(('http://bnf.lri.fr:5000/resources'),
+    return fetch((process.env.API + 'resources'),
         {
             method: 'POST',
             body: JSON.stringify(options),
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                'Access-Control-Allow-Origin': '*'
+                'Accept': 'application/json'
             }
         })
         .then((resp) => resp.json())

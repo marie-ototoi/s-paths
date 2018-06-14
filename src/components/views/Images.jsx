@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 // components
 import Coverage from '../elements/Coverage'
@@ -36,7 +35,7 @@ class Images extends React.Component {
             (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
-        const { config, data, zone } = nextProps
+        const { config, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
         // First prop
