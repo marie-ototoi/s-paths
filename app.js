@@ -9,12 +9,12 @@ require('./models/connection')
 
 // Router configuration
 const router = express.Router()
-router.use(bodyParser.urlencoded({ extended: true }))
+router.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }))
 
 // Application initialisation
 const app = express()
 app.use(cors())
-app.use(bodyParser.json())
+app.use(bodyParser.json({limit: '50mb'}))
 
 app.use('/', router)
 app.use('/', express.static('public'))
