@@ -123,7 +123,14 @@ export const FSL2SPARQL = (FSLpath, options) => {
 }
 
 export const getData = (endpoint, query, prefixes) => {
-    const client = new SparqlClient(endpoint)
+    const client = new SparqlClient(endpoint, {
+        requestDefaults: {
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Accept': 'application/sparql-results+json,application/json'
+            }
+        }
+    })
         .registerCommon('rdf', 'rdfs')
         .register(prefixes)
     return client

@@ -20,7 +20,11 @@ const getStats = (options) => {
             body: JSON.stringify(options),
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': 'true',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, DELETE',
+                'Access-Control-Allow-Headers': 'Content-Type, User-Agent, Origin'
             }
         })
         .then((resp) => resp.json())
@@ -28,14 +32,17 @@ const getStats = (options) => {
 }
 
 const getResources = (options) => {
-    console.log(process.env.API)
     return fetch((process.env.API + 'resources'),
         {
             method: 'POST',
             body: JSON.stringify(options),
             headers: {
                 'Content-Type': 'application/json',
-                'Accept': 'application/json'
+                'Accept': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': 'true',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, DELETE',
+                'Access-Control-Allow-Headers': 'Content-Type, User-Agent, Origin'
             }
         })
         .then((resp) => resp.json())
