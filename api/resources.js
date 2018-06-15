@@ -34,8 +34,8 @@ const getResources = async (opt) => {
     }
     let { defaultGraph, endpoint, forceUpdate } = options
     if (forceUpdate) {
-        await pathModel.deleteMany({ endpoint })
-        await resourceModel.deleteMany({ endpoint })
+        await pathModel.deleteMany({ endpoint, graph: defaultGraph })
+        await resourceModel.deleteMany({ endpoint, graph: defaultGraph })
     }
     let resources = await resourceModel.find({ endpoint: endpoint, graph: defaultGraph }).sort('-total').exec()
     if (resources.length > 0) {
