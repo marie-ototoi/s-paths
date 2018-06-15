@@ -46,7 +46,14 @@ export const defineGroup = (prop, options) => {
     if (ignoreList.includes(property)) {
         category = 'ignore'
     } else if (type === 'uri') {
-        category = 'uri'
+        if (propName.match(/place|country|city/gi)) {
+            category = 'geo'
+            subcategory = 'name'
+        } else if (propName.match(/depiction|picture/gi)) {
+            category = 'image'
+        } else {
+            category = 'uri'
+        }
     } else if ((datatype && datatype === 'http://www.w3.org/2001/XMLSchema#date') ||
         propName.match(/year|date|birthday/gi) ||
         propName.match(/[/#](birth|death|created|modified)$/gi)) {
@@ -59,14 +66,9 @@ export const defineGroup = (prop, options) => {
         propName.match(/[/#](long)$/gi)) {
         category = 'geo'
         subcategory = 'longitude'
-    } else if (propName.match(/place|country|city/gi)) {
-        category = 'geo'
-        subcategory = 'name'
-    } else if (datatype && datatype === 'http://www.w3.org/2001/XMLSchema#integer') {
+    }  else if (datatype && datatype === 'http://www.w3.org/2001/XMLSchema#integer') {
         category = 'number'
-    } else if (propName.match(/depiction|picture/gi)) {
-        category = 'image'
-    }else {
+    } else {
         category = 'text'
     }
     return {

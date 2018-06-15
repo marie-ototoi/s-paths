@@ -5,6 +5,7 @@ import { connect } from 'react-redux'
 // components
 import GeoMap from './views/GeoMap'
 import HeatMap from './views/HeatMap'
+import Images from './views/Images'
 import ListAllProps from './views/ListAllProps'
 import SingleProp from './views/SingleProp'
 import Timeline from './views/Timeline'
@@ -130,13 +131,14 @@ class App extends React.PureComponent {
         // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
+            'GeoMap': GeoMap,
             'HeatMap': HeatMap,
+            'Images': Images,
+            'ListAllProps': ListAllProps,
+            'SingleProp': SingleProp,
             'Timeline': Timeline,
             'TreeMap': TreeMap,
-            'GeoMap': GeoMap,
-            'URIWheel': URIWheel,
-            'ListAllProps': ListAllProps,
-            'SingleProp': SingleProp
+            'URIWheel': URIWheel
         }
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')

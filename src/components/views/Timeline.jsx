@@ -1,6 +1,5 @@
 import PropTypes from 'prop-types'
 import React from 'react'
-import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 import * as d3 from 'd3'
 // components

@@ -14,7 +14,7 @@ class PropSelector extends React.PureComponent {
         }
     }
     handleSelect (e) {
-        const { config, configs, dataset, propIndex, propList, views, zone } = this.props
+        const { config, dataset, propIndex, propList, views, zone } = this.props
         this.setState({
             selected: this.props.selected
         })

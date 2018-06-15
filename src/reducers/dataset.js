@@ -9,7 +9,7 @@ const initialState = {
     // 'http://nobel.bnf.fr',
     // null,  'http://localhost:8890/data10', 'http://data10.bnf.fr', 'http://data01.bnf.fr','http://data.bnf.fr',
     constraints: '',
-    forceUpdate: true,
+    forceUpdate: false,
     maxLevel: 4,
     resources: [],
     prefixes: {

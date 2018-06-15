@@ -151,12 +151,19 @@ const defaultState = [
     {
         id: 'Images',
         thumb : '/images/images.svg',
-        entrypoint: { min: 10, max: 100, optimal: [10, 50] },
+        entrypoint: { min: 1, max: 400 },
         constraints: [
             [
                 {
                     category: 'image',
-                    unique: { min: 10, max: 100 }
+                    unique: { min: 1, max: 300 }
+                }
+            ],
+            [
+                {
+                    category: 'text',
+                    avg: { max: 120, optimal: [30, 70] },
+                    unique: { }
                 }
             ]
         ]

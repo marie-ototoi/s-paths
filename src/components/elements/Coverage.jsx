@@ -62,7 +62,6 @@ class Coverage extends React.Component {
         ]
 
         let selectionDisabled = (selections.length > 0) ?  {} : { 'disabled' : 'disabled' }
-        let detailClass = (dataLib.getNbDisplayed(data, zone, 'active') < 1000) ?  { 'className': 'button is-small is-info' } : { 'className': 'button is-info is-small is-invisible' }
         // console.log(configs)
         return (<g
             transform = { `translate(${x}, ${y})` }

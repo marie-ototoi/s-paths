@@ -116,7 +116,7 @@ export const defineConfigs = (views, stats) => {
         if (stats.selectionInstances === 1) {
             return {
                 ...view,
-                matches: view.id === 'SingleProp' ? stats.statements.sort((a, b) => {
+                matches: view.id === 'ListAllProps' ? stats.statements.sort((a, b) => {
                     return b.score - a.score
                 }) : []
             }
@@ -199,7 +199,7 @@ export const defineConfigs = (views, stats) => {
         .sort((a, b) => {
             return b.matches[0].score - a.matches[0].score
         })
-    if (configSetUp.matches) console.log('salut la config', configSetUp.matches.map(p => p.fullPath))
+    // if (configSetUp.matches) console.log('salut la config', configSetUp.matches.map(p => p.fullPath))
     return [
         { zone: 'main', views: [...configSetUp] },
         { zone: 'aside', views: [...configSetUp] }

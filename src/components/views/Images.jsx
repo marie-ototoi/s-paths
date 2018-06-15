@@ -67,7 +67,7 @@ class Images extends React.Component {
                 selections = { selections }
             />
             }
-            { step !== 'changing' && this.customState.details &&
+            { step !== 'changing' && data &&
             <foreignObject
                 transform = { `translate(${dimensions.x}, ${dimensions.y})` }
                 with = { dimensions.width }

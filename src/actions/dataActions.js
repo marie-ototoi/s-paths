@@ -3,8 +3,6 @@ import types from '../constants/ActionTypes'
 import { activateDefaultConfigs, defineConfigs, getSelectedView, getSelectedMatch, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
 import { getData, makePropQuery, makeQuery, makeTransitionQuery } from '../lib/queryLib'
 
-console.log(process.env)
-
 export const endTransition = (dispatch) => (zone) => {
     return dispatch({
         zone,

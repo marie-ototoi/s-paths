@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import formatMessage from 'format-message'
-import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 // components
 import Coverage from '../elements/Coverage'

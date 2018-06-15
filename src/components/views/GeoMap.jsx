@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 import GeoMapLayout from '../../d3/GeoMapLayout'
-import { select } from '../../actions/selectionActions'
 import { getPropPalette } from '../../actions/palettesActions'
 
 class GeoMap extends React.Component {
@@ -42,8 +41,7 @@ class GeoMap extends React.Component {
         this.setState({ legend })
     }
     selectElements (elements) {
-        const { select, zone, selections } = this.props
-        select(elements, zone, selections)
+        
     }
     componentDidMount () {
         this.layout = new GeoMapLayout(this[this.state.elementName], { ...this.props, ...this.customState })
@@ -59,8 +57,7 @@ class GeoMap extends React.Component {
 GeoMap.propTypes = {
     display: PropTypes.object,
     selections: PropTypes.array,
-    zone: PropTypes.string,
-    select: PropTypes.func,
+    zone: PropTypes.string
 }
 
 function mapStateToProps (state) {
@@ -74,8 +71,7 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
-        getPropPalette: getPropPalette(dispatch),
-        select: select(dispatch)
+        getPropPalette: getPropPalette(dispatch)
     }
 }
 
