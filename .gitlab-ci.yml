@@ -28,7 +28,7 @@ services:
 Assets:
   <<: *node
   tags:
-   - docker
+   - build
   stage: build
   artifacts:
     paths:
@@ -40,7 +40,7 @@ Assets:
 UT:
   <<: *node
   tags:
-   - docker
+   - test
   stage: test
 
 #E2E:
@@ -62,12 +62,12 @@ UT:
 #    name: production
 #    url: https://example.com
 
-#build_docker:
-#  tags:
-#   - docker
-#  script:
-#    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
-#    - docker build -t registry.gitlab.inria.fr/mdestand/semantic-paths .
-#    - docker push registry.gitlab.inria.fr/mdestand/semantic-paths:latest
-#  only:
-#   - master
+build_docker:
+  tags:
+   - docker
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
+    - docker build -t registry.gitlab.inria.fr/mdestand/semantic-paths .
+    - docker push registry.gitlab.inria.fr/mdestand/semantic-paths:latest
+  only:
+    - master
