@@ -340,3 +340,39 @@
 15:26:35 Checkpoint finished, log reused
 15:26:35 HTTP/WebDAV server online at 8890
 15:26:35 Server online at 1111 (pid 1)
+15:42:30 Server received signal 15
+15:42:30 Initiating quick shutdown
+15:42:30 Server shutdown complete
+
+		Sun Jun 17 2018
+15:47:04 OpenLink Virtuoso Universal Server
+15:47:04 Version 07.20.3215-pthreads for Linux as of Nov 15 2017
+15:47:04 uses parts of OpenSSL, PCRE, Html Tidy
+15:47:04 Database version 3126
+15:47:04 SQL Optimizer enabled (max 1000 layouts)
+15:47:05 Compiler unit is timed at 0.000175 msec
+15:47:07 Roll forward started
+15:47:07     71 transactions, 19783 bytes replayed (100 %)
+15:47:07 Roll forward complete
+15:47:07 Checkpoint started
+15:47:07 Checkpoint finished, log reused
+15:47:09 HTTP/WebDAV server online at 8890
+15:47:09 Server online at 1111 (pid 1)
+
+		Sun Jun 17 2018
+15:50:02 OpenLink Virtuoso Universal Server
+15:50:02 Version 07.20.3215-pthreads for Linux as of Nov 15 2017
+15:50:02 uses parts of OpenSSL, PCRE, Html Tidy
+15:50:02 Database version 3126
+15:50:02 SQL Optimizer enabled (max 1000 layouts)
+15:50:03 Compiler unit is timed at 0.000173 msec
+15:50:04 Roll forward started
+15:50:04     3 transactions, 185 bytes replayed (100 %)
+15:50:04 Roll forward complete
+15:50:05 Checkpoint started
+15:50:05 Checkpoint finished, log reused
+15:50:05 HTTP/WebDAV server online at 8890
+15:50:05 Server online at 1111 (pid 1)
+15:50:38 Server received signal 15
+15:50:38 Initiating quick shutdown
+15:50:38 Server shutdown complete

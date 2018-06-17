@@ -1,6 +1,7 @@
 coverage/
 node_modules/
 public/
+db/
 .env
 .tmp/
 .nyc_output/
