@@ -27,11 +27,11 @@ if (process.env.NODE_ENV === 'development') {
 
     const compiler = require('webpack')(config);
     const {publicPath} = config.output;
-//    console.log(publicPath)
-    require('webpack-hot-client')(compiler, {});
+    // console.log(publicPath)
+    require('webpack-hot-client')(compiler, { host: process.env.APP_BASE });
     app.use(require('webpack-dev-middleware')(compiler, {
         publicPath
     }));
 }
 
-app.listen(5000, () => console.log('ℹ ｢app｣: Discover server running on port 5000'))
+app.listen(5000, () => console.log('ℹ ｢app｣: Semantic Paths server running on port 5000'))

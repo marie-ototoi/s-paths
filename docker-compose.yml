@@ -1,20 +1,24 @@
 version: "3.5"
 services:
   mongo:
-    image: mongo:3.7
+    image: mongo:3.6
     container_name: semantic-paths_mongo
-    restart: on-failure
+    restart: always
+    env_file:
+     - ${ENV}.env
     ports:
-     - "27017:27107"
-    network_mode: "host"
+     - 27017:37107
+    volumes:
+     - ./db/mongo:/data/db
   semanticpaths:
     image: registry.gitlab.inria.fr/mdestand/semantic-paths:latest
     container_name: semantic-paths_server
-#    command: ["npm", "start"]
-    environment:
-     - NODE_ENV="production"
+    env_file:
+     - ${ENV}.env
     ports:
-     - "5000:5000"
+     - 5000:5000
+     - 8081:8081
     depends_on:
-     - "mongo"
-    network_mode: "host"
+     - mongo
+    volumes:
+     - /:/build
