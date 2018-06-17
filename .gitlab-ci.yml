@@ -25,14 +25,14 @@ services:
 # Build stage
 # -> Run script to build any artifact needed by the application
 
-Assets:
-  <<: *node
-  tags:
-   - build
-  stage: build
-  artifacts:
-    paths:
-      - public
+#Assets:
+#  <<: *node
+#  tags:
+#   - build
+#  stage: build
+#  artifacts:
+#    paths:
+#      - public
 
 # Test stage
 # -> Run each independent test script in parallel
@@ -43,31 +43,12 @@ UT:
    - test
   stage: test
 
-#E2E:
-#  <<: *node
-#  stage: test
-#  script: npm run e2e
-
-# Deploy stage
-# -> Automate deployment and may provide continuous deployment
-
-#Production:
-#  <<: *node
-#  stage: deploy
+#build_docker:
+#  tags:
+#   - docker
 #  script:
+#    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
+#    - docker build -t registry.gitlab.inria.fr/mdestand/semantic-paths .
+#    - docker push registry.gitlab.inria.fr/mdestand/semantic-paths:latest
 #  only:
 #    - master
-#  when: manual
-#  environment:
-#    name: production
-#    url: https://example.com
-
-build_docker:
-  tags:
-   - docker
-  script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
-    - docker build -t registry.gitlab.inria.fr/mdestand/semantic-paths .
-    - docker push registry.gitlab.inria.fr/mdestand/semantic-paths:latest
-  only:
-    - master

@@ -1,6 +1,5 @@
 const path = require('path')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
-const Dotenv = require('dotenv-webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 
 module.exports = {
@@ -42,12 +41,11 @@ module.exports = {
         ]
     },
     plugins: [
-        new Dotenv(),
         new HtmlWebpackPlugin({
             inject: false,
             template: require('html-webpack-template'),
             appMountId: 'root',
-            title: 'Discover - semantic data sets exploratory tool',
+            title: 'Semantic Paths - semantic datasets exploratory tool',
             links: [{
                 href: 'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css',
                 rel: 'stylesheet',

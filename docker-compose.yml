@@ -1,24 +1,40 @@
 version: "3.5"
 services:
+  virtuoso:
+    container_name: semantic-paths_virtuoso
+    image: tenforce/virtuoso:1.3.1-virtuoso7.2.2
+    environment:
+      SPARQL_UPDATE: "true"
+      DEFAULT_GRAPH: "http://ilda.nobel.fr"
+    volumes:
+      - ./db/virtuoso:/data
+    ports:
+      - 8890:8890
+      - 1111:1111
   mongo:
     image: mongo:3.6
     container_name: semantic-paths_mongo
     restart: always
     env_file:
-     - ${ENV}.env
+     - .env.${ENV}
     ports:
-     - 27017:37107
+     - 27017:27017
     volumes:
      - ./db/mongo:/data/db
   semanticpaths:
-    image: registry.gitlab.inria.fr/mdestand/semantic-paths:latest
+    build:
+      context: ./
+      dockerfile: Dockerfile.${ENV}
     container_name: semantic-paths_server
     env_file:
-     - ${ENV}.env
+     - .env.${ENV}
     ports:
      - 5000:5000
      - 8081:8081
+     - 9229:9229
     depends_on:
      - mongo
+     - virtuoso
     volumes:
-     - /:/build
+     - .:/build
+      - /build/node_modules

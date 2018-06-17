@@ -1,0 +1,14 @@
+FROM node:9.11-jessie
+
+WORKDIR ./
+
+COPY . .
+
+# Install app dependencies
+# RUN npm install
+
+EXPOSE 5000 8081 9229
+
+ENV MONGODB_URI NODE_ENV API
+
+CMD npm run start:debug

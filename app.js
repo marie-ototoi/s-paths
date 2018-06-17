@@ -1,10 +1,10 @@
-import dotenv from 'dotenv'
+// import dotenv from 'dotenv'
 import cors from 'cors'
 import express from 'express'
 import bodyParser from 'body-parser'
 import index from './api/index'
 
-dotenv.config()
+// dotenv.config()
 require('./models/connection')
 
 // Router configuration
@@ -28,7 +28,7 @@ if (process.env.NODE_ENV === 'development') {
     const compiler = require('webpack')(config);
     const {publicPath} = config.output;
     // console.log(publicPath)
-    require('webpack-hot-client')(compiler, { host: process.env.APP_BASE });
+    require('webpack-hot-client')(compiler, { host: '0.0.0.0' });
     app.use(require('webpack-dev-middleware')(compiler, {
         publicPath
     }));

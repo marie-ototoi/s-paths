@@ -189,7 +189,7 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
 
 export const loadSelection = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
     // console.log('load Data ', dataset.constraints)
-    let { constraints, endpoint, entrypoint, labels, prefixes, stats } = dataset
+    let { constraints, endpoint, entrypoint, prefixes, stats } = dataset
     let countInstancesQuery = `SELECT DISTINCT ?entrypoint WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
     // console.log(countInstancesQuery)
     getData(endpoint, countInstancesQuery, prefixes)

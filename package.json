@@ -1,7 +1,7 @@
 {
-  "name": "discover",
+  "name": "semanticpaths",
   "version": "1.0.0",
-  "description": "explore semantic web datasets",
+  "description": "find your path through semantic web datasets",
   "repository": "git@gitlab.inria.fr:ilda-semantic/discover.git",
   "main": "app.js",
   "scripts": {
@@ -21,7 +21,7 @@
   "author": "Marie Destandau <marie.destandau@inria.fr>",
   "license": "ISC",
   "bugs": {
-    "url": "https://gitlab.inria.fr/dashboard/issues"
+    "url": "https://gitlab.inria.fr/mdestand/semantic-paths/issues"
   },
   "dependencies": {
     "cors": "^2.8.4",
@@ -41,7 +41,7 @@
     "rewire": "^4.0.1",
     "shallowequal": "^1.0.2"
   },
-  "homepage": "https://github.com/marie-ototoi/planning#readme",
+  "homepage": "https://gitlab.inria.fr/mdestand/semantic-paths/blob/master/readme.md",
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
