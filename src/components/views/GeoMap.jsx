@@ -3,6 +3,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import GeoMapLayout from '../../d3/GeoMapLayout'
 import { getPropPalette } from '../../actions/palettesActions'
+import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 
 class GeoMap extends React.Component {
     constructor (props) {
@@ -26,22 +27,36 @@ class GeoMap extends React.Component {
             </g>
         </g>)
     }
-    /*    setAxis (axis) {
-        this.setState({ axis })
+    shouldComponentUpdate (nextProps, nextState) {
+        if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
+            this.prepareData(nextProps)
+        }
+        return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
+            (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
+            (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
+            (this.props.step !== nextProps.step)
     }
-    selectElements (prop, value, category) {
-        const elements = d3Timeline.getElements(this.refs.Timeline, prop, value, category)
-        console.log(elements)
-        // console.log(prop, value, elements)
-        const { select, zone, selections } = this.props
-        select(elements, zone, selections)
+    prepareData (nextProps) {
+        const { config, data, dataset, zone } = nextProps
+        // prepare the data for display
+       // const selectedConfig = getSelectedMatch(config, zone)
+        // First prop
+
+        // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
+        //let details = prepareDetailData(data, dataset)
+        // 
+
+        // Save to reuse in render
+        this.customState = {
+            ...this.customState,
+            //details,
+            //selectedConfig
+        }
     }
-    */
-    setLegend (legend) {
-        this.setState({ legend })
-    }
-    selectElements (elements) {
-        
+    selectEnsemble (prop, value, category) {
+        const elements = this.layout.getElements(prop, value, category)
+        const { selectElements, zone, selections } = this.props
+        selectElements(elements, zone, selections)
     }
     componentDidMount () {
         this.layout = new GeoMapLayout(this[this.state.elementName], { ...this.props, ...this.customState })

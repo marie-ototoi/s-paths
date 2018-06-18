@@ -29,6 +29,7 @@
     "express": "^4.16.3",
     "fetch": "^1.1.0",
     "format-message": "^6.0.4",
+    "google-maps-react": "^2.0.2",
     "mongodb": "^3.0.10",
     "mongoose": "^5.1.5",
     "node-fetch": "^2.1.2",
