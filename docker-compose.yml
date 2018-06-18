@@ -25,16 +25,19 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile.${ENV}
+      args:
+      - http_proxy
+      - https_proxy
+      - no_proxy
+    restart: always
     container_name: semantic-paths_server
     env_file:
      - .env.${ENV}
     ports:
      - 5000:5000
      - 8081:8081
-     - 9229:9229
     depends_on:
      - mongo
      - virtuoso
     volumes:
-     - .:/build
-      - /build/node_modules
+     - ./src:/src/
