@@ -57,7 +57,7 @@ class Images extends React.Component {
     render () {
         const { config, dimensions, display, data, role, selections, step, zone } = this.props
        
-        return (<g className = { `ListProp ${this.customState.elementName} role_${role}` } >
+        return (<g className = { `Images ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
