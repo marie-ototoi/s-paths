@@ -70,7 +70,6 @@ const dataset = (state = initialState, action) => {
             ...state,
             labels: action.labels || state.labels,
             constraints: action.constraints || state.constraints,
-            totalInstances: action.totalInstances || state.totalInstances,
             stats: action.stats || state.stats,
             prefixes: action.prefixes || state.prefixes,
             entrypoint: action.entrypoint || state.entrypoint

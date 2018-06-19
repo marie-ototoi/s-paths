@@ -237,6 +237,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                                 main: { ...dataMain },
                                 aside: dataAside ? { ...dataAside } : { ...dataMain },
                                 mainDelta: dataDeltaMain,
+                                stats,
                                 asideDelta: dataDeltaAside ? dataDeltaAside : dataDeltaMain,
                                 mainDisplayed: Number(uniqueMain.results.bindings[0].displayed.value),
                                 asideDisplayed: uniqueAside ? Number(uniqueAside.results.bindings[0].displayed.value) : Number(uniqueMain.results.bindings[0].displayed.value),
