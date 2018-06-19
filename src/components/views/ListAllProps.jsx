@@ -62,7 +62,7 @@ class ListAllProps extends React.Component {
         return []
     }
     render () {
-        const { config, dimensions, display, role, selections, step, zone } = this.props
+        const { config, dataset, dimensions, display, role, selections, step, zone } = this.props
        
         return (<g className = { `ListProp ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&
@@ -134,12 +134,6 @@ class ListAllProps extends React.Component {
                 />
                 <Coverage
                     zone = { zone }
-                    displayedInstances = { this.customState.displayedInstances } // to be fixed - works only for unit displays
-                    selectedInstances = { selections.reduce((acc, cur) => {
-                        acc += Number(cur.count)
-                        return acc
-                    }, 0) }
-                    selections = { selections }
                     config = { config }
                 />
                 <Nav

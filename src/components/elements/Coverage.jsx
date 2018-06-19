@@ -55,13 +55,13 @@ class Coverage extends React.Component {
         const dimensions = getDimensions('coverage', display.zones[zone], display.viz, { x: 5, y: 5, width: -10, height: 0 })
         const { x, y, width } = dimensions
         let options = [
-            { label: 'dataset', total: dataset.stats.totalInstances },
+            { label: 'in dataset', total: dataset.stats.totalInstances },
             { label: 'queried', total: dataset.stats.selectionInstances },
             { label: 'displayed', total:  dataLib.getNbDisplayed(data, zone, 'active') }/* ,
             { label: 'selected', total: selectedInstances } */
         ]
 
-        let selectionDisabled = (selections.length > 0) ?  {} : { 'disabled' : 'disabled' }
+        let selectionDisabled = (selections.filter(s => s.zone === zone).length > 0) ?  {} : { 'disabled' : 'disabled' }
         // console.log(configs)
         return (<g
             transform = { `translate(${x}, ${y})` }
@@ -131,6 +131,7 @@ function mapStateToProps (state) {
         dataset: state.dataset,
         data: state.data,
         display: state.display,
+        selections: state.selections,
         views: state.views
     }
 }

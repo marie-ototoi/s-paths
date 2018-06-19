@@ -81,7 +81,7 @@ class Timeline extends React.Component {
     }
     render () {
         const { axisBottom, legend } = this.customState
-        const { config, data, dimensions, display, role, selections, step, zone } = this.props
+        const { config, data, dataset, dimensions, display, role, selections, step, zone } = this.props
         // display settings
         const classN = `Timeline ${this.customState.elementName} role_${role}`
         return (<g className = { classN } >
@@ -110,9 +110,6 @@ class Timeline extends React.Component {
                 />
                 <Coverage
                     zone = { zone }
-                    displayedInstances = { deduplicate(data, ['entrypoint']).length } // to be fixed - works only for unit displays
-                    selectedInstances = { selections.length }
-                    selections = { selections }
                     config = { config }
                 />
                 <Nav
@@ -180,6 +177,7 @@ class Timeline extends React.Component {
 Timeline.propTypes = {
     config: PropTypes.object,
     data: PropTypes.array,
+    dataset: PropTypes.object,
     dimensions: PropTypes.object,
     display: PropTypes.object,
     selections: PropTypes.array,
