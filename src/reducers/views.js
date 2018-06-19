@@ -93,7 +93,7 @@ const defaultState = [
                 }
             ]
         ]
-    },
+    }/* ,
     {
         id: 'GeoMap',
         thumb : '/images/geomap.svg',
@@ -111,7 +111,7 @@ const defaultState = [
                     hierarchical: true,
                     unique: { min: 2 }
                 }
-            ],
+            ]/* ,
             [
                 {
                     category: 'geo',
@@ -121,7 +121,7 @@ const defaultState = [
                 }
             ]
         ]
-    },
+    } */,
     {
         id: 'ListAllProps',
         thumb : '/images/listprop.svg',
