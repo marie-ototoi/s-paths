@@ -43,12 +43,34 @@ UT:
    - test
   stage: test
 
-#build_docker:
+build_semantic-paths:
+  tags:
+   - docker
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
+    - docker build -t registry.gitlab.inria.fr/mdestand/semantic-paths .
+    - docker push registry.gitlab.inria.fr/mdestand/semantic-paths:latest
+  only:
+    - master
+
+#deploy_semantic-paths:
+#  stage: deploy
 #  tags:
 #   - docker
+#  image: registry.gitlab.inria.fr/mdestand/semantic-paths
 #  script:
-#    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
-#    - docker build -t registry.gitlab.inria.fr/mdestand/semantic-paths .
-#    - docker push registry.gitlab.inria.fr/mdestand/semantic-paths:latest
+    # add the server as a known host
+#    - mkdir ~/.ssh
+#    - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+#    - chmod 644 ~/.ssh/known_hosts
+    # add ssh key stored in SSH_PRIVATE_KEY variable to the agent store
+#    - eval $(ssh-agent -s)
+#    - ssh-add <(echo "$SSH_PRIVATE_KEY")
+    # log into Docker registry
+#     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
+    # stop container, remove image.
+#    - ssh deployer@virtuoso.lri.fr "docker stack deploy --compose-file docker-compose-prod.yml stackSemanticPaths" || true
 #  only:
 #    - master
+#  when: manual 
