@@ -22,43 +22,30 @@ services:
     paths:
       - node_modules/
 
-# Build stage
-# -> Run script to build any artifact needed by the application
-
-#Assets:
-#  <<: *node
-#  tags:
-#   - build
-#  stage: build
-#  artifacts:
-#    paths:
-#      - public
-
 # Test stage
-# -> Run each independent test script in parallel
-
 UT:
   <<: *node
   tags:
    - test
   stage: test
 
+# Build stage
 build_semantic-paths:
   tags:
    - docker
   stage: build
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
-    - docker build -f Dockerfile.prod -t registry.gitlab.inria.fr/mdestand/semantic-paths .
+    - docker build -f Dockerfile.prod -t registry.gitlab.inria.fr/mdestand/semantic-paths
     - docker push registry.gitlab.inria.fr/mdestand/semantic-paths:latest
   only:
     - master
 
+# Deploy stage
 deploy_semantic-paths:
   stage: deploy
   tags:
    - docker
-  image: registry.gitlab.inria.fr/mdestand/semantic-paths
   script:
     # add the server as a known host
     - mkdir ~/.ssh
