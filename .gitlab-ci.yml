@@ -19,12 +19,13 @@ deploy_semantic-paths:
     DOCKER_MACHINE_NAME: default
   image: docker:latest
   script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
     - mkdir -pv ~/.docker
     - echo "$TLSCACERT" > ~/.docker/ca.pem
     - echo "$TLSCERT" > ~/.docker/cert.pem
     - echo "$TLSKEY" > ~/.docker/key.pem
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
-    - docker stack deploy semanticStack --compose-file docker-compose.yml
+    
+    - docker stack deploy  --with-registry-auth --compose-file docker-compose.yml semanticStack
   only:
     - master
   when: manual
