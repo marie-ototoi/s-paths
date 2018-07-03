@@ -3,7 +3,7 @@
 stages:
   - build
   - test
-#  - deploy
+  - deploy
   
 services:
  - docker:dind
@@ -43,10 +43,10 @@ UT:
    - test
   stage: test
 
-build_semantic-paths:
+deploy_semantic-paths:
   tags:
    - docker
-  stage: build
+  stage: deploy
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
     - docker build -f Dockerfile.prod -t registry.gitlab.inria.fr/mdestand/semantic-paths .
