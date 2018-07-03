@@ -1,8 +1,8 @@
 # https://docs.gitlab.com/ce/ci/yaml/README.html
 
 stages:
-  - test
-  - build
+#  - test
+#  - build
   - deploy
   
 services:
@@ -47,9 +47,7 @@ deploy_semantic-paths:
    - docker
   stage: deploy
   variables:
-    DOCKER_TLS_VERIFY: 1
     DOCKER_HOST: tcp://129.175.22.62:2376
-    DOCKER_CERT_PATH: /Users/mariedestandau/.docker/machine/machines/default
     DOCKER_MACHINE_NAME: default
   image: docker:latest
   script:
