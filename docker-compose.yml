@@ -32,8 +32,6 @@ services:
     depends_on:
      - mongo
      - virtuoso
-    volumes:
-     - ./src:/src/
     links:
      - virtuoso
      - mongo
