@@ -47,15 +47,15 @@ deploy_semantic-paths:
    - docker
   stage: deploy
   variables:
-    DOCKER_HOST: tcp://swarm.example.com:2375
-    SERVICE_NAME: foobar
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_HOST: tcp://129.175.22.62:2376
+    DOCKER_CERT_PATH: /Users/mariedestandau/.docker/machine/machines/default
+    DOCKER_MACHINE_NAME: default
   image: docker:latest
   script:
-    - docker login -u gitlab-ci-token -p "$CI_BUILD_TOKEN" "$CI_REGISTRY"
-    - docker stack deploy --with-registry-auth --compose-file=docker-stack-compose.yml ${CI_PROJECT_NAMESPACE}-${CI_PROJECT_NAME}-${SERVICE_NAME}
-  environment:
-    name: master
-    url: http://${CI_BUILD_REF_NAME}.example.com
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
+    - docker stack deploy semanticStack --compose-file docker-compose.yml
+    
   only:
     - master
   when: manual
