@@ -36,7 +36,7 @@ build_semantic-paths:
   stage: build
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
-    - docker build -f Dockerfile.prod -t registry.gitlab.inria.fr/mdestand/semantic-paths
+    - docker build -f Dockerfile.prod -t registry.gitlab.inria.fr/mdestand/semantic-paths .
     - docker push registry.gitlab.inria.fr/mdestand/semantic-paths:latest
   only:
     - master
@@ -52,6 +52,7 @@ deploy_semantic-paths:
     - echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
     - chmod 644 ~/.ssh/known_hosts
     # add ssh key stored in SSH_PRIVATE_KEY variable to the agent store
+    - 'which ssh-agent || ( apt-get update -y && apt-get install openssh-client -y )'
     - eval $(ssh-agent -s)
     - ssh-add <(echo "$SSH_PRIVATE_KEY")
     # log into Docker registry
