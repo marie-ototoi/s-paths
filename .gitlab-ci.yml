@@ -44,6 +44,7 @@ build_semantic-paths:
 # Deploy stage
 deploy_semantic-paths:
   stage: deploy
+  image: ubuntu
   tags:
    - docker
   before_script:
