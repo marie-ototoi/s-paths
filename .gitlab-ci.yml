@@ -1,9 +1,9 @@
 # https://docs.gitlab.com/ce/ci/yaml/README.html
 
 stages:
+  - deploy
 #  - test
 #  - build
-  - deploy
   
 services:
  - docker:dind
