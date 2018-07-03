@@ -7,8 +7,10 @@ stages:
 services:
  - docker:dind
 
-UT:
-  stage: test
+# Environment templates
+# -> Describe common environments to run stages
+
+.node: &node
   image: node:9
   before_script:
     - npm install
@@ -18,10 +20,30 @@ UT:
   cache:
     paths:
       - node_modules/
+
+# Build stage
+# -> Run script to build any artifact needed by the application
+
+#Assets:
+#  <<: *node
+#  tags:
+#   - build
+#  stage: build
+#  artifacts:
+#    paths:
+#      - public
+
+# Test stage
+# -> Run each independent test script in parallel
+
+UT:
+  <<: *node
   tags:
    - test
+  stage: test
 
 build_semantic-paths:
+  <<: *node
   tags:
    - docker
   stage: build
