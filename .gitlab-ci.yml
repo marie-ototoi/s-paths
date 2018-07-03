@@ -20,7 +20,7 @@ deploy_semantic-paths:
   image: docker:latest
   script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
-    - mkdir -p ~/.docker
+    - mkdir -pv ~/.docker
     - echo "$TLSCACERT" > ~/.docker/ca.pem
     - echo "$TLSCERT" > ~/.docker/cert.pem
     - echo "$TLSKEY" > ~/.docker/key.pem
