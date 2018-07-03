@@ -43,7 +43,6 @@ UT:
   stage: test
 
 build_semantic-paths:
-  <<: *node
   tags:
    - docker
   stage: build
