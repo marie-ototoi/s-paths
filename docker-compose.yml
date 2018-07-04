@@ -2,6 +2,7 @@ version: "3.5"
 services:
   virtuoso:
     image: tenforce/virtuoso:1.3.1-virtuoso7.2.2
+    restart: always
     environment:
       SPARQL_UPDATE: "true"
       DEFAULT_GRAPH: "http://ilda.nobel.fr"
@@ -12,6 +13,7 @@ services:
       - 1111:1111
   mongo:
     image: mongo:3.6
+    restart: always
     env_file:
      - .env.prod
     ports:
@@ -22,6 +24,7 @@ services:
     image: registry.gitlab.inria.fr/mdestand/semantic-paths:latest
     env_file:
      - .env.prod
+    restart: always
     ports:
      - 80:5000
     depends_on:
