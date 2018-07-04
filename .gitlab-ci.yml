@@ -1,11 +1,49 @@
 # https://docs.gitlab.com/ce/ci/yaml/README.html
 
 stages:
+  - test
+  - build
   - deploy
   
 services:
  - docker:dind
 
+# Environment templates
+# -> Describe common environments to run stages
+
+.node: &node
+  image: node:9
+  before_script:
+    - npm install
+  script: npm run $CI_JOB_STAGE
+  # This folder is cached between builds
+  # https://docs.gitlab.com/ce/ci/yaml/README.html#cache
+  cache:
+    paths:
+      - node_modules/
+
+# Test stage
+UT:
+  <<: *node
+  tags:
+   - test
+  stage: test
+
+# Build stage
+build_semantic-paths:
+  tags:
+   - docker
+  stage: build
+  script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
+    - docker build -f Dockerfile.prod -t registry.gitlab.inria.fr/mdestand/semantic-paths .
+    - docker push registry.gitlab.inria.fr/mdestand/semantic-paths:latest
+    - docker build -f Dockerfile.mongo -t registry.gitlab.inria.fr/mdestand/mongo .
+    - docker push registry.gitlab.inria.fr/mdestand/mongo:latest
+    - docker build -f Dockerfile.virtuoso -t registry.gitlab.inria.fr/mdestand/virtuoso .
+    - docker push registry.gitlab.inria.fr/mdestand/virtuoso:latest
+  only:
+    - master
 
 
 # Deploy stage
