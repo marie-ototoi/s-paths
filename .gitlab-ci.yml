@@ -64,7 +64,7 @@ deploy_semantic-paths:
     - echo "$TLSCERT" > ~/.docker/cert.pem
     - echo "$TLSKEY" > ~/.docker/key.pem
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
-    - docker stack deploy  --with-registry-auth --compose-file docker-compose.yml semanticStack
+    - docker service update  --with-registry-auth semanticStack_semanticpaths
   only:
     - master
   when: manual
