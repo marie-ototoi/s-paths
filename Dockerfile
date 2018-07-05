@@ -25,4 +25,6 @@ ENV PATH /node_modules/.bin:$PATH
 
 EXPOSE 5000
 
-CMD npm run start:debug
+RUN npm run build --production 
+
+CMD npm start
