@@ -45,7 +45,8 @@ $ npm test
 ## Many thanks to
 
 * **Léo, Silvio**
-* **Logilab**, especially Adrien, Tanguy and Luc
-* **BnF**, particularly Aude, Raphaëlle and Sébastien
+* **Logilab**: Adrien, Tanguy, Luc & co
+* **BnF**: Aude, Raphaëlle and Sébastien & co
+* **Staff** = technical support team @ LRI: Laurent & co
 * **Browserstack**, for supporting opensource and thus granting us a free open source licence
 
