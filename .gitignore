@@ -1,7 +1,7 @@
 coverage/
 node_modules/
 public/
-db/mongo/
+db/
 .env
 .tmp/
 .nyc_output/
