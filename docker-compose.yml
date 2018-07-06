@@ -19,7 +19,7 @@ services:
     volumes:
      - /home/deployer/db-mongo:/data/db
   semanticpaths:
-    image: registry.gitlab.inria.fr/mdestand/semantic-paths
+    image: registry.gitlab.inria.fr/mdestand/semantic-paths:latest
     build:
       context: ./
     restart: always
