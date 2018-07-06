@@ -8,25 +8,13 @@ import * as dataLib from '../../lib/dataLib'
 import * as queryLib from '../../lib/queryLib'
 import { getDimensions } from '../../lib/scaleLib'
 
-import { loadSelection, loadDetail } from '../../actions/dataActions'
+import { loadSelection } from '../../actions/dataActions'
 
 class Coverage extends React.Component {
     constructor (props) {
         super(props)
-        this.detailSelection = this.detailSelection.bind(this)
         this.exploreSelection = this.exploreSelection.bind(this)
         this.handleKeyDown = this.handleKeyDown.bind(this)
-    }
-    detailSelection () {
-        const { config, configs, dataset, selections, zone } = this.props
-        const activeConfigs = getCurrentConfigs(configs, 'active')
-        if (selections.length > 0) {
-            const selectedConfig = getSelectedMatch(config, zone)
-            this.props.loadDetail({
-                ...dataset,
-                constraints: queryLib.makeSelectionConstraints(selections, selectedConfig, zone)
-            }, activeConfigs, zone)
-        }
     }
     exploreSelection () {
         const { config, configs, dataset, selections, views, zone } = this.props
@@ -45,8 +33,6 @@ class Coverage extends React.Component {
         const { data, selections, zone } = this.props
         if (e === 'enter' && selections.length > 0) {
             this.exploreSelection()
-        } else if (e === 'ctrl+enter' && selections.length > 0  && dataLib.getNbDisplayed(data, zone, 'active') < 1000) {
-            this.detailSelection()
         }
     }
     render () {
@@ -122,7 +108,6 @@ Coverage.propTypes = {
     views: PropTypes.array,
     zone: PropTypes.string,
     loadSelection: PropTypes.func,
-    loadDetail: PropTypes.func,
 }
 
 function mapStateToProps (state) {
@@ -138,8 +123,7 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
-        loadSelection: loadSelection(dispatch),
-        loadDetail: loadDetail(dispatch)
+        loadSelection: loadSelection(dispatch)
     }
 }
 

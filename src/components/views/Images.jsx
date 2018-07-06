@@ -22,7 +22,6 @@ class Images extends React.Component {
         this.customState = {
             elementName: `refListProp_${props.zone}`
         }
-        this.state = { selectedIndex: 0 }
         this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {

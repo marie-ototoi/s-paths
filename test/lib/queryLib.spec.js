@@ -112,7 +112,7 @@ WHERE {
 WHERE {
 
 ?entrypoint rdf:type nobel:Laureate . ?entrypoint dbpedia-owl:affiliation ?prop1inter1 . FILTER (?prop1inter1 != ?entrypoint) . ?prop1inter1 dbpedia-owl:country ?prop1 . FILTER (?prop1 != ?prop1inter1 && ?prop1 != ?entrypoint) . 
-} GROUP BY ?prop1 ?latitude1 ?longitude1 ?geoname1  ORDER BY ?prop1 ?countprop1 `)
+} GROUP BY ?prop1  ORDER BY ?prop1 ?countprop1 `)
     })
     it('should make a valid SPARQL to get stats for a prop', () => {
         expect(queryLib.makePropsQuery('nobel:LaureateAward', { constraints: '' }, 1))
@@ -217,30 +217,6 @@ WHERE {
             .to.equal(false)
     })
 
-    it('should build a query corresponding to selected spec', () => {
-        expect(queryLib.makeQueryFromConstraint({
-            value: '1930',
-            category: 'datetime',
-            group: 'decade',
-            propName: 'prop1'
-        })).to.equal('FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . ')
-        expect(queryLib.makeQueryFromConstraint({
-            value: '1948',
-            category: 'datetime',
-            group: 'year',
-            propName: 'prop2'
-        })).to.equal('FILTER (?prop2 >= xsd:date("1948-01-01") && ?prop2 < xsd:date("1948-12-31")) . ')
-        expect(queryLib.makeQueryFromConstraint({
-            value: 'Chemistry',
-            category: 'text',
-            propName: 'prop2'
-        })).to.equal('FILTER regex(?prop2, "^Chemistry$") . ')
-        expect(queryLib.makeQueryFromConstraint({
-            value: [15, 30],
-            category: 'aggregate',
-            propName: 'prop1'
-        })).to.equal('FILTER (?prop1 >= 15 && ?prop1 < 30) . ')
-    })
     it('should build a query corresponding to a transition between two configs', () => {
         const config = {
             constraints: [
@@ -291,4 +267,65 @@ WHERE {
     GROUP BY ?prop1 ?prop2 ?newprop1 ?newprop2 
     ORDER BY ?prop1 ?countprop1 ?prop2 ?countprop2 ?newprop1 ?newcountprop1 ?newprop2 ?newcountprop2 `)
     })
+
+    /*it('should build a query corresponding to selected spec', () => {
+        expect(queryLib.makeQueryFromConstraint({
+            value: '1930',
+            category: 'datetime',
+            group: 'decade',
+            propName: 'prop1'
+        })).to.equal('FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . ')
+        expect(queryLib.makeQueryFromConstraint({
+            value: '1948',
+            category: 'datetime',
+            group: 'year',
+            propName: 'prop2'
+        })).to.equal('FILTER (?prop2 >= xsd:date("1948-01-01") && ?prop2 < xsd:date("1948-12-31")) . ')
+        expect(queryLib.makeQueryFromConstraint({
+            value: 'Chemistry',
+            category: 'text',
+            propName: 'prop2'
+        })).to.equal('FILTER regex(?prop2, "^Chemistry$") . ')
+        expect(queryLib.makeQueryFromConstraint({
+            value: [15, 30],
+            category: 'aggregate',
+            propName: 'prop1'
+        })).to.equal('FILTER (?prop1 >= 15 && ?prop1 < 30) . ')
+    })*/
+
+    /* it('should create constraints ', () => {
+        const config = {
+            constraints: [
+                [{}],
+                [{}]
+            ],
+            matches: [
+                {
+                    properties: [
+                        { path: 'nobel:LaureateAward/nobel:university/*' },
+                        { path: 'nobel:LaureateAward/dct:isPartOf/*' }
+                    ],
+                    selected: true
+                }
+            ]
+        }
+        expect(queryLib.makeSelectionConstraints([{
+            query: {
+                type: 'set',
+                value:[
+                    {
+                        category:"datetime",
+                        value:[1910,1919],
+                        propName:"prop1"
+                    },
+                    {
+                        category: 'text',
+                        value: 'Acceptance Speech',
+                        propName: 'prop2'
+                    }
+                ]
+            }
+        }], config, 'main'))
+            .to.equal(true)
+    }) */
 })

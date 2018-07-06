@@ -260,25 +260,6 @@ export const makePropsQuery = (entitiesClass, options, level) => {
     } */
 }
 
-export const makeQueryFromConstraint = (constraint) => {
-    const { category, group, propName, value } = constraint
-    if (category === 'datetime') {
-        // console.log(value, Number(value))
-        const startValue = Number(value)
-        if (group === 'century') {
-            return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${(startValue + 99)}-12-31")) . `
-        } else if (group === 'decade') {
-            return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${(startValue + 9)}-12-31")) . `
-        } else { // treats other case as year (should be refined to handle time)
-            return `FILTER (?${propName} >= xsd:date("${startValue}-01-01") && ?${propName} < xsd:date("${startValue}-12-31")) . `
-        }
-    } else if (category === 'text') {
-        return `FILTER regex(?${propName}, "^${value}$") . `
-    } else if (category === 'aggregate') {
-        return `FILTER (?${propName} >= ${value[0]} && ?${propName} < ${value[1]}) . `
-    }
-}
-
 export const makeSelectionConstraints = (selections, selectedConfig, zone) => {
     const uriSelections = selections.filter(sel => sel.query.type === 'uri' && sel.zone === zone)
     const uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
@@ -321,13 +302,13 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone) => {
 
 // to do : take constraints into account
 export const makeQuery = (entrypoint, configZone, zone, options) => {
-    const { defaultGraph, constraints, maxDepth, prop1only, unique } = options
+    const { defaultGraph, constraints, geonamesGraph, maxDepth, prop1only, unique } = options
     // console.log(configZone)
     let defList = ``
     let groupList = unique ?  `` : `GROUP BY `
     let propList = ``
     let orderList = unique ? `` : `ORDER BY `
-    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    let graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
     if (maxDepth) {
         propList = `DISTINCT ?entrypoint ?path1 ?prop1 ?level `
         if (!unique) groupList = groupList.concat(`?prop1 `)
@@ -384,13 +365,26 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
                 optional,
                 hierarchical
             }))
-            if (prop.category === 'geo' && prop.subcategory === 'name') {
+            if (prop.category === 'geo' && prop.subcategory === 'geoname') {
+                // FIND IN GEONAMES GRAPH
                 groupList = groupList.concat(`?latitude${index} ?longitude${index} ?geoname${index} `)
-                //defList = defList.concat('?latitude ?longitude ?geoname ') // FIND IN GEONAMES GRAPH
+                propList = propList.concat(`?latitude${index} ?longitude${index} ?geoname${index} `)
+                defList = defList.concat(`?prop${index} <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?latitude${index} .
+                ?prop${index} <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?longitude${index} .
+                ?prop${index} <http://www.geonames.org/ontology#name> ?geoname${index} .`)
+                if (graph === ``) {
+                    graph = graph.concat(`FROM <${geonamesGraph}> `)
+                } else if (graph.indexOf(`${geonamesGraph}`) === -1) {
+                    graph = graph.concat(` <${geonamesGraph}> `)
+                }
             }
-            
         })
     }
+    let request = `SELECT DISTINCT ${propList}${graph}
+    WHERE {
+    ${constraints}
+    ${defList}
+    } ${groupList} ${orderList}`
     return `SELECT DISTINCT ${propList}${graph}
 WHERE {
 ${constraints}

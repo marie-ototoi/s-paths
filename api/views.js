@@ -109,7 +109,7 @@ export const views = [
                     hierarchical: true,
                     unique: { min: 2 }
                 }
-            ],
+            ]/* ,
             [
                 {
                     category: 'geo',
@@ -117,7 +117,7 @@ export const views = [
                     optional: true,
                     unique: { min: 2 }
                 }
-            ]
+            ]*/
         ]
     },
     {

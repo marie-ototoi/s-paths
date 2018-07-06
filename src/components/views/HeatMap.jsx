@@ -160,6 +160,9 @@ class HeatMap extends React.Component {
             }
         </g>)
     }
+    getElementsInZone () {
+        return []
+    }
     selectEnsemble (prop, value, category) {
         const elements = this.layout.getElements(prop, value, category)
         const { selectElements, zone, selections } = this.props

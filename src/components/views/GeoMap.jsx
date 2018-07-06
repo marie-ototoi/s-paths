@@ -10,19 +10,23 @@ import SelectionZone from '../elements/SelectionZone'
 // d3
 
 // libs
+import { prepareGeoData } from '../../lib/dataLib'
 import { getPropPalette } from '../../actions/palettesActions'
-// redux functions
 import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
-import { Map, InfoWindow, Marker, GoogleApiWrapper } from 'google-maps-react';
+// redux functions
+// import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
+import ReactMapboxGl, { Layer, Feature } from "react-mapbox-gl"
 
+const Map = ReactMapboxGl({
+    accessToken: "pk.eyJ1IjoibWFyaWVkZXN0YW5kYXUiLCJhIjoiY2ppb2E2Y3hlMG5xMzNrbzI3Ynk0MDlmaSJ9.XmflFu2QUBjFDVVWAKFBKQ"
+})
 
 class GeoMap extends React.Component {
     constructor (props) {
         super(props)
-        this.selectElements = this.selectElements.bind(this)
-        this.state = {
-            setLegend: this.setLegend,
-            selectElements: this.selectElements,
+        // this.selectElements = this.selectElements.bind(this)
+        this.customState = {
+            // selectElements: this.selectElements,
             elementName: `refGeoMap_${props.zone}`
         }
     }
@@ -40,25 +44,28 @@ class GeoMap extends React.Component {
                 selections = { selections }
             />
             }
-            { step !== 'changing' && this.customState.details &&
+            { step !== 'changing' && 
             <foreignObject
                 transform = { `translate(${dimensions.x}, ${dimensions.y})` }
-                with = { dimensions.width }
+                width = { dimensions.width }
                 height = { dimensions.height }
                 onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
                 onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             >
-                <Map google={this.props.google} zoom={14}>
-
-                    <Marker onClick={this.onMarkerClick}
-                        name={'Current location'} />
-
-                    <InfoWindow onClose={this.onInfoWindowClose}>
-                        <div>
-                            <h1>{this.state.selectedPlace.name}</h1>
-                        </div>
-                    </InfoWindow>
+                <Map
+                    style="mapbox://styles/mapbox/light-v9"
+                    containerStyle={{
+                        height: '100%',
+                        width: '100%' 
+                    }}>
+                    <Layer
+                        type="symbol"
+                        id="marker"
+                        layout={{ "icon-image": "marker-15" }}>
+                        <Feature coordinates={[-0.481747846041145, 51.3233379650232]}/>
+                        <Feature coordinates={[-1.5, 51.3233379650232]}/>
+                    </Layer>
                 </Map>
             </foreignObject>
             }
@@ -69,12 +76,6 @@ class GeoMap extends React.Component {
                 />
                 <Coverage
                     zone = { zone }
-                    displayedInstances = { this.customState.displayedInstances } // to be fixed - works only for unit displays
-                    selectedInstances = { selections.reduce((acc, cur) => {
-                        acc += Number(cur.count)
-                        return acc
-                    }, 0) }
-                    selections = { selections }
                     config = { config }
                 />
                 <Nav
@@ -88,6 +89,9 @@ class GeoMap extends React.Component {
             </g>
             }
         </g>)
+    }
+    getElementsInZone () {
+        return []
     }
     shouldComponentUpdate (nextProps, nextState) {
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
@@ -105,33 +109,32 @@ class GeoMap extends React.Component {
         // First prop
 
         // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
-        //let details = prepareDetailData(data, dataset)
+        let geodata = prepareGeoData(data, dataset)
         // 
 
         // Save to reuse in render
         this.customState = {
             ...this.customState,
-            //details,
+            geodata
             //selectedConfig
         }
     }
     selectEnsemble (prop, value, category) {
-        const elements = this.layout.getElements(prop, value, category)
+        const elements = this.getElements(prop, value, category)
         const { selectElements, zone, selections } = this.props
         selectElements(elements, zone, selections)
     }
     componentDidMount () {
-        
+        this.props.handleTransition(this.props, [])
     }
     componentDidUpdate () {
-    }
-    componentWillUnmount () {
+        this.props.handleTransition(this.props, [])
     }
 }
 
 GeoMap.propTypes = {
     config: PropTypes.object,
-    data: PropTypes.object,
+    data: PropTypes.array,
     dataset: PropTypes.object,
     dimensions: PropTypes.object,
     display: PropTypes.object,
@@ -151,7 +154,6 @@ GeoMap.propTypes = {
 function mapStateToProps (state) {
     return {
         display: state.display,
-        data: state.data,
         palettes: state.palettes,
         selections: state.selections
     }
@@ -159,12 +161,13 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
-        getPropPalette: getPropPalette(dispatch)
+        getPropPalette: getPropPalette(dispatch),
+        handleMouseDown: handleMouseDown(dispatch),
+        handleMouseUp: handleMouseUp(dispatch),
+        selectElements: selectElements(dispatch)
     }
 }
 
 const GeoMapConnect = connect(mapStateToProps, mapDispatchToProps)(GeoMap)
 
-export default GoogleApiWrapper({
-    apiKey: 'AIzaSyAedqQrTPrMHaWSJt8jovCYXVpvK7Zs5vE'
-})(GeoMapConnect)
+export default GeoMapConnect

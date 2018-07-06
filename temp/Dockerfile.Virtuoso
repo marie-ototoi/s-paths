@@ -1,0 +1,4 @@
+FROM tenforce/virtuoso:1.3.1-virtuoso7.2.2
+
+RUN isql << EOF DB.DBA.VHOST_REMOVE (lhost=>'*ini*', vhost=>'*ini*', lpath=>'/sparql') go exit EOF && \
+    isql << EOF2 DB.DBA.VHOST_DEFINE (lpath=>'/sparql/', ppath => '/!sparql/', is_dav => 1, vsp_user => 'dba', opts => vector('noinherit', 1, 'cors', '*')) go exit EOF2

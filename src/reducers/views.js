@@ -93,7 +93,7 @@ const defaultState = [
                 }
             ]
         ]
-    }/* ,
+    },
     {
         id: 'GeoMap',
         thumb : '/images/geomap.svg',
@@ -119,9 +119,9 @@ const defaultState = [
                     optional: true,
                     unique: { min: 2 }
                 }
-            ]
+            ] */
         ]
-    } */,
+    },
     {
         id: 'ListAllProps',
         thumb : '/images/listprop.svg',

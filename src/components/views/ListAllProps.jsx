@@ -62,7 +62,7 @@ class ListAllProps extends React.Component {
         return []
     }
     render () {
-        const { config, dataset, dimensions, display, role, selections, step, zone } = this.props
+        const { config, dimensions, display, role, selections, step, zone } = this.props
        
         return (<g className = { `ListProp ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&

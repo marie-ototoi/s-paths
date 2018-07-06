@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-// import GeoMap from './views/GeoMap'
+import GeoMap from './views/GeoMap'
 import HeatMap from './views/HeatMap'
 import Images from './views/Images'
 import ListAllProps from './views/ListAllProps'
@@ -131,7 +131,7 @@ class App extends React.PureComponent {
         // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
-            // 'GeoMap': GeoMap,
+            'GeoMap': GeoMap,
             'HeatMap': HeatMap,
             'Images': Images,
             'ListAllProps': ListAllProps,

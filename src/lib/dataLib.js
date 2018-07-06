@@ -324,6 +324,25 @@ export const prepareSinglePropData = (data, category) => {
         })
 }
 
+export const prepareGeoData = (data, dataset) => {
+    return {
+        type: 'FeatureCollection',
+        features: data.map(place => {
+            return {
+                type: 'Feature', 
+                properties: {
+                    id: "ak16994521",
+                    name: place.geoname ? place.geoname.value : place.latitude.value + place.longitude.value
+                },
+                geometry: {
+                    type: "Point",
+                    coordinates: [ place.latitude.value, place.longitude.value, 0.0 ] 
+                }
+            }
+        })
+    }
+}
+
 export const prepareDetailData = (data, dataset) => {
     // console.log('prepare only once', data.length)
     let { entrypoint, labels, prefixes } = dataset

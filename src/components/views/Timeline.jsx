@@ -15,7 +15,7 @@ import SelectionZone from '../elements/SelectionZone'
 import TimelineLayout from '../../d3/TimelineLayout'
 // libs
 import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
-import { deduplicate, getAxis, getLegend, nestData } from '../../lib/dataLib'
+import { getAxis, getLegend, nestData } from '../../lib/dataLib'
 import { getDimensions } from '../../lib/scaleLib'
 // redux functions
 import { getPropPalette } from '../../actions/palettesActions'
@@ -81,7 +81,7 @@ class Timeline extends React.Component {
     }
     render () {
         const { axisBottom, legend } = this.customState
-        const { config, data, dataset, dimensions, display, role, selections, step, zone } = this.props
+        const { config, dimensions, display, role, selections, step, zone } = this.props
         // display settings
         const classN = `Timeline ${this.customState.elementName} role_${role}`
         return (<g className = { classN } >
