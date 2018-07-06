@@ -23,7 +23,7 @@ COPY . /
 ENV PATH /node_modules/.bin:$PATH
 
 
-EXPOSE 5000
+EXPOSE 80
 
 RUN npm run build --production 
 

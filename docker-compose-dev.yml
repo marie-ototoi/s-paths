@@ -6,29 +6,28 @@ services:
       SPARQL_UPDATE: "true"
       DEFAULT_GRAPH: "http://ilda.nobel.fr"
     volumes:
-      - ./db/virtuoso:/data
+      - /home/docker/db-virtuoso:/data
     ports:
       - 8890:8890
       - 1111:1111
   mongo:
     image: mongo:3.6
     env_file:
-     - .env.prod
+     - .env.dev
     ports:
      - 27017:27017
-     - 8081:8081
     volumes:
-     - ./db/mongo:/data/db
+     - /home/docker/db-mongo:/data/db
   semanticpaths:
-    image: registry.gitlab.inria.fr/mdestand/semantic-paths
     build:
       context: ./
-      dockerfile: Dockerfile.prod
+      dockerfile: Dockerfile-dev
     restart: always
     env_file:
-     - .env.prod
+     - .env.dev
     ports:
-     - 80:5000
+     - 80:80
+     - 8081:8081
     depends_on:
      - mongo
      - virtuoso

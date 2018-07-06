@@ -13,7 +13,7 @@ $ ENV=dev docker-compose up
 ```
 
 This will run 3 containers : 
-- the app on port `5000` : custom image derived from [node:9.11-jessie](https://hub.docker.com/_/node/)
+- the app on port `80` : custom image derived from [node:9.11-jessie](https://hub.docker.com/_/node/)
 - mongo on port `27017` : [jessie 3.6](https://hub.docker.com/_/mongo/)
 - virtuoso on port `8890` : [tenforce/virtuoso:1.3.1-virtuoso7.2.2](https://hub.docker.com/r/tenforce/virtuoso/)
 

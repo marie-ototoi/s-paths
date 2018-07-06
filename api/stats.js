@@ -222,7 +222,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
         let propsWithSample = []
         temp = await Promise.all(propsWithStats
             .map(prop => {
-                if (prop.category === 'datetime' && prop.total > 0) {
+                if ((prop.category === 'datetime' || prop.category === 'text') && prop.total > 0) {
                     let sampleQuery = queryLib.makePropQuery(prop, options, 'dateformat')
                     // console.log('dateformat', sampleQuery)
                     return queryLib.getData(options.endpoint, sampleQuery, options.prefixes)
@@ -230,16 +230,22 @@ const getProps = async (categorizedProps, level, options, instances) => {
                             // console.log(sampleData )
                             // console.log(']]', sampleData.results.bindings)
                             if (sampleData && sampleData.results.bindings.length > 0) {
-                                let countInvalid = 0
-                                sampleData.results.bindings.forEach(element => {
-                                    let thedate = new Date(element.object.value)
-                                    if (thedate.toString() === 'Invalid Date') countInvalid++ // with === the condition is false when the date is invalid :(((
-                                    // console.log(thedate == 'Invalid Date', element.object.value, thedate.getFullYear())
-                                })
-                                let category = (countInvalid > 5) ? 'text' : prop.category
+                                let category = prop.category
+                                let subcategory = prop.subcategory
+                                let value = sampleData.results.bindings[0].object.value
+                                if (prop.category === 'datetime') {
+                                    let thedate = new Date(value)
+                                    if (thedate.toString() === 'Invalid Date') category = 'text'
+                                } else if (prop.category === 'text') {
+                                    if (value.indexOf('http://sws.geonames.org') === 0) {
+                                        category = 'geo'
+                                        subcategory = 'geoname'
+                                    }
+                                }
                                 return {
                                     ...prop,
-                                    category
+                                    category,
+                                    subcategory
                                 }
                             } else {
                                 return prop
@@ -276,8 +282,9 @@ const getProps = async (categorizedProps, level, options, instances) => {
         // discard uris when there are more specific paths
         returnProps = returnProps.filter(prop => {
             // console.log(prop.total)
-            return (returnProps.filter(moreSpecificProp => prop.path.indexOf(moreSpecificProp.path) === 0 &&
-                moreSpecificProp.level > prop.level).length === 0) &&
+            return ((returnProps.filter(moreSpecificProp => prop.path.indexOf(moreSpecificProp.path) === 0 &&
+                moreSpecificProp.level > prop.level).length === 0) ||
+                prop.subcategory === 'geoname') &&
                 prop.total > 0 /* &&
                 ((prop.category === 'number') ||
                 (prop.category === 'datetime') ||
