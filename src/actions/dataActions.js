@@ -26,9 +26,8 @@ const getStats = (options) => {
             }
         })
         .then((resp) => resp.json())
-    // return rp('http://localhost:5000/stats/' + entrypoint)
+    // return rp('http://localhost:80/stats/' + entrypoint)
 }
-
 const getResources = (options) => {
     return fetch(('/resources'),
         {
@@ -252,35 +251,6 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
             console.error('Error loading subset data', error)
         })
             
-}
-
-export const loadDetail = (dispatch) => (dataset, configs, zone) => {
-    // console.log('load Detail ', dataset.constraints)
-    // would like to use async await rather than imbricated promise but compilation fails
-    let { endpoint, entrypoint, maxLevel, prefixes } = dataset
-    const configMain = getSelectedView(configs, 'main')
-    let queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: 1 } )
-    getData(endpoint, queryMain, prefixes)
-        .then(data => {
-            dispatch({
-                type: types.SET_DETAIL,
-                level: 1,
-                zone,
-                elements: data
-            })
-            for (let i = 1; i < maxLevel; i ++) {
-                queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: i } )
-                getData(endpoint, queryMain, prefixes)
-                    .then(newdata => {
-                        dispatch({
-                            type: types.SET_DETAIL,
-                            level: i,
-                            zone,
-                            elements: newdata
-                        })
-                    })
-            }
-        })   
 }
 
 export const loadResources = (dispatch) => (dataset, views) => {
