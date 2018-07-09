@@ -8,11 +8,44 @@ import { getDimensions } from '../../lib/scaleLib'
 class Header extends React.PureComponent {
     render () {
         const { config, dataset, display, zone } = this.props
-        // const dimensions = getDimensions('header', display.zones[zone], display.viz, offset)
-        // const { x, y, width, height } = dimensions
+        const dimensions = getDimensions('header', display.zones[zone], display.viz, {})
+        const { x, y, width, height } = dimensions
         // console.log(dataset.resources)
         return (
             <g className = "Header">
+                <foreignObject
+                    transform = { `translate(${x}, ${y})` }
+                    ref = { this.state.elementName }
+                    width = { width }
+                    height = { height }
+                >
+                    <form>
+                        <div className = "line">
+                            <div className = "field">
+                                <label className = "label">Set of resources</label>
+                                <div className ="control">
+                                    <div className ="select">
+                                        <select>
+                                            <option>Award file</option>
+                                            <option>...</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="submit" />                            
+                        </div>
+
+                        <div className = "line">
+                            <div className = "field">
+                                <label className = "label">Set of resources</label>
+                                <div className ="control">
+                                    <input className ="input" type="text" placeholder="Text input" />
+                                </div>
+                            </div>
+                            <input type="submit" />
+                        </div>
+                    </form>
+                </foreignObject>
                 <PropSelector
                     type = "header"
                     selected = { false }
@@ -30,6 +63,7 @@ class Header extends React.PureComponent {
 Header.propTypes = {
     config: PropTypes.object,
     dataset: PropTypes.object,
+    dimensions: PropTypes.object,
     display: PropTypes.object,
     zone: PropTypes.string,
 }
