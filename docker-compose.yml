@@ -6,7 +6,7 @@ services:
       SPARQL_UPDATE: "true"
       DEFAULT_GRAPH: "http://ilda.nobel.fr"
     volumes:
-      - /home/deployer/db-virtuoso:/data
+      - db-virtuoso:/data
     ports:
       - 8890:8890
       - 1111:1111
@@ -17,7 +17,7 @@ services:
     ports:
      - 27017:27017
     volumes:
-     - /home/deployer/db-mongo:/data/db
+     - db-mongo:/data/db
   semanticpaths:
     image: registry.gitlab.inria.fr/mdestand/semantic-paths:latest
     build:
@@ -33,3 +33,6 @@ services:
     links:
      - virtuoso
      - mongo
+volumes:
+  db-mongo:
+  db-virtuoso:
