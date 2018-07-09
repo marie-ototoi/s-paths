@@ -12,7 +12,7 @@ export const endTransition = (dispatch) => (zone) => {
 
 const getStats = (options) => {
     // console.log(JSON.stringify(options))
-    return fetch(('stats'),
+    return fetch((process.env.API + 'stats'),
         {
             method: 'POST',
             body: JSON.stringify(options),
@@ -29,7 +29,7 @@ const getStats = (options) => {
     // return rp('http://localhost:80/stats/' + entrypoint)
 }
 const getResources = (options) => {
-    return fetch(('/resources'),
+    return fetch((process.env.API + 'resources'),
         {
             method: 'POST',
             body: JSON.stringify(options),
