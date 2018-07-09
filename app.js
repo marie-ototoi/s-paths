@@ -34,4 +34,4 @@ if (process.env.NODE_ENV === 'development') {
     }));
 }
 
-app.listen(80, () => console.log('ℹ ｢app｣: Semantic Paths server running on port '))
+app.listen(80, () => console.log('ℹ ｢app｣: Semantic Paths server running on port 80'))
