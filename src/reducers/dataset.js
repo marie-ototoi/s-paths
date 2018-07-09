@@ -7,7 +7,7 @@ const initialState = {
     // 'http://eventmedia.eurecom.fr/sparql', //'http://bnf.lri.fr:8890/sparql','http://localhost:8890/sparql',
     entrypoint: '',
     defaultGraph: 'http://nobel.ilda.fr',
-    geonamesGraph: 'http://geonames.nobel.fr',
+    geonamesGraph: 'http://geonames.ilda.fr',
     // 'http://nobel.bnf.fr',
     // null,  'http://localhost:8890/data10', 'http://data10.bnf.fr', 'http://data01.bnf.fr','http://data.bnf.fr',
     constraints: '',
