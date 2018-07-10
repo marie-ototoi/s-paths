@@ -17,7 +17,7 @@ COPY package.json /
 # Install app dependencies
 # RUN npm install
 # in case of integrity error during the build, replace by :
-RUN  npm cache verify \
+RUN  npm cache clean --force \
   && npm install
 
 COPY . / 
