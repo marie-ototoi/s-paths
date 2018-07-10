@@ -15,8 +15,10 @@ WORKDIR ./
 COPY package.json /
 
 # Install app dependencies
+# RUN npm install
+# in case of integrity error during the build, replace by :
 RUN npm rm package-lock.json \ 
-  && clean \
+  && npm clean \
   && npm install
 
 COPY . / 
