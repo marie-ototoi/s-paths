@@ -15,7 +15,8 @@ WORKDIR ./
 COPY package.json /
 
 # Install app dependencies
-RUN npm install
+RUN npm i npm@latest -g \
+  && npm install
 
 COPY . / 
 
