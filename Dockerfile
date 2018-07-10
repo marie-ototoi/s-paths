@@ -17,8 +17,7 @@ COPY package.json /
 # Install app dependencies
 # RUN npm install
 # in case of integrity error during the build, replace by :
-RUN npm rm package-lock.json \ 
-  && npm clean \
+RUN  npm cache verify \
   && npm install
 
 COPY . / 
