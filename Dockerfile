@@ -15,7 +15,8 @@ WORKDIR ./
 COPY package.json /
 
 # Install app dependencies
-RUN npm i npm@latest -g \
+RUN npm rm package-lock.json \ 
+  && clean \
   && npm install
 
 COPY . / 
