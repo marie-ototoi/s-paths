@@ -30,7 +30,7 @@ const getStats = async (opt) => {
         constraints: opt.constraints || '',
         dateList: opt.dateList,
         defaultGraph: opt.defaultGraph || null,
-        endpoint: opt.endpoint,
+        endpoint: opt.localEndpoint,
         entrypoint: opt.entrypoint,
         forceUpdate: opt.forceUpdate,
         ignoreList: [...ignore, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],

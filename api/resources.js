@@ -28,7 +28,7 @@ const getResources = async (opt) => {
     // add default options when not set
     let options = {
         defaultGraph: opt.defaultGraph || null,
-        endpoint: opt.endpoint,
+        endpoint: opt.localEndpoint,
         forceUpdate: opt.forceUpdate,
         prefixes: opt.prefixes
     }

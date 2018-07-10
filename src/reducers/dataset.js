@@ -2,6 +2,7 @@ import types from '../constants/ActionTypes'
 
 const initialState = {
     endpoint: process.env.ENDPOINT,
+    localEndpoint: process.env.LOCAL_ENDPOINT,
     // 'http://bnf.lri.fr:8890/sparql',
     // 'http://eventmedia.eurecom.fr/sparql', //'http://bnf.lri.fr:8890/sparql','http://localhost:8890/sparql',
     entrypoint: '',
