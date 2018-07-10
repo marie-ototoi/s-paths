@@ -30,7 +30,8 @@ const getStats = async (opt) => {
         constraints: opt.constraints || '',
         dateList: opt.dateList,
         defaultGraph: opt.defaultGraph || null,
-        endpoint: opt.localEndpoint,
+        endpoint: opt.endpoint,
+        localEndpoint: opt.localEndpoint,
         entrypoint: opt.entrypoint,
         forceUpdate: opt.forceUpdate,
         ignoreList: [...ignore, 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
@@ -39,7 +40,7 @@ const getStats = async (opt) => {
         prefixes: opt.prefixes || {},
         totalInstances: opt.totalInstances
     }
-    let { prefixes, endpoint, entrypoint, labels, totalInstances } = options
+    let { prefixes, endpoint, localEndpoint, entrypoint, labels, totalInstances } = options
     let selectionInstances
     // add prefix to entrypoint if full url
     if (!queryLib.usesPrefix(entrypoint, prefixes)) {
@@ -54,7 +55,7 @@ const getStats = async (opt) => {
     if (options.constraints === '') {
         selectionInstances = totalInstances
     } else {
-        let selectioncount = await queryLib.getData(endpoint, selectionQuery, prefixes).catch(e => console.error('Error retrieving number of selected instances', e))
+        let selectioncount = await queryLib.getData(localEndpoint, selectionQuery, prefixes).catch(e => console.error('Error retrieving number of selected instances', e))
         selectionInstances = Number(selectioncount.results.bindings[0].total.value)
     }
     if (selectionInstances === 0) {
@@ -112,7 +113,7 @@ const getMaxRequest = (parentQuantities) => {
 }
 
 const getProps = async (categorizedProps, level, options, instances) => {
-    let { constraints, defaultGraph, entrypoint, endpoint, prefixes, maxLevel } = options
+    let { constraints, defaultGraph, entrypoint, endpoint, localEndpoint, prefixes, maxLevel } = options
     let { totalInstances, selectionInstances } = instances
     let maxRequests = getMaxRequest(totalInstances)
     let newCategorizedProps = []
@@ -151,7 +152,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 .map(prop => {
                     let propsQuery = queryLib.makePropsQuery(prop.path, options, level)
                     // console.log('QUERY', prop.path, propsQuery)
-                    return queryLib.getData(endpoint, propsQuery, prefixes)
+                    return queryLib.getData(localEndpoint, propsQuery, prefixes)
                 })
                 .map((promise, index) => promise.catch(e => {
                     console.error('Error with makePropsQuery', e, queryLib.makePropsQuery(queriedProps[i + index].path, options, level))
@@ -189,7 +190,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 .map(prop => {
                     let propQuery = queryLib.makePropQuery(prop, options, 'count')
                     // console.log('count ', propQuery)
-                    return queryLib.getData(options.endpoint, propQuery, options.prefixes)
+                    return queryLib.getData(localEndpoint, propQuery, options.prefixes)
                 })
                 .map((promise, i) => promise.catch(e => {
                     console.error('Error with makePropQuery count', e, queryLib.makePropQuery(newCategorizedProps[i], options, 'count'))
@@ -203,7 +204,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                     .map(prop => {
                         let propQuery = queryLib.makePropQuery(prop, options, 'type')
                         // console.log('type ', propQuery)
-                        return queryLib.getData(options.endpoint, propQuery, options.prefixes)
+                        return queryLib.getData(localEndpoint, propQuery, options.prefixes)
                     })
                     .map((promise, i) => promise.catch(e => {
                         console.error('Error with makePropQuery type', e, queryLib.makePropQuery(newCategorizedProps[i], options, 'type'))
@@ -225,7 +226,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 if ((prop.category === 'datetime' || prop.category === 'text') && prop.total > 0) {
                     let sampleQuery = queryLib.makePropQuery(prop, options, 'dateformat')
                     // console.log('dateformat', sampleQuery)
-                    return queryLib.getData(options.endpoint, sampleQuery, options.prefixes)
+                    return queryLib.getData(localEndpoint, sampleQuery, options.prefixes)
                         .then(sampleData => {
                             // console.log(sampleData )
                             // console.log(']]', sampleData.results.bindings)

@@ -28,11 +28,12 @@ const getResources = async (opt) => {
     // add default options when not set
     let options = {
         defaultGraph: opt.defaultGraph || null,
-        endpoint: opt.localEndpoint,
+        endpoint: opt.endpoint,
+        localEndpoint: opt.localEndpoint,
         forceUpdate: opt.forceUpdate,
         prefixes: opt.prefixes
     }
-    let { defaultGraph, endpoint, forceUpdate } = options
+    let { defaultGraph, endpoint, localEndpoint, forceUpdate } = options
     if (forceUpdate) {
         await pathModel.deleteMany({ endpoint, graph: defaultGraph })
         await resourceModel.deleteMany({ endpoint, graph: defaultGraph })
@@ -42,7 +43,7 @@ const getResources = async (opt) => {
         resources = resources.map(resource => resource._doc)
     } else {
         let query = queryLib.makeQueryResources(options)
-        let result = await queryLib.getData(endpoint, query, {})
+        let result = await queryLib.getData(localEndpoint, query, {})
         resources = result.results.bindings.map(resource => {
             return { total: Number(resource.occurrences.value), type: resource.type.value, endpoint, graph: defaultGraph }
         })
