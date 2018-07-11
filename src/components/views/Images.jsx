@@ -90,6 +90,8 @@ class Images extends React.Component {
             <g>
                 <Header
                     zone = { zone }
+                    config = { config }
+                    propsLists = { [] }
                 />
                 <Coverage
                     zone = { zone }

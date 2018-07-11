@@ -22,12 +22,19 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile-dev
+      args:
+      - http_proxy
+      - https_proxy
+      - no_proxy
     restart: always
     env_file:
      - .env.dev
     ports:
      - 80:80
      - 8081:8081
+     - 9229:9229
+    volumes:
+     - ./src:/src/
     depends_on:
      - mongo
      - virtuoso

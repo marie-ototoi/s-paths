@@ -78,6 +78,7 @@
     "react": "^16.4.1",
     "react-addons-test-utils": "^15.4.2",
     "react-bootstrap": "^0.32.1",
+    "react-bulma-components": "^1.5.0",
     "react-dom": "^16.4.1",
     "react-hot-loader": "^4.3.3",
     "react-keymaster": "^0.3.1",

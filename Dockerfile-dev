@@ -23,6 +23,6 @@ COPY . /
 ENV PATH /node_modules/.bin:$PATH
 
 
-EXPOSE 80
+EXPOSE 80 8081 9229
 
 CMD npm run start:debug

@@ -30,7 +30,10 @@ if (process.env.NODE_ENV === 'development') {
     // console.log(publicPath)
     require('webpack-hot-client')(compiler, { host: '0.0.0.0' });
     app.use(require('webpack-dev-middleware')(compiler, {
-        publicPath
+        publicPath,
+        watchOptions: {
+            poll: 1000 // https://webpack.js.org/configuration/watch/#watchoptions watching does not work with Virtualbox VM
+        }
     }));
 }
 

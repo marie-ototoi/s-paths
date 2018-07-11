@@ -82,9 +82,9 @@ export const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width
         }
     case 'header':
         return {
-            x: origin.x + viz.horizontal_margin + offset.x,
+            x: origin.x +  offset.x,
             y: origin.y + offset.y,
-            width: viz.useful_width + offset.width,
+            width: viz.useful_width + (viz.horizontal_margin * 2) + offset.width,
             height: viz.vertical_margin + offset.height
         }
     case 'coverage':

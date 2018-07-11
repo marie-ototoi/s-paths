@@ -7,6 +7,81 @@ h1 span {
     font-weight: normal;
     color: #777;
 }
+.Header .cache{
+    box-shadow: 0px 3px 5px 6px #fff;
+
+}
+.Header .line {
+    display: flex;
+    align-items: center;
+    background: #f4f4f4;
+    margin: 0 0 5px 0;
+    border-bottom: 1px solid #ababab;
+    box-shadow: 0px 3px 3px 0px #ababab;
+}
+.Header .line:last-child {
+    /* box-shadow: 0px -3px 5px 6px #ababab; */
+}
+.Header .field {
+    display: flex;
+    margin: 0;
+    padding: 0 0 2px 0;
+    align-items: center;
+    min-height: 35px;
+}
+.Header .control, .Header .dropdown {
+    margin-right: 10px;
+}
+.Header .label {
+    text-align: right;
+    padding-right: 10px;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    padding-top: 8px;
+}
+.Header .pointer {
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    display: inline-block;
+    padding: 0 3px; 
+}
+.Header select, .Header input, .Header .dropdown, .Header .control {
+    width: 150px;
+}
+.Header .dropdown-menu {
+    min-width: auto;
+}
+.Header .dropdown-trigger {
+    margin-top: 0;
+}
+.Header .dropdown-trigger .button{
+    padding-top: 3px;
+    padding-bottom: 3px;
+    height: auto;
+}
+.Header .dropdown img {
+    background: #666;
+}
+.Header .dropdown-item {
+    padding: 5px 15px 0 15px;
+}
+.Header button, .Header .button{
+    margin-top:-14px;
+    cursor: pointer;
+}
+.Header .text-progress {
+    padding-left: 10px;
+}
+.Header .submit .button {
+    height: 28px;
+    width: 29px;
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+.Header .submit .icon {
+    padding-left: 15px;
+    position: absolute;
+}
 .Header .propSelector p {
     font-size: 1.5em;
 }

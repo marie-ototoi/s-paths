@@ -107,15 +107,8 @@ class Timeline extends React.Component {
             <g>
                 <Header
                     zone = { zone }
-                />
-                <Coverage
-                    zone = { zone }
                     config = { config }
-                />
-                <Nav
-                    zone = { zone }
-                    config = { config }
-                    propsLists = { this.customState.propsLists }
+                    propsLists = { [] }
                 />
                 <Legend
                     type = "plain"
