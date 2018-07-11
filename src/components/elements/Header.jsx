@@ -12,18 +12,18 @@ class Header extends React.PureComponent {
     constructor (props) {
         super(props)
         this.displayResource = this.displayResource.bind(this)
-        let displayedResource = props.dataset.resources[0]
+        let selectedResource = 0
         this.state = {
-            resourceList: props.dataset.resources.map((resource) => {
-                if (resource.selected) displayedResource = resource
+            resourceList: props.dataset.resources.map((resource, i) => {
+                if (resource.type === props.dataset.entrypoint) selectedResource = i
                 return {
                     total: resource.total,
                     readablePath: [{ label: resource.label, comment: resource.comment }],
                     path: resource.type, selected: resource.type === props.dataset.entrypoint
                 }
             }),
-            selectedResource: 0,
-            displayedResource,
+            selectedResource,
+            displayedResource: props.dataset.resources[selectedResource],
             isLoading: false
         }
     }
@@ -87,21 +87,20 @@ class Header extends React.PureComponent {
                                     </div>
                                 </div>
                                 <div className = "submit">
+                                    { !this.state.isLoading &&
                                     <button
                                         className = "button"
-                                        onClick = { 
-                                            (e) => {
-                                                e.preventDefault()
-                                                console.log('salut')
-                                                if (selectResourceEnabled) this.displayResource()
-                                            }
-                                        }
+                                        onClick = { this.displayResource }
                                         { ...selectResourceEnabled }
                                     >
                                         <span className = "icon">
                                             <i className = "fas fa-arrow-down fa-lg"></i>
                                         </span>
                                     </button>
+                                    }
+                                    { this.state.isLoading &&
+                                        <span className = "button is-loading"></span>
+                                    }
                                 </div>
                             </div>
                             <div style = {{ width: barWidth + 'px' }}>
