@@ -2,16 +2,18 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { getConfigs, getCurrentConfigs } from '../../lib/configLib'
+import { getConfigs, getCurrentConfigs, getSelectedMatch } from '../../lib/configLib'
 import { getDimensions } from '../../lib/scaleLib'
 import { getNbDisplayed } from '../../lib/dataLib'
+import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 
-import { selectResource } from '../../actions/dataActions'
+import { loadSelection, selectResource } from '../../actions/dataActions'
 
 class Header extends React.PureComponent {
     constructor (props) {
         super(props)
         this.displayResource = this.displayResource.bind(this)
+        this.displaySelection = this.displaySelection.bind(this)
         let selectedResource = 0
         this.state = {
             resourceList: props.dataset.resources.map((resource, i) => {
@@ -24,7 +26,9 @@ class Header extends React.PureComponent {
             }),
             selectedResource,
             displayedResource: props.dataset.resources[selectedResource],
-            isLoading: false
+            isLoading: false,
+            keyword: '',
+            isNavOpen: false
         }
     }
     displayResource () {
@@ -33,8 +37,29 @@ class Header extends React.PureComponent {
         this.props.selectResource({ ...dataset, entrypoint: selectedResource.type, totalInstances: selectedResource.total, constraints: `` }, views)
         this.setState({ isLoading: true })
     }
+    displaySelection () {
+        const { config, configs, dataset, selections, views, zone } = this.props
+        const activeConfigs = getCurrentConfigs(configs, 'active')
+        let newConstraints 
+        if (selections.length > 0) {
+            const selectedConfig = getSelectedMatch(config, zone)
+            newConstraints = newConstraints.concat(makeSelectionConstraints(selections, selectedConfig, zone))
+        } else {
+            // keep old constraints
+            newConstraints = dataset.constraints
+        }
+        if (this.state.keyword.length > 3) {
+            newConstraints = newConstraints.concat(makeKeywordConstraints(this.state.keyword, dataset))
+        }
+        let newDataset = {
+            ...dataset,
+            constraints: newConstraints
+        }
+        this.props.loadSelection(newDataset, views, activeConfigs, dataset)
+    }
     render () {
         const { config, configs, data, dataset, display, selections, zone } = this.props
+        // general
         const dimensions = getDimensions('header', display.zones[zone], display.viz, { x:0, y:0, width:0, height: 0 })
         const { x, y, width, height } = dimensions
         const fieldWidth = (display.viz.useful_width * 2 / 3) + display.viz.horizontal_margin
@@ -53,8 +78,19 @@ class Header extends React.PureComponent {
                 percent
             }
         })
+
+        // first line - resources
         let selectResourceEnabled = (dataset.resources[this.state.selectedResource].type !== this.state.displayedResource.type) ?  {} : { 'disabled' : 'disabled' }
-        let selectionEnabled = (selections.filter(s => s.zone === zone).length > 0) ?  {} : { 'disabled' : 'disabled' }
+        
+        // second line - keyword + pointer
+        let pointerEnabled = selections.filter(s => s.zone === zone).length > 0
+        let keywordEnabled = this.state.keyword.length > 3
+        let pointerClass = pointerEnabled ? '' : 'greyed' 
+        let selectionEnabled = (pointerEnabled || keywordEnabled) ?  {} : { 'disabled' : 'disabled' }
+
+        // third line - view + props
+        let navClassName = this.state.isNavOpen ? 'dropdown is-active' : 'dropdown'
+        
         // console.log(dataset.resources)
         // let selectionDisabled = (selections.filter(s => s.zone === zone).length > 0) ?  {} : { 'disabled' : 'disabled' }
         
@@ -99,36 +135,59 @@ class Header extends React.PureComponent {
                                     </button>
                                     }
                                     { this.state.isLoading &&
-                                        <span className = "button is-loading"></span>
+                                        <span
+                                            className = "button is-loading"
+                                        >
+                                        </span>
                                     }
                                 </div>
                             </div>
                             <div style = {{ width: barWidth + 'px' }}>
-                                <progress className = "progress is-small" value = { options[0].total } max = { options[0].total }>{ options[0].percent }%</progress>
+                                <progress
+                                    className = "progress is-small"
+                                    value = { options[0].total }
+                                    max = { options[0].total }
+                                >{ options[0].percent }%</progress>
                             </div>
-                            <p className = "text-progress is-size-7">{ options[0].total } <span className = "is-pulled-right">&nbsp;{ options[0].label }</span></p>
+                            <p
+                                className = "text-progress is-size-7"
+                            >{ options[0].total } <span className = "is-pulled-right">&nbsp;{ options[0].label }</span>
+                            </p>
                         </div>
                         <div className = "line">
                             <div className = "field" style = {{ width: fieldWidth + 'px' }}>
-                                <label className = "label" style = {{ width: display.viz.horizontal_margin + 'px' }}>Selection</label>
+                                <label
+                                    className = "label"
+                                    style = {{ width: display.viz.horizontal_margin + 'px' }}
+                                >Selection
+                                </label>
                                 <div className ="control">
-                                    <input className ="input is-small" type="text" placeholder="Keyword" />
+                                    <input
+                                        className ="input is-small" 
+                                        type="text" 
+                                        placeholder="Keyword" 
+                                        value = { this.state.keyword }
+                                        onChange = { (e) => {
+                                            this.setState({ keyword: e.target.value })
+                                        } }
+                                    />
                                 </div>
                                 <div className ="control">
-                                    <p>&amp;&amp;&nbsp;&nbsp;
+                                    <p className = { pointerClass }><strong>&amp;&amp;</strong>&nbsp;&nbsp;
                                         <span className = "pointer is-size-7">
                                             pointer
                                             <span className = "icon">
                                                 <i className = "fas fa-mouse-pointer"></i>
                                             </span>
                                         </span>
-                                        <span className = "icon">
-                                            <i className = "fas fa-times fa-sm"></i>
-                                        </span>
                                     </p>
                                 </div>
                                 <div className = "submit">
-                                    <button className = "button">
+                                    <button
+                                        className = "button"
+                                        onClick = { this.displaySelection }
+                                        { ...selectionEnabled }
+                                    >
                                         <span className = "icon">
                                             <i className = "fas fa-arrow-down fa-lg"></i>
                                         </span>
@@ -136,23 +195,44 @@ class Header extends React.PureComponent {
                                 </div>
                             </div>
                             <div style = {{ width: barWidth + 'px' }}>
-                                <progress className = "progress is-small" value = { options[1].total } max = { options[0].total }>{ options[1].percent }%</progress>
+                                <progress
+                                    className = "progress is-small"
+                                    value = { options[1].total }
+                                    max = { options[0].total }
+                                >{ options[1].percent }%
+                                </progress>
                             </div>
-                            <p className = "text-progress is-size-7">{ options[1].total } <span className = "is-pulled-right">&nbsp;{ options[1].label }</span></p>
+                            <p
+                                className = "text-progress is-size-7"
+                            >{ options[1].total } <span className = "is-pulled-right">&nbsp;{ options[1].label }</span>
+                            </p>
                         </div>
                         <div className = "line">
                             <div className = "field" style = {{ width: fieldWidth + 'px' }}>
-                                <label className = "label" style = {{ width: display.viz.horizontal_margin + 'px' }}>Display</label>
-                                <div className="dropdown">
+                                <label
+                                    className = "label"
+                                    style = {{ width: display.viz.horizontal_margin + 'px' }}
+                                >Display
+                                </label>
+                                <div className = { navClassName }>
                                     <div className="dropdown-trigger">
-                                        <button className="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                                        <button
+                                            className = "button"
+                                            aria-haspopup = "true"
+                                            aria-controls = "dropdown-menu-nav"
+                                            onClick = { (e) => this.setState({ isNavOpen: !this.state.isNavOpen }) }
+                                        >
                                             <img src = { config.thumb } height = { 50 } />
                                             <span className="icon is-small">
                                                 <i className="fas fa-angle-down" aria-hidden="true"></i>
                                             </span>
                                         </button>
                                     </div>
-                                    <div className = "dropdown-menu" id="dropdown-menu" role="menu">
+                                    <div
+                                        className = "dropdown-menu"
+                                        id="dropdown-menu-nav"
+                                        role="menu"
+                                    >
                                         <div className="dropdown-content">
                                             { activeConfigs.map((option, i) => {
                                                 let selected = (config.id === option.id)
@@ -189,10 +269,17 @@ class Header extends React.PureComponent {
                                 </div>
                             </div>
                             <div style = {{ width: barWidth + 'px' }}>
-                                <progress className = "progress is-small" value = { options[2].total } max = { options[0].total }>{ options[2].percent }%</progress>
+                                <progress
+                                    className = "progress is-small"
+                                    value = { options[2].total }
+                                    max = { options[0].total }
+                                >{ options[2].percent }%
+                                </progress>
                             </div>
-                            <p className = "text-progress is-size-7">{ options[2].total } <span className = "is-pulled-right">&nbsp;{ options[2].label }</span></p>
-
+                            <p
+                                className = "text-progress is-size-7"
+                            >{ options[2].total } <span className = "is-pulled-right">&nbsp;{ options[2].label }</span>
+                            </p>
                         </div>
                         <div className = "cache"></div>
                     </div>
@@ -212,6 +299,7 @@ Header.propTypes = {
     selections: PropTypes.array,
     views: PropTypes.array,
     zone: PropTypes.string,
+    loadSelection: PropTypes.func,
     selectResource: PropTypes.func,
 }
 
@@ -228,6 +316,7 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
+        loadSelection: loadSelection(dispatch),
         selectResource: selectResource(dispatch)
     }
 }

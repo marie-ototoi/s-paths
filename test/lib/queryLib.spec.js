@@ -45,7 +45,16 @@ WHERE {
             propName: 'object',
             entrypointName: 'entrypoint',
             entrypointType: true
-        })).to.equal('?entrypoint rdf:type nobel:LaureateAward . ')
+        })).to.equal('?entrypoint rdf:type nobel:LaureateAward . ')    
+    })
+    it('should generate keyword search constraint', () => {
+        expect(queryLib.makeKeywordConstraints('einstein', { maxLevel: 3 }))
+            .to.equal(`?entrypoint ?level1 ?value1 . 
+    OPTIONAL {
+        ?value1 ?level2 ?value2 . 
+        ?value2 ?level3 ?value3 . 
+    }
+    FILTER (regex(?value1, 'einstein', 'i') || regex(?value2, 'einstein', 'i') || regex(?value3, 'einstein', 'i')) . `)
     })
     it('should make a valid SPARQL query to retrieve data for a specific config', () => {
         const config1 = {

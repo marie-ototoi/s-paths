@@ -260,6 +260,25 @@ export const makePropsQuery = (entitiesClass, options, level) => {
     } */
 }
 
+export const makeKeywordConstraints = (keyword, options) => {
+    let { maxLevel } = options
+    let start = `?value1`
+    let def = ``
+    let filter = ``
+    for (let i = 2; i <= maxLevel; i++) {
+        def = def.concat(`
+        ${start} ?level${i} ?value${i} . `)
+        filter = filter.concat(`regex(?value${i}, '${keyword}', 'i')`)
+        if (i < maxLevel)  filter = filter.concat(` || `)
+        start = `?value${i}`
+    }
+    let constraint = `?entrypoint ?level1 ?value1 . 
+    OPTIONAL {${def}
+    }
+    FILTER (regex(?value1, '${keyword}', 'i') || ${filter}) . `
+    return constraint
+}
+
 export const makeSelectionConstraints = (selections, selectedConfig, zone) => {
     const uriSelections = selections.filter(sel => sel.query.type === 'uri' && sel.zone === zone)
     const uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')

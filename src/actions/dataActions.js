@@ -212,7 +212,6 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                     const previousConfigMain = getSelectedView(previousConfigs, 'main')
                     const previousConfigAside = getSelectedView(previousConfigs, 'aside')
                     const configMain = getSelectedView(newConfigs, 'main')
-                    // console.log(newConfigs, configMain)
                     const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
                     const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
                     let queryTransitionMain = makeTransitionQuery(configMain, dataset, previousConfigMain, previousOptions, 'main')
@@ -220,7 +219,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                     const queryAside = makeQuery(entrypoint, configAside, 'aside',  { ...dataset, maxDepth: (configAside.id === 'ListAllProps') ? 1 : null })
                     const queryAsideUnique = makeQuery(entrypoint, configAside, 'aside', { ...dataset, unique: true })
                     let queryTransitionAside = makeTransitionQuery(configAside, dataset, previousConfigAside, previousOptions, 'aside')
-
+                    // console.log(queryMain)
                     return Promise.all([
                         getData(endpoint, queryMain, prefixes),
                         (queryMain === queryAside) ? null : getData(endpoint, queryAside, prefixes),

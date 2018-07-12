@@ -45,6 +45,9 @@ h1 span {
     display: inline-block;
     padding: 0 3px; 
 }
+.Header .greyed {
+    opacity: 0.5;
+}
 .Header select, .Header input, .Header .dropdown, .Header .control {
     width: 150px;
 }

@@ -41,15 +41,6 @@ describe('lib/config', () => {
         expect(config.overRange(10, range)).to.be.true
     })
     it('should calculate deviation cost for a unit according to max gap', () => {
-        let unique1 = {
-            optimal: [5, 10],
-            min: 3,
-            max: 160
-        }
-        let unique2 = {
-            ...unique1,
-            max: 20
-        }
         expect(config.getDeviationCost(3, 160, [5, 10], 0.5)).to.equal(0.5 / (160 - 10))
         expect(config.getDeviationCost(3, 20, [5, 10], 0.5)).to.equal(0.5 / (20 - 10))
     })
