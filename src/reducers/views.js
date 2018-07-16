@@ -3,6 +3,7 @@ import types from '../constants/ActionTypes'
 const defaultState = [
     {
         id: 'Timeline',
+        name: 'timeline',
         thumb : '/images/timeline.svg',
         entrypoint: { min: 2, max: 1000, optimal: [4, 200] },
         constraints: [
@@ -39,6 +40,7 @@ const defaultState = [
     },
     {
         id: 'HeatMap',
+        name: 'heatmap',
         thumb : '/images/heatmap.svg',
         constraints: [
             [
@@ -62,6 +64,7 @@ const defaultState = [
     },
     {
         id: 'TreeMap',
+        name: 'treemap',
         thumb : '/images/treemap.svg',
         constraints: [
             [
@@ -83,6 +86,7 @@ const defaultState = [
     },
     {
         id: 'URIWheel',
+        name: 'URI wheel',
         thumb : '/images/uriwheel.svg',
         constraints: [
             [
@@ -96,6 +100,7 @@ const defaultState = [
     },
     {
         id: 'GeoMap',
+        name: 'map',
         thumb : '/images/geomap.svg',
         constraints: [
             [
@@ -124,6 +129,7 @@ const defaultState = [
     },
     {
         id: 'ListAllProps',
+        name: 'all props',
         thumb : '/images/listprop.svg',
         entrypoint: { min: 1, max: 100, optimal: [1, 40] },
         constraints: [
@@ -137,6 +143,7 @@ const defaultState = [
     },
     {
         id: 'SingleProp',
+        name: 'single prop',
         thumb : '/images/listprop.svg',
         entrypoint: { min: 1, max: 200, optimal: [1, 100] },
         constraints: [

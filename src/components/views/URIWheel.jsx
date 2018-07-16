@@ -2,11 +2,9 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import Coverage from '../elements/Coverage'
 import Header from '../elements/Header'
 import History from '../elements/History'
 import Legend from '../elements/Legend'
-import Nav from '../elements/Nav'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 import URIWheelLayout from '../../d3/URIWheelLayout'
@@ -92,15 +90,6 @@ class URIWheel extends React.Component {
                     zone = { zone }
                     config = { config }
                     propsLists = { [] }
-                />
-                <Coverage
-                    zone = { zone }
-                    config = { config }
-                />
-                <Nav
-                    zone = { zone }
-                    config = { config }
-                    propsLists = { propsLists }
                 />
                 <Legend
                     type = "plain"

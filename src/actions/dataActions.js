@@ -191,7 +191,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
     let { constraints, endpoint, entrypoint, prefixes, stats } = dataset
     let countInstancesQuery = `SELECT DISTINCT ?entrypoint WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
     // console.log(countInstancesQuery)
-    getData(endpoint, countInstancesQuery, prefixes)
+    return getData(endpoint, countInstancesQuery, prefixes)
         .then(countInstances => {
             // console.log(countInstances)
             return new Promise((resolve, reject) => {
@@ -200,11 +200,13 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                 let configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }))
                 if (selectionInstances === 1) {
                     resolve([configs, { ...stats, selectionInstances }])
-                } else {
+                } else if (selectionInstances > 1) {
                     stats = evaluateSubStats({ ...stats, selectionInstances })
                     // console.log('evaluateSubStats', stats)
                     // for each views, checks which properties ou sets of properties could match and evaluate
                     resolve(checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset))
+                } else {
+                    reject('No results')
                 }
             }) 
                 .then(([newConfigs, newStats]) => {
@@ -244,10 +246,6 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                             })
                         })
                 })
-        })
-        .catch(error => {
-            if (error === 'no_results') return { statements: [] }
-            console.error('Error loading subset data', error)
         })
             
 }
@@ -310,7 +308,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
 
 export const selectResource = (dispatch) => (dataset, views) => {
     let { constraints, endpoint, entrypoint, prefixes, totalInstances } = dataset
-    getStats({ ...dataset, stats: [] })
+    return getStats({ ...dataset, stats: [] })
         .then(stats => {
             prefixes = stats.options.prefixes
             // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
@@ -357,9 +355,56 @@ export const selectResource = (dispatch) => (dataset, views) => {
 }
 
 
+export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfig, dataset, zone) => {
+    const { endpoint, entrypoint, prefixes } = dataset
+    const updatedConfigs = configs.map((config, index) => {
+        return {
+            ...config,
+            selected: index === viewIndex,
+            matches: config.matches.map(match => {
+                return {
+                    ...match,
+                    selected: index === viewIndex && match.properties.reduce((acc, cur, i) => {
+                        if (cur.path !== props[i]) acc = false
+                        return acc
+                    }, true)
+                }
+            })
+        }
+
+    })
+    let updatedConfig = updatedConfigs.filter(c => c.selected)[0]
+    const newQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, maxDepth: (updatedConfig.id === 'ListAllProps') ? 1 : null })
+    const queryTransition = makeTransitionQuery(updatedConfig, dataset, prevConfig, dataset, zone)
+    const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
+
+    return Promise.all([
+        getData(endpoint, newQuery, prefixes),
+        getData(endpoint, queryTransition, prefixes),
+        getData(endpoint, queryUnique, prefixes)
+    ])
+        .then(([newData, newDelta, newUnique]) => {
+            const action = {
+                type: types.SET_CONFIGS,
+                zone: zone
+            }
+            action[zone] = newData
+            action[zone + 'Config'] = updatedConfigs
+            action[zone + 'Delta'] = newDelta
+            action[zone + 'Displayed'] = Number(newUnique.results.bindings[0].displayed.value)
+            dispatch(action)
+        })
+        .catch(error => {
+            console.error('Error getting data after property update', error)
+        })
+}
+
+
 export const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) => {
+
     // console.log('select property')
     const { endpoint, entrypoint, prefixes } = dataset
+    
     const updatedConfig = selectPropertyConfig(config, zone, propIndex, path)
     dispatch({
         type: types.SET_CONFIG,
@@ -370,8 +415,7 @@ export const selectProperty = (dispatch) => (propIndex, path, config, dataset, z
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, config, dataset, zone)
     const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
     // const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
-    let reset = (propIndex === 0 ||
-        (propIndex === 1 && getSelectedMatch(config).properties[1].category !== getSelectedMatch(updatedConfig).properties[1].category && (getSelectedMatch(config).properties[1].category === 'datetime' || getSelectedMatch(updatedConfig).properties[1].category === 'datetime')))
+    
     Promise.all([
         getData(endpoint, newQuery, prefixes),
         getData(endpoint, queryTransition, prefixes),
@@ -381,7 +425,6 @@ export const selectProperty = (dispatch) => (propIndex, path, config, dataset, z
             // console.log('queryUnique', newUnique.results.bindings[0].displayed.value, queryUnique)
             const action = {
                 type: types.SET_DATA,
-                resetUnitDimensions: (reset) ? 'zone' : null,
                 zone: zone
             }
             action[zone] = newData
@@ -420,7 +463,6 @@ export const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => 
             // console.log(newUnique.results.bindings[0].displayed.value)
             const action = {
                 type: types.SET_DATA,
-                resetUnitDimensions: 'zone',
                 zone: zone
             }
             action[zone] = newData

@@ -3,10 +3,8 @@ import React from 'react'
 import formatMessage from 'format-message'
 import { connect } from 'react-redux'
 // components
-import Coverage from '../elements/Coverage'
 import Header from '../elements/Header'
 import History from '../elements/History'
-import Nav from '../elements/Nav'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 
@@ -130,15 +128,6 @@ class ListAllProps extends React.Component {
             { role !== 'target' &&
             <g>
                 <Header
-                    zone = { zone }
-                    config = { config }
-                    propsLists = { [] }
-                />
-                <Coverage
-                    zone = { zone }
-                    config = { config }
-                />
-                <Nav
                     zone = { zone }
                     config = { config }
                     propsLists = { [] }

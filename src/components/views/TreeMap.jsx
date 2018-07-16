@@ -2,11 +2,9 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import Coverage from '../elements/Coverage'
 import Header from '../elements/Header'
 import History from '../elements/History'
 import Legend from '../elements/Legend'
-import Nav from '../elements/Nav'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 import TreeMapLayout from '../../d3/TreeMapLayout'
@@ -49,7 +47,6 @@ class TreeMap extends React.Component {
         const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
         const propsLists = getPropsLists(config, zone, dataset)
 
-        // console.log(nestedProp1)
         // Save to reuse in render
         this.customState = {
             ...this.customState,
@@ -92,15 +89,6 @@ class TreeMap extends React.Component {
                     zone = { zone }
                     config = { config }
                     propsLists = { [] }
-                />
-                <Coverage
-                    zone = { zone }
-                    config = { config }
-                />
-                <Nav
-                    zone = { zone }
-                    config = { config }
-                    propsLists = { propsLists }
                 />
                 <Legend
                     type = "plain"

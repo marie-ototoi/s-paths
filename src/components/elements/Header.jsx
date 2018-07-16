@@ -1,41 +1,85 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
+import ReactKeymaster from 'react-keymaster'
+import shallowEqual from 'shallowequal'
 
-import { getConfigs, getCurrentConfigs, getSelectedMatch } from '../../lib/configLib'
+import { getConfigs, getCurrentConfigs, getPropsLists, getSelectedMatch } from '../../lib/configLib'
 import { getDimensions } from '../../lib/scaleLib'
 import { getNbDisplayed } from '../../lib/dataLib'
 import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 
-import { loadSelection, selectResource } from '../../actions/dataActions'
+import { displayConfig, loadSelection, selectResource } from '../../actions/dataActions'
 
 class Header extends React.PureComponent {
     constructor (props) {
         super(props)
+        this.displayConfig = this.displayConfig.bind(this)
         this.displayResource = this.displayResource.bind(this)
         this.displaySelection = this.displaySelection.bind(this)
-        let selectedResource = 0
+        this.handleKeyDown = this.handleKeyDown.bind(this)
+        let displayedResource = 0
         this.state = {
             resourceList: props.dataset.resources.map((resource, i) => {
-                if (resource.type === props.dataset.entrypoint) selectedResource = i
+                if (resource.type === props.dataset.entrypoint) displayedResource = i
                 return {
                     total: resource.total,
                     readablePath: [{ label: resource.label, comment: resource.comment }],
                     path: resource.type, selected: resource.type === props.dataset.entrypoint
                 }
             }),
-            selectedResource,
-            displayedResource: props.dataset.resources[selectedResource],
-            isLoading: false,
+            displayedResource,
+            selectedResource: displayedResource,
+            resourceIsLoading: false,
+            selectionIsLoading: false,
+            errorSelection: '',
+            propsAreLoading: false,
             keyword: '',
-            isNavOpen: false
+            isNavOpen: false,
+            configsLists: getConfigs(getCurrentConfigs(props.configs, 'active'), props.zone).map(config => { 
+                return getPropsLists(config, props.zone, props.dataset)
+            }),
+            displayedView: getConfigs(getCurrentConfigs(props.configs, 'active'), props.zone).reduce((acc, cur, i) => { return (cur.selected) ? i : acc }, null)
+        }
+        this.state.displayedProps = this.state.configsLists[this.state.displayedView].map(prop => prop.reduce((acc, cur, i) => { return (cur.selected) ? i : acc }, 0))
+        this.state.selectedProps = this.state.displayedProps
+        this.state.selectedView = this.state.displayedView
+        // console.log(this.state.selectedProps)
+    }
+    handleKeyDown (e) {
+        const { dataset, selections, zone } = this.props
+        if (e === 'enter') {
+            if (this.state.selectedResource !== this.state.displayedResource) {
+                this.displayResource()
+            } else if (selections.filter(s => s.zone === zone).length > 0 || this.state.keyword.length > 3) {
+                this.displaySelection()
+            } else if (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) {
+                this.displayConfig()
+            }
         }
     }
     displayResource () {
         const { dataset, views } = this.props
         let selectedResource = dataset.resources[this.state.selectedResource]
+        this.setState({ resourceIsLoading: true })
         this.props.selectResource({ ...dataset, entrypoint: selectedResource.type, totalInstances: selectedResource.total, constraints: `` }, views)
-        this.setState({ isLoading: true })
+            .then(res => this.setState({
+                resourceIsLoading: false,
+                displayedResource: this.state.selectedResource
+            }))
+        
+    }
+    displayConfig () {
+        const { config, configs, dataset, zone } = this.props
+        let selectedLists = this.state.configsLists[this.state.selectedView]
+        const propPaths = this.state.selectedProps.map((prop, i) => selectedLists[i][prop].path)
+        this.setState({ propsAreLoading: true })
+        this.props.displayConfig(this.state.selectedView, propPaths, getConfigs(getCurrentConfigs(configs, 'active'), zone), config, dataset, zone)
+            .then(res => this.setState({
+                propsAreLoading: false,
+                displayedProps: this.state.selectedProps,
+                displayedView: this.state.selectedView
+            }))
     }
     displaySelection () {
         const { config, configs, dataset, selections, views, zone } = this.props
@@ -43,7 +87,7 @@ class Header extends React.PureComponent {
         let newConstraints 
         if (selections.length > 0) {
             const selectedConfig = getSelectedMatch(config, zone)
-            newConstraints = newConstraints.concat(makeSelectionConstraints(selections, selectedConfig, zone))
+            newConstraints = makeSelectionConstraints(selections, selectedConfig, zone)
         } else {
             // keep old constraints
             newConstraints = dataset.constraints
@@ -55,7 +99,17 @@ class Header extends React.PureComponent {
             ...dataset,
             constraints: newConstraints
         }
+        this.setState({ selectionIsLoading: true, errorSelection: '' })
         this.props.loadSelection(newDataset, views, activeConfigs, dataset)
+            .then(res => this.setState({
+                selectionIsLoading: false,
+                keyword: ''
+            }))
+            .catch(res => this.setState({
+                selectionIsLoading: false,
+                keyword: '',
+                errorSelection: 'No results matching selection' 
+            }))
     }
     render () {
         const { config, configs, data, dataset, display, selections, zone } = this.props
@@ -80,22 +134,28 @@ class Header extends React.PureComponent {
         })
 
         // first line - resources
-        let selectResourceEnabled = (dataset.resources[this.state.selectedResource].type !== this.state.displayedResource.type) ?  {} : { 'disabled' : 'disabled' }
+        let selectResourceEnabled = (this.state.selectedResource !== this.state.displayedResource) ?  {} : { 'disabled' : 'disabled' }
         
         // second line - keyword + pointer
         let pointerEnabled = selections.filter(s => s.zone === zone).length > 0
         let keywordEnabled = this.state.keyword.length > 3
         let pointerClass = pointerEnabled ? '' : 'greyed' 
+        let andClass = pointerEnabled && keywordEnabled ? '' : 'greyed' 
         let selectionEnabled = (pointerEnabled || keywordEnabled) ?  {} : { 'disabled' : 'disabled' }
 
         // third line - view + props
         let navClassName = this.state.isNavOpen ? 'dropdown is-active' : 'dropdown'
-        
-        // console.log(dataset.resources)
-        // let selectionDisabled = (selections.filter(s => s.zone === zone).length > 0) ?  {} : { 'disabled' : 'disabled' }
+        let selectedLists = this.state.configsLists[this.state.selectedView]
+        let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) ? {} : { 'disabled' : 'disabled' }
         
         return (
             <g className = "Header">
+                { zone === 'main' &&
+                <ReactKeymaster
+                    keyName = "enter"
+                    onKeyDown = { this.handleKeyDown }
+                />
+                }
                 <foreignObject
                     transform = { `translate(${x}, ${y})` }
                     width = { width }
@@ -110,7 +170,7 @@ class Header extends React.PureComponent {
                                         <select
                                             value = { this.state.selectedResource }
                                             onChange = { (e) => {
-                                                this.setState({ selectedResource: e.target.value })
+                                                this.setState({ selectedResource: Number(e.target.value) })
                                             } }
                                         >
                                             { this.state.resourceList.map((resource, i) => {
@@ -123,7 +183,7 @@ class Header extends React.PureComponent {
                                     </div>
                                 </div>
                                 <div className = "submit">
-                                    { !this.state.isLoading &&
+                                    { !this.state.resourceIsLoading &&
                                     <button
                                         className = "button"
                                         onClick = { this.displayResource }
@@ -134,11 +194,8 @@ class Header extends React.PureComponent {
                                         </span>
                                     </button>
                                     }
-                                    { this.state.isLoading &&
-                                        <span
-                                            className = "button is-loading"
-                                        >
-                                        </span>
+                                    { this.state.resourceIsLoading &&
+                                        <span className = "button is-loading" ></span>
                                     }
                                 </div>
                             </div>
@@ -173,8 +230,8 @@ class Header extends React.PureComponent {
                                     />
                                 </div>
                                 <div className ="control">
-                                    <p className = { pointerClass }><strong>&amp;&amp;</strong>&nbsp;&nbsp;
-                                        <span className = "pointer is-size-7">
+                                    <p><span className = { 'label-like ' + andClass }>AND</span>&nbsp;&nbsp;
+                                        <span className = { 'pointer is-size-7 ' + pointerClass }>
                                             pointer
                                             <span className = "icon">
                                                 <i className = "fas fa-mouse-pointer"></i>
@@ -183,6 +240,7 @@ class Header extends React.PureComponent {
                                     </p>
                                 </div>
                                 <div className = "submit">
+                                    { !this.state.selectionIsLoading &&
                                     <button
                                         className = "button"
                                         onClick = { this.displaySelection }
@@ -192,7 +250,12 @@ class Header extends React.PureComponent {
                                             <i className = "fas fa-arrow-down fa-lg"></i>
                                         </span>
                                     </button>
+                                    }
+                                    { this.state.selectionIsLoading &&
+                                        <span className = "button is-loading" ></span>
+                                    }
                                 </div>
+                                <span className= "error">{ this.state.errorSelection }</span>
                             </div>
                             <div style = {{ width: barWidth + 'px' }}>
                                 <progress
@@ -214,15 +277,19 @@ class Header extends React.PureComponent {
                                     style = {{ width: display.viz.horizontal_margin + 'px' }}
                                 >Display
                                 </label>
-                                <div className = { navClassName }>
-                                    <div className="dropdown-trigger">
+                                <div
+                                    className = { navClassName }
+                                >
+                                    <div
+                                        className="dropdown-trigger"
+                                    >
                                         <button
                                             className = "button"
                                             aria-haspopup = "true"
                                             aria-controls = "dropdown-menu-nav"
                                             onClick = { (e) => this.setState({ isNavOpen: !this.state.isNavOpen }) }
                                         >
-                                            <img src = { config.thumb } height = { 50 } />
+                                            <img src = { config.thumb } height = { 20 } />
                                             <span className="icon is-small">
                                                 <i className="fas fa-angle-down" aria-hidden="true"></i>
                                             </span>
@@ -233,39 +300,67 @@ class Header extends React.PureComponent {
                                         id="dropdown-menu-nav"
                                         role="menu"
                                     >
-                                        <div className="dropdown-content">
+                                        <div
+                                            className = "dropdown-content"
+                                        >
                                             { activeConfigs.map((option, i) => {
-                                                let selected = (config.id === option.id)
-                                                return <div  key = { zone + 'activeNav' + i }><a href="#" className = "dropdown-item">
-                                                    <img src = { option.thumb } width = { 30 } />
-                                                </a>
+                                                let classOption = (config.id === option.id) ? 'selected' : ''
+                                                return <div
+                                                    key = { zone + 'activeNav' + i }
+                                                    className = { classOption }
+                                                >
+                                                    <a
+                                                        className = "dropdown-item"
+                                                        onClick = { (e) => { this.setState({
+                                                            selectedView: i,
+                                                            selectedProps: getConfigs(getCurrentConfigs(configs, 'active'), zone)[i].constraints.map(c => 0),
+                                                            isNavOpen: false }) }
+                                                        }
+                                                    >
+                                                        <img src = { option.thumb } width = { 30 } /><span>{ option.name }</span>
+                                                    </a>
                                                 </div>
                                             }) }
                                         </div>
                                     </div>
                                 </div>
-                                <div className ="control">
-                                    <div className ="select is-small">
-                                        <select>
-                                            <option>Award file</option>
-                                            <option>...</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className ="control">
-                                    <div className ="select is-small">
-                                        <select>
-                                            <option>Award file</option>
-                                            <option>...</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                { selectedLists.map((list, index) => {
+                                    return (<div className ="control" key = { `${zone}selectprop${index}` }>
+                                        <div className ="select is-small">
+                                            <select
+                                                value = { this.state.selectedProps[index] }
+                                                onChange = { (e) => {
+                                                    let newProps = [...this.state.selectedProps]
+                                                    newProps[index] = Number(e.target.value)
+                                                    this.setState({ selectedProps: newProps })
+                                                } }
+                                            >
+                                                { list.map((elt, indexElt) => {
+                                                    return <option
+                                                        key = { `${zone}selectprop${index}option${indexElt}` }
+                                                        value = { indexElt }
+                                                    >{elt.readablePath.map(p => p.label).join(' / ')}</option>
+
+                                                }) }
+                                            </select>
+                                        </div>
+                                    </div>) 
+                                }) }
                                 <div className = "submit">
-                                    <button className = "button">
+                                    { !this.state.propsAreLoading &&
+                                    <button
+                                        className = "button"
+                                        onClick = { this.displayConfig }
+                                        { ...configEnabled }
+                                    >
                                         <span className = "icon">
                                             <i className = "fas fa-arrow-down fa-lg"></i>
                                         </span>
                                     </button>
+                                    }
+                                    { this.state.propsAreLoading &&
+                                        <span className = "button is-loading" ></span>
+                                    }
                                 </div>
                             </div>
                             <div style = {{ width: barWidth + 'px' }}>
@@ -299,6 +394,7 @@ Header.propTypes = {
     selections: PropTypes.array,
     views: PropTypes.array,
     zone: PropTypes.string,
+    displayConfig: PropTypes.func,
     loadSelection: PropTypes.func,
     selectResource: PropTypes.func,
 }
@@ -316,6 +412,7 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
+        displayConfig: displayConfig(dispatch),
         loadSelection: loadSelection(dispatch),
         selectResource: selectResource(dispatch)
     }

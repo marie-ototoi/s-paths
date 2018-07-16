@@ -2,10 +2,8 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import Coverage from '../elements/Coverage'
 import Header from '../elements/Header'
 import History from '../elements/History'
-import Nav from '../elements/Nav'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 
@@ -89,15 +87,6 @@ class Images extends React.Component {
             { role !== 'target' &&
             <g>
                 <Header
-                    zone = { zone }
-                    config = { config }
-                    propsLists = { [] }
-                />
-                <Coverage
-                    zone = { zone }
-                    config = { config }
-                />
-                <Nav
                     zone = { zone }
                     config = { config }
                     propsLists = { [] }

@@ -87,20 +87,6 @@ export const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width
             width: viz.useful_width + (viz.horizontal_margin * 2) + offset.width,
             height: viz.vertical_margin + offset.height
         }
-    case 'coverage':
-        return {
-            x: origin.x + offset.x,
-            y: origin.y + offset.y,
-            width: viz.horizontal_margin + offset.width,
-            height: viz.vertical_margin + offset.height
-        }
-    case 'nav':
-        return {
-            x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
-            y: origin.y + offset.y,
-            width: viz.horizontal_margin + offset.width,
-            height: viz.vertical_margin + offset.height
-        }
     case 'axisBottom':
         return {
             x: origin.x + viz.horizontal_margin + offset.x,

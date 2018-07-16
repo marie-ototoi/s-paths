@@ -9,6 +9,7 @@ const initialState = [
 const datazone = (state, action) => {
     switch (action.type) {
     case types.SET_DATA:
+    case types.SET_CONFIG:
     case types.SET_CONFIGS:
     case types.SET_RESOURCES:
     case types.SET_STATS:
@@ -75,6 +76,7 @@ const datastatus = (state, action) => {
 const data = (state = initialState, action) => {
     switch (action.type) {
     case types.SET_DATA:
+    case types.SET_CONFIG:
     case types.SET_CONFIGS:
     case types.SET_STATS:
     case types.SET_RESOURCES:

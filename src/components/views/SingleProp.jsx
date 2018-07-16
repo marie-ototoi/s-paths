@@ -3,10 +3,8 @@ import React from 'react'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 // components
-import Coverage from '../elements/Coverage'
 import Header from '../elements/Header'
 import History from '../elements/History'
-import Nav from '../elements/Nav'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 
@@ -107,15 +105,6 @@ class SingleProp extends React.Component {
                     zone = { zone }
                     config = { config }
                     propsLists = { [] }
-                />
-                <Coverage
-                    zone = { zone }
-                    config = { config }
-                />
-                <Nav
-                    zone = { zone }
-                    config = { config }
-                    propsLists = { this.customState.propsLists }
                 />
                 <History
                     zone = { zone }
