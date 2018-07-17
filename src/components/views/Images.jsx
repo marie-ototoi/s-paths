@@ -12,6 +12,7 @@ import { getSelectedMatch } from '../../lib/configLib'
 // redux functions
 import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
+import { deduplicate } from '../../lib/dataLib'
 
 class Images extends React.Component {
     constructor (props) {
@@ -32,14 +33,15 @@ class Images extends React.Component {
             (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
-        const { config, zone } = nextProps
+        const { config, data, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
         // First prop
-
+        let uniqueData = deduplicate(data, ['prop1'])
         // Save to reuse in render
         this.customState = {
             ...this.customState,
+            uniqueData,
             selectedConfig
         }
     }
@@ -53,6 +55,7 @@ class Images extends React.Component {
     }
     render () {
         const { config, dimensions, display, data, role, selections, step, zone } = this.props
+        const { uniqueData } = this.customState
        
         return (<g className = { `Images ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&
@@ -76,8 +79,8 @@ class Images extends React.Component {
                 <div className = "box" style = {{ width: dimensions.width + 'px' }}>
                     <div className = "content">
                         { 
-                            data.map((el, i) => 
-                                (<img key = { `img_${zone}_${i}` }  className = "" src = { el.prop1.value } alt = { el.prop2.value } />)
+                            uniqueData.map((el, i) => 
+                                (<img key = { `img_${zone}_${i}` }  className = "" src = { el.prop1.value } alt = { el.prop2.value } title = { el.prop2.value } />)
                             )
                         }
                     </div>
