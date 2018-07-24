@@ -48,8 +48,9 @@ class Header extends React.PureComponent {
     }
     handleKeyDown (e) {
         const { dataset, selections, zone } = this.props
+        console.log(e, this, selections)
         if (e === 'enter') {
-            if (this.state.selectedResource !== this.state.displayedResource) {
+            if (dataset.constraints !== '' || this.state.selectedResource !== this.state.displayedResource) {
                 this.displayResource()
             } else if (selections.filter(s => s.zone === zone).length > 0 || this.state.keyword.length > 3) {
                 this.displaySelection()
@@ -61,19 +62,18 @@ class Header extends React.PureComponent {
     displayResource () {
         const { dataset, views } = this.props
         let selectedResource = dataset.resources[this.state.selectedResource]
-        this.setState({ resourceIsLoading: true })
+        this.setState({ resourceIsLoading: true, errorSelection: '' })
         this.props.selectResource({ ...dataset, entrypoint: selectedResource.type, totalInstances: selectedResource.total, constraints: `` }, views)
             .then(res => this.setState({
                 resourceIsLoading: false,
                 displayedResource: this.state.selectedResource
             }))
-        
     }
     displayConfig () {
         const { config, configs, dataset, zone } = this.props
         let selectedLists = this.state.configsLists[this.state.selectedView]
         const propPaths = this.state.selectedProps.map((prop, i) => selectedLists[i][prop].path)
-        this.setState({ propsAreLoading: true })
+        this.setState({ propsAreLoading: true, errorSelection: '' })
         this.props.displayConfig(this.state.selectedView, propPaths, getConfigs(getCurrentConfigs(configs, 'active'), zone), config, dataset, zone)
             .then(res => this.setState({
                 propsAreLoading: false,
@@ -111,6 +111,9 @@ class Header extends React.PureComponent {
                 errorSelection: 'No results matching selection' 
             }))
     }
+    componentWillUnmount() {
+        this.handleKeyDown = null
+    }
     render () {
         const { config, configs, data, dataset, display, selections, zone } = this.props
         // general
@@ -134,7 +137,7 @@ class Header extends React.PureComponent {
         })
 
         // first line - resources
-        let selectResourceEnabled = (this.state.selectedResource !== this.state.displayedResource) ?  {} : { 'disabled' : 'disabled' }
+        let selectResourceEnabled = (dataset.constraints !== '' || this.state.selectedResource !== this.state.displayedResource) ?  {} : { 'disabled' : 'disabled' }
         
         // second line - keyword + pointer
         let pointerEnabled = selections.filter(s => s.zone === zone).length > 0
@@ -150,7 +153,9 @@ class Header extends React.PureComponent {
         
         return (
             <g className = "Header">
-                { zone === 'main' &&
+                { ( (display.mode === 'main' && zone === 'main') || 
+                (display.mode === 'aside' && zone === 'aside') ||
+                ((display.mode === 'full' || display.mode === 'dev') && zone === 'main')) &&
                 <ReactKeymaster
                     keyName = "enter"
                     onKeyDown = { this.handleKeyDown }
@@ -198,6 +203,9 @@ class Header extends React.PureComponent {
                                         <span className = "button is-loading" ></span>
                                     }
                                 </div>
+                                { this.state.resourceList[this.state.selectedResource].readablePath[0].comment  &&
+                                <span className= "resource-def">? <span>{ this.state.resourceList[this.state.selectedResource].readablePath[0].comment }</span></span>
+                                }
                             </div>
                             <div style = {{ width: barWidth + 'px' }}>
                                 <progress
