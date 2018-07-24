@@ -157,6 +157,7 @@ const defaultState = [
     },
     {
         id: 'Images',
+        name: 'images',
         thumb : '/images/images.svg',
         entrypoint: { min: 1, max: 400 },
         constraints: [
