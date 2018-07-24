@@ -37,6 +37,13 @@ docker swarm init --advertise-addr 192.168.99.100
 6. Configure port forwarding on your virtual machine to enable sockets and debugger for development
 https://stackoverflow.com/questions/35372399/connect-to-docker-machine-using-localhost
 
+
+## Databases
+
+You might have to shut down your local Virtuoso and Mongo
+since the instances in Docker containers are exposed on the default ports
+
+
 ## Development
 
 Switch to you local machine's docker (when needed)
@@ -51,16 +58,15 @@ This will run 3 containers :
 - mongo on port `27017` : [jessie 3.6](https://hub.docker.com/_/mongo/)
 - virtuoso on port `8890` : [tenforce/virtuoso:1.3.1-virtuoso7.2.2](https://hub.docker.com/r/tenforce/virtuoso/)
 
+
 ## Simulate deployment on your local machine
+
+First commit the version to deploy to git master branch. 
+When tests are passed (step 1 in CI) and the new image is built and published to Gitlab registry (step 2 in CI)
 
 ```bash
 $ docker stack deploy semanticStack --compose-file docker-compose.yml --with-registry-auth
 ```
-
-## Databases
-
-You might have to shut down your local Virtuoso and Mongo
-since the instances in Docker containers are exposed on the default ports
 
 
 ## Tests
@@ -69,6 +75,7 @@ since the instances in Docker containers are exposed on the default ports
 $ npm test
 ```
 
+
 ## Reducers
 
 * **config**: computed possible configurations of the views, derived from the stats in the dataset + the views configuration
@@ -76,6 +83,7 @@ $ npm test
 * **dataset**: definition of the data to visualize: entrypoint config, options and stats
 * **display**: settings + calculated scaled values
 * **selections**: elements selected by the user on a screen
+
 
 ## Many thanks to
 
