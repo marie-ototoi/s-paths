@@ -43,6 +43,46 @@ https://stackoverflow.com/questions/35372399/connect-to-docker-machine-using-loc
 You might have to shut down your local Virtuoso and Mongo
 since the instances in Docker containers are exposed on the default ports
 
+To load the graphs in Virtuoso :
+
+### Simple way
+
+Access Virtuoso 192.168.99.100:8890, login to the conductor (local access codes should be dba/dba) and use ISQL pop up in the left menu to create graphs
+```
+> SPARQL CREATE GRAPH <http://nobel.ilda.fr>;
+> SPARQL CREATE GRAPH <http://nobeladdon.ilda.fr>;
+> SPARQL CREATE GRAPH <http://geonames.ilda.fr>;
+```
+
+Then use the top menu `Linked Data > Quad Store Upload` to upload files 
+
+
+### Advanced procedure (for big files and / or bulk upload)
+
+Once the containers are up and running (see below), copy files to upload in the dump folder.
+Then get the id of your virtuoso container
+
+```bash
+$ eval $(docker-machine env local) 
+$ docker container ls
+```
+
+And use it to start an isql console
+```bash
+$ docker exec -it 93211349efc4 bash
+$ isql-v -U dba -P dba
+```
+
+You can now use bulk upload (leave the full directory path, it is mapped to your dump folder)
+
+```
+> SPARQL CREATE GRAPH <http://nobel.ilda.fr>;
+> ld_dir_all('/usr/local/virtuoso-opensource/share/virtuoso/vad', '%.nt', 'http://nobel.ilda.fr');
+> select * from DB.DBA.load_list;
+> rdf_loader_run();
+> DELETE FROM DB.DBA.load_list;
+```
+
 
 ## Development
 
@@ -58,6 +98,8 @@ This will run 3 containers :
 - mongo on port `27017` : [jessie 3.6](https://hub.docker.com/_/mongo/)
 - virtuoso on port `8890` : [tenforce/virtuoso:1.3.1-virtuoso7.2.2](https://hub.docker.com/r/tenforce/virtuoso/)
 
+It will also mount a local volume that can be used for bulk uploads.
+
 
 ## Simulate deployment on your local machine
 
@@ -68,6 +110,11 @@ When tests are passed (step 1 in CI) and the new image is built and published to
 $ docker stack deploy semanticStack --compose-file docker-compose.yml --with-registry-auth
 ```
 
+
+## Deploy
+
+Commit to master.
+When tests are passed (step 1 in CI) and the new image is built and published to Gitlab registry (step 2 in CI), activate Step # (deployment) manually.
 
 ## Tests
 
@@ -85,9 +132,15 @@ $ npm test
 * **selections**: elements selected by the user on a screen
 
 
+## Authors
+* **Marie Destandau**
+* **Emmanuel Pietriga**
+* **Caroline Appert**
+
+
 ## Many thanks to
 
-* **Léo, Silvio**
+* **Léo, Silvio, Dylan**
 * **Logilab**: Adrien, Tanguy, Luc & co
 * **BnF**: Aude, Raphaëlle and Sébastien & co
 * **Staff** = technical support team @ LRI: Laurent & co
