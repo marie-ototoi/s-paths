@@ -60,7 +60,6 @@ const getResources = async (opt) => {
                 queryLib.getData(localEndpoint, query, {})
                 await new Promise((resolve, reject) => setTimeout(resolve, 2500))
             }
-            resourceModel.update({ endpoint: endpoint, graphs: { $all: graphs }, type: resource.type }, { $set: { ownGraph: true } }).exec()
         }
     }
     let labels = await getLabels(resources.map(resource => {

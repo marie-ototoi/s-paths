@@ -418,7 +418,7 @@ export const makeQueryResources = (options) => {
 }
 
 export const makeSubGraphQuery = (options, level) => {
-    const { constraints, entrypoint, graphs, maxLevel, resourceGraph } = options
+    const { constraints, entrypoint, graphs, resourceGraph } = options
     const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
     let ins = level === 1 ? `?entrypoint ?prop1 ?value1 . ?entrypoint rdf:type <${entrypoint}> .` : ``
     let defs = ``
