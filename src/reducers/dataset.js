@@ -13,6 +13,7 @@ const initialState = {
     constraints: '',
     forceUpdate: false,
     maxLevel: 6,
+    ignoreList: ['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
     resources: [],
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',
@@ -77,6 +78,7 @@ const dataset = (state = initialState, action) => {
             entrypoint: action.entrypoint || state.entrypoint,
         }
     case types.SET_RESOURCES:
+        console.log('set resources')
         return {
             ...state,
             resources: action.resources,

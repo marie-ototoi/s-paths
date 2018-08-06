@@ -63,7 +63,7 @@ class Header extends React.PureComponent {
         const { dataset, views } = this.props
         let selectedResource = dataset.resources[this.state.selectedResource]
         this.setState({ resourceIsLoading: true, errorSelection: '' })
-        console.log(selectedResource)
+        //console.log(selectedResource)
         this.props.selectResource({ ...dataset, resourceGraph: selectedResource._id, entrypoint: selectedResource.type, totalInstances: selectedResource.total, constraints: `` }, views)
             .then(res => this.setState({
                 resourceIsLoading: false,

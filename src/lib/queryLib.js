@@ -125,7 +125,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
 }
 
 export const getData = (endpoint, query, prefixes) => {
-    // console.log(query)
+    console.log(query)
     const client = new SparqlClient(endpoint, {
         requestDefaults: {
             headers: {
@@ -442,8 +442,9 @@ export const makeSubGraphQuery = (options, level) => {
 
 
 export const makeTotalQuery = (entitiesClass, options) => {
-    let { constraints, graphs } = options
+    let { constraints, graphs, resourceGraph } = options
     const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+    // let graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     return `SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) ${graph}
 WHERE {
 ?entrypoint rdf:type ${entitiesClass} . ${constraints}

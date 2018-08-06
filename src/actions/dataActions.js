@@ -272,19 +272,21 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
 export const loadResources = (dispatch) => (dataset, views) => {
     let { endpoint, prefixes } = dataset
     let totalInstances
-    // console.log(dataset)
+    console.log(dataset)
     return getResources(dataset)
         .then(resources => {
+            console.log(resources)
             dataset.entrypoint = resources[0].type,
             dataset.totalInstances = resources[0].total,
             dataset.resourceGraph = resources[0]._id,
             getStats({ ...dataset, stats: [] })
                 .then(stats => {
+                    console.log(stats)
                     prefixes = stats.options.prefixes
                     // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
                     // for each views, checks which properties ou sets of properties could match and evaluate
                     let configs = activateDefaultConfigs(defineConfigs(views, stats))
-                    
+
                     const configMain = getSelectedView(configs, 'main')
                     const queryMain = makeQuery(dataset.entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
                     const configAside = getSelectedView(configs, 'aside')
@@ -300,7 +302,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
                         (queryMain === queryAside) ? null : getData(endpoint, queryAsideUnique, prefixes)
                     ])
                         .then(([dataMain, dataAside, uniqueMainPromise, uniqueAsidePromise]) => { // , coverageMain, coverageAside
-                            // console.log('ok on a bien reçu les promesses')
+                            console.log('ok on a bien reçu les promesses')
                             dispatch({
                                 type: types.SET_RESOURCES,
                                 resources,
@@ -335,7 +337,6 @@ export const selectResource = (dispatch) => (dataset, views) => {
             // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
             // for each views, checks which properties ou sets of properties could match and evaluate
             let configs = activateDefaultConfigs(defineConfigs(views, stats))
-                            
             const configMain = getSelectedView(configs, 'main')
             const queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
             const configAside = getSelectedView(configs, 'aside')
