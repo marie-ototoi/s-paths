@@ -2,9 +2,9 @@
 
 ## Installation
 
-1. Install Docker and VirtualEnv
+1. Install Docker and Virtualbox
 
-2. Create a local virtual machine named 'local' with VirtualEnv
+2. Create a local virtual machine named 'local' with Virtualbox
 ```bash
 $ docker-machine create --driver=virtualbox local
 ```

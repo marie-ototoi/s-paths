@@ -11,6 +11,7 @@ const initialState = {
     // 'http://nobel.bnf.fr',
     // null,  'http://localhost:8890/data10', 'http://data10.bnf.fr', 'http://data01.bnf.fr','http://data.bnf.fr',
     constraints: '',
+    labels: [],
     forceUpdate: false,
     maxLevel: 6,
     ignoreList: ['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
@@ -78,7 +79,6 @@ const dataset = (state = initialState, action) => {
             entrypoint: action.entrypoint || state.entrypoint,
         }
     case types.SET_RESOURCES:
-        console.log('set resources')
         return {
             ...state,
             resources: action.resources,

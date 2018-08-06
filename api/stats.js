@@ -24,9 +24,7 @@ router.post('/', (req, res) => {
 })
 
 const getStats = async (options) => {
-    
     let { prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
-    console.log(options)
     let selectionInstances
     // add prefix to entrypoint if full url
     if (!queryLib.usesPrefix(entrypoint, prefixes)) {
@@ -64,11 +62,10 @@ const getStats = async (options) => {
         // if necessary retrieve missing level
         // or recursively retrieve properties
         let paths = await getProps(entryProp, 1, options, { totalInstances, selectionInstances }).catch(e => console.error('Error getting paths and stats', e))
-        console.log(paths)
         // last parameter is for first time query, should be changed dynamically
         // get human readable rdfs:labels and rdfs:comments of all properties listed
         let newlabels = await getPropsLabels(paths.options.prefixes, paths.statements)
-        console.log(newlabels)
+        
         return {
             statements: paths.statements.sort((a, b) => a.level - b.level),
             totalInstances,
@@ -114,7 +111,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
             (!prop.total || (prop.total && prop.total > 0)))
     })
     // look for savedProps in the database
-    let props = await pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level, graphs: { $all: graphs } }).exec()
+    let props = await pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level, graphs: graphs }).exec()
     if (props.length > 0) {
         // if available
         // generate current prefixes
