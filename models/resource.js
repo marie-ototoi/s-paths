@@ -3,7 +3,8 @@ import mongoose from 'mongoose'
 const resourceSchema = new mongoose.Schema({
     type: { type: String, required: true },
     endpoint: { type: String, required: true },
-    graph: { type: String },
+    graphs: { type: Array },
+    ownGraph: Boolean,
     total: Number,
     createdAt: Date,
     modifiedAt: Date
@@ -16,7 +17,7 @@ resourceSchema.statics = {
                 {
                     type: prop.type,
                     endpoint: prop.endpoint,
-                    graph: prop.graph
+                    graphs: prop.graphs
                 },
                 {
                     $set: {
@@ -24,9 +25,7 @@ resourceSchema.statics = {
                         modifiedAt: Date.now()
                     },
                     $setOnInsert: {
-                        type: prop.type,
-                        endpoint: prop.endpoint,
-                        graph: prop.graph,
+                        ownGraph: false,
                         createdAt: Date.now()
                     }
                 },

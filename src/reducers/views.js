@@ -18,11 +18,6 @@ const defaultState = [
                     category: 'text',
                     avg: { max: 30, optimal: [10, 20] },
                     unique: { min: 2, max: 50, optimal: [4, 6] }
-                },
-                {
-                    category: 'geo',
-                    subcategory: 'name',
-                    unique: { min: 2, max: 50, optimal: [4, 6] }
                 }
             ]/* ,
             [
@@ -102,29 +97,29 @@ const defaultState = [
         id: 'GeoMap',
         name: 'map',
         thumb : '/images/geomap.svg',
+        entrypoint: { min: 2 },
         constraints: [
             [
                 {
                     category: 'geo',
                     subcategory: 'latitude',
-                    hierarchical: true,
-                    unique: { min: 2 }
-                },
-                {
-                    category: 'geo',
-                    subcategory: 'name',
-                    hierarchical: true,
-                    unique: { min: 2 }
+                    unique: {}
                 }
-            ]/* ,
+            ],
             [
                 {
                     category: 'geo',
                     subcategory: 'longitude',
-                    optional: true,
-                    unique: { min: 2 }
+                    unique: {}
                 }
-            ] */
+            ],
+            [
+                {
+                    category: 'text',
+                    avg: { max: 120, optimal: [30, 70] },
+                    unique: {}
+                }
+            ]
         ]
     },
     {
@@ -136,7 +131,7 @@ const defaultState = [
             [
                 {
                     category: '*',
-                    unique: { min: 1 }
+                    unique: {}
                 }
             ]
         ]
@@ -145,12 +140,12 @@ const defaultState = [
         id: 'SingleProp',
         name: 'single prop',
         thumb : '/images/listprop.svg',
-        entrypoint: { min: 1, max: 200, optimal: [1, 100] },
+        entrypoint: { max: 200, optimal: [1, 100] },
         constraints: [
             [
                 {
                     category: '*',
-                    unique: { min: 1 }
+                    unique: {}
                 }
             ]
         ]
@@ -159,19 +154,19 @@ const defaultState = [
         id: 'Images',
         name: 'images',
         thumb : '/images/images.svg',
-        entrypoint: { min: 1, max: 400 },
+        entrypoint: { min: 2, max: 400 },
         constraints: [
             [
                 {
                     category: 'image',
-                    unique: { min: 1, max: 300 }
+                    unique: { max: 300 }
                 }
             ],
             [
                 {
                     category: 'text',
                     avg: { max: 120, optimal: [30, 70] },
-                    unique: { }
+                    unique: {}
                 }
             ]
         ]

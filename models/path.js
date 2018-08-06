@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 
 const pathSchema = new mongoose.Schema({
     fullPath: { type: String, required: true },
-    graph: { type: String },
+    graphs: { type: Array },
     endpoint: { type: String, required: true },
     //
     createdAt: Date,
@@ -30,7 +30,7 @@ pathSchema.statics = {
             return this.update(
                 {
                     endpoint: prop.endpoint,
-                    graph: prop.graph,
+                    graphs: prop.graphs,
                     entrypoint: prop.entrypoint,
                     fullPath: prop.fullPath
                 },

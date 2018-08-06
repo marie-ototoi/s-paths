@@ -1,9 +1,9 @@
 import express from 'express'
+//
 import pathModel from '../models/path'
+
 import { getPropsLabels } from '../src/lib/labelLib'
 import * as queryLib from '../src/lib/queryLib'
-import { views } from './views'
-// import { error } from 'util';
 
 const router = express.Router()
 
@@ -29,7 +29,8 @@ const getStats = async (opt) => {
     let options = {
         constraints: opt.constraints || '',
         dateList: opt.dateList,
-        defaultGraph: opt.defaultGraph || null,
+        graphs: opt.graphs || null,
+        resourceGraph: opt.resourceGraph || null,
         endpoint: opt.endpoint,
         localEndpoint: opt.localEndpoint,
         entrypoint: opt.entrypoint,
@@ -40,7 +41,7 @@ const getStats = async (opt) => {
         prefixes: opt.prefixes || {},
         totalInstances: opt.totalInstances
     }
-    let { prefixes, endpoint, localEndpoint, entrypoint, labels, totalInstances } = options
+    let { prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
     let selectionInstances
     // add prefix to entrypoint if full url
     if (!queryLib.usesPrefix(entrypoint, prefixes)) {
@@ -68,6 +69,8 @@ const getStats = async (opt) => {
             path: entrypoint,
             entrypoint: queryLib.useFullUri(entrypoint, prefixes),
             level: 0,
+            endpoint,
+            graphs,
             category: 'entrypoint',
             type: 'uri',
             total: totalInstances
@@ -113,7 +116,7 @@ const getMaxRequest = (parentQuantities) => {
 }
 
 const getProps = async (categorizedProps, level, options, instances) => {
-    let { constraints, defaultGraph, entrypoint, endpoint, localEndpoint, prefixes, maxLevel } = options
+    let { constraints, graphs, entrypoint, endpoint, localEndpoint, prefixes, maxLevel } = options
     let { totalInstances, selectionInstances } = instances
     let maxRequests = getMaxRequest(totalInstances)
     let newCategorizedProps = []
@@ -125,7 +128,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
             (!prop.total || (prop.total && prop.total > 0)))
     })
     // look for savedProps in the database
-    let props = await pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level, graph: defaultGraph }).exec()
+    let props = await pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level, graphs }).exec()
     if (props.length > 0) {
         // if available
         // generate current prefixes
@@ -264,7 +267,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
         propsWithSample.push(...temp)
         propsWithStats = propsWithSample
             .filter(prop => (prop && prop.category !== 'ignore'))
-            .map(prop => { return { ...prop, endpoint, graph: defaultGraph } })
+            .map(prop => { return { ...prop, endpoint, graphs } })
         // save all stats, only if they are relative to the whole ensemble
         if (constraints === '') await pathModel.createOrUpdate(propsWithStats).catch(e => console.error('Error updating stats', e))
     } else {

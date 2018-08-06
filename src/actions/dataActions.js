@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import types from '../constants/ActionTypes'
-import { activateDefaultConfigs, defineConfigs, getSelectedView, getSelectedMatch, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
+import { activateDefaultConfigs, defineConfigs, getSelectedView, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
 import { getData, makePropQuery, makeQuery, makeTransitionQuery } from '../lib/queryLib'
 
 export const endTransition = (dispatch) => (zone) => {
@@ -8,6 +8,25 @@ export const endTransition = (dispatch) => (zone) => {
         zone,
         type: types.END_TRANSITION
     })
+}
+
+export const loadStats = (dispatch) => (dataset) => {
+    return getAllStats(dataset, 0)
+}
+
+export const getAllStats = (dataset, index) => {
+    dataset = {
+        ...dataset,
+        resourceGraph: dataset.resources[index]._id,
+        entrypoint: dataset.resources[index].type,
+        totalInstances: dataset.resources[index].total,
+        selectionInstances: dataset.resources[index].total
+    }
+    return getStats(dataset)
+        .then(stats => {
+            console.log(stats)
+            if (index < dataset.resources.length - 1) getAllStats(dataset, index + 1)
+        })
 }
 
 const getStats = (options) => {
@@ -258,6 +277,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
         .then(resources => {
             dataset.entrypoint = resources[0].type,
             dataset.totalInstances = resources[0].total,
+            dataset.resourceGraph = resources[0]._id,
             getStats({ ...dataset, stats: [] })
                 .then(stats => {
                     prefixes = stats.options.prefixes
@@ -286,6 +306,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
                                 resources,
                                 stats,
                                 entrypoint: dataset.entrypoint,
+                                resourceGraph: dataset.resourceGraph,
                                 totalInstances,
                                 prefixes: stats.options.prefixes,
                                 labels: stats.options.labels,

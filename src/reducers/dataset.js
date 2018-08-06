@@ -6,13 +6,13 @@ const initialState = {
     // 'http://bnf.lri.fr:8890/sparql',
     // 'http://eventmedia.eurecom.fr/sparql', //'http://bnf.lri.fr:8890/sparql','http://localhost:8890/sparql',
     entrypoint: '',
-    defaultGraph: 'http://nobel.ilda.fr',
-    geonamesGraph: 'http://geonames.ilda.fr',
+    graphs: ['http://nobel.ilda.fr', 'http://nobeladdon.ilda.fr', 'http://geonames.ilda.fr'],
+    resourceGraph: null,
     // 'http://nobel.bnf.fr',
     // null,  'http://localhost:8890/data10', 'http://data10.bnf.fr', 'http://data01.bnf.fr','http://data.bnf.fr',
     constraints: '',
-    forceUpdate: true,
-    maxLevel: 4,
+    forceUpdate: false,
+    maxLevel: 6,
     resources: [],
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',
@@ -74,7 +74,7 @@ const dataset = (state = initialState, action) => {
             constraints: action.constraints || state.constraints,
             stats: action.stats || state.stats,
             prefixes: action.prefixes || state.prefixes,
-            entrypoint: action.entrypoint || state.entrypoint
+            entrypoint: action.entrypoint || state.entrypoint,
         }
     case types.SET_RESOURCES:
         return {
@@ -84,7 +84,8 @@ const dataset = (state = initialState, action) => {
             labels: action.labels || state.labels,
             entrypoint: action.entrypoint,
             prefixes: action.prefixes || state.prefixes,
-            constraints: action.constraints
+            constraints: action.constraints,
+            resourceGraph: action.resourceGraph || state.resourceGraph
         }
     case types.SET_DATA:
         return {

@@ -2,6 +2,7 @@ import * as d3 from 'd3'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
+
 // components
 import GeoMap from './views/GeoMap'
 import HeatMap from './views/HeatMap'
@@ -126,7 +127,7 @@ class App extends React.PureComponent {
         // console.log('mode', mode)
         // console.log('display', display)
         // console.log('views', this.props.views)
-        // console.log('dataset', this.props.dataset)
+        // console.log('dataset', this.props.dataset.stats)
         // console.log('configs', configs)
         // console.log('data', data)
         // console.log('selections', selections)
@@ -172,7 +173,6 @@ class App extends React.PureComponent {
                 { mode === 'dev' &&
                     <Debug />
                 }
-
                 { mainConfig && this.state.main_step === 'launch' &&
                     <MainTransitionComponent
                         role = "target"

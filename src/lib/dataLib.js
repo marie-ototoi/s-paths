@@ -325,13 +325,14 @@ export const prepareSinglePropData = (data, category) => {
 }
 
 export const prepareGeoData = (data, dataset) => {
+    console.log(data)
     return {
         type: 'FeatureCollection',
         features: data.map(place => {
             return {
                 type: 'Feature', 
                 properties: {
-                    id: "ak16994521",
+                    id: makeId(place.entrypoint.value),
                     name: place.geoname ? place.geoname.value : place.latitude.value + place.longitude.value
                 },
                 geometry: {

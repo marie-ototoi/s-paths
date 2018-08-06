@@ -81,12 +81,12 @@ export const defineGroup = (prop, options) => {
 }
 
 export const FSL2SPARQL = (FSLpath, options) => {
-    let { constraints, entrypointName, entrypointType, graph, hierarchical, optional, propName, sample } = options
+    let { constraints, entrypointName, entrypointType, graphs, hierarchical, optional, propName, resourceGraph, sample } = options
     let pathParts = FSLpath.split('/')
     let query = ``
     if (entrypointType) {
-        let graphDef = graph ? `FROM <${graph}> ` : ``
-        let entryDef = sample ? `{ SELECT ?${entrypointName} ${graphDef}WHERE { ?${entrypointName} rdf:type ${pathParts[0]} . ${constraints || ``}} LIMIT ${sample} } . ` : `?${entrypointName} rdf:type ${pathParts[0]} . `
+        const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+        let entryDef = sample ? `{ SELECT ?${entrypointName} ${graph}WHERE { ?${entrypointName} rdf:type ${pathParts[0]} . ${constraints || ``}} LIMIT ${sample} } . ` : `?${entrypointName} rdf:type ${pathParts[0]} . `
         query = query.concat(entryDef)
     }
     let levels = Math.floor(pathParts.length / 2)
@@ -125,6 +125,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
 }
 
 export const getData = (endpoint, query, prefixes) => {
+    // console.log(query)
     const client = new SparqlClient(endpoint, {
         requestDefaults: {
             headers: {
@@ -188,9 +189,9 @@ export const makePath = (prop, previousProp, level, options) => {
 
 export const makePropQuery = (prop, options, queryType) => {
     // queryType: count, type, char
-    const { constraints, defaultGraph } = options
+    const { constraints, graphs, resourceGraph } = options
     const { path } = prop
-    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     let props
     let bindProps
     let propsPath
@@ -206,8 +207,8 @@ export const makePropQuery = (prop, options, queryType) => {
             propName: 'object',
             entrypointName: 'entrypoint',
             entrypointType: true,
-            // sample: 100,
-            graph: defaultGraph
+            resourceGraph,
+            graphs
         })
         limit = ` LIMIT 1`
     } else if (queryType === 'count') {
@@ -216,7 +217,9 @@ export const makePropQuery = (prop, options, queryType) => {
         propsPath = FSL2SPARQL(path, {
             propName: 'object',
             entrypointName: 'entrypoint',
-            entrypointType: true
+            entrypointType: true,
+            resourceGraph,
+            graphs
         })
     } else if (queryType === 'dateformat') {
         props = `DISTINCT ?object `
@@ -225,8 +228,8 @@ export const makePropQuery = (prop, options, queryType) => {
             propName: 'object',
             entrypointName: 'entrypoint',
             entrypointType: true,
-            // sample: 30,
-            graph: defaultGraph
+            resourceGraph,
+            graphs
         })
         limit = ` LIMIT 30`
     }
@@ -240,16 +243,17 @@ ${bindProps}
 
 export const makePropsQuery = (entitiesClass, options, level) => {
     // this is valid only for first level
-    const { constraints, defaultGraph } = options
+    const { constraints, graphs, resourceGraph } = options
     const pathQuery = FSL2SPARQL(entitiesClass, {
         propName: 'interobject',
         entrypointName: 'subject',
         entrypointType: true,
         // sample: 100,
-        graph: defaultGraph,
+        graphs,
+        resourceGraph,
         constraints
     })
-    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     const subject = (level === 1) ? '?subject' : '?interobject'
     return `SELECT DISTINCT ?property ${graph}WHERE {
         ${pathQuery}${constraints}
@@ -279,7 +283,8 @@ export const makeKeywordConstraints = (keyword, options) => {
     return constraint
 }
 
-export const makeSelectionConstraints = (selections, selectedConfig, zone) => {
+export const makeSelectionConstraints = (selections, selectedConfig, zone, dataset) => {
+    const { resourceGraph, graphs } = dataset
     const uriSelections = selections.filter(sel => sel.query.type === 'uri' && sel.zone === zone)
     const uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
     // add constraints for constrained groups of entities (heatmap)
@@ -293,7 +298,9 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone) => {
                 paths += FSL2SPARQL(selectedConfig.properties[iC].path, {
                     propName,
                     entrypointName: 'entrypoint',
-                    entrypointType: true
+                    entrypointType: true,
+                    resourceGraph,
+                    graphs
                 })
             }
             if (constraint.category === 'datetime') {
@@ -321,13 +328,13 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone) => {
 
 // to do : take constraints into account
 export const makeQuery = (entrypoint, configZone, zone, options) => {
-    const { defaultGraph, constraints, geonamesGraph, maxDepth, prop1only, unique } = options
+    const { graphs, constraints, maxDepth, prop1only, resourceGraph, unique } = options
     // console.log(configZone)
     let defList = ``
     let groupList = unique ?  `` : `GROUP BY `
     let propList = ``
     let orderList = unique ? `` : `ORDER BY `
-    let graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    let graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     if (maxDepth) {
         propList = `DISTINCT ?entrypoint ?path1 ?prop1 ?level `
         if (!unique) groupList = groupList.concat(`?prop1 `)
@@ -382,28 +389,17 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
                 entrypointName: 'entrypoint',
                 entrypointType: (index === 1),
                 optional,
+                resourceGraph,
+                graphs,
                 hierarchical
             }))
-            if (prop.category === 'geo' && prop.subcategory === 'geoname') {
-                // FIND IN GEONAMES GRAPH
-                groupList = groupList.concat(`?latitude${index} ?longitude${index} ?geoname${index} `)
-                propList = propList.concat(`?latitude${index} ?longitude${index} ?geoname${index} `)
-                defList = defList.concat(`?prop${index} <http://www.w3.org/2003/01/geo/wgs84_pos#lat> ?latitude${index} .
-                ?prop${index} <http://www.w3.org/2003/01/geo/wgs84_pos#long> ?longitude${index} .
-                ?prop${index} <http://www.geonames.org/ontology#name> ?geoname${index} .`)
-                if (graph === ``) {
-                    graph = graph.concat(`FROM <${geonamesGraph}> `)
-                } else if (graph.indexOf(`${geonamesGraph}`) === -1) {
-                    graph = graph.concat(` <${geonamesGraph}> `)
-                }
-            }
         })
     }
-    let request = `SELECT DISTINCT ${propList}${graph}
+    /* let request = `SELECT DISTINCT ${propList}${graph}
     WHERE {
     ${constraints}
     ${defList}
-    } ${groupList} ${orderList}`
+    } ${groupList} ${orderList}` */
     return `SELECT DISTINCT ${propList}${graph}
 WHERE {
 ${constraints}
@@ -411,14 +407,9 @@ ${defList}
 } ${groupList} ${orderList}`
 }
 
-/* const makeGeoNamesQuery = (options) => {
-    const { defaultGraph, geograph } = options
-    let service = (getRoot(defaultGraph) !== getRoot(geograph)) ? ` { service <${geograph}> }` : ``
-} */
-
 export const makeQueryResources = (options) => {
-    const { defaultGraph } = options
-    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    const { graphs } = options
+    const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
     return `SELECT DISTINCT ?type (COUNT(?type) as ?occurrences) ${graph}
     WHERE {
       ?s rdf:type ?type
@@ -426,9 +417,33 @@ export const makeQueryResources = (options) => {
     ORDER BY DESC(?occurrences)`
 }
 
+export const makeSubGraphQuery = (options, level) => {
+    const { constraints, entrypoint, graphs, maxLevel, resourceGraph } = options
+    const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+    let ins = level === 1 ? `?entrypoint ?prop1 ?value1 . ?entrypoint rdf:type <${entrypoint}> .` : ``
+    let defs = ``
+    for (let i = 1; i < level; i++ ) {
+        if (i === level-1) ins = ins.concat(`?value${i} ?prop${(i+1)} ?value${(i+1)} . `)
+        defs = defs.concat(`?value${i} ?prop${(i+1)} ?value${(i+1)} . `)
+    }
+    return `INSERT { 
+        GRAPH <${resourceGraph}> {
+            ${ins}
+        }
+      }
+      ${graph}
+      WHERE { 
+        ?entrypoint ?prop1 ?value1 .
+        ?entrypoint rdf:type <${entrypoint}> .
+        ${constraints}
+        ${defs}
+    }`
+}
+
+
 export const makeTotalQuery = (entitiesClass, options) => {
-    let { constraints, defaultGraph } = options
-    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    let { constraints, graphs } = options
+    const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
     return `SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) ${graph}
 WHERE {
 ?entrypoint rdf:type ${entitiesClass} . ${constraints}
@@ -438,8 +453,8 @@ WHERE {
 export const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
     // let newConstraints = newOptions.constraints
     // newConstraints = newConstraints.replace('?', '?new')
-    const { defaultGraph, constraints } = options
-    const graph = defaultGraph ? `FROM <${defaultGraph}> ` : ``
+    const { graphs, resourceGraph, constraints } = options
+    const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     //
     
     let propList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``
@@ -463,7 +478,9 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
                     propName: `prop${index}`,
                     entrypointName: 'entrypoint',
                     entrypointType: (index === 1),
-                    optional
+                    optional,
+                    resourceGraph,
+                    graphs
                 }))
             }
         })
@@ -489,7 +506,9 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
                     propName: `newprop${index}`,
                     entrypointName: 'entrypoint',
                     entrypointType: (index === 1),
-                    optional: false
+                    optional: false,
+                    resourceGraph,
+                    graphs
                 }))
             }
         })

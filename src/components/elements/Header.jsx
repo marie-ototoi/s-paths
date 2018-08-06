@@ -9,7 +9,7 @@ import { getDimensions } from '../../lib/scaleLib'
 import { getNbDisplayed } from '../../lib/dataLib'
 import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 
-import { displayConfig, loadSelection, selectResource } from '../../actions/dataActions'
+import { displayConfig, loadResources, loadSelection, loadStats, selectResource } from '../../actions/dataActions'
 
 class Header extends React.PureComponent {
     constructor (props) {
@@ -63,7 +63,8 @@ class Header extends React.PureComponent {
         const { dataset, views } = this.props
         let selectedResource = dataset.resources[this.state.selectedResource]
         this.setState({ resourceIsLoading: true, errorSelection: '' })
-        this.props.selectResource({ ...dataset, entrypoint: selectedResource.type, totalInstances: selectedResource.total, constraints: `` }, views)
+        console.log(selectedResource)
+        this.props.selectResource({ ...dataset, resourceGraph: selectedResource._id, entrypoint: selectedResource.type, totalInstances: selectedResource.total, constraints: `` }, views)
             .then(res => this.setState({
                 resourceIsLoading: false,
                 displayedResource: this.state.selectedResource
@@ -87,7 +88,7 @@ class Header extends React.PureComponent {
         let newConstraints 
         if (selections.length > 0) {
             const selectedConfig = getSelectedMatch(config, zone)
-            newConstraints = makeSelectionConstraints(selections, selectedConfig, zone)
+            newConstraints = makeSelectionConstraints(selections, selectedConfig, zone, dataset)
         } else {
             // keep old constraints
             newConstraints = dataset.constraints
@@ -385,6 +386,26 @@ class Header extends React.PureComponent {
                             </p>
                         </div>
                         <div className = "cache"></div>
+                        {
+                            <div>
+                                <button
+                                    onClick = { e => {
+                                        //console.log(this.props.dataset)
+                                        this.props.loadResources({ ...this.props.dataset, forceUpdate: true }, this.props.views)
+                                    } }
+                                >
+                                    Resources
+                                </button>
+                                <button
+                                    onClick = { e => {
+                                        //console.log(this.props.dataset)
+                                        this.props.loadStats({ ...this.props.dataset, forceUpdate: true })
+                                    } }
+                                >
+                                    Stats
+                                </button>
+                            </div>
+                        }
                     </div>
                 </foreignObject>
             </g>
@@ -402,8 +423,11 @@ Header.propTypes = {
     selections: PropTypes.array,
     views: PropTypes.array,
     zone: PropTypes.string,
+    analyseEndpoint: PropTypes.func,
     displayConfig: PropTypes.func,
+    loadResources: PropTypes.func,
     loadSelection: PropTypes.func,
+    loadStats: PropTypes.func,
     selectResource: PropTypes.func,
 }
 
@@ -421,6 +445,8 @@ function mapStateToProps (state) {
 function mapDispatchToProps (dispatch) {
     return {
         displayConfig: displayConfig(dispatch),
+        loadResources: loadResources(dispatch),
+        loadStats: loadStats(dispatch),
         loadSelection: loadSelection(dispatch),
         selectResource: selectResource(dispatch)
     }
