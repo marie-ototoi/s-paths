@@ -8,6 +8,7 @@ services:
     volumes:
       - db-virtuoso:/data
       - ./dump:/usr/local/virtuoso-opensource/share/virtuoso/vad
+      # - /home/docker/dumps:/usr/local/virtuoso-opensource/share/virtuoso/vad
     ports:
       - 8890:8890
       - 1111:1111
