@@ -24,6 +24,7 @@ router.post('/', (req, res) => {
 })
 
 const getStats = async (options) => {
+    console.log('a ', options)
     let { prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
     let selectionInstances
     // add prefix to entrypoint if full url
@@ -99,6 +100,7 @@ const getMaxRequest = (parentQuantities) => {
 }
 
 const getProps = async (categorizedProps, level, options, instances) => {
+    //console.log(options)
     let { constraints, graphs, entrypoint, endpoint, localEndpoint, prefixes, maxLevel } = options
     let { totalInstances, selectionInstances } = instances
     let maxRequests = getMaxRequest(totalInstances)
@@ -112,7 +114,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
     })
     // look for savedProps in the database
     let props = await pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level, graphs: graphs }).exec()
-    if (props.length > 0) {
+    if (props.length > 0) {        
         // if available
         // generate current prefixes
         newCategorizedProps = props.map(prop => {
@@ -127,7 +129,14 @@ const getProps = async (categorizedProps, level, options, instances) => {
         })
         // keep only those whose parents count > 0
     } else {
-        // console.log ('là !')
+        if (level === 1) {
+            for(let j = 1; j < options.maxLevel; j ++) {
+                let query = queryLib.makeSubGraphQuery(options, j)
+                queryLib.getData(localEndpoint, query, {})
+                await new Promise((resolve, reject) => setTimeout(resolve, 500))
+            }
+            await new Promise((resolve, reject) => setTimeout(resolve, 4000))
+        }   
         // let propQueries = queriedProps
         // deal with props by bunches of promises
         for (let i = 0; i < queriedProps.length; i += maxRequests) {
@@ -263,8 +272,10 @@ const getProps = async (categorizedProps, level, options, instances) => {
     ]
     // console.log('???? la fourche ?', (level < maxLevel && newCategorizedProps.length > 0), level, maxLevel, newCategorizedProps.length)
     if (level < maxLevel && newCategorizedProps.length > 0) {
+        console.log(level, 'next')
         return getProps(returnProps, level + 1, options, instances)
     } else {
+        console.log(level, 'return')
         // console.log(returnProps.length)
         // discard uris when there are more specific paths
         returnProps = returnProps.filter(prop => {
