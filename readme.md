@@ -58,9 +58,24 @@ Then use the top menu `Linked Data > Quad Store Upload` to upload files
 
 #### Advanced procedure (for big files and / or bulk upload)
 
-Once the containers are up and running (see below), copy files to upload in the dump folder.
-Then get the id of your virtuoso container
+##### MAC 
+Once the containers are up and running (see below), copy files to upload in the dump folder, it is mapped to the containers' /usr/local/virtuoso-opensource/share/virtuoso/vad folder in the docker-compose file.
+```
+- ./dump:/usr/local/virtuoso-opensource/share/virtuoso/vad
+```
 
+##### LINUX
+Once the containers are up and running (see below), connect to the VM 
+```
+- docker-machine ssh local
+```
+and copy files to upload in the /home/docker/dumps folder, it is mapped to the containers' /usr/local/virtuoso-opensource/share/virtuoso/vad folder in the docker-compose file.
+```
+- /home/docker/dumps:/usr/local/virtuoso-opensource/share/virtuoso/vad
+```
+
+##### BOTH
+Then get the id of your virtuoso container
 ```bash
 $ eval $(docker-machine env local) 
 $ docker container ls
