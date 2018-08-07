@@ -255,7 +255,8 @@ export const makePropsQuery = (entitiesClass, options, level) => {
         resourceGraph,
         constraints
     })
-    const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+    const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+    // const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     const subject = (level === 1) ? '?subject' : '?interobject'
     return `SELECT DISTINCT ?property ${graph}WHERE {
         ${pathQuery}${constraints}

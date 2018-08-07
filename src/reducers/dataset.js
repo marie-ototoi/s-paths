@@ -12,7 +12,7 @@ const initialState = {
     // null,  'http://localhost:8890/data10', 'http://data10.bnf.fr', 'http://data01.bnf.fr','http://data.bnf.fr',
     constraints: '',
     labels: [],
-    forceUpdate: true,
+    forceUpdate: false,
     maxLevel: 6,
     ignoreList: ['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
     resources: [],
@@ -58,7 +58,6 @@ const initialState = {
         slickm: 'http://slickmem.data.t-mus.org/',
         slickmem: 'http://slickmem.data.t-mus.org/terms/'
     },
-    status: 'off',
     stats: []
 }
 

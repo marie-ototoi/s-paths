@@ -2,7 +2,7 @@ import mongoose from 'mongoose'
 
 const pathSchema = new mongoose.Schema({
     fullPath: { type: String, required: true },
-    graphs: { type: Array },
+    graphs: { type: Array, required: true },
     endpoint: { type: String, required: true },
     //
     createdAt: Date,

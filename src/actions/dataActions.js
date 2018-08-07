@@ -11,10 +11,10 @@ export const endTransition = (dispatch) => (zone) => {
 }
 
 export const loadStats = (dispatch) => (dataset) => {
-    return getAllStats(dataset, 0)
+    return loadAllStats(dataset, 0)
 }
 
-export const getAllStats = (dataset, index) => {
+const loadAllStats = (dataset, index) => {
     dataset = {
         ...dataset,
         resourceGraph: dataset.resources[index]._id,
@@ -28,6 +28,7 @@ export const getAllStats = (dataset, index) => {
             if (index < dataset.resources.length - 1) getAllStats(dataset, index + 1)
         })
 }
+
 
 const getStats = (options) => {
     return fetch((process.env.API + 'stats'),
@@ -43,9 +44,7 @@ const getStats = (options) => {
                 'Access-Control-Allow-Headers': 'Content-Type, User-Agent, Origin'
             }
         })
-        .then((resp) => {
-            resp.json()
-        })
+        .then((resp) => resp.json())
     // return rp('http://localhost:80/stats/' + entrypoint)
 }
 const getResources = (options) => {
@@ -273,13 +272,15 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
 export const loadResources = (dispatch) => (dataset, views) => {
     let { endpoint, prefixes } = dataset
     let totalInstances
-    return getResources(dataset)
+    getResources(dataset)
         .then(resources => {
-            dataset.entrypoint = resources[0].type,
-            dataset.totalInstances = resources[0].total,
-            dataset.resourceGraph = resources[0].type,
+            console.log('avant')
+            dataset.entrypoint = resources[8].type
+            dataset.totalInstances = resources[8].total
+            dataset.resourceGraph = resources[8].type
             getStats({ ...dataset, stats: [] })
                 .then(stats => {
+                    console.log('ok on a bien reçu les stats', stats)
                     prefixes = stats.options.prefixes
                     // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
                     // for each views, checks which properties ou sets of properties could match and evaluate
@@ -292,7 +293,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
                     const queryMainUnique = makeQuery(dataset.entrypoint, configMain, 'main', { ...dataset, unique: true })
                     const queryAsideUnique = makeQuery(dataset.entrypoint, configAside, 'aside', { ...dataset, unique: true })
                     //
-                    return Promise.all([
+                    Promise.all([
                         getData(endpoint, queryMain, prefixes),
                         (queryMain === queryAside) ? null : getData(endpoint, queryAside, prefixes),
                         getData(endpoint, queryMainUnique, prefixes),

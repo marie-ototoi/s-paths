@@ -289,7 +289,7 @@ App.propTypes = {
     endTransition: PropTypes.func.isRequired,
     handleTransition: PropTypes.func,
     handleMouseUp: PropTypes.func,
-    loadResources: PropTypes.func.isRequired,
+    loadResources: PropTypes.func,
     select: PropTypes.func,
     setDisplay: PropTypes.func.isRequired
 }

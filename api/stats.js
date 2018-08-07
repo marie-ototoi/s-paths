@@ -1,5 +1,4 @@
 import express from 'express'
-//
 import pathModel from '../models/path'
 
 import { getPropsLabels } from '../src/lib/labelLib'
@@ -8,11 +7,12 @@ import * as queryLib from '../src/lib/queryLib'
 const router = express.Router()
 
 router.post('/', (req, res) => {
+    // req.setTimeout(600000)
     if (!req.body.entrypoint || !req.body.endpoint || !req.body.totalInstances) {
         console.error('You must provide at least an entrypoint and an endpoint, and the total number of instances')
         res.end()
     } else {
-        getStats(req.body)
+        getAllStats(req.body)
             .then(props => {
                 res.json(props)
                 res.end()
@@ -23,8 +23,7 @@ router.post('/', (req, res) => {
     }
 })
 
-const getStats = async (options) => {
-    console.log('a ', options)
+const getAllStats = async (options) => {
     let { prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
     let selectionInstances
     // add prefix to entrypoint if full url
@@ -62,11 +61,13 @@ const getStats = async (options) => {
         // check if props available in database
         // if necessary retrieve missing level
         // or recursively retrieve properties
-        let paths = await getProps(entryProp, 1, options, { totalInstances, selectionInstances }).catch(e => console.error('Error getting paths and stats', e))
+        let paths = await getProps(entryProp, 1, options, { totalInstances, selectionInstances })
+        
+        // console.log(paths.statements[1])
         // last parameter is for first time query, should be changed dynamically
         // get human readable rdfs:labels and rdfs:comments of all properties listed
         let newlabels = await getPropsLabels(paths.options.prefixes, paths.statements)
-        
+
         return {
             statements: paths.statements.sort((a, b) => a.level - b.level),
             totalInstances,
@@ -100,20 +101,13 @@ const getMaxRequest = (parentQuantities) => {
 }
 
 const getProps = async (categorizedProps, level, options, instances) => {
-    //console.log(options)
     let { constraints, graphs, entrypoint, endpoint, localEndpoint, prefixes, maxLevel } = options
     let { totalInstances, selectionInstances } = instances
     let maxRequests = getMaxRequest(totalInstances)
     let newCategorizedProps = []
-    const queriedProps = categorizedProps.filter(prop => {
-        // console.log(prop.total)
-        return (prop.level === level - 1 &&
-            (prop.category === 'entrypoint' ||
-            prop.type === 'uri') &&
-            (!prop.total || (prop.total && prop.total > 0)))
-    })
+    
     // look for savedProps in the database
-    let props = await pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level, graphs: graphs }).exec()
+    let props = await pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: level, graphs: { $all: graphs } }).exec()
     if (props.length > 0) {        
         // if available
         // generate current prefixes
@@ -123,40 +117,36 @@ const getProps = async (categorizedProps, level, options, instances) => {
             }
             return {
                 ...prop._doc,
-                // generate prefixed paths
-                path: queryLib.convertPath(prop.fullPath, prefixes)
+                path: queryLib.convertPath(prop.fullPath, prefixes) // generate prefixed paths
             }
         })
         // keep only those whose parents count > 0
     } else {
-        /* if (level === 1) {
-            for(let j = 1; j < options.maxLevel; j ++) {
-                let query = queryLib.makeSubGraphQuery(options, j)
-                queryLib.getData(localEndpoint, query, {})
-                await new Promise((resolve, reject) => setTimeout(resolve, 500))
-            }
-            await new Promise((resolve, reject) => setTimeout(resolve, 4000))
-        }  */ 
-        // let propQueries = queriedProps
+   
+        const queriedProps = categorizedProps.filter(prop => {
+            // console.log(prop.total)
+            return (prop.level === level - 1 &&
+                (prop.category === 'entrypoint' ||
+                prop.type === 'uri') &&
+                (!prop.total || (prop.total && prop.total > 0)))
+        })
         // deal with props by bunches of promises
         for (let i = 0; i < queriedProps.length; i += maxRequests) {
             let elementsToSlice = (queriedProps.length - i < maxRequests) ? queriedProps.length - i : maxRequests
-            // console.log('000', level, i, elementsToSlice, maxRequests, queriedProps.length)
             let propsLists = await Promise.all(queriedProps
                 .slice(i, i + elementsToSlice)
                 .map(prop => {
                     let propsQuery = queryLib.makePropsQuery(prop.path, options, level)
-                    // console.log('QUERY', prop.path, propsQuery)
                     return queryLib.getData(localEndpoint, propsQuery, prefixes)
                 })
                 .map((promise, index) => promise.catch(e => {
                     console.error('Error with makePropsQuery', e, queryLib.makePropsQuery(queriedProps[i + index].path, options, level))
                     return undefined
-                })))
+                }))
+            )
             // keep only promises that have been fulfilled
             propsLists = propsLists
                 .map((props, index) => {
-                    // console.log('BINDINGS', props.results.bindings)
                     return (props && props.results.bindings.length > 0) ? props.results.bindings.map(prop => {
                     // generate prefixes if needed
                         if (!queryLib.prefixDefined(prop.property.value, prefixes)) {
@@ -171,7 +161,6 @@ const getProps = async (categorizedProps, level, options, instances) => {
         }
     }
     //
-    // console.log('newCategorizedProps ', newCategorizedProps)
     let propsWithStats = []
     let temp
     if (props.length === 0 || constraints !== '') {
@@ -179,19 +168,16 @@ const getProps = async (categorizedProps, level, options, instances) => {
         let countStats = []
         for (let i = 0; i < newCategorizedProps.length; i += maxRequests) {
             let elementsToSlice = (newCategorizedProps.length - i < maxRequests) ? newCategorizedProps.length - i : maxRequests
-            // console.log('a', level, i, elementsToSlice, maxRequests)
             temp = await Promise.all(newCategorizedProps
                 .slice(i, i + elementsToSlice)
                 .map(prop => {
                     let propQuery = queryLib.makePropQuery(prop, options, 'count')
-                    // console.log('count ', propQuery)
                     return queryLib.getData(localEndpoint, propQuery, options.prefixes)
                 })
                 .map((promise, i) => promise.catch(e => {
                     console.error('Error with makePropQuery count', e, queryLib.makePropQuery(newCategorizedProps[i], options, 'count'))
                     return undefined
                 })))
-            // console.log('b', level, i, elementsToSlice, maxRequests)
             countStats.push(...temp)
             if (props.length === 0 && selectionInstances > 1) {
                 temp = await Promise.all(newCategorizedProps
@@ -206,92 +192,70 @@ const getProps = async (categorizedProps, level, options, instances) => {
                         return undefined
                     })))
                 typeStats.push(...temp)
-                // console.log('c', level, i, elementsToSlice, maxRequests)
             }
         }
-        propsWithStats = queryLib.mergeStatsWithProps(newCategorizedProps, countStats, typeStats, selectionInstances)
-        // console.log('|||||| stop tout bon')
-        propsWithStats = propsWithStats.map(prop => {
-            // the place to create or fetch a prefix if it does not exist, needed to make the path in defineGroup
-            return queryLib.defineGroup(prop, options)
-        })
-        let propsWithSample = []
-        temp = await Promise.all(propsWithStats
-            .map(prop => {
-                if ((prop.category === 'datetime' || prop.category === 'text') && prop.total > 0) {
-                    let sampleQuery = queryLib.makePropQuery(prop, options, 'dateformat')
-                    // console.log('dateformat', sampleQuery)
-                    return queryLib.getData(localEndpoint, sampleQuery, options.prefixes)
-                        .then(sampleData => {
-                            // console.log(sampleData )
-                            // console.log(']]', sampleData.results.bindings)
-                            if (sampleData && sampleData.results.bindings.length > 0) {
-                                let category = prop.category
-                                let subcategory = prop.subcategory
-                                let value = sampleData.results.bindings[0].object.value
-                                if (prop.category === 'datetime') {
-                                    let thedate = new Date(value)
-                                    if (thedate.toString() === 'Invalid Date') category = 'text'
-                                } else if (prop.category === 'text') {
-                                    if (value.indexOf('http://sws.geonames.org') === 0) {
-                                        category = 'geo'
-                                        subcategory = 'geoname'
-                                    }
-                                }
-                                return {
-                                    ...prop,
-                                    category,
-                                    subcategory
-                                }
-                            } else {
-                                return prop
-                            }
-                        })
-                        .catch(e => {
-                            console.error('Error with makePropQuery sample dateformat', e)
-                            return undefined
-                        })
-                } else {
-                    return prop
-                }
+        if (newCategorizedProps.length > 0 ) {
+            propsWithStats = queryLib.mergeStatsWithProps(newCategorizedProps, countStats, typeStats, selectionInstances)
+            propsWithStats = propsWithStats.map(prop => {
+                // the place to create or fetch a prefix if it does not exist, needed to make the path in defineGroup
+                return queryLib.defineGroup(prop, options)
             })
-        )
-        propsWithSample.push(...temp)
-        propsWithStats = propsWithSample
-            .filter(prop => (prop && prop.category !== 'ignore'))
-            .map(prop => { return { ...prop, endpoint, graphs } })
-        // save all stats, only if they are relative to the whole ensemble
-        if (constraints === '') await pathModel.createOrUpdate(propsWithStats).catch(e => console.error('Error updating stats', e))
+            let propsWithSample = []
+            temp = await Promise.all(propsWithStats
+                .map(prop => {
+                    if ((prop.category === 'datetime' || prop.category === 'text') && prop.total > 0) {
+                        let sampleQuery = queryLib.makePropQuery(prop, options, 'dateformat')
+                        return queryLib.getData(localEndpoint, sampleQuery, options.prefixes)
+                            .then(sampleData => {
+                                if (sampleData && sampleData.results.bindings.length > 0) {
+                                    let category = prop.category
+                                    let subcategory = prop.subcategory
+                                    let value = sampleData.results.bindings[0].object.value
+                                    if (prop.category === 'datetime') {
+                                        let thedate = new Date(value)
+                                        if (thedate.toString() === 'Invalid Date') category = 'text'
+                                    }
+                                    return {
+                                        ...prop,
+                                        category,
+                                        subcategory
+                                    }
+                                } else {
+                                    return prop
+                                }
+                            })
+                            .catch(e => {
+                                console.error('Error with makePropQuery sample dateformat', e)
+                                return undefined
+                            })
+                    } else {
+                        return prop
+                    }
+                })
+            )
+            propsWithSample.push(...temp)
+            propsWithStats = propsWithSample
+                .filter(prop => (prop && prop.category !== 'ignore'))
+                .map(prop => { return { ...prop, endpoint, graphs } })
+            // save all stats, only if they are relative to the whole ensemble
+            if (constraints === '') await pathModel.createOrUpdate(propsWithStats).catch(e => console.error('Error updating stats', e))
+        }
     } else {
         propsWithStats = newCategorizedProps
     }
-    //
     let returnProps = [
         ...categorizedProps,
         ...propsWithStats
     ]
-    // console.log('???? la fourche ?', (level < maxLevel && newCategorizedProps.length > 0), level, maxLevel, newCategorizedProps.length)
     if (level < maxLevel && newCategorizedProps.length > 0) {
-        console.log(level, 'next')
         return getProps(returnProps, level + 1, options, instances)
     } else {
-        console.log(level, 'return')
-        // console.log(returnProps.length)
         // discard uris when there are more specific paths
         returnProps = returnProps.filter(prop => {
-            // console.log(prop.total)
             return ((returnProps.filter(moreSpecificProp => prop.path.indexOf(moreSpecificProp.path) === 0 &&
-                moreSpecificProp.level > prop.level).length === 0) ||
-                prop.subcategory === 'geoname') &&
-                prop.total > 0 /* &&
-                ((prop.category === 'number') ||
-                (prop.category === 'datetime') ||
-                (prop.category === 'text') ||
-                (prop.category === 'geo') ||
-                (prop.category === 'uri') ||
-        (prop.type === 'uri' && prop.level === maxLevel - 1) ) */
+                moreSpecificProp.level > prop.level).length === 0) &&
+                prop.total > 0)
         })
-        // console.log(returnProps.length)
         return { statements: returnProps, options }
     }
 }
