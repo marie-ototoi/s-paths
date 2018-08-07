@@ -31,7 +31,7 @@ const getResources = async (opt) => {
     if (forceUpdate) {
         let toDelete = await resourceModel.find({ endpoint, graphs: { $all: graphs } }).exec()
         for(let i = 0; i < toDelete.length; i ++) {
-            queryLib.getData(localEndpoint, `CLEAR GRAPH <${toDelete[i]._doc._id}>`, {})
+            queryLib.getData(localEndpoint, `CLEAR GRAPH <${toDelete[i]._doc.type}>`, {})
             await new Promise((resolve, reject) => setTimeout(resolve, 1000))
         }
         await pathModel.deleteMany({ endpoint, graphs: { $all: graphs } }).exec()
@@ -54,7 +54,7 @@ const getResources = async (opt) => {
             for(let j = 1; j < options.maxLevel; j ++) {
                 let query = queryLib.makeSubGraphQuery({
                     ...options,
-                    resourceGraph: resource._id,
+                    resourceGraph: resource.type,
                     entrypoint: resource.type
                 }, j)
                 queryLib.getData(localEndpoint, query, {})
