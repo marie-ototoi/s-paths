@@ -29,11 +29,11 @@ const getResources = async (opt) => {
     let options = opt
     let { graphs, endpoint, localEndpoint, forceUpdate } = options
     if (forceUpdate) {
-        let toDelete = await resourceModel.find({ endpoint, graphs: { $all: graphs } }).exec()
+        /* let toDelete = await resourceModel.find({ endpoint, graphs: { $all: graphs } }).exec()
         for(let i = 0; i < toDelete.length; i ++) {
             queryLib.getData(localEndpoint, `CLEAR GRAPH <${toDelete[i]._doc.type}>`, {})
             await new Promise((resolve, reject) => setTimeout(resolve, 200))
-        }
+        } */
         await pathModel.deleteMany({ endpoint, graphs: { $all: graphs } }).exec()
         await resourceModel.deleteMany({ endpoint, graphs: { $all: graphs } }).exec()
     }
