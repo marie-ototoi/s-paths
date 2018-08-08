@@ -131,16 +131,19 @@ WHERE {
             .to.equal(`SELECT DISTINCT ?property WHERE {
         ?subject rdf:type nobel:LaureateAward . 
         ?subject ?property ?object .
+        FILTER (?subject != ?object) . 
     } GROUP BY ?property`)
         expect(queryLib.makePropsQuery('nobel:LaureateAward/nobel:university/*', { constraints: '', graphs:['http://localhost:8890/nobel'] }, 2))
             .to.equal(`SELECT DISTINCT ?property FROM <http://localhost:8890/nobel> WHERE {
         ?subject rdf:type nobel:LaureateAward . ?subject nobel:university ?interobject . FILTER (?interobject != ?subject) . 
         ?interobject ?property ?object .
+        FILTER (?interobject != ?object) . 
     } GROUP BY ?property`)
         expect(queryLib.makePropsQuery('nobel:LaureateAward/nobel:university/*', { constraints: '', graphs:['http://localhost:8890/nobel'] }, 3))
             .to.equal(`SELECT DISTINCT ?property FROM <http://localhost:8890/nobel> WHERE {
         ?subject rdf:type nobel:LaureateAward . ?subject nobel:university ?interobject . FILTER (?interobject != ?subject) . 
         ?interobject ?property ?object .
+        FILTER (?interobject != ?object) . 
     } GROUP BY ?property`)
     })
     it('should affect a prop to the right group', () => {
@@ -252,7 +255,8 @@ WHERE {
         }
         const options = {
             constraints: 'FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . ',
-            graphs: []
+            graphs: [],
+            resourceGraph: 'a'
         }
         const newConfig = {
             constraints: [
@@ -271,10 +275,11 @@ WHERE {
         }
         const newOptions = {
             constraints: 'FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . ',
-            graphs: []
+            graphs: [],
+            resourceGraph: 'b'
         }
         expect(queryLib.makeTransitionQuery(newConfig, newOptions, config, options, 'main'))
-            .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) ?prop2 (COUNT(?prop2) as ?countprop2) ?newprop1 (COUNT(?newprop1) as ?newcountprop1) ?newprop2 (COUNT(?newprop2) as ?newcountprop2) 
+            .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) ?prop2 (COUNT(?prop2) as ?countprop2) ?newprop1 (COUNT(?newprop1) as ?newcountprop1) ?newprop2 (COUNT(?newprop2) as ?newcountprop2) FROM <a> FROM <b>
     WHERE {
         FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . 
         
@@ -300,6 +305,21 @@ WHERE {
         
         ?value1 ?prop2 ?value2 . 
     }`)
+    })
+    it('should return true if there s already a + specific path in the list', () => {
+        let pathsList1 = [
+            { path: 'nobel:LaureateAward/nobel:university/*/nobel:LaureateAward/dct:isPartOf/*', level: 2 },
+            { path: 'nobel:LaureateAward/nobel:LaureateAward/dct:isPartOf/*/nobel:university/*', level: 2 }
+
+        ]
+        expect(queryLib.hasMoreSpecificPath('nobel:LaureateAward/nobel:university/*', 1, pathsList1))
+            .to.be.true
+        expect(queryLib.hasMoreSpecificPath('nobel:Award/nobel:university/*', 1, pathsList1))
+            .to.be.false
+        expect(queryLib.hasMoreSpecificPath('nobel:LaureateAward/nobel:university/*/nobel:LaureateAward/dct:isPartOf/*/more/*', 3, pathsList1))
+            .to.be.false
+        expect(queryLib.hasMoreSpecificPath('nobel:LaureateAward/nobel:university/*/nobel:LaureateAward/dct:isPartOf/*', 2, pathsList1))
+            .to.be.false
     })
     /*it('should build a query corresponding to selected spec', () => {
         expect(queryLib.makeQueryFromConstraint({

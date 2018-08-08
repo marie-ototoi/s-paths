@@ -261,11 +261,18 @@ export const makePropsQuery = (entitiesClass, options, level) => {
     return `SELECT DISTINCT ?property ${graph}WHERE {
         ${pathQuery}${constraints}
         ${subject} ?property ?object .
-        FILTER (${subject} != ?object) .
+        FILTER (${subject} != ?object) . 
     } GROUP BY ?property`
     /* for (let index = 1; index <= levels; index ++) {
         let subject
     } */
+}
+
+export const hasMoreSpecificPath = (path, level, pathList) => {
+    return pathList.find(comparePath => {
+        // console.log(comparePath.path, path, comparePath.path.indexOf(path))
+        return comparePath.level > level && comparePath.path.indexOf(path) === 0
+    }) !== undefined
 }
 
 export const makeKeywordConstraints = (keyword, options) => {
@@ -460,7 +467,7 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
     // let newConstraints = newOptions.constraints
     // newConstraints = newConstraints.replace('?', '?new')
     const { graphs, resourceGraph, constraints } = options
-    const graph = `FROM <${resourceGraph}> FROM  <${newOptions.resourceGraph}>`
+    const graph = `FROM <${resourceGraph}> FROM <${newOptions.resourceGraph}>`
     // const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
     
     let propList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``

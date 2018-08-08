@@ -128,7 +128,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 queryLib.getData(localEndpoint, query, {})
                 await new Promise((resolve, reject) => setTimeout(resolve, 500))
             }
-            await new Promise((resolve, reject) => setTimeout(resolve, 4000))
+            await new Promise((resolve, reject) => setTimeout(resolve, 5000))
         }   
 
         const queriedProps = categorizedProps.filter(prop => {
@@ -259,15 +259,10 @@ const getProps = async (categorizedProps, level, options, instances) => {
         return getProps(returnProps, level + 1, options, instances)
     } else {
         // discard uris when there are more specific paths
-        console.log('avant', returnProps.length)
-        returnProps = returnProps.filter(prop => {
-            return ((returnProps.filter(moreSpecificProp => {
-                return prop.path.indexOf(moreSpecificProp.path) === 0 &&
-                moreSpecificProp.level > prop.level
-            }).length === 0) && prop.total > 0)
-        })
-        console.log('apres', returnProps.length)
-        return { statements: returnProps, options }
+        return {
+            statements: returnProps.filter(prop => (prop.total > 0 && !queryLib.hasMoreSpecificPath(prop.path, prop.level, returnProps))), 
+            options 
+        }
     }
 }
 
