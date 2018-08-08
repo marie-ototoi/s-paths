@@ -85,8 +85,8 @@ export const FSL2SPARQL = (FSLpath, options) => {
     let pathParts = FSLpath.split('/')
     let query = ``
     if (entrypointType) {
-        // const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
-        const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+        const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+        // const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
         let entryDef = sample ? `{ SELECT ?${entrypointName} ${graph}WHERE { ?${entrypointName} rdf:type ${pathParts[0]} . ${constraints || ``}} LIMIT ${sample} } . ` : `?${entrypointName} rdf:type ${pathParts[0]} . `
         query = query.concat(entryDef)
     }
@@ -192,8 +192,8 @@ export const makePropQuery = (prop, options, queryType) => {
     // queryType: count, type, char
     const { constraints, graphs, resourceGraph } = options
     const { path } = prop
-    const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
-    // const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+    // const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+    const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     let props
     let bindProps
     let propsPath
@@ -255,8 +255,8 @@ export const makePropsQuery = (entitiesClass, options, level) => {
         resourceGraph,
         constraints
     })
-    const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
-    // const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+    // const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+    const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     const subject = (level === 1) ? '?subject' : '?interobject'
     return `SELECT DISTINCT ?property ${graph}WHERE {
         ${pathQuery}${constraints}
@@ -337,8 +337,8 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
     let groupList = unique ?  `` : `GROUP BY `
     let propList = ``
     let orderList = unique ? `` : `ORDER BY `
-    let graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
-    // let graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+    // let graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+    let graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     if (maxDepth) {
         propList = `DISTINCT ?entrypoint ?path1 ?prop1 ?level `
         if (!unique) groupList = groupList.concat(`?prop1 `)
@@ -447,8 +447,8 @@ export const makeSubGraphQuery = (options, level) => {
 
 export const makeTotalQuery = (entitiesClass, options) => {
     let { constraints, graphs, resourceGraph } = options
-    const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
-    // let graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+    // const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+    const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     return `SELECT (COUNT(DISTINCT ?entrypoint) AS ?total) ${graph}
 WHERE {
 ?entrypoint rdf:type ${entitiesClass} . ${constraints}
@@ -459,8 +459,8 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
     // let newConstraints = newOptions.constraints
     // newConstraints = newConstraints.replace('?', '?new')
     const { graphs, resourceGraph, constraints } = options
-    // const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
-    const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+    const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+    // const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
     
     let propList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``
     let groupList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``

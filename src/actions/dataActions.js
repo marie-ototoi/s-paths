@@ -25,7 +25,7 @@ const loadAllStats = (dataset, index) => {
     return getStats(dataset)
         .then(stats => {
             console.log(stats)
-            if (index < dataset.resources.length - 1) getAllStats(dataset, index + 1)
+            if (index < dataset.resources.length - 1) loadAllStats(dataset, index + 1)
         })
 }
 
@@ -274,13 +274,11 @@ export const loadResources = (dispatch) => (dataset, views) => {
     let totalInstances
     getResources(dataset)
         .then(resources => {
-            console.log('avant')
-            dataset.entrypoint = resources[8].type
-            dataset.totalInstances = resources[8].total
-            dataset.resourceGraph = resources[8].type
+            dataset.entrypoint = resources[0].type
+            dataset.totalInstances = resources[0].total
+            dataset.resourceGraph = resources[0].type
             getStats({ ...dataset, stats: [] })
                 .then(stats => {
-                    console.log('ok on a bien reçu les stats', stats)
                     prefixes = stats.options.prefixes
                     // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
                     // for each views, checks which properties ou sets of properties could match and evaluate

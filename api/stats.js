@@ -122,7 +122,15 @@ const getProps = async (categorizedProps, level, options, instances) => {
         })
         // keep only those whose parents count > 0
     } else {
-   
+        if (level === 1) {
+            for(let j = 1; j < options.maxLevel; j ++) {
+                let query = queryLib.makeSubGraphQuery(options, j)
+                queryLib.getData(localEndpoint, query, {})
+                await new Promise((resolve, reject) => setTimeout(resolve, 500))
+            }
+            await new Promise((resolve, reject) => setTimeout(resolve, 4000))
+        }   
+
         const queriedProps = categorizedProps.filter(prop => {
             // console.log(prop.total)
             return (prop.level === level - 1 &&
