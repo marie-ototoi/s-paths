@@ -127,7 +127,6 @@ export const defineConfigs = (views, stats) => {
                 stats.statements.forEach(prop => {
                     constraintSet.forEach(constraint => {
                         // generic conditions
-                        console.log(constraint.category, prop.path, prop.category, prop.unique)
                         if (prop.total > 0 && prop.category !== 'entrypoint' &&
                         (prop.category === constraint.category || constraint.category === '*') &&
                         (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&

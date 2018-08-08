@@ -144,11 +144,11 @@ const getProps = async (categorizedProps, level, options, instances) => {
             let propsLists = await Promise.all(queriedProps
                 .slice(i, i + elementsToSlice)
                 .map(prop => {
-                    let propsQuery = queryLib.makePropsQuery(prop.path, options, level)
+                    let propsQuery = queryLib.makePropsQuery(prop.path, options, level, prefixes)
                     return queryLib.getData(localEndpoint, propsQuery, prefixes)
                 })
                 .map((promise, index) => promise.catch(e => {
-                    console.error('Error with makePropsQuery', e, queryLib.makePropsQuery(queriedProps[i + index].path, options, level))
+                    console.error('Error with makePropsQuery', e, queryLib.makePropsQuery(queriedProps[i + index].path, options, level, prefixes))
                     return undefined
                 }))
             )

@@ -25,7 +25,7 @@ const loadAllStats = (dataset, index) => {
     return getStats(dataset)
         .then(stats => {
             console.log(stats)
-            if (index < dataset.resources.length - 1) loadAllStats(dataset, index + 1)
+            if (index < dataset.resources.length - 1) setTimeout(() => { loadAllStats(dataset, index + 1) }, 10000)
         })
 }
 

@@ -243,10 +243,10 @@ ${bindProps}
 }${limit}`
 }
 
-export const makePropsQuery = (entitiesClass, options, level) => {
+export const makePropsQuery = (initialPath, options, level, prefixes) => {
     // this is valid only for first level
     const { constraints, graphs, resourceGraph } = options
-    const pathQuery = FSL2SPARQL(entitiesClass, {
+    const pathQuery = FSL2SPARQL(initialPath, {
         propName: 'interobject',
         entrypointName: 'subject',
         entrypointType: true,
@@ -258,10 +258,21 @@ export const makePropsQuery = (entitiesClass, options, level) => {
     // const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
     const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     const subject = (level === 1) ? '?subject' : '?interobject'
+    let pathsParts = initialPath.split('/')
+    let countAllResources = Math.floor(pathsParts.length / 3)
+    let filter = `FILTER (${subject} != ?object) . `
+    if (countAllResources >= 1) {
+        for (let i = 1; i <= countAllResources; i++) {
+            let prop = useFullUri(pathsParts[(i * 2)-1], prefixes)
+            let inter = (countAllResources === 1) ? `interobject` : `interobjectinter${i}`
+            console.log(`FILTER (?${inter} != ?object && <${prop}> != ?property) . `)
+            filter = filter.concat(`FILTER (?${inter} != ?object && ?property != <${prop}>) . `)
+        }
+    }
     return `SELECT DISTINCT ?property ${graph}WHERE {
         ${pathQuery}${constraints}
         ${subject} ?property ?object .
-        FILTER (${subject} != ?object) . 
+        ${filter}
     } GROUP BY ?property`
     /* for (let index = 1; index <= levels; index ++) {
         let subject
