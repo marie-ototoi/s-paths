@@ -17,7 +17,7 @@ export const loadStats = (dispatch) => (dataset) => {
 const loadAllStats = (dataset, index) => {
     dataset = {
         ...dataset,
-        resourceGraph: dataset.resources[index]._id,
+        resourceGraph: dataset.resources[index].type,
         entrypoint: dataset.resources[index].type,
         totalInstances: dataset.resources[index].total,
         selectionInstances: dataset.resources[index].total

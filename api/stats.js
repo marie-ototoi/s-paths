@@ -259,11 +259,14 @@ const getProps = async (categorizedProps, level, options, instances) => {
         return getProps(returnProps, level + 1, options, instances)
     } else {
         // discard uris when there are more specific paths
+        console.log('avant', returnProps.length)
         returnProps = returnProps.filter(prop => {
-            return ((returnProps.filter(moreSpecificProp => prop.path.indexOf(moreSpecificProp.path) === 0 &&
-                moreSpecificProp.level > prop.level).length === 0) &&
-                prop.total > 0)
+            return ((returnProps.filter(moreSpecificProp => {
+                return prop.path.indexOf(moreSpecificProp.path) === 0 &&
+                moreSpecificProp.level > prop.level
+            }).length === 0) && prop.total > 0)
         })
+        console.log('apres', returnProps.length)
         return { statements: returnProps, options }
     }
 }
