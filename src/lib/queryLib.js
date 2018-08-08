@@ -366,7 +366,7 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
     
         let properties = selectedConfig.properties
         if (prop1only === true) properties = [properties[0]]
-        propList = (configZone.entrypoint === undefined || unique) ? `` : `?entrypoint `
+        propList = (configZone.entrypoint === undefined || unique) ? `DISTINCT ` : `DISTINCT ?entrypoint `
         if (unique) propList = propList.concat(`(COUNT(DISTINCT ?entrypoint) AS ?displayed) `)
         if (configZone.entrypoint !== undefined && !unique) groupList = groupList.concat(`?entrypoint `)
         properties.forEach((prop, index) => {
