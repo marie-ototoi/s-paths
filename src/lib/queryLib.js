@@ -126,7 +126,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
 }
 
 export const getData = (endpoint, query, prefixes) => {
-    console.log(query)
+    // console.log(query)
     const client = new SparqlClient(endpoint, {
         requestDefaults: {
             headers: {
@@ -546,8 +546,7 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
             ${newdefList}
         }
     } 
-    GROUP BY ${groupList}
-    ORDER BY ${orderList}`
+    GROUP BY ${groupList}`
 }
 
 export const mergeStatsWithProps = (props, countStats, typeStats, totalEntities) => {

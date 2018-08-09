@@ -11,6 +11,11 @@ const defaultState = [
                 {
                     category: 'datetime',
                     unique: { min: 2 }
+                },
+                {
+                    category: 'text',
+                    avg: { max: 70, optimal: [10, 40] },
+                    unique: { min: 2, max: 150 }
                 }
             ],
             [

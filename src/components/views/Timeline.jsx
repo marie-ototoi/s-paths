@@ -43,14 +43,22 @@ class Timeline extends React.Component {
         const selectedConfig = getSelectedMatch(config, zone)
         // First prop to be displayed in the bottom axis
         let maxUnitsPerYear
-        const nestedProp1 = nestData(data, [{
+        /* const nestedProp1 = nestData(data, [{
             propName: 'prop1',
             category: 'datetime',
             max: 50,
             sortValues: 'prop2',
             sortValuesOrder: 'DESC'
+        }]) */
+        let categoryProp1 = selectedConfig.properties[0].category
+        let nestedProp1 = nestData(data, [{
+            propName: 'prop1',
+            category: categoryProp1,
+            max: 50,
+            sortValues: 'prop2',
+            sortValuesOrder: 'DESC'
         }])
-        const categoryProp1 = selectedConfig.properties[0].category
+        // const categoryProp1 = selectedConfig.properties[0].category
         const axisBottom = getAxis(nestedProp1, 'prop1', categoryProp1)
         // Second prop to be displayed in the legend
         const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })

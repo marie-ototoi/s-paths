@@ -441,7 +441,7 @@ export const deduplicate = (data, props) => {
 }
 
 export const getTransitionElements = (originElements, targetElements, originConfig, targetSelectedView, deltaData, zone) => {
-    // console.log('before', zone, originElements, targetElements, originConfig, targetSelectedView, deltaData)
+    console.log('before', zone, originElements, targetElements, originConfig, targetSelectedView, deltaData)
     deltaData = deltaData.map(data => {
         let indexOrigin = getDeltaIndex(data, originElements, { entrypoint: originConfig.entrypoint, isTarget: false })
         let indexTarget = getDeltaIndex(data, targetElements, { entrypoint: targetSelectedView.entrypoint, isTarget: true })

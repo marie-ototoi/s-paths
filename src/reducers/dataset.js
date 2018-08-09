@@ -76,6 +76,7 @@ const dataset = (state = initialState, action) => {
             stats: action.stats || state.stats,
             prefixes: action.prefixes || state.prefixes,
             entrypoint: action.entrypoint || state.entrypoint,
+            resourceGraph: action.resourceGraph || state.resourceGraph
         }
     case types.SET_RESOURCES:
         return {

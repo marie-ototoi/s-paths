@@ -207,14 +207,14 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
 
 export const loadSelection = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
     // console.log('load Data ', dataset.constraints)
-    let { constraints, endpoint, entrypoint, prefixes, stats } = dataset
-    let countInstancesQuery = `SELECT DISTINCT ?entrypoint WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
+    let { constraints, endpoint, entrypoint, prefixes, resourceGraph, stats } = dataset
+    let countInstancesQuery = `SELECT (COUNT(DISTINCT ?entrypoint) as ?total) FROM <${resourceGraph}> WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
     // console.log(countInstancesQuery)
     return getData(endpoint, countInstancesQuery, prefixes)
         .then(countInstances => {
-            // console.log(countInstances)
+            console.log(countInstances)
             return new Promise((resolve, reject) => {
-                let selectionInstances = countInstances.results.bindings.length
+                let selectionInstances = Number(countInstances.results.bindings[0].total.value)
                 // console.log('selectionInstances', selectionInstances)
                 let configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }))
                 if (selectionInstances === 1) {
@@ -229,7 +229,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                 }
             }) 
                 .then(([newConfigs, newStats]) => {
-                    // console.log('then ? ',newConfigs, newStats)
+                    console.log('then ? ',newConfigs, newStats)
                     const previousConfigMain = getSelectedView(previousConfigs, 'main')
                     const previousConfigAside = getSelectedView(previousConfigs, 'aside')
                     const configMain = getSelectedView(newConfigs, 'main')
@@ -325,7 +325,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
 }
 
 export const selectResource = (dispatch) => (dataset, views) => {
-    let { constraints, endpoint, entrypoint, prefixes, totalInstances } = dataset
+    let { constraints, endpoint, entrypoint, prefixes, resourceGraph, totalInstances } = dataset
     return getStats({ ...dataset, stats: [] })
         .then(stats => {
             prefixes = stats.options.prefixes
@@ -352,6 +352,7 @@ export const selectResource = (dispatch) => (dataset, views) => {
                         type: types.SET_STATS,
                         stats,
                         entrypoint,
+                        resourceGraph,
                         totalInstances,
                         prefixes: stats.options.prefixes,
                         labels: stats.options.labels,

@@ -104,34 +104,45 @@ class TimelineLayout extends AbstractLayout {
         return selectedElements
     }
     resize (props) {
-        const { nestedProp1, display } = props
-        let maxUnitsPerYear
+        const { nestedProp1, display, selectedConfig } = props
 
-        maxUnitsPerYear = 1
+        let category = selectedConfig.properties[0].category
+        let dico = dataLib.getDict(nestedProp1)
+        const xScale = d3.scaleLinear().range([0, display.viz.useful_width])
+        if (category === 'number' || category === 'datetime') {
+            xScale.domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
+        } else if (category === 'text' || category === 'uri') {
+            xScale.domain([0, nestedProp1.length - 1])
+        }
+        let maxUnitsPerYear = 1
         d3.select(this.el)
             .selectAll('g.time')
+            .attr('transform', d => {
+                let x
+                if (category === 'number' || category === 'datetime') {
+                    x = xScale(Number(d.key)) + 1
+                } else {
+                    x = xScale(Number(dico[d.key]))
+                }
+                return `translate(${x}, 0)`
+            })
             .each(d => {
                 if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
             })
-
-        const xScale = d3.scaleLinear()
-            .domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
-            //.domain([Number(nestedCoverage1[0].key), Number(nestedCoverage1[nestedCoverage1.length - 1].key)])
-            .range([0, display.viz.useful_width])
-
-        d3.select(this.el)
-            .selectAll('g.time')
-            .attr('transform', d => `translate(${xScale(Number(d.key))}, 0)`)
-        //console.log(maxUnitsPerYear, zone, role)
-        //const unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedCoverage1, 'datetime'))
-        const unitWidth = (display.viz.useful_width / dataLib.getNumberOfUnits(nestedProp1, 'datetime'))
+        let unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedProp1, category))
+        if (unitWidth < 1) unitWidth = 1
         const unitHeight = (display.viz.useful_height / maxUnitsPerYear)
         const group = nestedProp1[0].group
         d3.select(this.el).selectAll('g.time').selectAll('.elements')
             .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
         d3.select(this.el).selectAll('g.time').selectAll('.elements')
             .each((d, i) => {
-                const x1 = xScale(Number(d[group])) + 1
+                let x1
+                if (category === 'number' || category === 'datetime') {
+                    x1 = xScale(Number(d.parent)) + 1
+                } else {
+                    x1 = xScale(Number(dico[d.parent]))
+                }
                 const y1 = display.viz.useful_height - (i * unitHeight)
                 d.zone = {
                     x1: x1,
