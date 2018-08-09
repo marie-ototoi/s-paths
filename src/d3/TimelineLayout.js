@@ -139,9 +139,9 @@ class TimelineLayout extends AbstractLayout {
             .each((d, i) => {
                 let x1
                 if (category === 'number' || category === 'datetime') {
-                    x1 = xScale(Number(d.parent)) + 1
+                    x1 = xScale(Number(d[group])) + 1
                 } else {
-                    x1 = xScale(Number(dico[d.parent]))
+                    x1 = xScale(Number(dico[d[group]]))
                 }
                 const y1 = display.viz.useful_height - (i * unitHeight)
                 d.zone = {
