@@ -587,7 +587,7 @@ const nestDataLevel = (data, props, parent) => {
                 range
             }
         })
-    } else if (category === 'text') {
+    } else if (category === 'text' || category === 'uri') {
         nestedData = d3.nest().key(d => d[propName].value)
             .entries(data).sort((a, b) => { return a.key.localeCompare(b.key) })
         additionalValue = ''

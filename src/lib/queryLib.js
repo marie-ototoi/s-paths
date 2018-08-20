@@ -46,10 +46,7 @@ export const defineGroup = (prop, options) => {
     if (ignoreList.includes(property)) {
         category = 'ignore'
     } else if (type === 'uri') {
-        if (propName.match(/place|country|city/gi)) {
-            category = 'geo'
-            subcategory = 'name'
-        } else if (propName.match(/depiction|picture/gi)) {
+        if (propName.match(/depiction|picture/gi)) {
             category = 'image'
         } else {
             category = 'uri'
@@ -265,7 +262,6 @@ export const makePropsQuery = (initialPath, options, level, prefixes) => {
         for (let i = 1; i <= countAllResources; i++) {
             let prop = useFullUri(pathsParts[(i * 2)-1], prefixes)
             let inter = (countAllResources === 1) ? `interobject` : `interobjectinter${i}`
-            console.log(`FILTER (?${inter} != ?object && <${prop}> != ?property) . `)
             filter = filter.concat(`FILTER (?${inter} != ?object && ?property != <${prop}>) . `)
         }
     }

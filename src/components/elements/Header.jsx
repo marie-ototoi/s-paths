@@ -391,14 +391,6 @@ class Header extends React.PureComponent {
                                 <button
                                     onClick = { e => {
                                         //console.log(this.props.dataset)
-                                        this.props.loadResources({ ...this.props.dataset, forceUpdate: true }, this.props.views)
-                                    } }
-                                >
-                                    Resources
-                                </button>
-                                <button
-                                    onClick = { e => {
-                                        //console.log(this.props.dataset)
                                         this.props.loadStats({ ...this.props.dataset, forceUpdate: true })
                                     } }
                                 >

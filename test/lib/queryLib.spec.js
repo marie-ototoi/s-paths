@@ -141,19 +141,19 @@ WHERE {
             .to.equal(`SELECT DISTINCT ?property FROM <http://localhost:8890/nobel> WHERE {
         ?subject rdf:type nobel:LaureateAward . ?subject nobel:university ?interobject . FILTER (?interobject != ?subject) . 
         ?interobject ?property ?object .
-        FILTER (?interobject != ?object) . 
+        FILTER (?interobject != ?object) . FILTER (?interobject != ?object && ?property != <http://data.nobelprize.org/terms/university>) . 
     } GROUP BY ?property`)
         expect(queryLib.makePropsQuery('nobel:LaureateAward/nobel:university/*', { constraints: '', graphs:['http://localhost:8890/nobel'] }, 3, prefixes))
             .to.equal(`SELECT DISTINCT ?property FROM <http://localhost:8890/nobel> WHERE {
         ?subject rdf:type nobel:LaureateAward . ?subject nobel:university ?interobject . FILTER (?interobject != ?subject) . 
         ?interobject ?property ?object .
-        FILTER (?interobject != ?object) . 
+        FILTER (?interobject != ?object) . FILTER (?interobject != ?object && ?property != <http://data.nobelprize.org/terms/university>) . 
     } GROUP BY ?property`)
         expect(queryLib.makePropsQuery('dbpedia-owl:Award/nobel:laureate/*/nobel:university/*/rdfs:label/*', { constraints: '', graphs:['a'] }, 3, prefixes))
             .to.equal(`SELECT DISTINCT ?property FROM <a> WHERE {
         ?subject rdf:type dbpedia-owl:Award . ?subject nobel:laureate ?interobjectinter1 . FILTER (?interobjectinter1 != ?subject) . ?interobjectinter1 nobel:university ?interobjectinter2 . FILTER (?interobjectinter2 != ?interobjectinter1 && ?interobjectinter2 != ?subject) . ?interobjectinter2 rdfs:label ?interobject . FILTER (?interobject != ?interobjectinter2 && ?interobject != ?interobjectinter1 && ?interobject != ?subject) . 
         ?interobject ?property ?object .
-        FILTER (?interobject != ?object) . FILTER (?interobjectinter1 != ?object) . FILTER (?interobjectinter2 != ?object) . 
+        FILTER (?interobject != ?object) . FILTER (?interobjectinter1 != ?object && ?property != <http://data.nobelprize.org/terms/laureate>) . FILTER (?interobjectinter2 != ?object && ?property != <http://data.nobelprize.org/terms/university>) . 
     } GROUP BY ?property`)
     })
     it('should affect a prop to the right group', () => {
@@ -298,8 +298,7 @@ WHERE {
             ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:university ?newprop1 . FILTER (?newprop1 != ?entrypoint) . ?entrypoint dct:isPartOf ?newprop2 . FILTER (?newprop2 != ?entrypoint) . 
         }
     } 
-    GROUP BY ?prop1 ?prop2 ?newprop1 ?newprop2 
-    ORDER BY ?prop1 ?countprop1 ?prop2 ?countprop2 ?newprop1 ?newcountprop1 ?newprop2 ?newcountprop2 `)
+    GROUP BY ?prop1 ?prop2 ?newprop1 ?newprop2 `)
     })
     it('should build a query to generate a subgraph', () => {
         expect(queryLib.makeSubGraphQuery({ constraints:``, resourceGraph: 'http://resource1.ilda.fr', graphs: ['http://nobel.ilda.fr', 'http://nobeladdon.ilda.fr'], entrypoint: 'http://data.nobelprize.org/terms/AwardFile', maxLevel: 5 }, 2))

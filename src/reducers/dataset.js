@@ -13,7 +13,7 @@ const initialState = {
     constraints: '',
     labels: [],
     forceUpdate: false,
-    maxLevel: 6,
+    maxLevel: 5,
     ignoreList: ['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
     resources: [],
     prefixes: {

@@ -24,8 +24,11 @@ router.post('/', (req, res) => {
 })
 
 const getAllStats = async (options) => {
-    let { prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
+    let { forceUpdate, prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
     let selectionInstances
+    if (forceUpdate) {
+        await pathModel.deleteMany({ endpoint, graphs: { $all: graphs } }).exec()
+    }
     // add prefix to entrypoint if full url
     if (!queryLib.usesPrefix(entrypoint, prefixes)) {
         if (!queryLib.prefixDefined(entrypoint)) {
@@ -122,15 +125,6 @@ const getProps = async (categorizedProps, level, options, instances) => {
         })
         // keep only those whose parents count > 0
     } else {
-        if (level === 1) {
-            for(let j = 1; j < options.maxLevel; j ++) {
-                let query = queryLib.makeSubGraphQuery(options, j)
-                queryLib.getData(localEndpoint, query, {})
-                await new Promise((resolve, reject) => setTimeout(resolve, 500))
-            }
-            await new Promise((resolve, reject) => setTimeout(resolve, 5000))
-        }   
-
         const queriedProps = categorizedProps.filter(prop => {
             // console.log(prop.total)
             return (prop.level === level - 1 &&

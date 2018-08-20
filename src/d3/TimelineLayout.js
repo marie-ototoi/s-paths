@@ -105,7 +105,6 @@ class TimelineLayout extends AbstractLayout {
     }
     resize (props) {
         const { nestedProp1, display, selectedConfig } = props
-
         let category = selectedConfig.properties[0].category
         let dico = dataLib.getDict(nestedProp1)
         const xScale = d3.scaleLinear().range([0, display.viz.useful_width])
@@ -132,7 +131,7 @@ class TimelineLayout extends AbstractLayout {
         let unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedProp1, category))
         if (unitWidth < 1) unitWidth = 1
         const unitHeight = (display.viz.useful_height / maxUnitsPerYear)
-        const group = nestedProp1[0].group
+        const group = nestedProp1[0].group 
         d3.select(this.el).selectAll('g.time').selectAll('.elements')
             .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
         d3.select(this.el).selectAll('g.time').selectAll('.elements')
@@ -141,7 +140,7 @@ class TimelineLayout extends AbstractLayout {
                 if (category === 'number' || category === 'datetime') {
                     x1 = xScale(Number(d[group])) + 1
                 } else {
-                    x1 = xScale(Number(dico[d[group]]))
+                    x1 = xScale(Number(dico[d.prop1.value]))
                 }
                 const y1 = display.viz.useful_height - (i * unitHeight)
                 d.zone = {
