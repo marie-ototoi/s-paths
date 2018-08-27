@@ -40,9 +40,6 @@ https://stackoverflow.com/questions/35372399/connect-to-docker-machine-using-loc
 
 ## Databases
 
-You might have to shut down your local Virtuoso and Mongo
-since the instances in Docker containers are exposed on the default ports
-
 ### Load data in Virtuoso :
 
 #### Simple way
@@ -61,7 +58,7 @@ Then use the top menu `Linked Data > Quad Store Upload` to upload files
 ##### MAC 
 Once the containers are up and running (see below), copy files to upload in the dump folder, it is mapped to the containers' /usr/local/virtuoso-opensource/share/virtuoso/vad folder in the docker-compose file.
 ```
-- ./dump:/usr/local/virtuoso-opensource/share/virtuoso/vad
+- ./dump:/opt/virtuoso-opensource/vad
 ```
 
 ##### LINUX
@@ -71,7 +68,7 @@ Once the containers are up and running (see below), connect to the VM
 ```
 and copy files to upload in the /home/docker/dumps folder, it is mapped to the containers' /usr/local/virtuoso-opensource/share/virtuoso/vad folder in the docker-compose file.
 ```
-- /home/docker/dumps:/usr/local/virtuoso-opensource/share/virtuoso/vad
+- /home/docker/dumps:/opt/virtuoso-opensource/vad
 ```
 
 ##### BOTH
@@ -84,14 +81,14 @@ $ docker container ls
 And use it to start an isql console (replace 93211349efc4 with your container id)
 ```bash
 $ docker exec -it 93211349efc4 bash
-$ isql-v -U dba -P dba
+$ /opt/virtuoso-opensource/bin/isql 1111 dba dba
 ```
 
 You can now use bulk upload (leave the full directory path as below, it is mapped to your dump folder)
 
 ```
-> SPARQL CREATE GRAPH <http://nobel.ilda.fr>;
-> ld_dir_all('/usr/local/virtuoso-opensource/share/virtuoso/vad', '%.nt', 'http://nobel.ilda.fr');
+> SPARQL CREATE GRAPH <http://geonames.ilda.fr>;
+> ld_dir_all('/opt/virtuoso-opensource/vad', '%.nt', 'http://geonames.ilda.fr');
 > select * from DB.DBA.load_list;
 > rdf_loader_run();
 > DELETE FROM DB.DBA.load_list;
@@ -130,7 +127,7 @@ $ docker-compose -f docker-compose-dev.yml up
 This will run 3 containers : 
 - the app on port `80` : custom image derived from [node:9.11-jessie](https://hub.docker.com/_/node/)
 - mongo on port `27017` : [jessie 3.6](https://hub.docker.com/_/mongo/)
-- virtuoso on port `8890` : [tenforce/virtuoso:1.3.1-virtuoso7.2.2](https://hub.docker.com/r/tenforce/virtuoso/)
+- virtuoso on port `8890` : [tenforce/virtuoso:1.3.1-virtuoso7.2.2](https://hub.docker.com/r/openlink/virtuoso_opensource/)
 
 It will also mount a local volume that can be used for bulk uploads.
 
@@ -147,8 +144,8 @@ $ docker stack deploy semanticStack --compose-file docker-compose.yml --with-reg
 
 ## Deploy
 
-Commit to master.
-When tests are passed (step 1 in CI) and the new image is built and published to Gitlab registry (step 2 in CI), activate Step # (deployment) manually.
+Commit to master (if you have not already done it to simulate deployment).
+When tests are passed (step 1 in CI) and the new image is built and published to Gitlab registry (step 2 in CI), activate Step 3 (deployment) manually.
 
 ## Tests
 
