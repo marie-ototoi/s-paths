@@ -27,3 +27,21 @@
     font-size: 0.75em;
     font-weight: bold;
 }
+
+.propSelector__menu {
+    width: 500px !important;
+}
+.propSelector__control {
+    font-size: 0.75em;
+    min-height: 28px !important;
+}
+.propSelector__value-container {
+    padding: 0 8px !important;
+}
+.propSelector__indicator,
+.propSelector__dropdown-indicator {
+    padding: 0 !important;
+}
+.propSelector__option {
+    font-size: 0.75em !important;
+}

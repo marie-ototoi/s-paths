@@ -28,6 +28,17 @@ const getResources = async (opt) => {
     // add default options when not set
     let options = opt
     let { graphs, endpoint, localEndpoint, forceUpdate } = options
+    
+    if (forceUpdate) {
+        let toDelete = await resourceModel.find({ endpoint, graphs: { $all: graphs } }).exec()
+        for(let i = 0; i < toDelete.length; i ++) {
+            queryLib.getData(localEndpoint, `DROP SILENT GRAPH <${toDelete[i]._doc.type}>`, {})
+            queryLib.getData(localEndpoint, `CREATE GRAPH <${toDelete[i]._doc.type}>`, {})
+            await new Promise((resolve, reject) => setTimeout(resolve, 200))
+        }
+        await pathModel.deleteMany({ endpoint, graphs: { $all: graphs } }).exec()
+        await resourceModel.deleteMany({ endpoint, graphs: { $all: graphs } }).exec()
+    }
 
     let resources = await resourceModel.find({ endpoint: endpoint, graphs: { $all: graphs } }).sort('-total').exec()
     console.log('GET RESOURCES', resources)

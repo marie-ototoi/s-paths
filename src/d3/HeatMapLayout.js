@@ -162,7 +162,7 @@ class HeatMapLayout extends AbstractLayout {
                     x1: x1,
                     y1: y1 - unitHeight,
                     x2: x1 + unitWidth - 2,
-                    y2: y1 - 1,
+                    y2: y1 - 2,
                     width: unitWidth - 2,
                     height: unitHeight - 1
                 }

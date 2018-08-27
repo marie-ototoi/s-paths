@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
+import ReactSelect from 'react-select'
 import { connect } from 'react-redux'
 
 import { selectResource, selectProperty } from '../../actions/dataActions'
@@ -18,7 +19,7 @@ class PropSelector extends React.PureComponent {
         this.setState({
             selected: this.props.selected
         })
-        let requestedProp = propList[e.target.value]
+        let requestedProp = propList[e.value]
         if (this.props.type === 'header') {
             this.props.selectResource({ ...dataset, entrypoint: requestedProp.path, totalInstances: requestedProp.total, constraints: `` }, views)
         } else {
@@ -55,21 +56,19 @@ class PropSelector extends React.PureComponent {
                     </p>
                 }
                 { (this.state.selected) &&
-                <select
-                    className = { alignClass }
-                    style = { { width: width + `px` } }
+                <ReactSelect
+                    classNamePrefix = "propSelector"
+                    placeholder = {propList[selectedPropIndex].readablePath.map(part => part.label).join(' / ')}
+
+                    value = { propList[selectedPropIndex].readablePath.map(part => part.label).join(' / ') }
                     onChange = { this.handleSelect }
-                    value = { selectedPropIndex }
-                >
-                    { propList.map((config, i) => {
-                        return <option
-                            value = { i }
-                            key = { this.state.elementName + i }
-                        >
-                            { config.readablePath.map(part => part.label).join(' / ').concat(config.total ? ' (' + config.total + ')' : '') }
-                        </option>
-                    }) }
-                </select>
+                    options = {propList.map((config, i) => {
+                        return {
+                            label: config.readablePath.map(part => part.label).join(' / ').concat(config.total ? ' (' + config.total + ')' : '') ,
+                            value: i
+                        }
+                    })}
+                />
                 }
             </foreignObject>
         )

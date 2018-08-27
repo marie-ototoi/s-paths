@@ -40,6 +40,15 @@ https://stackoverflow.com/questions/35372399/connect-to-docker-machine-using-loc
 
 ## Databases
 
+### Allow sparql update through endpoint in Virtuoso :
+
+Access Virtuoso 192.168.99.100:8890, login to the conductor (local access codes should be dba/dba) and use ISQL pop up in the left menu.
+
+```bash
+grant execute on DB.DBA.SPARQL_INSERT_DICT_CONTENT to "SPARQL";
+grant execute on DB.DBA.SPARQL_INSERT_DICT_CONTENT to SPARQL_UPDATE;
+```
+
 ### Load data in Virtuoso :
 
 #### Simple way

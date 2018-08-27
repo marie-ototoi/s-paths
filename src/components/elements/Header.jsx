@@ -3,6 +3,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import ReactKeymaster from 'react-keymaster'
 import shallowEqual from 'shallowequal'
+import ReactSelect from 'react-select'
 
 import { getConfigs, getCurrentConfigs, getPropsLists, getSelectedMatch } from '../../lib/configLib'
 import { getDimensions } from '../../lib/scaleLib'
@@ -44,11 +45,10 @@ class Header extends React.PureComponent {
         this.state.displayedProps = this.state.configsLists[this.state.displayedView].map(prop => prop.reduce((acc, cur, i) => { return (cur.selected) ? i : acc }, 0))
         this.state.selectedProps = this.state.displayedProps
         this.state.selectedView = this.state.displayedView
-        // console.log(this.state.selectedProps)
     }
     handleKeyDown (e) {
         const { dataset, selections, zone } = this.props
-        console.log(e, this, selections)
+        // console.log(e, this, selections)
         if (e === 'enter') {
             if (dataset.constraints !== '' || this.state.selectedResource !== this.state.displayedResource) {
                 this.displayResource()
@@ -172,21 +172,21 @@ class Header extends React.PureComponent {
                             <div className = "field" style = {{ width: fieldWidth + 'px' }}>
                                 <label className = "label" style = {{ width: display.viz.horizontal_margin + 'px' }}>Set of resources</label>
                                 <div className = "control">
-                                    <div className = "select is-small">
-                                        <select
-                                            value = { this.state.selectedResource }
-                                            onChange = { (e) => {
-                                                this.setState({ selectedResource: Number(e.target.value) })
-                                            } }
-                                        >
-                                            { this.state.resourceList.map((resource, i) => {
-                                                return <option
-                                                    key = { `${zone}_resource_${i}` }
-                                                    value = { i }
-                                                >{ resource.readablePath[0].label } ({ resource.total })</option>
-                                            }) }
-                                        </select>
-                                    </div>
+                                    <ReactSelect
+                                        classNamePrefix = "propSelector"
+                                        placeholder = {this.state.resourceList[this.state.selectedResource].readablePath[0].label}
+            
+                                        value = { this.state.resourceList[this.state.selectedResource].value }
+                                        onChange = {(selectedOption) => {
+                                            this.setState({ selectedResource: Number(selectedOption.value) })
+                                        }}
+                                        options = {this.state.resourceList.map((resource, i) => {
+                                            return {
+                                                label: `${resource.readablePath[0].label} (${resource.total})` ,
+                                                value: i
+                                            }
+                                        })}
+                                    />
                                 </div>
                                 <div className = "submit">
                                     { !this.state.resourceIsLoading &&
@@ -333,26 +333,23 @@ class Header extends React.PureComponent {
                                         </div>
                                     </div>
                                 </div>
-                                { selectedLists.map((list, index) => {
-                                    return (<div className ="control" key = { `${zone}selectprop${index}` }>
-                                        <div className ="select is-small">
-                                            <select
-                                                value = { this.state.selectedProps[index] }
-                                                onChange = { (e) => {
-                                                    let newProps = [...this.state.selectedProps]
-                                                    newProps[index] = Number(e.target.value)
-                                                    this.setState({ selectedProps: newProps })
-                                                } }
-                                            >
-                                                { list.map((elt, indexElt) => {
-                                                    return <option
-                                                        key = { `${zone}selectprop${index}option${indexElt}` }
-                                                        value = { indexElt }
-                                                    >{elt.readablePath.map(p => p.label).join(' / ')}</option>
 
-                                                }) }
-                                            </select>
-                                        </div>
+                                { selectedLists.map((list, index) => {
+                                    return (<div className ="control is-small" key = { `${zone}selectprop${index}` }>
+                                        
+                                        <ReactSelect
+                                            placeholder = {list[this.state.selectedProps[index]].readablePath.map(p => p.label).join(' / ')}
+                                            classNamePrefix = "propSelector"
+                                            value = { list[this.state.selectedProps[index]].value }
+                                            onChange = {(selectedOption) => {
+                                                let newProps = [...this.state.selectedProps]
+                                                newProps[index] = Number(selectedOption.value)
+                                                this.setState({ selectedProps: newProps })
+                                            }}
+                                            options = {list.map((elt, indexElt) => {
+                                                return { value: indexElt, label: elt.readablePath.map(p => p.label).join(' / ') }
+                                            })}
+                                        />
                                     </div>) 
                                 }) }
                                 <div className = "submit">
@@ -391,6 +388,15 @@ class Header extends React.PureComponent {
                                 <button
                                     onClick = { e => {
                                         //console.log(this.props.dataset)
+                                        this.props.loadResources({ ...this.props.dataset, forceUpdate: true }, this.props.views)
+                                    } }
+                                >
+                                    Resources
+                                </button>
+                                <button
+                                    onClick = { e => {
+                                        //console.log(this.props.dataset)
+
                                         this.props.loadStats({ ...this.props.dataset, forceUpdate: true })
                                     } }
                                 >

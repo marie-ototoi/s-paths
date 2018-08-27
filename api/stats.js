@@ -139,6 +139,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 .slice(i, i + elementsToSlice)
                 .map(prop => {
                     let propsQuery = queryLib.makePropsQuery(prop.path, options, level, prefixes)
+                    console.log(propsQuery)
                     return queryLib.getData(localEndpoint, propsQuery, prefixes)
                 })
                 .map((promise, index) => promise.catch(e => {
