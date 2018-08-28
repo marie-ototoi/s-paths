@@ -56,11 +56,11 @@ export const defineGroup = (prop, options) => {
         propName.match(/(birth|death|created|modified)$/gi)) {
         category = 'datetime'
     } else if (propName.match(/latitude/gi) ||
-        propName.match(/lat$/gi)) {
+        propName.match(/(lat|latd)$/gi)) {
         category = 'geo'
         subcategory = 'latitude'
     } else if (propName.match(/longitude/gi) ||
-        propName.match(/long$/gi)) {
+        propName.match(/(long|longd)$/gi)) {
         category = 'geo'
         subcategory = 'longitude'
     }  else if (datatype && datatype === 'http://www.w3.org/2001/XMLSchema#integer') {

@@ -13,10 +13,12 @@ import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 // redux functions
 // import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
-import ReactMapboxGl, { GeoJSONLayer, Layer, Feature, Source } from "react-mapbox-gl"
+import ReactMapboxGl, { GeoJSONLayer, Layer, ZoomControl } from "react-mapbox-gl"
 
 const Map = ReactMapboxGl({
-    accessToken: "pk.eyJ1IjoibWFyaWVkZXN0YW5kYXUiLCJhIjoiY2ppb2E2Y3hlMG5xMzNrbzI3Ynk0MDlmaSJ9.XmflFu2QUBjFDVVWAKFBKQ"
+    accessToken: "pk.eyJ1IjoibWFyaWVkZXN0YW5kYXUiLCJhIjoiY2ppb2E2Y3hlMG5xMzNrbzI3Ynk0MDlmaSJ9.XmflFu2QUBjFDVVWAKFBKQ",
+    renderWorldCopies: false,
+    dragRotate: false
 })
 
 class GeoMap extends React.Component {
@@ -27,6 +29,7 @@ class GeoMap extends React.Component {
             // selectElements: this.selectElements,
             elementName: `refGeoMap_${props.zone}`
         }
+        this.prepareData(props)
     }
     render () {
         // console.log('salut GeoMap')
@@ -52,31 +55,33 @@ class GeoMap extends React.Component {
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             >
                 <Map
-                    style="mapbox://styles/mapbox/light-v9"
-                    containerStyle={{
+                    style = "mapbox://styles/mapbox/light-v9"
+                    containerStyle = {{
                         height: '100%',
                         width: '100%' 
                     }}>
+                   
                     <GeoJSONLayer
                         id='source_id'
-                        data={{
-                            "type": "FeatureCollection",
-                            "features": [{
-                                "type": "Feature",
-                                "geometry": {
-                                    "type": "Point",
-                                    "coordinates": [
-                                        -77.12911152370515,
-                                        38.79930767201779
-                                    ]
-                                }
-                            }]
-                        } }
+                        data={this.customState.geodata}
                         sourceOptions={{
                             cluster: true,
                             clusterMaxZoom: 14,
                             clusterRadius: 50
                         }}
+                    />
+                    <ZoomControl/>
+                    <Layer
+                        id = 'unclustered_layer'
+                        sourceId = 'source_id'
+                        layerOptions = {{
+                            filter: ["!", ["has", "point_count"]]
+                        }}
+                        paint = {{
+                            'circle-color': 'green',
+                            'circle-radius': 10
+                        }}
+                        type = 'circle'
                     />
                     <Layer
                         id='cluster_layer'
@@ -114,29 +119,16 @@ class GeoMap extends React.Component {
                         layerOptions={{
                             filter: [
                                 'has', 'point_count'
-                            ],
-                            layout:{
-                                "text-field": "{point_count_abbreviated}",
-                                "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-                                "text-size": 12
-                            }
+                            ]
+                        }}
+                        layout = {{
+                            "text-field": "{point_count_abbreviated}",
+                            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
+                            "text-size": 12
                         }}
                         type='symbol'
                     />
-                    <Layer
-                        id = 'unclustered_layer'
-                        sourceId = 'source_id'
-                        layerOptions = {{
-                            filter: [
-                                '!has', 'point_count'
-                            ]
-                        }}
-                        paint = {{
-                            'circle-color': 'green',
-                            'circle-radius': 10
-                        }}
-                        type = 'circle'
-                    />
+                   
                 </Map>
             </foreignObject>
             }
@@ -175,7 +167,7 @@ class GeoMap extends React.Component {
         // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
         let geodata = prepareGeoData(data, dataset)
         // 
-
+        console.log(geodata)
         // Save to reuse in render
         this.customState = {
             ...this.customState,

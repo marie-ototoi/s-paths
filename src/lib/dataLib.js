@@ -333,11 +333,11 @@ export const prepareGeoData = (data, dataset) => {
                 type: 'Feature', 
                 properties: {
                     id: makeId(place.entrypoint.value),
-                    name: place.geoname ? place.geoname.value : place.latitude.value + place.longitude.value
+                    title: place.prop3 ? place.prop3.value : place.prop1.value + '/' +  place.prop2.value
                 },
                 geometry: {
                     type: "Point",
-                    coordinates: [ place.latitude.value, place.longitude.value, 0.0 ] 
+                    coordinates: [ Number(place.prop1.value), Number(place.prop2.value), 0.0 ] 
                 }
             }
         })
