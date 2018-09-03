@@ -188,7 +188,6 @@ class App extends React.PureComponent {
                         handleTransition = { this.handleTransition }
                     />
                 }
-
                 { mainConfig && this.state.main_step === 'changing' &&
                     <Transition
                         zone = "main"
@@ -197,7 +196,6 @@ class App extends React.PureComponent {
                         endTransition = { this.handleEndTransition }
                     />
                 }
-
                 { mainConfig && areLoaded(data, 'main', 'active') &&
                     <MainComponent
                         role = "origin"
@@ -216,7 +214,6 @@ class App extends React.PureComponent {
                         handleTransition = { this.handleTransition }
                     />
                 }
-
                 { asideConfig && this.state.aside_step === 'launch' &&
                     <SideTransitionComponent
                         role = "target"
@@ -231,7 +228,6 @@ class App extends React.PureComponent {
                         handleTransition = { this.handleTransition }
                     />
                 }
-
                 { asideConfig && this.state.aside_step === 'changing' &&
                     <Transition
                         zone = "aside"
@@ -240,7 +236,6 @@ class App extends React.PureComponent {
                         endTransition = { this.handleEndTransition }
                     />
                 }
-
                 { asideConfig && areLoaded(data, 'aside', 'active') &&
                     <SideComponent
                         zone = "aside"

@@ -293,15 +293,7 @@ class Header extends React.PureComponent {
                             <p
                                 className = "text-progress is-size-7"
                             >{ options[1].total } <span className = "is-pulled-right">&nbsp;{ options[1].label }</span>
-                            </p>                           
-                            <button
-                                className = "button settings"
-                                onClick = { this.displaySelection }
-                            >
-                                <span className = "icon">
-                                    <i className = "fas fa-arrow-down"></i>
-                                </span>
-                            </button>
+                            </p>        
                             
                         </div>
                         <div className = "line">
