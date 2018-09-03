@@ -38,13 +38,15 @@ const defaultState = {
     vizDefPercent: {
         useful_width: 70,
         useful_height: 60,
-        vertical_margin: 20,
+        top_margin: 24,
+        bottom_margin: 16,
         horizontal_margin: 15
     },
     viz: {
         useful_width: 10,
         useful_height: 10,
-        vertical_margin: 10,
+        top_margin: 10,
+        bottom_margin: 10,
         horizontal_margin: 10
     },
     selectedZone: {

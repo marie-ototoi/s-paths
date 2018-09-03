@@ -9,13 +9,13 @@ import HeatMap from './views/HeatMap'
 import Images from './views/Images'
 import ListAllProps from './views/ListAllProps'
 import SingleProp from './views/SingleProp'
-import Timeline from './views/Timeline'
+import StackedChart from './views/StackedChart'
 import TreeMap from './views/TreeMap'
 import URIWheel from './views/URIWheel'
 import Transition from './elements/Transition'
 import Debug from './Debug'
 // libs
-import { getDimensions, getScreen, getZoneCoord } from '../lib/scaleLib'
+import { getDimensions, getScreen } from '../lib/scaleLib'
 import { areLoaded, getCurrentState, getResults, getTransitionElements } from '../lib/dataLib'
 import { getSelectedView, getCurrentConfigs } from '../lib/configLib'
 import * as selectionLib from '../lib/selectionLib'
@@ -57,9 +57,9 @@ class App extends React.PureComponent {
             const zoneDimensions = selectionLib.getRectSelection(display.selectedZone[zone])
             const selectedZone = {
                 x1: zoneDimensions.x1 - this.props.display.viz.horizontal_margin,
-                y1: zoneDimensions.y1 - this.props.display.viz.vertical_margin,
+                y1: zoneDimensions.y1 - this.props.display.viz.top_margin,
                 x2: zoneDimensions.x2 - this.props.display.viz.horizontal_margin,
-                y2: zoneDimensions.y2 - this.props.display.viz.vertical_margin
+                y2: zoneDimensions.y2 - this.props.display.viz.bottom_margin
             }
             d3.select(this['refView']).selectAll('rect.selection')
                 .data([selectedZone])
@@ -138,7 +138,7 @@ class App extends React.PureComponent {
             'Images': Images,
             'ListAllProps': ListAllProps,
             'SingleProp': SingleProp,
-            'Timeline': Timeline,
+            'StackedChart': StackedChart,
             'TreeMap': TreeMap,
             'URIWheel': URIWheel
         }

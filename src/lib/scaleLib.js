@@ -34,7 +34,8 @@ export const getViz = (vizDef, stage) => {
         useful_width: scaleX(vizDef.useful_width, stage),
         useful_height: scaleY(vizDef.useful_height, stage),
         horizontal_margin: scaleX(vizDef.horizontal_margin, stage),
-        vertical_margin: scaleY(vizDef.vertical_margin, stage)
+        top_margin: scaleY(vizDef.top_margin, stage),
+        bottom_margin: scaleY(vizDef.bottom_margin, stage)
     }
 }
 
@@ -69,14 +70,14 @@ export const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width
     case 'core':
         return {
             x: origin.x + viz.horizontal_margin + offset.x,
-            y: origin.y + viz.vertical_margin + offset.y,
+            y: origin.y + viz.top_margin + offset.y,
             width: viz.useful_width + offset.width,
             height: viz.useful_height + offset.height
         }
     case 'legend':
         return {
             x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
-            y: origin.y + viz.vertical_margin + offset.y,
+            y: origin.y + viz.top_margin + offset.y,
             width: viz.horizontal_margin + offset.width,
             height: viz.useful_height + offset.height
         }
@@ -85,47 +86,47 @@ export const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width
             x: origin.x +  offset.x,
             y: origin.y + offset.y,
             width: viz.useful_width + (viz.horizontal_margin * 2) + offset.width,
-            height: viz.vertical_margin + offset.height
+            height: viz.top_margin + offset.height
         }
     case 'axisBottom':
         return {
             x: origin.x + viz.horizontal_margin + offset.x,
-            y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
+            y: origin.y + viz.useful_height + viz.top_margin + offset.y,
             width: viz.useful_width + offset.width,
-            height: viz.vertical_margin + offset.height
+            height: viz.top_margin + offset.height
         }
     case 'axisLeft':
         return {
             x: origin.x + offset.x,
-            y: origin.y + viz.vertical_margin + offset.y,
+            y: origin.y + viz.top_margin + offset.y,
             width: viz.horizontal_margin + offset.width,
             height: viz.useful_height + offset.height
         }
     case 'legendAxisBottom':
         return {
             x: origin.x + offset.x,
-            y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
+            y: origin.y + viz.useful_height + viz.top_margin + offset.y,
             width: viz.horizontal_margin + offset.width,
             height: 20 + offset.height
         }
     case 'legendAxisLeft':
         return {
             x: origin.x + offset.x,
-            y: origin.y + viz.useful_height + viz.vertical_margin + offset.y,
+            y: origin.y + viz.useful_height + viz.top_margin + offset.y,
             width: viz.horizontal_margin + offset.width,
             height: 20 + offset.height
         }
     case 'legendLegend':
         return {
             x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
-            y: origin.y + (viz.useful_height * 3 / 4) + viz.vertical_margin + offset.y,
+            y: origin.y + (viz.useful_height * 3 / 4) + viz.top_margin + offset.y,
             width: viz.horizontal_margin + offset.width,
             height: 20 + offset.height
         }
     case 'history':
         return {
             x: origin.x + 10 + offset.x,
-            y: origin.y + viz.useful_height + (viz.vertical_margin * 2) - 10 + offset.y,
+            y: origin.y + viz.useful_height + (viz.top_margin * 2) - 10 + offset.y,
             width: (viz.horizontal_margin * 2) + viz.useful_width - 20 + offset.width,
             height: 20 + offset.height
         }

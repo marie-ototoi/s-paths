@@ -93,9 +93,9 @@ class TreeMapLayout extends AbstractLayout {
     getElementsInZone (props) {
         const selectedZone = {
             x1: props.zoneDimensions.x1 - props.display.viz.horizontal_margin,
-            y1: props.zoneDimensions.y1 - props.display.viz.vertical_margin,
+            y1: props.zoneDimensions.y1 - props.display.viz.top_margin,
             x2: props.zoneDimensions.x2 - props.display.viz.horizontal_margin,
-            y2: props.zoneDimensions.y2 - props.display.viz.vertical_margin
+            y2: props.zoneDimensions.y2 - props.display.viz.bottom_margin
         }
         let selectedElements = []
         d3.select(this.el).selectAll('g.units')

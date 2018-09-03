@@ -325,7 +325,6 @@ export const prepareSinglePropData = (data, category) => {
 }
 
 export const prepareGeoData = (data, dataset) => {
-    console.log(data)
     return {
         type: 'FeatureCollection',
         features: data.map(place => {

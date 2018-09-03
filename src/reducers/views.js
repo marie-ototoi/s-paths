@@ -2,9 +2,9 @@ import types from '../constants/ActionTypes'
 
 const defaultState = [
     {
-        id: 'Timeline',
-        name: 'timeline',
-        thumb : '/images/timeline.svg',
+        id: 'StackedChart',
+        name: 'stacked chart',
+        thumb : '/images/stackedchart.svg',
         entrypoint: { min: 2, max: 1000, optimal: [4, 200] },
         constraints: [
             [

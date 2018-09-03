@@ -9,13 +9,13 @@ describe('reducers/views', () => {
     beforeEach(() => {
         initialState = [
             { id: 'Barchart_A' },
-            { id: 'Timeline' },
+            { id: 'StackedChart' },
             { id: 'Chord' },
             { id: 'Heatmap' }
         ]
     })
     it('should handle initial state', () => {
-        expect(views(undefined, { })[0].id).to.equal('Timeline')
+        expect(views(undefined, { })[0].id).to.equal('StackedChart')
     })
     /* lit('should handle SELECT_VIEWS', () => {
         et action =  {
@@ -25,7 +25,7 @@ describe('reducers/views', () => {
         expect(views(initialState, action))
             .to.deep.equal([
                 { id: 'Barchart_A', selected: false },
-                { id: 'Timeline', selected: true },
+                { id: 'StackedChart', selected: true },
                 { id: 'Chord', selected: true},
                 { id: 'Heatmap', selected: false}
             ])
@@ -33,12 +33,12 @@ describe('reducers/views', () => {
     it('should handle DISPLAY_VIEWS', () => {
         let action = {
             type: 'DISPLAY_VIEWS',
-            ids: ['Timeline']
+            ids: ['StackedChart']
         }
         expect(views(initialState, action))
             .to.deep.equal([
                 { id: 'Barchart_A', displayed: false },
-                { id: 'Timeline', displayed: true },
+                { id: 'StackedChart', displayed: true },
                 { id: 'Chord', displayed: false },
                 { id: 'Heatmap', displayed: false }
             ])

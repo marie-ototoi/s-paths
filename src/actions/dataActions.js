@@ -278,7 +278,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
             dataset.entrypoint = resources[0].type
             dataset.totalInstances = resources[0].total
             dataset.resourceGraph = resources[0].type
-            getStats({ ...dataset, stats: [] })
+            getStats({ ...dataset, stats: [], resources })
                 .then(stats => {
                     prefixes = stats.options.prefixes
                     // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))

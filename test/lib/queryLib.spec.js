@@ -13,10 +13,10 @@ WHERE {
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object . FILTER (?object != ?entrypoint) . 
 
 }`)
-        expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*', category: 'text' }, { constraints: '', graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'] }, 'type')).to.equal(`SELECT DISTINCT ?datatype ?language ?isiri ?isliteral ((?charlength) as ?avgcharlength) FROM <http://localhost:8890/nobel> FROM <http://localhost:8890/geonames> 
+        expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*', category: 'text', level: 1 }, { constraints: '', graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'] }, 'type')).to.equal(`SELECT DISTINCT ?datatype ?language ?isiri ?isliteral ((?charlength) as ?avgcharlength) ?g1 FROM <http://localhost:8890/nobel> FROM <http://localhost:8890/geonames> 
 WHERE {
 
-?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?object . FILTER (?object != ?entrypoint) . 
+?entrypoint rdf:type nobel:LaureateAward . GRAPH ?g1 { ?entrypoint nobel:year ?object . } FILTER (?object != ?entrypoint) . 
 BIND(DATATYPE(?object) AS ?datatype) .
         BIND(ISIRI(?object) AS ?isiri) .
         BIND(ISLITERAL(?object) AS ?isliteral) .

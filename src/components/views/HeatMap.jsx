@@ -76,7 +76,7 @@ class HeatMap extends React.Component {
     }
     render () {
         const { axisBottom, axisLeft, legend } = this.customState
-        const { config, display, dimensions, role, selections, step, zone } = this.props
+        const { config, data, display, dimensions, role, selections, step, zone } = this.props
         return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` }>
             { role !== 'target' &&
             <SelectionZone
@@ -100,7 +100,7 @@ class HeatMap extends React.Component {
             <g>
                 <Header
                     zone = { zone }
-                    config = { config }
+                    config = { config }                    
                     propsLists = { this.customState.propsLists }
                 />
                 <Legend
@@ -150,9 +150,6 @@ class HeatMap extends React.Component {
             </g>
             }
         </g>)
-    }
-    getElementsInZone () {
-        return []
     }
     selectEnsemble (prop, value, category) {
         const elements = this.layout.getElements(prop, value, category)

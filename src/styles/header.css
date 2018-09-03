@@ -1,12 +1,3 @@
-h1 {
-    font-size: 1.5em;
-    padding-top: 19px;
-}
-h1 span {
-    font-size: 0.75em;
-    font-weight: normal;
-    color: #777;
-}
 .Header .cache{
     box-shadow: 0px 3px 5px 6px #fff;
 
@@ -21,6 +12,10 @@ h1 span {
 }
 .Header .line:last-child {
     /* box-shadow: 0px -3px 5px 6px #ababab; */
+}
+.Header .logo {
+    display: flex;
+    align-items: center;
 }
 .Header .field {
     display: flex;
@@ -37,8 +32,9 @@ h1 span {
     padding-right: 10px;
     text-transform: uppercase;
     font-size: 0.8em;
-    padding-top: 8px;
+    padding-top: 10px;
     font-weight: normal;
+    margin: 0;
 }
 .Header .label-like {
     font-size: 0.8em;
@@ -53,6 +49,14 @@ h1 span {
 .Header .greyed {
     opacity: 0.5;
 }
+.Header .pointer-group {
+    margin-right: 10px;
+}
+.propSelector__placeholder,
+.propSelector__single-value {
+    top: 60% !important;
+    margin-left: 0 !important;
+}
 .Header .error {
     color: #f00;
     font-size: 0.7em;
@@ -61,8 +65,12 @@ h1 span {
 .Header select, .Header input, .Header .dropdown, .Header .control {
     width: 150px;
 }
+.Header input {
+    padding-top: 8px;
+    display: inline-block;
+}
 .Header .dropdown {
-    width: 75px;
+    width: 45px;
     margin-top: -3px;
 }
 .Header .dropdown-content {
@@ -100,6 +108,7 @@ h1 span {
 }
 .Header .text-progress {
     padding-left: 10px;
+    display: inline-block;
 }
 .Header .submit .button {
     height: 28px;
@@ -119,22 +128,73 @@ h1 span {
 }
 .Header .resource-def {
     font-size: 0.7em;
-    width: 350px;
+    min-width: 350px;
     height: 20px;
-    padding-left: 35px;
+    padding: 5px 0 0 35px;
     cursor: pointer;
     font-weight: bold;
 }
-.Header .resource-def span {
-    position: absolute;
-    visibility: hidden;
-    padding: 2px 5px;
-    width: 350px;
+.Header .explain .resource-def {
+    width: auto;
+    height: auto;
+    padding-left: 5px;
+    font-size: 0.8em;
+}
+.Header .explain .resource-content {
+    font-size: 1.2em;
+}
+.Header .resource-content {
+    display: none;
+    margin-top: -8px;
+    padding: 2px 8px 5px 8px;
     background: #fff;
-    z-index: 10;
-    box-shadow: 0px 3px 3px 0px #ababab;
+    z-index: 100;
+    margin-left: 5px;
+    border: 1px solid #ccc;
     border-radius: 3px;
 }
-.Header .resource-def:hover span {
-    visibility: visible;
+.Header .resource-def span.resource-content {
+    position: absolute;
+    width: 450px;
+}
+
+.Header .resource-def:hover .resource-content {
+    display: inline-block;
+}
+.Header .explain .resource-content {
+    padding: 20px 25px;
+    position: absolute;
+    font-weight: normal;
+}
+.Header .explain p {
+    font-size: 0.8em;
+    color: #a5a5a5;
+    display: inline-block;
+}
+.Header .explain p strong {
+    color: #414141;
+}
+.Header .explain span {
+    display: inline-block;
+    color: #a5a5a5;
+}
+.Header .explain .path {
+    font-size: 0.8em;
+    color: #a5a5a5;
+    padding-bottom: 15px;
+}
+.Header .explain .path .pathlabel {
+    color: #414141;
+}
+.Header .explain ul {
+    padding-bottom: 15px;
+}
+.Header .explain ul li {
+    display: inline-block;
+    font-size: 0.8em;
+    padding-right: 5px;
+}
+.Header .explain ul span {
+    font-size: 0.8em;
+    padding-right: 5px;
 }

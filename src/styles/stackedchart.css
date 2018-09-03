@@ -1,0 +1,6 @@
+.StackedChart .elements:hover {
+    opacity: 0.8;
+}
+.StackedChart .elements {
+    cursor:pointer;
+}

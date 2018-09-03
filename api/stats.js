@@ -24,6 +24,7 @@ router.post('/', (req, res) => {
 })
 
 const getAllStats = async (options) => {
+    // console.log('oy', options)
     let { forceUpdate, prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
     let selectionInstances
     if (forceUpdate) {
@@ -187,7 +188,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                     .slice(i, i + elementsToSlice)
                     .map(prop => {
                         let propQuery = queryLib.makePropQuery(prop, options, 'type')
-                        // console.log('type ', propQuery)
+                        console.log('type ', propQuery)
                         return queryLib.getData(localEndpoint, propQuery, options.prefixes)
                     })
                     .map((promise, i) => promise.catch(e => {

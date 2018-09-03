@@ -163,11 +163,9 @@ class GeoMap extends React.Component {
         // prepare the data for display
         // const selectedConfig = getSelectedMatch(config, zone)
         // First prop
-        console.log('prepare data')
         // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
         let geodata = prepareGeoData(data, dataset)
         // 
-        console.log(geodata)
         // Save to reuse in render
         this.customState = {
             ...this.customState,

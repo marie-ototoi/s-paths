@@ -11,7 +11,7 @@ export const handleMouseDown = (dispatch) => (e, zone, display) => {
         zone
     })
 }
-export const handleMouseUp = (dispatch) => (e, zone, display, layout, selections) => {
+export const handleMouseUp = (dispatch) => (e, zone, display, layout, selections) => {    
     let offset = getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen)
     let selectionZone = {
         x1: display.selectedZone[zone].x1 || e.pageX - offset.x,

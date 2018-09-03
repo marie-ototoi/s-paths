@@ -47,10 +47,10 @@ class PropSelector extends React.PureComponent {
                     <p
                         className = { alignClass }
                         onClick = { (e) => this.setState({ selected: true }) }
-                    >
+                    >/ 
                         { selectedProp && selectedProp.readablePath.map((part, index) => {
                             return <span key = { `${this.state.elementName}_path_${index}` }>
-                                <span title = { part.comment }>&nbsp;{part.label} </span> { (index < selectedProp.readablePath.length - 1) ? ' / ' : '' }
+                                &nbsp;<span title = { part.comment }>{part.label} </span>  { (index < selectedProp.readablePath.length - 1) ? ' / * / ' : ' /' }
                             </span>
                         }) }
                     </p>
@@ -58,13 +58,13 @@ class PropSelector extends React.PureComponent {
                 { (this.state.selected) &&
                 <ReactSelect
                     classNamePrefix = "propSelector"
-                    placeholder = {propList[selectedPropIndex].readablePath.map(part => part.label).join(' / ')}
+                    placeholder = {'/ ' + propList[selectedPropIndex].readablePath.map(part => part.label).join(' / * / ').concat(' /')}
 
                     value = { propList[selectedPropIndex].readablePath.map(part => part.label).join(' / ') }
                     onChange = { this.handleSelect }
                     options = {propList.map((config, i) => {
                         return {
-                            label: config.readablePath.map(part => part.label).join(' / ').concat(config.total ? ' (' + config.total + ')' : '') ,
+                            label: '/ ' + config.readablePath.map(part => part.label).join(' / * / ').concat(config.total ? ' (' + config.total + ')' : ' /') ,
                             value: i
                         }
                     })}

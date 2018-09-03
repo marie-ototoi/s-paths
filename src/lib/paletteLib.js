@@ -13,6 +13,13 @@ export const getNextPaletteIndex = (palettes) => {
     return index
 }
 
+export const getGraphsColors = (length = 6) => {
+    const colors = [
+        '#ff0000', '#5b2886', '#0071fc', '#fc00ed', '#09bc00', '#00bcad'
+    ]
+    return selectColorsInPalette(colors, length)
+}
+
 export const getQuantitativeColors = (length = 6) => {
     const colors = [
         '#FDD835', '#FBC02D', '#FF8F00', '#FF6F00', '#E65100', '#BF360C'

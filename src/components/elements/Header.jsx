@@ -4,10 +4,12 @@ import { connect } from 'react-redux'
 import ReactKeymaster from 'react-keymaster'
 import shallowEqual from 'shallowequal'
 import ReactSelect from 'react-select'
+import pluralize from 'pluralize'
 
-import { getConfigs, getCurrentConfigs, getPropsLists, getSelectedMatch } from '../../lib/configLib'
+import { getConfigs, getCurrentConfigs, getPropsLists, getSelectedMatch, getSelectedView } from '../../lib/configLib'
 import { getDimensions } from '../../lib/scaleLib'
-import { getNbDisplayed } from '../../lib/dataLib'
+import { getNbDisplayed, getReadablePathsParts } from '../../lib/dataLib'
+import { getGraphsColors } from '../../lib/paletteLib'
 import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 
 import { displayConfig, loadResources, loadSelection, loadStats, selectResource } from '../../actions/dataActions'
@@ -116,13 +118,18 @@ class Header extends React.PureComponent {
         this.handleKeyDown = null
     }
     render () {
+
         const { config, configs, data, dataset, display, selections, zone } = this.props
+        
         // general
         const dimensions = getDimensions('header', display.zones[zone], display.viz, { x:0, y:0, width:0, height: 0 })
         const { x, y, width, height } = dimensions
-        const fieldWidth = (display.viz.useful_width * 2 / 3) + display.viz.horizontal_margin
+        const fieldWidth = (display.viz.useful_width * 2 / 3)
         const barWidth = (display.viz.useful_width / 3)
         const activeConfigs = getConfigs(getCurrentConfigs(configs, 'active'), zone)
+        let selectedConfig = getSelectedView(getCurrentConfigs(configs, 'active'), zone)
+        let selectedProperties = getSelectedMatch(selectedConfig).properties
+        // console.log(selectedProperties)
         let options = [
             { label: 'entities', total: dataset.stats.totalInstances },
             { label: 'selected', total: dataset.stats.selectionInstances },
@@ -136,6 +143,13 @@ class Header extends React.PureComponent {
                 percent
             }
         })
+        const colors = getGraphsColors()
+        const graphs = {}
+        selectedProperties[0].graphs.forEach((graph, gi) => {
+            graphs[graph] = colors[gi]
+        })
+
+        //let 
 
         // first line - resources
         let selectResourceEnabled = (dataset.constraints !== '' || this.state.selectedResource !== this.state.displayedResource) ?  {} : { 'disabled' : 'disabled' }
@@ -151,7 +165,6 @@ class Header extends React.PureComponent {
         let navClassName = this.state.isNavOpen ? 'dropdown is-active' : 'dropdown'
         let selectedLists = this.state.configsLists[this.state.selectedView]
         let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) ? {} : { 'disabled' : 'disabled' }
-        
         return (
             <g className = "Header">
                 { ( (display.mode === 'main' && zone === 'main') || 
@@ -169,8 +182,9 @@ class Header extends React.PureComponent {
                 >
                     <div>
                         <div className = "line">
+                            <div className = "logo" style = {{ width: display.viz.horizontal_margin + 'px' }}><img src = "/images/logo.svg" style = {{ height: '29px', paddingLeft:'5px' }} /></div>
                             <div className = "field" style = {{ width: fieldWidth + 'px' }}>
-                                <label className = "label" style = {{ width: display.viz.horizontal_margin + 'px' }}>Set of resources</label>
+                                <label className = "label">Set of resources</label>
                                 <div className = "control">
                                     <ReactSelect
                                         classNamePrefix = "propSelector"
@@ -204,8 +218,11 @@ class Header extends React.PureComponent {
                                         <span className = "button is-loading" ></span>
                                     }
                                 </div>
-                                { this.state.resourceList[this.state.selectedResource].readablePath[0].comment  &&
-                                <span className= "resource-def">? <span>{ this.state.resourceList[this.state.selectedResource].readablePath[0].comment }</span></span>
+                                { this.state.resourceList[this.state.selectedResource].readablePath[0].comment  && false &&
+                                <span title= { this.state.resourceList[this.state.selectedResource].readablePath[0].comment } style = {{ paddingLeft: '35px', backgroundColor: '#ffffff' }}>?</span>
+                                }
+                                { this.state.resourceList[this.state.selectedResource].readablePath[0].comment  && 
+                                <span className= "resource-def">? <span className = "resource-content" style = {{ paddingTop: '5px', backgroundColor: '#ffffff' }}>{ this.state.resourceList[this.state.selectedResource].readablePath[0].comment }</span></span>
                                 }
                             </div>
                             <div style = {{ width: barWidth + 'px' }}>
@@ -221,10 +238,9 @@ class Header extends React.PureComponent {
                             </p>
                         </div>
                         <div className = "line">
-                            <div className = "field" style = {{ width: fieldWidth + 'px' }}>
+                            <div className = "field" style = {{ marginLeft: display.viz.horizontal_margin + 'px', width: fieldWidth + 'px' }}>
                                 <label
                                     className = "label"
-                                    style = {{ width: display.viz.horizontal_margin + 'px' }}
                                 >Selection
                                 </label>
                                 <div className ="control">
@@ -238,7 +254,7 @@ class Header extends React.PureComponent {
                                         } }
                                     />
                                 </div>
-                                <div className ="control">
+                                <div className = "pointer-group">
                                     <p><span className = { 'label-like ' + andClass }>AND</span>&nbsp;&nbsp;
                                         <span className = { 'pointer is-size-7 ' + pointerClass }>
                                             pointer
@@ -277,13 +293,21 @@ class Header extends React.PureComponent {
                             <p
                                 className = "text-progress is-size-7"
                             >{ options[1].total } <span className = "is-pulled-right">&nbsp;{ options[1].label }</span>
-                            </p>
+                            </p>                           
+                            <button
+                                className = "button settings"
+                                onClick = { this.displaySelection }
+                            >
+                                <span className = "icon">
+                                    <i className = "fas fa-arrow-down"></i>
+                                </span>
+                            </button>
+                            
                         </div>
                         <div className = "line">
-                            <div className = "field" style = {{ width: fieldWidth + 'px' }}>
+                            <div className = "field" style = {{ marginLeft: display.viz.horizontal_margin + 'px', width: fieldWidth + 'px' }}>
                                 <label
                                     className = "label"
-                                    style = {{ width: display.viz.horizontal_margin + 'px' }}
                                 >Display
                                 </label>
                                 <div
@@ -347,7 +371,7 @@ class Header extends React.PureComponent {
                                                 this.setState({ selectedProps: newProps })
                                             }}
                                             options = {list.map((elt, indexElt) => {
-                                                return { value: indexElt, label: elt.readablePath.map(p => p.label).join(' / ') }
+                                                return { value: indexElt, label: '/ ' + elt.readablePath.map(p => p.label).join(' / * / ') + ' / * /' }
                                             })}
                                         />
                                     </div>) 
@@ -383,6 +407,40 @@ class Header extends React.PureComponent {
                             </p>
                         </div>
                         <div className = "cache"></div>
+                        <div 
+                            className = "explain" 
+                            style = {{
+                                marginTop: Math.floor((display.viz.top_margin - 145)/2) + 'px',
+                                marginLeft: display.viz.horizontal_margin + 'px'
+                            }} >
+                            <p>You are currently visualizing <strong>{ options[2].total } { pluralize('entity', options[2].total) } </strong>  
+                            belonging to the class of ressources <strong>{ this.state.resourceList[this.state.displayedResource].readablePath[0].label } </strong> 
+                            according to <strong>{ config.constraints.length } property { pluralize('path', config.constraints.length) } </strong> 
+                            traversing <strong>2 graphs</strong></p><span className = "resource-def">?
+                                <div className = "resource-content" style = {{ margin: '-55px 0 0 0' + 'px' }}>
+                                    <ul><span>Graphs: </span>  
+                                        { selectedProperties[0].graphs.map((graph, gi) => {
+                                            return (<li style = {{ color: graphs[graph] }} key = {`graph_${zone}_${gi}`}>{graph}</li>)
+                                        }) }
+                                    </ul>
+                                    { selectedProperties.map((prop, pi) => {
+                                        let readablePath = getReadablePathsParts(prop.path, dataset.labels, dataset.prefixes)
+                                        return (<div className = "path"  key = {`path_${zone}_${pi}`}>Path {(pi + 1)}: <span style = {{ borderBottom: `1px solid ${graphs[prop.triplesGraphs[0]]}` }}>{this.state.resourceList[this.state.displayedResource].readablePath[0].label} / </span> { readablePath.map((rp, rpi) => {
+                                            return (<span 
+                                                className = "triple"
+                                                style = {{ 
+                                                    borderBottom: `1px solid ${graphs[prop.triplesGraphs[rpi]]}`, 
+                                                    paddingLeft: (5 + (rpi * 20)) + 'px',
+                                                    paddingBottom: (rpi * 3) + 'px',
+                                                    position: 'relative', 
+                                                    left: '-' + (5 + (rpi * 20)) + 'px' 
+                                                }} 
+                                                key = {`path_${zone}_${pi}_triple_${rpi}`}><span className = "pathlabel" title={ rp.comment }>{ rp.label }</span> / * /</span>)
+                                        }) }</div>)
+                                    }) }
+                                </div>
+                            </span>
+                        </div>
                         {
                             <div>
                                 <button
@@ -432,8 +490,8 @@ Header.propTypes = {
 function mapStateToProps (state) {
     return {
         configs: state.configs,
+        data:state.data,
         dataset: state.dataset,
-        data: state.data,
         display: state.display,
         selections: state.selections,
         views: state.views

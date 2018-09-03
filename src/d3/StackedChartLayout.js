@@ -3,7 +3,7 @@ import AbstractLayout from './AbstractLayout'
 import * as dataLib from '../lib/dataLib'
 import * as selectionLib from '../lib/selectionLib'
 
-class TimelineLayout extends AbstractLayout {
+class StackedChartLayout extends AbstractLayout {
     draw (props) {
         const { nestedProp1, legend, selections, zone } = props
         //console.log(selections)
@@ -36,7 +36,7 @@ class TimelineLayout extends AbstractLayout {
                 d.color = legend.info.filter(p => (p.key === d.prop2.value || (d.labelprop2 && p.key === d.labelprop2.value)))[0].color
                 // console.log(zone, d)
                 d.selection = {
-                    selector: `timeline_element_${dataLib.makeId(d.entrypoint.value)}`,
+                    selector: `stackedchart_element_${dataLib.makeId(d.entrypoint.value)}`,
                     query: {
                         type: 'uri',
                         value: d.entrypoint.value
@@ -91,9 +91,9 @@ class TimelineLayout extends AbstractLayout {
     getElementsInZone (props) {
         const selectedZone = {
             x1: props.zoneDimensions.x1 - props.display.viz.horizontal_margin,
-            y1: props.zoneDimensions.y1 - props.display.viz.vertical_margin,
+            y1: props.zoneDimensions.y1 - props.display.viz.top_margin,
             x2: props.zoneDimensions.x2 - props.display.viz.horizontal_margin,
-            y2: props.zoneDimensions.y2 - props.display.viz.vertical_margin
+            y2: props.zoneDimensions.y2 - props.display.viz.bottom_margin
         }
         let selectedElements = []
         d3.select(this.el).selectAll('.elements')
@@ -161,4 +161,4 @@ class TimelineLayout extends AbstractLayout {
     }
 }
 
-export default TimelineLayout
+export default StackedChartLayout

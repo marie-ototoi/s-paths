@@ -79,7 +79,7 @@ export const defineGroup = (prop, options) => {
 }
 
 export const FSL2SPARQL = (FSLpath, options) => {
-    let { constraints, entrypointName, entrypointType, graphs, hierarchical, optional, propName, resourceGraph, sample } = options
+    let { constraints, entrypointName, entrypointType, graphs, hierarchical, optional, propName, resourceGraph, sample, whichGraph } = options
     let pathParts = FSLpath.split('/')
     let query = ``
     if (entrypointType) {
@@ -96,7 +96,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
         let level = Math.ceil(index / 2)
         let thisSubject = (level === 1) ? entrypointName : `${propName}inter${(level - 1)}`
         let thisObject = (level === levels) ? propName : `${propName}inter${level}`
-        query = query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
+        query = whichGraph ? query.concat(`GRAPH ?g${level} { ?${thisSubject} ${predicate} ?${thisObject} . } `) : query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
         // if (level === levels) query = query.concat(`${!optional ? 'OPTIONAL { ' : ''}?${thisObject} rdfs:label ?label${propName}${!optional ? ' } .' : ''} `)
         if (objectType !== '*') {
             query = query.concat(`?${thisObject} rdf:type ${objectType} . `)
@@ -188,16 +188,32 @@ export const makePath = (prop, previousProp, level, options) => {
 
 export const makePropQuery = (prop, options, queryType) => {
     // queryType: count, type, char
-    const { constraints, graphs, resourceGraph } = options
-    const { path } = prop
+    const { constraints, graphs, resourceGraph, resources } = options
+    const { path, level } = prop
     // const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
-    const graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+    let graph = ''
+    if (queryType !== 'type') {
+        graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+    }
     let props
     let bindProps
     let propsPath
+    let filterGraphs = ''
     let limit = ``
     if (queryType === 'type') {
         props = `DISTINCT ?datatype ?language ?isiri ?isliteral ((?charlength) as ?avgcharlength) `
+        filterGraphs = 'FILTER('
+        for (let i = 1; i <= level; i++) {
+            props = props.concat(`?g${i} `)
+            for (let j = 0; j < resources.length; j++) {
+                filterGraphs = filterGraphs.concat(`?g${i} != <${resources[j].type}>`)
+                if (!(i === level && j === resources.length -1)) {
+                    filterGraphs = filterGraphs.concat(` && `)
+                } else {
+                    filterGraphs = filterGraphs.concat(`)`)
+                }
+            }
+        }
         bindProps = `BIND(DATATYPE(?object) AS ?datatype) .
         BIND(ISIRI(?object) AS ?isiri) .
         BIND(ISLITERAL(?object) AS ?isliteral) .
@@ -207,8 +223,8 @@ export const makePropQuery = (prop, options, queryType) => {
             propName: 'object',
             entrypointName: 'entrypoint',
             entrypointType: true,
-            resourceGraph,
-            graphs
+            graphs,
+            whichGraph: true
         })
         limit = ` LIMIT 1`
     } else if (queryType === 'count') {
@@ -238,6 +254,7 @@ WHERE {
 ${constraints}
 ${propsPath}
 ${bindProps}
+${filterGraphs}
 }${limit}`
 }
 
@@ -561,7 +578,8 @@ export const mergeStatsWithProps = (props, countStats, typeStats, totalEntities)
                 language: typeStat.language ? typeStat.language.value : ``,
                 isiri: typeStat.isiri.value,
                 isliteral: typeStat.isliteral.value,
-                avgcharlength: Math.floor(Number(typeStat.avgcharlength.value))
+                avgcharlength: Math.floor(Number(typeStat.avgcharlength.value)),
+                triplesGraphs: Array.from(Array(prop.level).keys()).map(key => typeStat['g'+ (key+1)].value)
             } : {}
             return {
                 ...prop,

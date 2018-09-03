@@ -10,7 +10,7 @@ import PropSelector from '../elements/PropSelector'
 import Axis from '../elements/Axis'
 import SelectionZone from '../elements/SelectionZone'
 // d3
-import TimelineLayout from '../../d3/TimelineLayout'
+import StackedChartLayout from '../../d3/StackedChartLayout'
 // libs
 import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
 import { getAxis, getLegend, nestData } from '../../lib/dataLib'
@@ -19,12 +19,12 @@ import { getDimensions } from '../../lib/scaleLib'
 import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 
-class Timeline extends React.Component {
+class StackedChart extends React.Component {
     constructor (props) {
         super(props)
         this.selectEnsemble = this.selectEnsemble.bind(this)
         this.customState = {
-            elementName: `Timeline_${props.zone}`
+            elementName: `StackedChart_${props.zone}`
         }
         this.prepareData(props)
     }
@@ -89,7 +89,7 @@ class Timeline extends React.Component {
         const { axisBottom, legend } = this.customState
         const { config, dimensions, display, role, selections, step, zone } = this.props
         // display settings
-        const classN = `Timeline ${this.customState.elementName} role_${role}`
+        const classN = `StackedChart ${this.customState.elementName} role_${role}`
         return (<g className = { classN } >
             { role !== 'target' &&
             <SelectionZone
@@ -159,7 +159,7 @@ class Timeline extends React.Component {
     }
     componentDidMount () {
         // console.log(this.props.data)
-        this.layout = new TimelineLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
+        this.layout = new StackedChartLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
         if (this.props.role === 'target') {
             this.render()
             // console.log('called once when transition data are loaded and displayed')
@@ -173,7 +173,7 @@ class Timeline extends React.Component {
     }
 }
 
-Timeline.propTypes = {
+StackedChart.propTypes = {
     config: PropTypes.object,
     data: PropTypes.array,
     dataset: PropTypes.object,
@@ -207,6 +207,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const TimelineConnect = connect(mapStateToProps, mapDispatchToProps)(Timeline)
+const StackedChartConnect = connect(mapStateToProps, mapDispatchToProps)(StackedChart)
 
-export default TimelineConnect
+export default StackedChartConnect
