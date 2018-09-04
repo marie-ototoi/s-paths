@@ -12,7 +12,7 @@ const resourceSchema = new mongoose.Schema({
 resourceSchema.statics = {
     createOrUpdate (properties) {
         let allPromises = properties.map(prop => {
-            return this.update(
+            return this.updateOne(
                 {
                     type: prop.type,
                     endpoint: prop.endpoint,

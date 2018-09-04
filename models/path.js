@@ -28,7 +28,7 @@ const pathSchema = new mongoose.Schema({
 pathSchema.statics = {
     createOrUpdate (properties) {
         let allPromises = properties.map(prop => {
-            return this.update(
+            return this.updateOne(
                 {
                     endpoint: prop.endpoint,
                     graphs: prop.graphs,

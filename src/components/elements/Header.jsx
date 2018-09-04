@@ -236,6 +236,9 @@ class Header extends React.PureComponent {
                                 className = "text-progress is-size-7"
                             >{ options[0].total } <span className = "is-pulled-right">&nbsp;{ options[0].label }</span>
                             </p>
+                            <span className = "icon">
+                                <i className = "fas fa-cogs"></i>
+                            </span>
                         </div>
                         <div className = "line">
                             <div className = "field" style = {{ marginLeft: display.viz.horizontal_margin + 'px', width: fieldWidth + 'px' }}>
