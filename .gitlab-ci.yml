@@ -6,13 +6,15 @@ stages:
   - deploy
   
 services:
- - docker:dind
+  - docker:dind
 
 # Environment templates
 # -> Describe common environments to run stages
 
 .node: &node
   image: node:9
+  tags:
+    - node
   before_script:
     - npm install
   script: npm run $CI_JOB_STAGE
@@ -25,12 +27,14 @@ services:
 # Test stage
 UT:
   <<: *node
-  tags:
-   - test
   stage: test
 
 # Build stage
-build_semantic-paths:
+Assets:
+  <<: *node
+  stage: build
+
+Docker:
   tags:
    - docker
   stage: build
@@ -43,7 +47,7 @@ build_semantic-paths:
 
 
 # Deploy stage
-deploy_semantic-paths:
+Production:
   tags:
    - docker
   stage: deploy
