@@ -27,15 +27,16 @@ const getAllStats = async (options) => {
     // console.log('oy', options)
     let { analyse, prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
     let selectionInstances
-    if (analyse) {
-        await pathModel.deleteMany({ endpoint, graphs: { $all: graphs } }).exec()
-    }
+    
     // add prefix to entrypoint if full url
     if (!queryLib.usesPrefix(entrypoint, prefixes)) {
         if (!queryLib.prefixDefined(entrypoint)) {
             prefixes = queryLib.addSmallestPrefix(entrypoint, prefixes)
         }
         entrypoint = queryLib.usePrefix(entrypoint, prefixes)
+    }
+    if (analyse) {
+        await pathModel.deleteMany({ endpoint, graphs: { $all: graphs }, entrypoint: queryLib.useFullUri(entrypoint, prefixes) }).exec()
     }
     // number of entities of the set of entrypoint class limited by given constraints
     let selectionQuery = queryLib.makeTotalQuery(entrypoint, options)
