@@ -12,7 +12,7 @@ services:
 # -> Describe common environments to run stages
 
 .node: &node
-  image: node:9
+  image: node
   tags:
     - node
   before_script:
