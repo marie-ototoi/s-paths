@@ -130,7 +130,7 @@ class URIWheelLayout extends AbstractLayout {
             .attr('transform', (d, i) => `translate(${center.x}, ${center.y}) rotate(${(i * angle)} 0 0)`)
 
         // d3.select(el).selectAll('.radius linearGradient')
-            //.attr('gradientTransform', (d, i) => `rotate(0)`)
+        //.attr('gradientTransform', (d, i) => `rotate(0)`)
         
         d3.select(this.el).selectAll('.radius textPath')
             .attr('fill', (d, i) => `url(#${'gradientWheel' + zone + dataLib.makeId(d.key)})`)
