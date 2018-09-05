@@ -3,16 +3,11 @@ import types from '../constants/ActionTypes'
 const initialState = {
     endpoint: process.env.ENDPOINT,
     localEndpoint: process.env.LOCAL_ENDPOINT,
-    // 'http://bnf.lri.fr:8890/sparql',
-    // 'http://eventmedia.eurecom.fr/sparql', //'http://bnf.lri.fr:8890/sparql','http://localhost:8890/sparql',
     entrypoint: '',
     graphs: ['http://nobel.ilda.fr', 'http://nobeladdon.ilda.fr'],
     resourceGraph: null,
-    // 'http://nobel.bnf.fr',
-    // null,  'http://localhost:8890/data10', 'http://data10.bnf.fr', 'http://data01.bnf.fr','http://data.bnf.fr',
     constraints: '',
     labels: [],
-    forceUpdate: false,
     maxLevel:6,
     ignoreList: ['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
     resources: [],
@@ -86,7 +81,7 @@ const dataset = (state = initialState, action) => {
             labels: action.labels || state.labels,
             entrypoint: action.entrypoint,
             prefixes: action.prefixes || state.prefixes,
-            constraints: action.constraints,
+            constraints: action.constraints || state.constraints,
             resourceGraph: action.resourceGraph || state.resourceGraph
         }
     case types.SET_DATA:

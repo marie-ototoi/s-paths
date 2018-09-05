@@ -2,16 +2,12 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { loadResources, loadStats } from '../../actions/dataActions'
+import { analyseResources, loadStats } from '../../actions/dataActions'
 
 class Settings extends React.PureComponent {
     constructor (props) {
         super(props)
-        //this.selectElement = this.selectElement.bind(this)
-        this.customState = {
-            elementName: `Settings_${props.zone}`
-        }
-        //this.prepareData(props)
+        this.state = {}
     }
     render () {
         const { dataset, dimensions, zone } = this.props
@@ -27,22 +23,49 @@ class Settings extends React.PureComponent {
             >
                 <div className = "box">
                     <div className = "content">
+                        <div className = "field">
+                            <label className = "label">Graphs</label>
+                            <div className ="control">
+                                to do
+                            </div>
+                        </div>
+                        <div className = "field">
+                            <label className = "label">Max depth</label>
+                            <div className ="control">
+                               to do
+                            </div>
+                        </div>
+
+                        { dataset.resources.lenght === 0 &&
                         <button
                             onClick = { e => {
                                 //console.log(this.props.dataset)
-                                this.props.loadResources({ ...this.props.dataset, forceUpdate: true }, this.props.views)
+                                this.props.analyseResources({ ...this.props.dataset, forceUpdate: true }, [])
                             } }
                         >
-                            Resources
+                            Get Resources
                         </button>
-                        <button
-                            onClick = { e => {
-                                //console.log(this.props.dataset)
-                                this.props.loadStats({ ...this.props.dataset, forceUpdate: true })
-                            } }
-                        >
-                            Stats
-                        </button>                    
+                        }
+                        <table className = "table is-bordered">
+                            <tbody>
+                                { dataset.resources.map((resource, ri) => {
+                                    return (<tr key = { `resource_${zone}_${ri}` }>
+                                        <td>{ resource.type }</td>
+                                        <td><a onClick = { e => this.props.analyseResources(dataset, [resource.type]) }>generate subgraph</a></td>
+                                        <td><a onClick = { e => {
+                                            this.props.loadStats({
+                                                ...dataset,
+                                                analyse: true,
+                                                resourceGraph: resource.type,
+                                                entrypoint: resource.type,
+                                                totalInstances: resource.total,
+                                                selectionInstances: resource.total
+                                            })
+                                        } }>analyze stats</a></td>
+                                    </tr>)
+                                }) }
+                            </tbody>
+                        </table>                   
                     </div>
                 </div>
             </foreignObject>
@@ -56,7 +79,7 @@ Settings.propTypes = {
     display: PropTypes.object,
     views: PropTypes.array,
     zone: PropTypes.string,
-    loadResources: PropTypes.func,
+    analyseResources: PropTypes.func,
     loadStats: PropTypes.func,
 }
 
@@ -72,7 +95,7 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
-        loadResources: loadResources(dispatch),
+        analyseResources: analyseResources(dispatch),
         loadStats: loadStats(dispatch)
     }
 }

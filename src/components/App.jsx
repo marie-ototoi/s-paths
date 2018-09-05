@@ -171,7 +171,6 @@ class App extends React.PureComponent {
                 viewBox = { `${display.viewBox.x}, ${display.viewBox.y}, ${display.viewBox.width}, ${display.viewBox.height}` }
                 preserveAspectRatio = "xMinYMin meet"
             >
-
                 { mode === 'dev' &&
                     <Debug />
                 }
@@ -215,7 +214,7 @@ class App extends React.PureComponent {
                         handleTransition = { this.handleTransition }
                     />
                 }
-                { display.settingsOpen.main &&
+                { (!mainConfig || display.settingsOpen.main) &&
                     <Settings
                         dimensions = { getDimensions('settings', display.zones['main'], display.viz) }
                     />

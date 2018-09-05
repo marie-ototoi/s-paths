@@ -25,9 +25,9 @@ router.post('/', (req, res) => {
 
 const getAllStats = async (options) => {
     // console.log('oy', options)
-    let { forceUpdate, prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
+    let { analyse, prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
     let selectionInstances
-    if (forceUpdate) {
+    if (analyse) {
         await pathModel.deleteMany({ endpoint, graphs: { $all: graphs } }).exec()
     }
     // add prefix to entrypoint if full url
@@ -43,7 +43,7 @@ const getAllStats = async (options) => {
     if (options.constraints === '') {
         selectionInstances = totalInstances
     } else {
-        let selectioncount = await queryLib.getData(localEndpoint, selectionQuery, prefixes).catch(e => console.error('Error retrieving number of selected instances', e))
+        let selectioncount = await queryLib.getData(localEndpoint, selectionQuery, prefixes).catch(e => console.error('Error retrieving number of selected instances', selectionQuery, e))
         selectionInstances = Number(selectioncount.results.bindings[0].total.value)
     }
     if (selectionInstances === 0) {
@@ -105,7 +105,7 @@ const getMaxRequest = (parentQuantities) => {
 }
 
 const getProps = async (categorizedProps, level, options, instances) => {
-    let { constraints, graphs, entrypoint, endpoint, localEndpoint, prefixes, maxLevel } = options
+    let { analyse, constraints, graphs, entrypoint, endpoint, localEndpoint, prefixes, maxLevel } = options
     let { totalInstances, selectionInstances } = instances
     let maxRequests = getMaxRequest(totalInstances)
     let newCategorizedProps = []
@@ -125,7 +125,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
             }
         })
         // keep only those whose parents count > 0
-    } else {
+    } else if (analyse) {
         const queriedProps = categorizedProps.filter(prop => {
             // console.log(prop.total)
             return (prop.level === level - 1 &&

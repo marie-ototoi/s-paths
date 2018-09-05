@@ -11,25 +11,8 @@ export const endTransition = (dispatch) => (zone) => {
 }
 
 export const loadStats = (dispatch) => (dataset) => {
-    return loadAllStats(dataset, 0)
+    getStats(dataset)
 }
-
-const loadAllStats = (dataset, index) => {
-    dataset = {
-        ...dataset,
-        forceUpdate: true,
-        resourceGraph: dataset.resources[index].type,
-        entrypoint: dataset.resources[index].type,
-        totalInstances: dataset.resources[index].total,
-        selectionInstances: dataset.resources[index].total
-    }
-    return getStats(dataset)
-        .then(stats => {
-            console.log(stats)
-            if (index < dataset.resources.length - 1) setTimeout(() => { loadAllStats(dataset, index + 1) }, 10000)
-        })
-}
-
 
 const getStats = (options) => {
     return fetch((process.env.API + 'stats'),
@@ -270,55 +253,98 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
             
 }
 
+export const analyseResources = (dispatch) => (dataset, resources) => {
+    console.log('ICI intwe', dataset, resources)
+    getResources({ ...dataset, toAnalyse: resources })
+}
+
+export const getGraphs = (dispatch) => (dataset) => {
+    let query = `SELECT DISTINCT ?g 
+    WHERE {
+        GRAPH ?g { ?s ?p ?o }
+    }`
+    let ignore = [
+        'http://www.openlinksw.com/schemas/virtrdf#',
+        'http://www.w3.org/ns/ldp#',
+        'http://localhost:8890/sparql',
+        'http://localhost:8890/DAV/',
+        'http://www.w3.org/2002/07/owl#',
+        'http://www.w3.org/2000/01/rdf-schema#Class'
+    ]
+    dataset.resources.forEach(resource => {
+        ignore.push(resource.type)
+    })
+    getData(dataset.endpoint, query, dataset.prefixes)
+        .then(results => {
+            return results.bindings.map(graph => {
+                if (!ignore.includes(graph.g.value)) return graph.g.value
+            }).filter(graph => graph)
+        })
+}
+
 export const loadResources = (dispatch) => (dataset, views) => {
     let { endpoint, prefixes } = dataset
     let totalInstances
     getResources(dataset)
         .then(resources => {
-            dataset.entrypoint = resources[0].type
-            dataset.totalInstances = resources[0].total
-            dataset.resourceGraph = resources[0].type
-            getStats({ ...dataset, stats: [], resources })
-                .then(stats => {
-                    prefixes = stats.options.prefixes
-                    // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
-                    // for each views, checks which properties ou sets of properties could match and evaluate
-                    let configs = activateDefaultConfigs(defineConfigs(views, stats))
-                    //
-                    const configMain = getSelectedView(configs, 'main')
-                    const queryMain = makeQuery(dataset.entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
-                    const configAside = getSelectedView(configs, 'aside')
-                    const queryAside = makeQuery(dataset.entrypoint, configAside, 'aside', { ...dataset, maxDepth: (configAside.id === 'ListAllProps') ? 1 : null })
-                    const queryMainUnique = makeQuery(dataset.entrypoint, configMain, 'main', { ...dataset, unique: true })
-                    const queryAsideUnique = makeQuery(dataset.entrypoint, configAside, 'aside', { ...dataset, unique: true })
-                    //
-                    Promise.all([
-                        getData(endpoint, queryMain, prefixes),
-                        (queryMain === queryAside) ? null : getData(endpoint, queryAside, prefixes),
-                        getData(endpoint, queryMainUnique, prefixes),
-                        (queryMain === queryAside) ? null : getData(endpoint, queryAsideUnique, prefixes)
-                    ])
-                        .then(([dataMain, dataAside, uniqueMainPromise, uniqueAsidePromise]) => { // , coverageMain, coverageAside
+            if (resources[0].subgraph) {
+                dataset.entrypoint = resources[0].type
+                dataset.totalInstances = resources[0].total
+                dataset.resourceGraph = resources[0].type
+                getStats({ ...dataset, stats: [], resources })
+                    .then(stats => {
+                        prefixes = stats.options.prefixes
+                        // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
+                        // for each views, checks which properties ou sets of properties could match and evaluate
+                        let configs = activateDefaultConfigs(defineConfigs(views, stats))
+                        //
+                        const configMain = getSelectedView(configs, 'main')
+                        if (configMain) {
+                            const queryMain = makeQuery(dataset.entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
+                            const configAside = getSelectedView(configs, 'aside')
+                            const queryAside = makeQuery(dataset.entrypoint, configAside, 'aside', { ...dataset, maxDepth: (configAside.id === 'ListAllProps') ? 1 : null })
+                            
+                            const queryMainUnique = makeQuery(dataset.entrypoint, configMain, 'main', { ...dataset, unique: true })
+                            const queryAsideUnique = makeQuery(dataset.entrypoint, configAside, 'aside', { ...dataset, unique: true })
+                            //
+                            Promise.all([
+                                getData(endpoint, queryMain, prefixes),
+                                (queryMain === queryAside) ? null : getData(endpoint, queryAside, prefixes),
+                                getData(endpoint, queryMainUnique, prefixes),
+                                (queryMain === queryAside) ? null : getData(endpoint, queryAsideUnique, prefixes)
+                            ])
+                                .then(([dataMain, dataAside, uniqueMainPromise, uniqueAsidePromise]) => { // , coverageMain, coverageAside
+                                    dispatch({
+                                        type: types.SET_RESOURCES,
+                                        resources,
+                                        stats,
+                                        entrypoint: dataset.entrypoint,
+                                        resourceGraph: dataset.resourceGraph,
+                                        totalInstances,
+                                        prefixes: stats.options.prefixes,
+                                        labels: stats.options.labels,
+                                        constraints: '',
+                                        mainConfig: configs[0].views,
+                                        asideConfig: configs[1].views,
+                                        main: { ...dataMain },
+                                        aside: dataAside ? { ...dataAside } : { ...dataMain },
+                                        mainDisplayed: Number(uniqueMainPromise.results.bindings[0].displayed.value),
+                                        asideDisplayed: uniqueAsidePromise ? Number(uniqueAsidePromise.results.bindings[0].displayed.value): Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                                    })
+                                })
+                        } else {
                             dispatch({
                                 type: types.SET_RESOURCES,
-                                resources,
-                                stats,
-                                entrypoint: dataset.entrypoint,
-                                resourceGraph: dataset.resourceGraph,
-                                totalInstances,
-                                prefixes: stats.options.prefixes,
-                                labels: stats.options.labels,
-                                constraints: '',
-                                mainConfig: configs[0].views,
-                                asideConfig: configs[1].views,
-                                main: { ...dataMain },
-                                aside: dataAside ? { ...dataAside } : { ...dataMain },
-                                mainDisplayed: Number(uniqueMainPromise.results.bindings[0].displayed.value),
-                                asideDisplayed: uniqueAsidePromise ? Number(uniqueAsidePromise.results.bindings[0].displayed.value): Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                                resources
                             })
-                        })
-                        
+                        } 
+                    })
+            } else {
+                dispatch({
+                    type: types.SET_RESOURCES,
+                    resources
                 })
+            }
         })
         .catch(error => {
             console.error('Error getting data main + aside', error)

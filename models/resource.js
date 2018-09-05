@@ -4,6 +4,7 @@ const resourceSchema = new mongoose.Schema({
     type: { type: String, required: true },
     endpoint: { type: String, required: true },
     graphs: { type: Array },
+    subgraph: Boolean,
     total: Number,
     createdAt: Date,
     modifiedAt: Date
@@ -24,7 +25,8 @@ resourceSchema.statics = {
                         modifiedAt: Date.now()
                     },
                     $setOnInsert: {
-                        createdAt: Date.now()
+                        createdAt: Date.now(),
+                        subgraph: false
                     }
                 },
                 { upsert: true }
