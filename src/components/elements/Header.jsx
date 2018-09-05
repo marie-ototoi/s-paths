@@ -409,7 +409,7 @@ class Header extends React.PureComponent {
                                 marginTop: Math.floor((display.viz.top_margin - 145)/2) + 'px',
                                 marginLeft: display.viz.horizontal_margin + 'px'
                             }} >
-                            <p>You are currently visualizing <strong>{ options[2].total } { pluralize('entity', options[2].total) } </strong>  
+                            <p>You are visualizing <strong>{ options[2].total } { pluralize('entity', options[2].total) } </strong>  
                             belonging to the class of ressources <strong>{ this.state.resourceList[this.state.displayedResource].readablePath[0].label } </strong> 
                             according to <strong>{ config.constraints.length } property { pluralize('path', config.constraints.length) } </strong> 
                             traversing <strong>2 graphs</strong></p><span className = "resource-def">?
