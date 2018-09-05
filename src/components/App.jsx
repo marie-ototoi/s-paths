@@ -4,6 +4,8 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 // components
+import Back from './elements/Back'
+import Settings from './elements/Settings'
 import GeoMap from './views/GeoMap'
 import HeatMap from './views/HeatMap'
 import Images from './views/Images'
@@ -212,6 +214,16 @@ class App extends React.PureComponent {
                         handleMouseMove = { this.handleMouseMove }
                         handleMouseUp = { this.handleMouseUp }
                         handleTransition = { this.handleTransition }
+                    />
+                }
+                { display.backOpen.main &&
+                    <Back
+                        dimensions = { getDimensions('back', display.zones['main'], display.viz) }
+                    />
+                }
+                { display.settingsOpen.main &&
+                    <Settings
+                        dimensions = { getDimensions('settings', display.zones['main'], display.viz) }
                     />
                 }
                 { asideConfig && this.state.aside_step === 'launch' &&

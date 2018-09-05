@@ -12,6 +12,7 @@ import { getNbDisplayed, getReadablePathsParts } from '../../lib/dataLib'
 import { getGraphsColors } from '../../lib/paletteLib'
 import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 
+import { showBack, showSettings } from '../../actions/displayActions'
 import { displayConfig, loadResources, loadSelection, loadStats, selectResource } from '../../actions/dataActions'
 
 class Header extends React.PureComponent {
@@ -236,8 +237,11 @@ class Header extends React.PureComponent {
                                 className = "text-progress is-size-7"
                             >{ options[0].total } <span className = "is-pulled-right">&nbsp;{ options[0].label }</span>
                             </p>
-                            <span className = "icon">
+                            <span className = "icon" onClick = { (e) => { this.props.showSettings(zone) } }>
                                 <i className = "fas fa-cogs"></i>
+                            </span>
+                            <span className = "icon" onClick = {  (e) => { this.props.showBack(zone) } }>
+                                <i className = "fas fa-wrench"></i>
                             </span>
                         </div>
                         <div className = "line">
@@ -436,27 +440,7 @@ class Header extends React.PureComponent {
                                 </div>
                             </span>
                         </div>
-                        {
-                            <div>
-                                <button
-                                    onClick = { e => {
-                                        //console.log(this.props.dataset)
-                                        this.props.loadResources({ ...this.props.dataset, forceUpdate: true }, this.props.views)
-                                    } }
-                                >
-                                    Resources
-                                </button>
-                                <button
-                                    onClick = { e => {
-                                        //console.log(this.props.dataset)
-
-                                        this.props.loadStats({ ...this.props.dataset, forceUpdate: true })
-                                    } }
-                                >
-                                    Stats
-                                </button>
-                            </div>
-                        }
+                        
                     </div>
                 </foreignObject>
             </g>
@@ -480,6 +464,8 @@ Header.propTypes = {
     loadSelection: PropTypes.func,
     loadStats: PropTypes.func,
     selectResource: PropTypes.func,
+    showBack: PropTypes.func,
+    showSettings: PropTypes.func,
 }
 
 function mapStateToProps (state) {
@@ -499,7 +485,9 @@ function mapDispatchToProps (dispatch) {
         loadResources: loadResources(dispatch),
         loadStats: loadStats(dispatch),
         loadSelection: loadSelection(dispatch),
-        selectResource: selectResource(dispatch)
+        selectResource: selectResource(dispatch),
+        showBack: showBack(dispatch),
+        showSettings: showSettings(dispatch)
     }
 }
 
