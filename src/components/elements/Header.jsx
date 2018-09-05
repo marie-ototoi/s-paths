@@ -12,7 +12,7 @@ import { getNbDisplayed, getReadablePathsParts } from '../../lib/dataLib'
 import { getGraphsColors } from '../../lib/paletteLib'
 import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 
-import { showBack, showSettings } from '../../actions/displayActions'
+import { showSettings } from '../../actions/displayActions'
 import { displayConfig, loadResources, loadSelection, loadStats, selectResource } from '../../actions/dataActions'
 
 class Header extends React.PureComponent {
@@ -240,9 +240,6 @@ class Header extends React.PureComponent {
                             <span className = "icon" onClick = { (e) => { this.props.showSettings(zone) } }>
                                 <i className = "fas fa-cogs"></i>
                             </span>
-                            <span className = "icon" onClick = {  (e) => { this.props.showBack(zone) } }>
-                                <i className = "fas fa-wrench"></i>
-                            </span>
                         </div>
                         <div className = "line">
                             <div className = "field" style = {{ marginLeft: display.viz.horizontal_margin + 'px', width: fieldWidth + 'px' }}>
@@ -464,7 +461,6 @@ Header.propTypes = {
     loadSelection: PropTypes.func,
     loadStats: PropTypes.func,
     selectResource: PropTypes.func,
-    showBack: PropTypes.func,
     showSettings: PropTypes.func,
 }
 
@@ -486,7 +482,6 @@ function mapDispatchToProps (dispatch) {
         loadStats: loadStats(dispatch),
         loadSelection: loadSelection(dispatch),
         selectResource: selectResource(dispatch),
-        showBack: showBack(dispatch),
         showSettings: showSettings(dispatch)
     }
 }

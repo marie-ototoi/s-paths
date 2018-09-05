@@ -103,13 +103,6 @@ const display = (state = defaultState, action) => {
             zones: action.zones || state.zones,
             viz: action.viz || state.viz
         }
-    case types.SHOW_BACK:
-        newSettings = state.backOpen
-        newSettings[action.zone] = !newSettings[action.zone]
-        return {
-            ...state,
-            backOpen: newSettings
-        }
     case types.SHOW_SETTINGS:
         newSettings = state.settingsOpen
         newSettings[action.zone] = !newSettings[action.zone]

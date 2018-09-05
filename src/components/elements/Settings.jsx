@@ -2,12 +2,14 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
+import { loadResources, loadStats } from '../../actions/dataActions'
+
 class Settings extends React.PureComponent {
     constructor (props) {
         super(props)
         //this.selectElement = this.selectElement.bind(this)
         this.customState = {
-            elementName: `Back_${props.zone}`
+            elementName: `Settings_${props.zone}`
         }
         //this.prepareData(props)
     }
@@ -15,7 +17,7 @@ class Settings extends React.PureComponent {
         const { dataset, dimensions, zone } = this.props
         const { x, y, width, height } = dimensions
         return (<g
-            className = "Back"
+            className = "Settings"
             transform = { `translate(${x}, ${y})` }
         >
             <foreignObject
@@ -25,7 +27,22 @@ class Settings extends React.PureComponent {
             >
                 <div className = "box">
                     <div className = "content">
-                       Settings               
+                        <button
+                            onClick = { e => {
+                                //console.log(this.props.dataset)
+                                this.props.loadResources({ ...this.props.dataset, forceUpdate: true }, this.props.views)
+                            } }
+                        >
+                            Resources
+                        </button>
+                        <button
+                            onClick = { e => {
+                                //console.log(this.props.dataset)
+                                this.props.loadStats({ ...this.props.dataset, forceUpdate: true })
+                            } }
+                        >
+                            Stats
+                        </button>                    
                     </div>
                 </div>
             </foreignObject>
@@ -39,6 +56,8 @@ Settings.propTypes = {
     display: PropTypes.object,
     views: PropTypes.array,
     zone: PropTypes.string,
+    loadResources: PropTypes.func,
+    loadStats: PropTypes.func,
 }
 
 function mapStateToProps (state) {
@@ -53,6 +72,8 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
+        loadResources: loadResources(dispatch),
+        loadStats: loadStats(dispatch)
     }
 }
 

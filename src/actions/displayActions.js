@@ -33,9 +33,3 @@ export const showSettings = (dispatch) => (zone) => {
         zone
     })
 }
-export const showBack = (dispatch) => (zone) => {
-    dispatch({
-        type: types.SHOW_BACK,
-        zone
-    })
-}
