@@ -291,7 +291,7 @@ WHERE {
             resourceGraph: 'b'
         }
         expect(queryLib.makeTransitionQuery(newConfig, newOptions, config, options, 'main'))
-            .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) ?prop2 (COUNT(?prop2) as ?countprop2) ?newprop1 (COUNT(?newprop1) as ?newcountprop1) ?newprop2 (COUNT(?newprop2) as ?newcountprop2) FROM <a> FROM <b>
+            .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) ?prop2 (COUNT(?prop2) as ?countprop2) ?newprop1 (COUNT(?newprop1) as ?newcountprop1) ?newprop2 (COUNT(?newprop2) as ?newcountprop2) 
     WHERE {
         FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . 
         
