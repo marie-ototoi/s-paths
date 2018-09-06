@@ -202,6 +202,9 @@ export const makePropQuery = (prop, options, queryType) => {
     let limit = ``
     if (queryType === 'type') {
         props = `DISTINCT ?datatype ?language ?isiri ?isliteral ((?charlength) as ?avgcharlength) `
+        for (let i = 1; i <= level; i++) {
+            props = props.concat(`?g${i} `)
+        }
         bindProps = `BIND(DATATYPE(?object) AS ?datatype) .
         BIND(ISIRI(?object) AS ?isiri) .
         BIND(ISLITERAL(?object) AS ?isliteral) .
