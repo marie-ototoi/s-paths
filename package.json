@@ -6,8 +6,9 @@
   "main": "app.js",
   "scripts": {
     "build": "webpack --config webpack.prod.js --progress --hide-modules",
-    "start": "babel-node $NODE_DEBUG_OPTION app --presets env",
+    "start": "babel-node app --presets env",
     "start:debug": "npm run start -- --inspect",
+    "start:debug-docker": "npm run start -- --inspect-brk=0.0.0.0:9229",
     "lint": "eslint --ext .js,.jsx src api models app.js webpack.*.js",
     "test": "NODE_ENV=test mocha --require babel-register test/**/*.js --reporter spec",
     "coverage": "nyc npm test"
