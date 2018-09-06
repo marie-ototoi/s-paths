@@ -84,13 +84,8 @@ class URIWheel extends React.Component {
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             ></g>
             }
-            { role !== 'target' &&
+            { role !== 'target' && step !== 'changing' &&
             <g>
-                <Header
-                    zone = { zone }
-                    config = { config }
-                    propsLists = { [] }
-                />
                 <Legend
                     type = "plain"
                     zone = { zone }

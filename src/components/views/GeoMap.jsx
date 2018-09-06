@@ -132,13 +132,8 @@ class GeoMap extends React.Component {
                 </Map>
             </foreignObject>
             }
-            { role !== 'target' &&
+            { role !== 'target' && step !== 'changing' &&
             <g>
-                <Header
-                    zone = { zone }
-                    config = { config }
-                    propsLists = { [] }
-                />
                 <History
                     zone = { zone }
                 />

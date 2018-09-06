@@ -6,6 +6,7 @@ import { connect } from 'react-redux'
 // components
 import Settings from './elements/Settings'
 import GeoMap from './views/GeoMap'
+import Header from './elements/Header'
 import HeatMap from './views/HeatMap'
 import Images from './views/Images'
 import ListAllProps from './views/ListAllProps'
@@ -196,6 +197,7 @@ class App extends React.PureComponent {
                         endTransition = { this.handleEndTransition }
                     />
                 }
+                
                 { mainConfig && areLoaded(data, 'main', 'active') &&
                     <MainComponent
                         role = "origin"
@@ -212,6 +214,12 @@ class App extends React.PureComponent {
                         handleMouseMove = { this.handleMouseMove }
                         handleMouseUp = { this.handleMouseUp }
                         handleTransition = { this.handleTransition }
+                    />
+                }
+                { mainConfig &&
+                    <Header
+                        zone = "main"
+                        config = { mainConfig }
                     />
                 }
                 { (!mainConfig || display.settingsOpen.main) &&

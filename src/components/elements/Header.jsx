@@ -53,7 +53,7 @@ class Header extends React.PureComponent {
         const { dataset, selections, zone } = this.props
         // console.log(e, this, selections)
         if (e === 'enter') {
-            if (dataset.constraints !== '' || this.state.selectedResource !== this.state.displayedResource) {
+            if (this.state.selectedResource !== this.state.displayedResource) {
                 this.displayResource()
             } else if (selections.filter(s => s.zone === zone).length > 0 || this.state.keyword.length > 3) {
                 this.displaySelection()
@@ -153,7 +153,7 @@ class Header extends React.PureComponent {
         //let 
 
         // first line - resources
-        let selectResourceEnabled = (dataset.constraints !== '' || this.state.selectedResource !== this.state.displayedResource) ?  {} : { 'disabled' : 'disabled' }
+        let selectResourceEnabled = (this.state.selectedResource !== this.state.displayedResource) ?  {} : { 'disabled' : 'disabled' }
         
         // second line - keyword + pointer
         let pointerEnabled = selections.filter(s => s.zone === zone).length > 0
