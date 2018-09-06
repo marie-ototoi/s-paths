@@ -1,6 +1,7 @@
 import express from 'express'
 import pathModel from '../models/path'
 
+import { getReadablePathsParts } from '../src/lib/dataLib'
 import { getPropsLabels } from '../src/lib/labelLib'
 import * as queryLib from '../src/lib/queryLib'
 
@@ -73,13 +74,21 @@ const getAllStats = async (options) => {
         // get human readable rdfs:labels and rdfs:comments of all properties listed
         let newlabels = await getPropsLabels(paths.options.prefixes, paths.statements)
 
+        let labelsDic = {}
+        let allLabels = [...labels, ...newlabels]
+        allLabels.forEach(lab => {
+            labelsDic[lab.uri] = { label: lab.label, comment: lab.comment }
+        })
+        console.log(labelsDic)
         return {
-            statements: paths.statements.sort((a, b) => a.level - b.level),
+            statements: paths.statements
+                .map(stat => { return { ...stat, readablePath: getReadablePathsParts(stat.path, stat.fullPath, labelsDic, paths.options.prefixes ) } })
+                .sort((a, b) => a.level - b.level),
             totalInstances,
             selectionInstances,
             options: {
                 ...paths.options,
-                labels: [...labels, ...newlabels]
+                labels: allLabels
             }
         }
     }

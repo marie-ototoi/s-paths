@@ -1,5 +1,4 @@
 import express from 'express'
-import pathModel from '../models/path'
 import resourceModel from '../models/resource'
 import { getLabels } from '../src/lib/labelLib'
 import * as queryLib from '../src/lib/queryLib'
@@ -38,8 +37,7 @@ const getResources = async (options) => {
             for(let j = 1; j < options.maxLevel; j ++) {
                 let query = queryLib.makeSubGraphQuery({
                     ...options,
-                    entrypoint: toAnalyse[i],
-                    resourceGraph: toAnalyse[i],
+                    entrypoint: toAnalyse[i]
                 }, j)
                 console.log(query)
                 queryLib.getData(localEndpoint, query, {})

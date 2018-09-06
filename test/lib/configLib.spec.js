@@ -89,42 +89,6 @@ describe('lib/config', () => {
     })
 
     it('should return lists of props available for each propIndex in a config', () => {
-        let configEx = {
-            matches: [
-                {
-                    properties: [
-                        { path: 'nobel:LaureateAward/nobel:category/*' },
-                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
-                        { path: 'nobel:LaureateAward/nobel:share/*' }
-                    ],
-                    selected: false
-                },
-                {
-                    properties: [
-                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
-                        { path: 'nobel:LaureateAward/nobel:category/*' },
-                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' }
-                    ],
-                    selected: true
-                },
-                {
-                    properties: [
-                        { path: 'nobel:LaureateAward/nobel:category/*' },
-                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
-                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' }
-                    ],
-                    selected: false
-                },
-                {
-                    properties: [
-                        { path: 'nobel:LaureateAward/nobel:category/*' },
-                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' },
-                        { path: 'nobel:LaureateAward/nobel:share/*' }
-                    ],
-                    selected: false
-                }
-            ]
-        }
         let prop1 = {
             path: 'nobel:LaureateAward/nobel:category/*',
             readablePath: [ { comment: undefined, label: 'nobel:category' } ]
@@ -141,11 +105,49 @@ describe('lib/config', () => {
             path: 'nobel:LaureateAward/nobel:share/*',
             readablePath: [ { 'comment': undefined, label: 'nobel:share' } ]
         }
+        let configEx = {
+            matches: [
+                {
+                    properties: [
+                        prop1,
+                        prop2,
+                        prop3
+                    ],
+                    selected: false
+                },
+                {
+                    properties: [
+                        prop2,
+                        prop1,
+                        prop3
+                    ],
+                    selected: true
+                },
+                {
+                    properties: [
+                        prop4,
+                        prop2,
+                        prop3
+                    ],
+                    selected: false
+                },
+                {
+                    properties: [
+                        prop1,
+                        prop3,
+                        prop4
+                    ],
+                    selected: false
+                }
+            ]
+        }
+        
         let propsLists = config.getPropsLists(configEx, 'main', { labels: [], prefixes: {} })
         expect(propsLists).to.deep.equal([
             [
                 { ...prop1, selected: false },
-                { ...prop2, selected: true }
+                { ...prop2, selected: true },
+                { ...prop4, selected: false }
             ],
             [
                 { ...prop2, selected: false },
@@ -153,8 +155,8 @@ describe('lib/config', () => {
                 { ...prop3, selected: false }
             ],
             [
-                { ...prop4, selected: false },
-                { ...prop3, selected: true }
+                { ...prop3, selected: true },
+                { ...prop4, selected: false }                
             ]
         ])
     })

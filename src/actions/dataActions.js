@@ -191,8 +191,9 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
 
 export const loadSelection = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
     // console.log('load Data ', dataset.constraints)
-    let { constraints, endpoint, entrypoint, prefixes, resourceGraph, stats } = dataset
-    let countInstancesQuery = `SELECT (COUNT(DISTINCT ?entrypoint) as ?total) FROM <${resourceGraph}> WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
+    let { constraints, endpoint, entrypoint, prefixes, graphs, resourceGraph, stats } = dataset
+    let graph =  resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+    let countInstancesQuery = `SELECT (COUNT(DISTINCT ?entrypoint) as ?total) ${graph} WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
     // console.log(countInstancesQuery)
     return getData(endpoint, countInstancesQuery, prefixes)
         .then(countInstances => {
@@ -290,7 +291,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
             if (resources[0].subgraph) {
                 dataset.entrypoint = resources[0].type
                 dataset.totalInstances = resources[0].total
-                dataset.resourceGraph = resources[0].type
+             
                 getStats({ ...dataset, stats: [], resources })
                     .then(stats => {
                         prefixes = stats.options.prefixes
@@ -319,7 +320,6 @@ export const loadResources = (dispatch) => (dataset, views) => {
                                         resources,
                                         stats,
                                         entrypoint: dataset.entrypoint,
-                                        resourceGraph: dataset.resourceGraph,
                                         totalInstances,
                                         prefixes: stats.options.prefixes,
                                         labels: stats.options.labels,
@@ -379,7 +379,6 @@ export const selectResource = (dispatch) => (dataset, views) => {
                         type: types.SET_STATS,
                         stats,
                         entrypoint,
-                        resourceGraph,
                         totalInstances,
                         prefixes: stats.options.prefixes,
                         labels: stats.options.labels,

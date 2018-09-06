@@ -28,8 +28,10 @@ class Header extends React.PureComponent {
                 if (resource.type === props.dataset.entrypoint) displayedResource = i
                 return {
                     total: resource.total,
-                    readablePath: [{ label: resource.label, comment: resource.comment }],
-                    path: resource.type, selected: resource.type === props.dataset.entrypoint
+                    label: resource.label,
+                    comment: resource.comment,
+                    path: resource.type, 
+                    selected: resource.type === props.dataset.entrypoint
                 }
             }),
             displayedResource,
@@ -67,7 +69,7 @@ class Header extends React.PureComponent {
         let selectedResource = dataset.resources[this.state.selectedResource]
         this.setState({ resourceIsLoading: true, errorSelection: '' })
         //console.log(selectedResource)
-        this.props.selectResource({ ...dataset, resourceGraph: selectedResource.type, entrypoint: selectedResource.type, totalInstances: selectedResource.total, constraints: `` }, views)
+        this.props.selectResource({ ...dataset, entrypoint: selectedResource.type, totalInstances: selectedResource.total, constraints: `` }, views)
             .then(res => this.setState({
                 resourceIsLoading: false,
                 displayedResource: this.state.selectedResource
@@ -189,7 +191,7 @@ class Header extends React.PureComponent {
                                 <div className = "control">
                                     <ReactSelect
                                         classNamePrefix = "propSelector"
-                                        placeholder = {this.state.resourceList[this.state.selectedResource].readablePath[0].label}
+                                        placeholder = {this.state.resourceList[this.state.selectedResource].label}
             
                                         value = { this.state.resourceList[this.state.selectedResource].value }
                                         onChange = {(selectedOption) => {
@@ -197,7 +199,7 @@ class Header extends React.PureComponent {
                                         }}
                                         options = {this.state.resourceList.map((resource, i) => {
                                             return {
-                                                label: `${resource.readablePath[0].label} (${resource.total})` ,
+                                                label: `${resource.label} (${resource.total})` ,
                                                 value: i
                                             }
                                         })}
@@ -219,11 +221,11 @@ class Header extends React.PureComponent {
                                         <span className = "button is-loading" ></span>
                                     }
                                 </div>
-                                { this.state.resourceList[this.state.selectedResource].readablePath[0].comment  && false &&
-                                <span title= { this.state.resourceList[this.state.selectedResource].readablePath[0].comment } style = {{ paddingLeft: '35px', backgroundColor: '#ffffff' }}>?</span>
+                                { this.state.resourceList[this.state.selectedResource].comment  && false &&
+                                <span title= { this.state.resourceList[this.state.selectedResource].comment } style = {{ paddingLeft: '35px', backgroundColor: '#ffffff' }}>?</span>
                                 }
-                                { this.state.resourceList[this.state.selectedResource].readablePath[0].comment  && 
-                                <span className= "resource-def">? <span className = "resource-content" style = {{ paddingTop: '5px', backgroundColor: '#ffffff' }}>{ this.state.resourceList[this.state.selectedResource].readablePath[0].comment }</span></span>
+                                { this.state.resourceList[this.state.selectedResource].comment  && 
+                                <span className= "resource-def">? <span className = "resource-content" style = {{ paddingTop: '5px', backgroundColor: '#ffffff' }}>{ this.state.resourceList[this.state.selectedResource].comment }</span></span>
                                 }
                             </div>
                             <div style = {{ width: barWidth + 'px' }}>
@@ -410,7 +412,7 @@ class Header extends React.PureComponent {
                                 marginLeft: display.viz.horizontal_margin + 'px'
                             }} >
                             <p>You are visualizing <strong>{ options[2].total } { pluralize('entity', options[2].total) } </strong>  
-                            belonging to the class of ressources <strong>{ this.state.resourceList[this.state.displayedResource].readablePath[0].label } </strong> 
+                            belonging to the class of ressources <strong>{ this.state.resourceList[this.state.displayedResource].label } </strong> 
                             according to <strong>{ config.constraints.length } property { pluralize('path', config.constraints.length) } </strong> 
                             traversing <strong>2 graphs</strong></p><span className = "resource-def">?
                                 <div className = "resource-content" style = {{ margin: '-55px 0 0 0' + 'px' }}>
@@ -420,8 +422,9 @@ class Header extends React.PureComponent {
                                         }) }
                                     </ul>
                                     { selectedProperties.map((prop, pi) => {
-                                        let readablePath = getReadablePathsParts(prop.path, dataset.labels, dataset.prefixes)
-                                        return (<div className = "path"  key = {`path_${zone}_${pi}`}>Path {(pi + 1)}: <span style = {{ borderBottom: `1px solid ${graphs[prop.triplesGraphs[0]]}` }}>{this.state.resourceList[this.state.displayedResource].readablePath[0].label} / </span> { readablePath.map((rp, rpi) => {
+                                        //let readablePath = getReadablePathsParts(prop.path, dataset.labels, dataset.prefixes)
+                                        let readablePath = prop.readablePath
+                                        return (<div className = "path"  key = {`path_${zone}_${pi}`}>Path {(pi + 1)}: <span style = {{ borderBottom: `1px solid ${graphs[prop.triplesGraphs[0]]}` }}>{this.state.resourceList[this.state.displayedResource].label} / </span> { readablePath.map((rp, rpi) => {
                                             return (<span 
                                                 className = "triple"
                                                 style = {{ 

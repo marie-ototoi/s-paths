@@ -140,7 +140,7 @@ export const getData = (endpoint, query, prefixes) => {
         .execute()
 }
 
-const getPropName = (uri) => {
+export const getPropName = (uri) => {
     const root = getRoot(uri)
     return uri.replace(root, '')
 }
@@ -202,18 +202,6 @@ export const makePropQuery = (prop, options, queryType) => {
     let limit = ``
     if (queryType === 'type') {
         props = `DISTINCT ?datatype ?language ?isiri ?isliteral ((?charlength) as ?avgcharlength) `
-        filterGraphs = 'FILTER('
-        for (let i = 1; i <= level; i++) {
-            props = props.concat(`?g${i} `)
-            for (let j = 0; j < resources.length; j++) {
-                filterGraphs = filterGraphs.concat(`?g${i} != <${resources[j].type}>`)
-                if (!(i === level && j === resources.length -1)) {
-                    filterGraphs = filterGraphs.concat(` && `)
-                } else {
-                    filterGraphs = filterGraphs.concat(`)`)
-                }
-            }
-        }
         bindProps = `BIND(DATATYPE(?object) AS ?datatype) .
         BIND(ISIRI(?object) AS ?isiri) .
         BIND(ISLITERAL(?object) AS ?isliteral) .

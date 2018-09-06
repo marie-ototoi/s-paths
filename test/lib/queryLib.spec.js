@@ -14,7 +14,7 @@ WHERE {
 
 
 }`)
-        expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*', category: 'text', level: 1 }, { constraints: '', graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'], resources: [{type: 'urn:geonames.test.fr'}, {type: 'urn:nobel.test.fr'}] }, 'type')).to.equal(`SELECT DISTINCT ?datatype ?language ?isiri ?isliteral ((?charlength) as ?avgcharlength) ?g1 
+        expect(queryLib.makePropQuery({ path: 'nobel:LaureateAward/nobel:year/*', category: 'text', level: 1 }, { constraints: '', graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'], resources: [{type: 'urn:geonames.test.fr'}, {type: 'urn:nobel.test.fr'}] }, 'type')).to.equal(`SELECT DISTINCT ?datatype ?language ?isiri ?isliteral ((?charlength) as ?avgcharlength) 
 WHERE {
 
 ?entrypoint rdf:type nobel:LaureateAward . GRAPH ?g1 { ?entrypoint nobel:year ?object . } FILTER (?object != ?entrypoint) . 
@@ -23,7 +23,7 @@ BIND(DATATYPE(?object) AS ?datatype) .
         BIND(ISLITERAL(?object) AS ?isliteral) .
         BIND(LANG(?object) AS ?language) .
         BIND(STRLEN(xsd:string(?object)) AS ?charlength) .
-FILTER(?g1 != <urn:geonames.test.fr> && ?g1 != <urn:nobel.test.fr>)
+
 } LIMIT 1`)
     })
     it('should write query to get total number of entities', () => {

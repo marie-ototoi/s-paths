@@ -24,15 +24,15 @@ class Settings extends React.PureComponent {
                 <div className = "box">
                     <div className = "content">
                         <div className = "field">
-                            <label className = "label">Graphs</label>
+                            <label className = "label"></label>
                             <div className ="control">
-                                to do
+                               
                             </div>
                         </div>
                         <div className = "field">
-                            <label className = "label">Max depth</label>
+                            <label className = "label"></label>
                             <div className ="control">
-                               to do
+                             
                             </div>
                         </div>
 
@@ -51,12 +51,10 @@ class Settings extends React.PureComponent {
                                 { dataset.resources.map((resource, ri) => {
                                     return (<tr key = { `resource_${zone}_${ri}` }>
                                         <td>{ resource.type }</td>
-                                        <td><a onClick = { e => this.props.analyseResources(dataset, [resource.type]) }>generate subgraph</a></td>
                                         <td><a onClick = { e => {
                                             this.props.loadStats({
                                                 ...dataset,
                                                 analyse: true,
-                                                resourceGraph: resource.type,
                                                 entrypoint: resource.type,
                                                 totalInstances: resource.total,
                                                 selectionInstances: resource.total

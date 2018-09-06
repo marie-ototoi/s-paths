@@ -130,7 +130,7 @@ class App extends React.PureComponent {
         // console.log('mode', mode)
         // console.log('display', display)
         // console.log('views', this.props.views)
-        // console.log('dataset', this.props.dataset.stats)
+        // console.log('dataset', this.props.dataset)
         // console.log('configs', configs)
         // console.log('data', data)
         // console.log('selections', selections)
