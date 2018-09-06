@@ -4,7 +4,7 @@ const initialState = {
     endpoint: process.env.ENDPOINT,
     localEndpoint: process.env.LOCAL_ENDPOINT,
     entrypoint: '',
-    graphs: ['http://data10.ilda.fr'],
+    graphs: ['http://nobel.ilda.fr', 'http://nobeladdon.ilda.fr'],
     resourceGraph: null,
     constraints: '',
     labels: [],
