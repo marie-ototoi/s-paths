@@ -8,7 +8,7 @@ import pluralize from 'pluralize'
 
 import { getConfigs, getCurrentConfigs, getPropsLists, getSelectedMatch, getSelectedView } from '../../lib/configLib'
 import { getDimensions } from '../../lib/scaleLib'
-import { getNbDisplayed, getReadablePathsParts } from '../../lib/dataLib'
+import { getNbDisplayed } from '../../lib/dataLib'
 import { getGraphsColors } from '../../lib/paletteLib'
 import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 
@@ -152,7 +152,10 @@ class Header extends React.PureComponent {
             graphs[graph] = colors[gi]
         })
 
-        //let 
+        let allgraphs = [...new Set(selectedProperties.reduce((acc, cur) => {
+            acc.push(...cur.graphs)
+            return acc
+        }, []))]
 
         // first line - resources
         let selectResourceEnabled = (this.state.selectedResource !== this.state.displayedResource) ?  {} : { 'disabled' : 'disabled' }
@@ -414,10 +417,10 @@ class Header extends React.PureComponent {
                             <p>You are visualizing <strong>{ options[2].total } { pluralize('entity', options[2].total) } </strong>  
                             belonging to the class of ressources <strong>{ this.state.resourceList[this.state.displayedResource].label } </strong> 
                             according to <strong>{ config.constraints.length } property { pluralize('path', config.constraints.length) } </strong> 
-                            traversing <strong>2 graphs</strong></p><span className = "resource-def">?
+                            traversing <strong>{ allgraphs.length } { pluralize('graph', allgraphs.length) }</strong></p><span className = "resource-def">?
                                 <div className = "resource-content" style = {{ margin: '-55px 0 0 0' + 'px' }}>
                                     <ul><span>Graphs: </span>  
-                                        { selectedProperties[0].graphs.map((graph, gi) => {
+                                        { allgraphs.map((graph, gi) => {
                                             return (<li style = {{ color: graphs[graph] }} key = {`graph_${zone}_${gi}`}>{graph}</li>)
                                         }) }
                                     </ul>

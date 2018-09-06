@@ -159,7 +159,7 @@ class App extends React.PureComponent {
         const coreDimensionsMain = getDimensions('core', display.zones['main'], display.viz)
         const coreDimensionsAside = getDimensions('core', display.zones['aside'], display.viz)
         // console.log( getResults(data, 'aside', 'active') )
-        console.log(getResults(data, 'main', 'transition'))
+        // console.log(getResults(data, 'main', 'transition'))
         // to do : avoid recalculate transition data at each render
         return (<div
             className = "view"

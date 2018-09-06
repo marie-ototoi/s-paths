@@ -1,9 +1,10 @@
 import * as d3 from 'd3'
 import AbstractLayout from './AbstractLayout'
+import { usePrefix } from '../lib/queryLib'
 
 class AxisLayout extends AbstractLayout {
     resize (props) {
-        const { axis, dimensions, selectElements, type } = props
+        const { axis, dimensions, dataset, selectElements, type } = props
         const { info, category } = axis
         let axeLength
         let tickV
@@ -45,7 +46,7 @@ class AxisLayout extends AbstractLayout {
         } else if (category === 'text' || category === 'uri') {
             scale.domain([0, info.length - 1])
             tickV = info.map((d, i) => i)
-            tickF = (d, i) => { return info[i].key }
+            tickF = (d, i) => { return (category === 'text') ? info[i].key : usePrefix(info[i].key, dataset.prefixes) }
         }
         //
         d3.select(this.el).selectAll(`.axis${type}`).remove()
