@@ -483,8 +483,8 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
     // let newConstraints = newOptions.constraints
     // newConstraints = newConstraints.replace('?', '?new')
     const { graphs, resourceGraph, constraints } = options
-    const graph = `FROM <${resourceGraph}> FROM <${newOptions.resourceGraph}>`
-    // const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+    //const graph = `FROM <${resourceGraph}> FROM <${newOptions.resourceGraph}>`
+    const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
     
     let propList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``
     let groupList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``

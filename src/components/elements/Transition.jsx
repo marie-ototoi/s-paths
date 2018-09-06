@@ -7,7 +7,7 @@ class Transition extends React.PureComponent {
     constructor (props) {
         super(props)
         this.customState = {
-            elementName: `${props.zone}_history`
+            elementName: `${props.zone}_transition`
         }
     }
     render () {

@@ -197,7 +197,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
     // console.log(countInstancesQuery)
     return getData(endpoint, countInstancesQuery, prefixes)
         .then(countInstances => {
-            console.log(countInstances)
+            // console.log(countInstances)
             return new Promise((resolve, reject) => {
                 let selectionInstances = Number(countInstances.results.bindings[0].total.value)
                 // console.log('selectionInstances', selectionInstances)
@@ -214,7 +214,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                 }
             }) 
                 .then(([newConfigs, newStats]) => {
-                    console.log('then ? ',newConfigs, newStats)
+                    // console.log('then ? ',newConfigs, newStats)
                     const previousConfigMain = getSelectedView(previousConfigs, 'main')
                     const previousConfigAside = getSelectedView(previousConfigs, 'aside')
                     const configMain = getSelectedView(newConfigs, 'main')
