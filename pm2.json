@@ -1,8 +1,0 @@
-{
-  "name": "semantic-paths",
-  "script": "app.js",
-  "instances": "1",
-   "env_production" : {
-    "NODE_ENV": "production"
-   }
-}
