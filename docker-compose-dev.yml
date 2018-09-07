@@ -10,7 +10,7 @@ services:
       - 8890:8890
       - 1111:1111
   mongo:
-    image: mongo:3.6
+    image: mongo
     env_file:
      - .env.dev
     ports:
