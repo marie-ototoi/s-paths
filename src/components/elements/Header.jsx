@@ -52,7 +52,7 @@ class Header extends React.PureComponent {
         this.state.selectedView = this.state.displayedView
     }
     handleKeyDown (e) {
-        const { dataset, selections, zone } = this.props
+        const { selections, zone } = this.props
         // console.log(e, this, selections)
         if (e === 'enter') {
             if (this.state.selectedResource !== this.state.displayedResource) {

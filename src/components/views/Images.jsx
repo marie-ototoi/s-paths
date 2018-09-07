@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import Header from '../elements/Header'
 import History from '../elements/History'
 import SelectionZone from '../elements/SelectionZone'
 // d3
@@ -54,7 +53,7 @@ class Images extends React.Component {
         return []
     }
     render () {
-        const { config, dimensions, display, data, role, selections, step, zone } = this.props
+        const { dimensions, display, data, role, selections, step, zone } = this.props
         const { uniqueData } = this.customState
        
         return (<g className = { `Images ${this.customState.elementName} role_${role}` } >

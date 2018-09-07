@@ -3,7 +3,6 @@ import React from 'react'
 import { connect } from 'react-redux'
 import * as d3 from 'd3'
 // components
-import Header from '../elements/Header'
 import History from '../elements/History'
 import Legend from '../elements/Legend'
 import PropSelector from '../elements/PropSelector'

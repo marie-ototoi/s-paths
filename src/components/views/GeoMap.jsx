@@ -31,7 +31,7 @@ class GeoMap extends React.Component {
     }
     render () {
         // console.log('salut GeoMap')
-        const { config, dimensions, display, role, selections, step, zone } = this.props
+        const { dimensions, display, role, selections, step, zone } = this.props
 
         return (<g className = { `GeoMap ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&

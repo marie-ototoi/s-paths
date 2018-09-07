@@ -3,7 +3,6 @@ import React from 'react'
 import formatMessage from 'format-message'
 import { connect } from 'react-redux'
 // components
-import Header from '../elements/Header'
 import History from '../elements/History'
 import SelectionZone from '../elements/SelectionZone'
 // d3
@@ -60,7 +59,7 @@ class ListAllProps extends React.Component {
         return []
     }
     render () {
-        const { config, dimensions, display, role, selections, step, zone } = this.props
+        const { dimensions, display, role, selections, step, zone } = this.props
        
         return (<g className = { `ListProp ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&

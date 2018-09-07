@@ -188,7 +188,7 @@ export const makePath = (prop, previousProp, level, options) => {
 
 export const makePropQuery = (prop, options, queryType) => {
     // queryType: count, type, char
-    const { constraints, graphs, resourceGraph, resources } = options
+    const { constraints, graphs, resourceGraph } = options
     const { path, level } = prop
     // const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
     let graph = ''
