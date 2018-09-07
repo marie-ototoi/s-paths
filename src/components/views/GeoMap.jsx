@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import Header from '../elements/Header'
 import History from '../elements/History'
 import SelectionZone from '../elements/SelectionZone'
 // d3
@@ -13,11 +12,10 @@ import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 // redux functions
 // import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
-import ReactMapboxGl, { GeoJSONLayer, Layer, ZoomControl } from "react-mapbox-gl"
+import ReactMapboxGl, { GeoJSONLayer, Layer, ZoomControl } from 'react-mapbox-gl'
 
 const Map = ReactMapboxGl({
     accessToken: "pk.eyJ1IjoibWFyaWVkZXN0YW5kYXUiLCJhIjoiY2ppb2E2Y3hlMG5xMzNrbzI3Ynk0MDlmaSJ9.XmflFu2QUBjFDVVWAKFBKQ",
-    renderWorldCopies: false,
     dragRotate: false
 })
 
@@ -50,16 +48,20 @@ class GeoMap extends React.Component {
                 transform = { `translate(${dimensions.x}, ${dimensions.y})` }
                 width = { dimensions.width }
                 height = { dimensions.height }
-                onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
-                onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
-                onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
+                // TODO: These event handlers need another layer to perform mouse selection over the map
+                // onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
+                // onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
+                // onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             >
                 <Map
                     style = "mapbox://styles/mapbox/light-v9"
                     containerStyle = {{
                         height: '100%',
                         width: '100%' 
-                    }}>
+                    }}
+                    center={[0, 40]}
+                    zoom={[1.2]}
+                >
                    
                     <GeoJSONLayer
                         id='source_id'
@@ -132,13 +134,8 @@ class GeoMap extends React.Component {
                 </Map>
             </foreignObject>
             }
-            { role !== 'target' &&
+            { role !== 'target' && step !== 'changing' &&
             <g>
-                <Header
-                    zone = { zone }
-                    config = { config }
-                    propsLists = { [] }
-                />
                 <History
                     zone = { zone }
                 />

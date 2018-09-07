@@ -189,16 +189,16 @@ export const getLegend = (nestedProps, propName, colors, category) => {
     }
 }
 
-export const getReadablePathsParts = (path, labels, prefixes) => {
+export const getReadablePathsParts = (path, fullPath, labelsDic, prefixes) => {
     const parts = path.split('/')
     // if (!labels) return parts.map(part => { return { label: part } })
     return parts
         .filter((part, index) => index !== 0 && part !== '*')
         .map(part => {
-            let prop = labels.filter(l => l.uri === queryLib.useFullUri(part, prefixes))
+            let prop = labelsDic[fullPath]
             return {
-                label: (prop[0] && prop[0].label) ? prop[0].label : part,
-                comment: (prop[0] && prop[0].comment) ? prop[0].comment : undefined
+                label: (prop) ? prop.label : part,
+                comment: (prop) ? prop.comment : undefined
             }
         })
 }
@@ -380,7 +380,7 @@ export const prepareDetailData = (data, dataset) => {
                 } else {
                     let newItem = cur
                     newItem.path = queryLib.convertPath(fullPath, prefixes)
-                    newItem.readablePath = getReadablePathsParts(newItem.path, labels, prefixes)
+                    // newItem.readablePath = getReadablePathsParts(newItem.path, labels, prefixes)
                     newItem.fullPath = fullPath
                     newItem[`prop${i}`] = Array.isArray(newItem[`prop${i}`]) ? newItem[`prop${i}`] : [newItem[`prop${i}`]]
                     newItem[`prop${i}`] = newItem[`prop${i}`].map(v => {

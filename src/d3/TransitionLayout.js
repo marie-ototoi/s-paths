@@ -5,8 +5,8 @@ class TransitionLayout extends AbstractLayout {
     draw (props) {
         this.drawShapes(props, props.elements.origin, 'origin')
         this.drawShapes(props, props.elements.target, 'target')
-        // console.log('draw B', targetRectangles)
-        // console.log('meoui', originRectangles)
+        // console.log('draw B', props.elements.origin)
+        // console.log('meoui',  props.elements.target)
     }
     drawShapes (props, shapes, type) {
         // console.log(`|||||drawRectangles`, props.zone, type)

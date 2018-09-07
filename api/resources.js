@@ -1,5 +1,4 @@
 import express from 'express'
-import pathModel from '../models/path'
 import resourceModel from '../models/resource'
 import { getLabels } from '../src/lib/labelLib'
 import * as queryLib from '../src/lib/queryLib'
@@ -24,24 +23,33 @@ router.post('/', (req, res) => {
     }
 })
 
-const getResources = async (opt) => {
+const getResources = async (options) => {
     // add default options when not set
-    let options = opt
-    let { graphs, endpoint, localEndpoint, forceUpdate } = options
-    
-    if (forceUpdate) {
-        let toDelete = await resourceModel.find({ endpoint, graphs: { $all: graphs } }).exec()
-        for(let i = 0; i < toDelete.length; i ++) {
-            queryLib.getData(localEndpoint, `DROP SILENT GRAPH <${toDelete[i]._doc.type}>`, {})
-            queryLib.getData(localEndpoint, `CREATE GRAPH <${toDelete[i]._doc.type}>`, {})
-            await new Promise((resolve, reject) => setTimeout(resolve, 200))
+    let { graphs, endpoint, localEndpoint, toAnalyse } = options
+    if (Array.isArray(toAnalyse) && toAnalyse.length > 0) {
+        for(let i = 0; i < toAnalyse.length; i ++) {
+            queryLib.getData(localEndpoint, `DROP SILENT GRAPH <${toAnalyse[i]}>`, {})
+            console.log(`DROP SILENT GRAPH <${toAnalyse[i]}>`)
+            await new Promise((resolve, reject) => setTimeout(resolve, 100))
+            queryLib.getData(localEndpoint, `CREATE GRAPH <${toAnalyse[i]}>`, {})
+            console.log(`CREATE GRAPH <${toAnalyse[i]}>`)
+            await new Promise((resolve, reject) => setTimeout(resolve, 100))
+            for(let j = 1; j < options.maxLevel; j ++) {
+                let query = queryLib.makeSubGraphQuery({
+                    ...options,
+                    entrypoint: toAnalyse[i]
+                }, j)
+                console.log(query)
+                queryLib.getData(localEndpoint, query, {})
+                await new Promise((resolve, reject) => setTimeout(resolve, 2000))
+            }
+            resourceModel.updateOne({ endpoint, graphs: { $all: graphs }, type: toAnalyse[i] }, { subgraph: true }, { upsert: true }).exec()
+            await new Promise((resolve, reject) => setTimeout(resolve, 5000))
         }
-        await pathModel.deleteMany({ endpoint, graphs: { $all: graphs } }).exec()
-        await resourceModel.deleteMany({ endpoint, graphs: { $all: graphs } }).exec()
     }
 
     let resources = await resourceModel.find({ endpoint: endpoint, graphs: { $all: graphs } }).sort('-total').exec()
-    console.log('GET RESOURCES', resources)
+    console.log('GET RESOURCES', endpoint, graphs, resources)
     if (resources.length > 0) {
         resources = resources.map(resource => resource._doc)
     } else {
@@ -53,24 +61,6 @@ const getResources = async (opt) => {
         })
         console.log(resources)
         await resourceModel.createOrUpdate(resources) 
-        for(let i = 0; i < resources.length; i ++) {
-            console.log(`CREATE GRAPH <${resources[i].type}>`)
-            queryLib.getData(localEndpoint, `CREATE GRAPH <${resources[i].type}>`, {})
-            await new Promise((resolve, reject) => setTimeout(resolve, 200))
-        }
-        for(let i = 0; i < resources.length; i ++) {
-            for(let j = 1; j < options.maxLevel; j ++) {
-                let query = queryLib.makeSubGraphQuery({
-                    ...options,
-                    entrypoint: resources[i].type,
-                    resourceGraph: resources[i].type,
-                }, j)
-                console.log(query)
-                queryLib.getData(localEndpoint, query, {})
-                await new Promise((resolve, reject) => setTimeout(resolve, 2000))
-            }
-            await new Promise((resolve, reject) => setTimeout(resolve, 5000))
-        }
     }
     let labels = await getLabels(resources.map(resource => {
         return { uri: resource.type }

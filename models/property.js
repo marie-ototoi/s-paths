@@ -14,7 +14,7 @@ propertySchema.statics = {
         // console.log('youhou', properties)
         let allPromises = properties.map(prop => {
             if (prop.label) {
-                return this.update(
+                return this.updateOne(
                     {
                         property: prop.uri
                     },
@@ -33,7 +33,7 @@ propertySchema.statics = {
                     { upsert: true }
                 ).exec()
             } else {
-                return this.update(
+                return this.updateOne(
                     {
                         property: prop.uri
                     },

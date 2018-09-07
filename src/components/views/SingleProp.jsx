@@ -99,13 +99,8 @@ class SingleProp extends React.Component {
                 </div>
             </foreignObject>
             }
-            { role !== 'target' &&
+            { role !== 'target' && step !== 'changing' &&
             <g>
-                <Header
-                    zone = { zone }
-                    config = { config }
-                    propsLists = { [] }
-                />
                 <History
                     zone = { zone }
                 />

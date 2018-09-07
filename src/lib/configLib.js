@@ -247,7 +247,8 @@ export const getPropsLists = (configs, zone, dataset) => {
             .map(config => {
                 return {
                     path: config.properties[propIndex].path,
-                    readablePath: dataLib.getReadablePathsParts(config.properties[propIndex].path, labels, prefixes),
+                    readablePath: config.properties[propIndex].readablePath,
+                    // readablePath: dataLib.getReadablePathsParts(config.properties[propIndex].path, labels, prefixes),
                     selected: config.selected
                 }
             }).reduce((configAcc, config) => {

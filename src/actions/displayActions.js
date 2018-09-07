@@ -26,3 +26,10 @@ export const hideDetail = (dispatch) => (zone) => {
         zone
     })
 }
+
+export const showSettings = (dispatch) => (zone) => {
+    dispatch({
+        type: types.SHOW_SETTINGS,
+        zone
+    })
+}

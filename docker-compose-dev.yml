@@ -5,7 +5,7 @@ services:
     volumes:
       - db-virtuoso:/opt/virtuoso-opensource/database
       #- db-virtuosobnf:/opt/virtuoso-opensource/database
-      - ./dump:/opt/virtuoso-opensource/vad
+      #- ./dump:/opt/virtuoso-opensource/vad
     ports:
       - 8890:8890
       - 1111:1111

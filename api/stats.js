@@ -1,6 +1,7 @@
 import express from 'express'
 import pathModel from '../models/path'
 
+import { getReadablePathsParts } from '../src/lib/dataLib'
 import { getPropsLabels } from '../src/lib/labelLib'
 import * as queryLib from '../src/lib/queryLib'
 
@@ -25,11 +26,9 @@ router.post('/', (req, res) => {
 
 const getAllStats = async (options) => {
     // console.log('oy', options)
-    let { forceUpdate, prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
+    let { analyse, prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
     let selectionInstances
-    if (forceUpdate) {
-        await pathModel.deleteMany({ endpoint, graphs: { $all: graphs } }).exec()
-    }
+    
     // add prefix to entrypoint if full url
     if (!queryLib.usesPrefix(entrypoint, prefixes)) {
         if (!queryLib.prefixDefined(entrypoint)) {
@@ -37,13 +36,16 @@ const getAllStats = async (options) => {
         }
         entrypoint = queryLib.usePrefix(entrypoint, prefixes)
     }
+    if (analyse) {
+        await pathModel.deleteMany({ endpoint, graphs: { $all: graphs }, entrypoint: queryLib.useFullUri(entrypoint, prefixes) }).exec()
+    }
     // number of entities of the set of entrypoint class limited by given constraints
     let selectionQuery = queryLib.makeTotalQuery(entrypoint, options)
     //
     if (options.constraints === '') {
         selectionInstances = totalInstances
     } else {
-        let selectioncount = await queryLib.getData(localEndpoint, selectionQuery, prefixes).catch(e => console.error('Error retrieving number of selected instances', e))
+        let selectioncount = await queryLib.getData(localEndpoint, selectionQuery, prefixes).catch(e => console.error('Error retrieving number of selected instances', selectionQuery, e))
         selectionInstances = Number(selectioncount.results.bindings[0].total.value)
     }
     if (selectionInstances === 0) {
@@ -72,13 +74,21 @@ const getAllStats = async (options) => {
         // get human readable rdfs:labels and rdfs:comments of all properties listed
         let newlabels = await getPropsLabels(paths.options.prefixes, paths.statements)
 
+        let labelsDic = {}
+        let allLabels = [...labels, ...newlabels]
+        allLabels.forEach(lab => {
+            labelsDic[lab.uri] = { label: lab.label, comment: lab.comment }
+        })
+        console.log(labelsDic)
         return {
-            statements: paths.statements.sort((a, b) => a.level - b.level),
+            statements: paths.statements
+                .map(stat => { return { ...stat, readablePath: getReadablePathsParts(stat.path, stat.fullPath, labelsDic, paths.options.prefixes ) } })
+                .sort((a, b) => a.level - b.level),
             totalInstances,
             selectionInstances,
             options: {
                 ...paths.options,
-                labels: [...labels, ...newlabels]
+                labels: allLabels
             }
         }
     }
@@ -105,7 +115,7 @@ const getMaxRequest = (parentQuantities) => {
 }
 
 const getProps = async (categorizedProps, level, options, instances) => {
-    let { constraints, graphs, entrypoint, endpoint, localEndpoint, prefixes, maxLevel } = options
+    let { analyse, constraints, graphs, entrypoint, endpoint, localEndpoint, prefixes, maxLevel } = options
     let { totalInstances, selectionInstances } = instances
     let maxRequests = getMaxRequest(totalInstances)
     let newCategorizedProps = []
@@ -125,7 +135,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
             }
         })
         // keep only those whose parents count > 0
-    } else {
+    } else if (analyse) {
         const queriedProps = categorizedProps.filter(prop => {
             // console.log(prop.total)
             return (prop.level === level - 1 &&

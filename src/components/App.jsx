@@ -4,7 +4,9 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 // components
+import Settings from './elements/Settings'
 import GeoMap from './views/GeoMap'
+import Header from './elements/Header'
 import HeatMap from './views/HeatMap'
 import Images from './views/Images'
 import ListAllProps from './views/ListAllProps'
@@ -128,7 +130,7 @@ class App extends React.PureComponent {
         // console.log('mode', mode)
         // console.log('display', display)
         // console.log('views', this.props.views)
-        // console.log('dataset', this.props.dataset.stats)
+        // console.log('dataset', this.props.dataset)
         // console.log('configs', configs)
         // console.log('data', data)
         // console.log('selections', selections)
@@ -157,7 +159,7 @@ class App extends React.PureComponent {
         const coreDimensionsMain = getDimensions('core', display.zones['main'], display.viz)
         const coreDimensionsAside = getDimensions('core', display.zones['aside'], display.viz)
         // console.log( getResults(data, 'aside', 'active') )
-        // console.log( this.state.main_step)
+        // console.log(getResults(data, 'main', 'transition'))
         // to do : avoid recalculate transition data at each render
         return (<div
             className = "view"
@@ -170,7 +172,6 @@ class App extends React.PureComponent {
                 viewBox = { `${display.viewBox.x}, ${display.viewBox.y}, ${display.viewBox.width}, ${display.viewBox.height}` }
                 preserveAspectRatio = "xMinYMin meet"
             >
-
                 { mode === 'dev' &&
                     <Debug />
                 }
@@ -188,14 +189,7 @@ class App extends React.PureComponent {
                         handleTransition = { this.handleTransition }
                     />
                 }
-                { mainConfig && this.state.main_step === 'changing' &&
-                    <Transition
-                        zone = "main"
-                        dimensions = { coreDimensionsMain }
-                        elements = { this.state.main_transition }
-                        endTransition = { this.handleEndTransition }
-                    />
-                }
+                
                 { mainConfig && areLoaded(data, 'main', 'active') &&
                     <MainComponent
                         role = "origin"
@@ -214,6 +208,25 @@ class App extends React.PureComponent {
                         handleTransition = { this.handleTransition }
                     />
                 }
+                { mainConfig && this.state.main_step === 'changing' &&
+                    <Transition
+                        zone = "main"
+                        dimensions = { coreDimensionsMain }
+                        elements = { this.state.main_transition }
+                        endTransition = { this.handleEndTransition }
+                    />
+                }
+                { mainConfig &&
+                    <Header
+                        zone = "main"
+                        config = { mainConfig }
+                    />
+                }
+                { (!mainConfig || display.settingsOpen.main) &&
+                    <Settings
+                        dimensions = { getDimensions('settings', display.zones['main'], display.viz) }
+                    />
+                }
                 { asideConfig && this.state.aside_step === 'launch' &&
                     <SideTransitionComponent
                         role = "target"
@@ -226,14 +239,6 @@ class App extends React.PureComponent {
                         selections = { selectionLib.getSelections(selections, 'aside', 'transition') }
                         ref = {(c) => { this.refAsideTransition = c }}
                         handleTransition = { this.handleTransition }
-                    />
-                }
-                { asideConfig && this.state.aside_step === 'changing' &&
-                    <Transition
-                        zone = "aside"
-                        dimensions = { coreDimensionsAside }
-                        elements = { this.state.aside_transition }
-                        endTransition = { this.handleEndTransition }
                     />
                 }
                 { asideConfig && areLoaded(data, 'aside', 'active') &&
@@ -252,6 +257,20 @@ class App extends React.PureComponent {
                         handleMouseMove = { this.handleMouseMove }
                         handleMouseUp = { this.handleMouseUp }
                         handleTransition = { this.handleTransition }
+                    />
+                }
+                { asideConfig && this.state.aside_step === 'changing' &&
+                    <Transition
+                        zone = "aside"
+                        dimensions = { coreDimensionsAside }
+                        elements = { this.state.aside_transition }
+                        endTransition = { this.handleEndTransition }
+                    />
+                }
+                { asideConfig &&
+                    <Header
+                        zone = "aside"
+                        config = { asideConfig }
                     />
                 }
             </svg>

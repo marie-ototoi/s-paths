@@ -1,7 +1,7 @@
 import fetch from 'rdf-fetch'
 import rdflib from 'rdflib'
 import propertyModel from '../../models/property'
-import { ignorePromise, useFullUri } from './queryLib'
+import { getPropName, ignorePromise, useFullUri } from './queryLib'
 
 export const getPropsLabels = async (prefixes, props) => {
     // find all classes and props used in paths
@@ -38,7 +38,7 @@ export const getLabels = async (urisToLabel, prefixes) => {
         if (prop) {
             if (prop.label && prop.label !== '') {
                 urisToLabel[index].label = prop.label
-            } else if (prop.loadAttempts > 10 && new Date(prop.modifiedAt) > limitDate) {
+            } else if (prop.loadAttempts > 3 && new Date(prop.modifiedAt) > limitDate) {
                 urisToLabel[index].label = prop.property
             }
             urisToLabel[index].comment = prop.comment
@@ -58,7 +58,7 @@ export const getLabels = async (urisToLabel, prefixes) => {
             if (missing.length > 0) {
                 return missing[0]
             } else {
-                return { ...prop, label: prop.uri }
+                return { ...prop, label: getPropName(prop.uri) }
             }
         }
     })

@@ -76,12 +76,21 @@ const defaultState = {
     detail: {
         main: false,
         aside: false
+    },
+    settingsOpen: {
+        main: false,
+        aside: false
+    },
+    backOpen: {
+        main: false,
+        aside: false
     }
 }
 
 const display = (state = defaultState, action) => {
     // console.log(action, state)
     let newZone
+    let newSettings
     switch (action.type) {
     case types.SET_DISPLAY:
         return {
@@ -93,6 +102,13 @@ const display = (state = defaultState, action) => {
             grid: action.grid || state.grid,
             zones: action.zones || state.zones,
             viz: action.viz || state.viz
+        }
+    case types.SHOW_SETTINGS:
+        newSettings = state.settingsOpen
+        newSettings[action.zone] = !newSettings[action.zone]
+        return {
+            ...state,
+            settingsOpen: newSettings
         }
     case types.START_SELECTED_ZONE:
         newZone = { ...state.selectedZone }

@@ -67,7 +67,7 @@ class Images extends React.Component {
                 selections = { selections }
             />
             }
-            { step !== 'changing' && data &&
+            { step !== 'changing' && data && 
             <foreignObject
                 transform = { `translate(${dimensions.x}, ${dimensions.y})` }
                 with = { dimensions.width }
@@ -87,13 +87,8 @@ class Images extends React.Component {
                 </div>
             </foreignObject>
             }
-            { role !== 'target' &&
+            { role !== 'target' && step !== 'changing' &&
             <g>
-                <Header
-                    zone = { zone }
-                    config = { config }
-                    propsLists = { [] }
-                />
                 <History
                     zone = { zone }
                 />

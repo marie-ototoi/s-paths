@@ -140,7 +140,7 @@ export const getData = (endpoint, query, prefixes) => {
         .execute()
 }
 
-const getPropName = (uri) => {
+export const getPropName = (uri) => {
     const root = getRoot(uri)
     return uri.replace(root, '')
 }
@@ -202,17 +202,8 @@ export const makePropQuery = (prop, options, queryType) => {
     let limit = ``
     if (queryType === 'type') {
         props = `DISTINCT ?datatype ?language ?isiri ?isliteral ((?charlength) as ?avgcharlength) `
-        filterGraphs = 'FILTER('
         for (let i = 1; i <= level; i++) {
             props = props.concat(`?g${i} `)
-            for (let j = 0; j < resources.length; j++) {
-                filterGraphs = filterGraphs.concat(`?g${i} != <${resources[j].type}>`)
-                if (!(i === level && j === resources.length -1)) {
-                    filterGraphs = filterGraphs.concat(` && `)
-                } else {
-                    filterGraphs = filterGraphs.concat(`)`)
-                }
-            }
         }
         bindProps = `BIND(DATATYPE(?object) AS ?datatype) .
         BIND(ISIRI(?object) AS ?isiri) .
@@ -492,8 +483,8 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
     // let newConstraints = newOptions.constraints
     // newConstraints = newConstraints.replace('?', '?new')
     const { graphs, resourceGraph, constraints } = options
-    const graph = `FROM <${resourceGraph}> FROM <${newOptions.resourceGraph}>`
-    // const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+    //const graph = `FROM <${resourceGraph}> FROM <${newOptions.resourceGraph}>`
+    const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
     
     let propList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``
     let groupList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``

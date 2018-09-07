@@ -96,13 +96,8 @@ class HeatMap extends React.Component {
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             ></g>
             }
-            { role !== 'target' &&
+            { role !== 'target' && step !== 'changing' &&
             <g>
-                <Header
-                    zone = { zone }
-                    config = { config }                    
-                    propsLists = { this.customState.propsLists }
-                />
                 <Legend
                     type = "plain"
                     zone = { zone }
