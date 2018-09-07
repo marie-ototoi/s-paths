@@ -3,7 +3,6 @@ import resourceModel from '../models/resource'
 import { getLabels } from '../src/lib/labelLib'
 import * as queryLib from '../src/lib/queryLib'
 import * as dataLib from '../src/lib/dataLib'
-// import { error } from 'util';
 
 const router = express.Router()
 
