@@ -6,11 +6,11 @@
   "main": "app.js",
   "scripts": {
     "build": "webpack --config webpack.prod.js --progress --hide-modules",
-    "start": "babel-node app --presets @babel/env",
+    "start": "babel-node app --presets env",
     "start:debug": "npm run start -- --inspect",
     "start:debug-docker": "npm run start -- --inspect-brk=0.0.0.0:9229",
     "lint": "eslint --ext .js,.jsx src api models app.js webpack.*.js",
-    "test": "NODE_ENV=test mocha --require @babel/register test/**/*.js --reporter spec",
+    "test": "NODE_ENV=test mocha --require babel-register test/**/*.js --reporter spec",
     "coverage": "nyc npm test"
   },
   "engines": {
@@ -25,28 +25,14 @@
     "url": "https://gitlab.inria.fr/mdestand/semantic-paths/issues"
   },
   "dependencies": {
-    "@babel/cli": "^7.0.0",
-    "@babel/core": "^7.0.0",
-    "@babel/plugin-proposal-class-properties": "^7.0.0",
-    "@babel/plugin-proposal-decorators": "^7.0.0",
-    "@babel/plugin-proposal-do-expressions": "^7.0.0",
-    "@babel/plugin-proposal-export-default-from": "^7.0.0",
-    "@babel/plugin-proposal-export-namespace-from": "^7.0.0",
-    "@babel/plugin-proposal-function-sent": "^7.0.0",
-    "@babel/plugin-proposal-json-strings": "^7.0.0",
-    "@babel/plugin-proposal-logical-assignment-operators": "^7.0.0",
-    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.0.0",
-    "@babel/plugin-proposal-numeric-separator": "^7.0.0",
-    "@babel/plugin-proposal-object-rest-spread": "^7.0.0",
-    "@babel/plugin-proposal-optional-chaining": "^7.0.0",
-    "@babel/plugin-proposal-pipeline-operator": "^7.0.0",
-    "@babel/plugin-proposal-throw-expressions": "^7.0.0",
-    "@babel/plugin-syntax-dynamic-import": "^7.0.0",
-    "@babel/plugin-syntax-import-meta": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
-    "@babel/preset-react": "^7.0.0",
-    "babel-eslint": "^9.0.0",
-    "babel-loader": "^8.0.0",
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.6",
+    "babel-loader": "^7.1.5",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
+    "babel-preset-stage-1": "^6.24.1",
     "body-parser": "^1.18.3",
     "bulma": "^0.7.1",
     "chai": "^4.1.2",
@@ -120,7 +106,5 @@
     "webpack-merge": "^4.1.3"
   },
   "homepage": "https://gitlab.inria.fr/mdestand/semantic-paths/blob/master/readme.md",
-  "devDependencies": {
-    "@babel/node": "^7.0.0"
-  }
+  "devDependencies": {}
 }
