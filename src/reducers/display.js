@@ -80,10 +80,6 @@ const defaultState = {
     settingsOpen: {
         main: false,
         aside: false
-    },
-    backOpen: {
-        main: false,
-        aside: false
     }
 }
 
