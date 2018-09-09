@@ -11,7 +11,7 @@ export const endTransition = (dispatch) => (zone) => {
 }
 
 export const loadStats = (dispatch) => (dataset) => {
-    getStats(dataset)
+    getStats({ ...dataset, constraints: '' })
 }
 
 const getStats = (options) => {
