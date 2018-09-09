@@ -7,3 +7,5 @@ db/
 .nyc_output/
 .vscode/
 package-lock.json
+.babelignore
+dump/

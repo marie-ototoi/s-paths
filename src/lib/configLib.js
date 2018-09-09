@@ -1,5 +1,4 @@
 import * as d3 from 'd3'
-import * as dataLib from './dataLib'
 
 export const getSelectedMatch = (config) => {
     return config.matches.filter(m => m.selected === true)[0]
@@ -239,7 +238,7 @@ export const activateDefaultConfigs = (configs) => {
     })
 }
 export const getPropsLists = (configs, zone, dataset) => {
-    const { labels, prefixes } = dataset
+    // const { labels, prefixes } = dataset
     const maxPropIndex = d3.max(configs.matches.map(m => m.properties.length))
     return Array.from(Array(maxPropIndex).keys()).map(propIndex => {
         return configs.matches

@@ -1,5 +1,4 @@
-FROM node:9.11.2-jessie
-
+FROM node
 
 ARG http_proxy
 ARG https_proxy

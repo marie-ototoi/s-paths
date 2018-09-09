@@ -345,7 +345,7 @@ export const prepareGeoData = (data, dataset) => {
 
 export const prepareDetailData = (data, dataset) => {
     // console.log('prepare only once', data.length)
-    let { entrypoint, labels, prefixes } = dataset
+    let { entrypoint, prefixes } = dataset
     let newData = []
     newData.push(d3.nest().key(prop => prop.entrypoint.value).entries(data).map(prop => prop.key))
     let maxLevel = Number(data.sort((a, b) => Number(b.level.value) - Number(a.level.value))[0].level.value)

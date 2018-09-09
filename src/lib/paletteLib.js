@@ -37,7 +37,6 @@ export const selectColorsInPalette = (colors, length) => {
 // create a patern equivalent to the string parameter (ex:lines) with the specified color,
 // add it to the element 'el' and then return the url (ex: attr('fill', url))
 export const colorPattern = (el, pattern, color) => {
-    const stringify = require('virtual-dom-stringify')
     let resultPattern
     let patternLib
     switch (pattern) {
@@ -158,7 +157,8 @@ export const colorPattern = (el, pattern, color) => {
             size: 20
         })
     }
-    el.append('defs').html(stringify(resultPattern))
+    const toHTML = require('vdom-to-html')
+    el.append('defs').html(toHTML(resultPattern))
     return resultPattern.url()
 }
 

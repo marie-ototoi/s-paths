@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import Header from '../elements/Header'
 import History from '../elements/History'
 import Legend from '../elements/Legend'
 import Axis from '../elements/Axis'
@@ -76,7 +75,7 @@ class HeatMap extends React.Component {
     }
     render () {
         const { axisBottom, axisLeft, legend } = this.customState
-        const { config, data, display, dimensions, role, selections, step, zone } = this.props
+        const { config, display, dimensions, role, selections, step, zone } = this.props
         return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` }>
             { role !== 'target' &&
             <SelectionZone

@@ -352,7 +352,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
 }
 
 export const selectResource = (dispatch) => (dataset, views) => {
-    let { constraints, endpoint, entrypoint, prefixes, resourceGraph, totalInstances } = dataset
+    let { constraints, endpoint, entrypoint, prefixes, totalInstances } = dataset
     return getStats({ ...dataset, stats: [] })
         .then(stats => {
             prefixes = stats.options.prefixes

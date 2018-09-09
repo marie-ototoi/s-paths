@@ -6,13 +6,15 @@ stages:
   - deploy
   
 services:
- - docker:dind
+  - docker:dind
 
 # Environment templates
 # -> Describe common environments to run stages
 
 .node: &node
-  image: node:9
+  image: node
+  tags:
+    - node
   before_script:
     - npm install
   script: npm run $CI_JOB_STAGE
@@ -22,15 +24,35 @@ services:
     paths:
       - node_modules/
 
+.docker-deploy: &docker-deploy
+  stage: deploy
+  image: docker
+  tags:
+    - docker
+  script:
+    - mkdir -pv ~/.docker
+    - echo "$TLSCACERT" > ~/.docker/ca.pem
+    - echo "$TLSCERT" > ~/.docker/cert.pem
+    - echo "$TLSKEY" > ~/.docker/key.pem
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
+    - docker stack deploy --compose-file docker-compose.yml --with-registry-auth semanticStack
+    # - docker service update  --with-registry-auth semanticStack_semanticpaths
+
 # Test stage
+#
+
 UT:
   <<: *node
-  tags:
-   - test
   stage: test
 
 # Build stage
-build_semantic-paths:
+#
+
+Assets:
+  <<: *node
+  stage: build
+
+Docker:
   tags:
    - docker
   stage: build
@@ -43,23 +65,26 @@ build_semantic-paths:
 
 
 # Deploy stage
-deploy_semantic-paths:
-  tags:
-   - docker
-  stage: deploy
+# -> Automate deployment and provide continuous deployment
+
+Staging:
+  <<: *docker-deploy
   variables:
     DOCKER_TLS_VERIFY: 1
     DOCKER_HOST: tcp://129.175.22.62:2376
     DOCKER_MACHINE_NAME: default
-  image: docker:latest
-  script:
-    - mkdir -pv ~/.docker
-    - echo "$TLSCACERT" > ~/.docker/ca.pem
-    - echo "$TLSCERT" > ~/.docker/cert.pem
-    - echo "$TLSKEY" > ~/.docker/key.pem
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
-    - docker stack deploy --compose-file docker-compose.yml --with-registry-auth semanticStack
-    # - docker service update  --with-registry-auth semanticStack_semanticpaths
   only:
     - master
   when: manual
+  environment:
+    name: Staging
+    url: http://semantic-paths.lri.fr
+
+#Production:
+#  <<: *docker-deploy
+#  variables:
+#    DOCKER_TLS_VERIFY: 1
+#    DOCKER_HOST:
+#    DOCKER_MACHINE_NAME: default
+#  only:
+#    - tags

@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import Header from '../elements/Header'
 import History from '../elements/History'
 import Legend from '../elements/Legend'
 import SelectionZone from '../elements/SelectionZone'
@@ -63,8 +62,8 @@ class URIWheel extends React.Component {
         selectElements(elements, zone, selections)
     }
     render () {
-        const { legend, propsLists } = this.customState
-        const { config, dimensions, display, role, selections, step, zone } = this.props
+        const { legend } = this.customState
+        const { dimensions, display, role, selections, step, zone } = this.props
         return (<g className = { `URIWheel ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&
             <SelectionZone
