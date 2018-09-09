@@ -28,7 +28,7 @@ if (process.env.NODE_ENV === 'development') {
     const compiler = require('webpack')(config);
     const {publicPath} = config.output;
     // console.log(publicPath)
-    require('webpack-hot-client')(compiler, { host: '0.0.0.0' });
+    require('webpack-hot-client')(compiler, { host: '0.0.0.0', port: { client: 8081, server: 8081 } });
     app.use(require('webpack-dev-middleware')(compiler, {
         publicPath,
         watchOptions: {
