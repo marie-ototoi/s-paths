@@ -73,16 +73,16 @@ class GeoMap extends React.Component {
                     />
                     <ZoomControl/>
                     <Layer
-                        id = 'unclustered_layer'
-                        sourceId = 'source_id'
-                        layerOptions = {{
+                        id='unclustered_layer'
+                        sourceId='source_id'
+                        layerOptions={{
                             filter: ["!", ["has", "point_count"]]
                         }}
-                        paint = {{
+                        paint={{
                             'circle-color': 'green',
                             'circle-radius': 10
                         }}
-                        type = 'circle'
+                        type='circle'
                     />
                     <Layer
                         id='cluster_layer'
