@@ -147,6 +147,7 @@ const defaultState = [
         id: 'ListAllProps',
         name: 'all props',
         thumb : '/images/listprop.svg',
+        allProperties: true,
         entrypoint: { min: 1, max: 100, optimal: [1, 40] },
         constraints: [
             [

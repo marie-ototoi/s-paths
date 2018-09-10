@@ -243,7 +243,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                                 mainDelta: dataDeltaMain,
                                 stats,
                                 asideDelta: dataDeltaAside ? dataDeltaAside : dataDeltaMain,
-                                mainDisplayed: Number(uniqueMain.results.bindings[0].displayed.value),
+                                mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMain.results.bindings[0].displayed.value),
                                 asideDisplayed: uniqueAside ? Number(uniqueAside.results.bindings[0].displayed.value) : Number(uniqueMain.results.bindings[0].displayed.value),
                                 mainConfig: newConfigs[0].views,
                                 asideConfig: newConfigs[1].views
@@ -328,7 +328,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
                                         asideConfig: configs[1].views,
                                         main: { ...dataMain },
                                         aside: dataAside ? { ...dataAside } : { ...dataMain },
-                                        mainDisplayed: Number(uniqueMainPromise.results.bindings[0].displayed.value),
+                                        mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value),
                                         asideDisplayed: uniqueAsidePromise ? Number(uniqueAsidePromise.results.bindings[0].displayed.value): Number(uniqueMainPromise.results.bindings[0].displayed.value)
                                     })
                                 })
@@ -387,7 +387,7 @@ export const selectResource = (dispatch) => (dataset, views) => {
                         asideConfig: configs[1].views,
                         main: { ...dataMain },
                         aside: dataAside ? { ...dataAside } : { ...dataMain },
-                        mainDisplayed: Number(uniqueMainPromise.results.bindings[0].displayed.value),
+                        mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value),
                         asideDisplayed: uniqueAsidePromise ? Number(uniqueAsidePromise.results.bindings[0].displayed.value): Number(uniqueMainPromise.results.bindings[0].displayed.value)
                     })
                 })
@@ -408,10 +408,10 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
             matches: config.matches.map(match => {
                 return {
                     ...match,
-                    selected: index === viewIndex && match.properties.reduce((acc, cur, i) => {
+                    selected: index === viewIndex && (config.id === 'ListAllProps' || match.properties.reduce((acc, cur, i) => {
                         if (cur.path !== props[i]) acc = false
                         return acc
-                    }, true)
+                    }, true))
                 }
             })
         }
@@ -421,7 +421,7 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, maxDepth: (updatedConfig.id === 'ListAllProps') ? 1 : null })
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, prevConfig, dataset, zone)
     const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
-
+    
     return Promise.all([
         getData(endpoint, newQuery, prefixes),
         getData(endpoint, queryTransition, prefixes),
@@ -435,7 +435,7 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
             action[zone] = newData
             action[zone + 'Config'] = updatedConfigs
             action[zone + 'Delta'] = newDelta
-            action[zone + 'Displayed'] = Number(newUnique.results.bindings[0].displayed.value)
+            action[zone + 'Displayed'] = updatedConfig.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(newUnique.results.bindings[0].displayed.value)
             dispatch(action)
         })
         .catch(error => {

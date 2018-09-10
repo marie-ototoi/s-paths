@@ -78,7 +78,7 @@ class Header extends React.PureComponent {
     displayConfig () {
         const { config, configs, dataset, zone } = this.props
         let selectedLists = this.state.configsLists[this.state.selectedView]
-        const propPaths = this.state.selectedProps.map((prop, i) => selectedLists[i][prop].path)
+        const propPaths =  this.state.selectedProps && selectedLists ? this.state.selectedProps.map((prop, i) => selectedLists[i][prop].path) : []
         this.setState({ propsAreLoading: true, errorSelection: '' })
         this.props.displayConfig(this.state.selectedView, propPaths, getConfigs(getCurrentConfigs(configs, 'active'), zone), config, dataset, zone)
             .then(res => this.setState({
@@ -131,8 +131,9 @@ class Header extends React.PureComponent {
         const barWidth = (display.viz.useful_width / 3)
         const activeConfigs = getConfigs(getCurrentConfigs(configs, 'active'), zone)
         let selectedConfig = getSelectedView(getCurrentConfigs(configs, 'active'), zone)
+        console.log(selectedConfig)
         let selectedProperties = getSelectedMatch(selectedConfig).properties
-        // console.log(selectedProperties)
+        console.log(selectedProperties)
         let options = [
             { label: 'entities', total: dataset.stats.totalInstances },
             { label: 'selected', total: dataset.stats.selectionInstances },
@@ -359,7 +360,7 @@ class Header extends React.PureComponent {
                                     </div>
                                 </div>
 
-                                { selectedLists.map((list, index) => {
+                                { selectedLists && selectedLists.map((list, index) => {
                                     return (<div className ="control is-small" key = { `${zone}selectprop${index}` }>
                                         
                                         <ReactSelect
@@ -416,7 +417,7 @@ class Header extends React.PureComponent {
                             }} >
                             <p>You are visualizing <strong>{ options[2].total } { pluralize('entity', options[2].total) } </strong>  
                             belonging to the class of ressources <strong>{ this.state.resourceList[this.state.displayedResource].label } </strong> 
-                            according to <strong>{ config.constraints.length } property { pluralize('path', config.constraints.length) } </strong> 
+                            according to <strong>{ selectedProperties.length } property { pluralize('path', selectedProperties.length) } </strong> 
                             traversing <strong>{ allgraphs.length } { pluralize('graph', allgraphs.length) }</strong></p><span className = "resource-def">?
                                 <div className = "resource-content" style = {{ margin: '-55px 0 0 0' + 'px' }}>
                                     <ul><span>Graphs: </span>  
@@ -428,12 +429,14 @@ class Header extends React.PureComponent {
                                         //let readablePath = getReadablePathsParts(prop.path, dataset.labels, dataset.prefixes)
                                         let readablePath = prop.readablePath
                                         return (<div className = "path"  key = {`path_${zone}_${pi}`}>Path {(pi + 1)}: <span style = {{ borderBottom: `1px solid ${graphs[prop.triplesGraphs[0]]}` }}>{this.state.resourceList[this.state.displayedResource].label} / </span> { readablePath.map((rp, rpi) => {
+                                            let paddB = rpi % 2 === 0 ? 0 : 1
+                                            let paddL = rpi < 1 ? 0 : 20
                                             return (<span 
                                                 className = "triple"
                                                 style = {{ 
                                                     borderBottom: `1px solid ${graphs[prop.triplesGraphs[rpi]]}`, 
-                                                    paddingLeft: (5 + (rpi * 20)) + 'px',
-                                                    paddingBottom: (rpi * 3) + 'px',
+                                                    paddingLeft: (5 + paddL) + 'px',
+                                                    paddingBottom: (paddB * 3) + 'px',
                                                     position: 'relative', 
                                                     left: '-' + (5 + (rpi * 20)) + 'px' 
                                                 }} 

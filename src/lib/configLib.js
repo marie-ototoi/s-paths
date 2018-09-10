@@ -1,7 +1,8 @@
 import * as d3 from 'd3'
 
 export const getSelectedMatch = (config) => {
-    return config.matches.filter(m => m.selected === true)[0]
+    let thematch = config.matches.filter(m => m.selected === true)
+    return thematch.length > 0 ? thematch[0] : []
 }
 export const getConfigs = (configs, zone) => {
     return configs.filter(c => c.zone === zone)[0].views
@@ -176,15 +177,22 @@ export const defineConfigs = (views, stats) => {
                     entrypointFactor += getCost(stats.selectionInstances, min, max, optimal, 0.3)
                 }
             }
-            // remove combinations where a mandatory prop is missing
-            let scoredMatches = matches.map(match => {
-                return {
-                    properties: match,
-                    entrypointFactor,
-                    score: scoreMatch(match, entrypointFactor) /*,
-                    entrypoint: (view.entrypoint !== undefined) */
-                }
-            })
+            let scoredMatches
+            if ( view.id === 'ListAllProps' ) {
+                scoredMatches = [ {
+                    score: 170,
+                    properties: matches.map(match => match[0])
+                } ]
+            } else {
+                scoredMatches = matches.map(match => {
+                    return {
+                        properties: match,
+                        entrypointFactor,
+                        score: scoreMatch(match, entrypointFactor) /*,
+                        entrypoint: (view.entrypoint !== undefined) */
+                    }
+                })
+            }
             // sort by score and return
             return {
                 ...view,

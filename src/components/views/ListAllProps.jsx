@@ -21,7 +21,7 @@ class ListAllProps extends React.Component {
         this.customState = {
             elementName: `refListProp_${props.zone}`
         }
-        this.state = { selectedIndex: 0 }
+        this.state = { selectedIndex: 1 }
         this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
@@ -36,18 +36,13 @@ class ListAllProps extends React.Component {
     prepareData (nextProps) {
         const { config, data, dataset, zone } = nextProps
         // prepare the data for display
-        const selectedConfig = getSelectedMatch(config, zone)
-        // First prop
-
-        // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
         let details = prepareDetailData(data, dataset)
         // 
 
         // Save to reuse in render
         this.customState = {
             ...this.customState,
-            details,
-            selectedConfig
+            details
         }
     }
     selectEnsemble (prop, value, category) {

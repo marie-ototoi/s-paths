@@ -142,6 +142,9 @@
 }
 .Header .explain .resource-content {
     font-size: 1.2em;
+    max-height: 400px;
+    max-width: 500px;
+    overflow-y: scroll;
 }
 .Header .resource-content {
     display: none;

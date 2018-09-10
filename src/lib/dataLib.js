@@ -345,7 +345,7 @@ export const prepareGeoData = (data, dataset) => {
 
 export const prepareDetailData = (data, dataset) => {
     // console.log('prepare only once', data.length)
-    let { entrypoint, prefixes } = dataset
+    let { entrypoint, prefixes, labels } = dataset
     let newData = []
     newData.push(d3.nest().key(prop => prop.entrypoint.value).entries(data).map(prop => prop.key))
     let maxLevel = Number(data.sort((a, b) => Number(b.level.value) - Number(a.level.value))[0].level.value)
@@ -380,7 +380,7 @@ export const prepareDetailData = (data, dataset) => {
                 } else {
                     let newItem = cur
                     newItem.path = queryLib.convertPath(fullPath, prefixes)
-                    // newItem.readablePath = getReadablePathsParts(newItem.path, labels, prefixes)
+                    newItem.readablePath = getReadablePathsParts(newItem.path, labels, prefixes)
                     newItem.fullPath = fullPath
                     newItem[`prop${i}`] = Array.isArray(newItem[`prop${i}`]) ? newItem[`prop${i}`] : [newItem[`prop${i}`]]
                     newItem[`prop${i}`] = newItem[`prop${i}`].map(v => {

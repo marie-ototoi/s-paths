@@ -388,7 +388,7 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
         let selectedConfig = configLib.getSelectedMatch(configZone)
         // console.log(selectedConfig)
     
-        let properties = selectedConfig.properties
+        let properties = !configZone.allProperties ? selectedConfig.properties : []
         if (prop1only === true) properties = [properties[0]]
         propList = (configZone.entrypoint === undefined || unique) ? `DISTINCT ` : `DISTINCT ?entrypoint `
         if (unique) propList = propList.concat(`(COUNT(DISTINCT ?entrypoint) AS ?displayed) `)
