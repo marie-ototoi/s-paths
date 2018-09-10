@@ -1,5 +1,5 @@
 .gridline {
     stroke-dasharray: 1, 1;
-    stroke: black;
+    stroke: #ff0000;
     stroke-width: 1px;
 }

@@ -13,7 +13,7 @@ class Debug extends React.Component {
                     x1 = { point }
                     y1 = "0"
                     x2 = { point }
-                    y2 = { display.stage.height }
+                    y2 = { display.screen.height }
                     key = { `x${point}` }
                     className = "gridline"
                 />)
@@ -23,7 +23,7 @@ class Debug extends React.Component {
                     y1 = { point }
                     x1 = "0"
                     y2 = { point }
-                    x2 = { display.stage.width }
+                    x2 = { display.screen.width }
                     key = { `y${point}` }
                     className = "gridline"
                 />)
@@ -37,7 +37,7 @@ class Debug extends React.Component {
 }
 
 Debug.propTypes = {
-    display: PropTypes.string
+    display: PropTypes.object
 }
 
 function mapStateToProps (state) {

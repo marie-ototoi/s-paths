@@ -13,7 +13,7 @@ const render = Component =>
     ReactDOM.render(
         <Provider store={store}>
             <AppContainer>
-                <Component mode="main" />
+                <Component mode="dev" />
             </AppContainer>
         </Provider>,
         document.getElementById('root')

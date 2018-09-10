@@ -5,23 +5,13 @@ const defaultState = {
         width: 10,
         height: 10
     },
-    viewBox: {
-        width: 10,
-        height: 10,
-        x: 0,
-        y: 0
-    },
-    stage: {
-        width: 10,
-        height: 10
-    },
     grid: {
         xPoints: [],
         yPoints: []
     },
     gridDefPercent: {
-        xPoints: [0, 30, 35, 65, 70, 85, 100],
-        yPoints: [0, 30, 35, 65, 70, 85, 100]
+        xPoints: [0, 35, 40, 100],
+        yPoints: [0, 17, 100]
     },
     zones: {
         main: { x: 0, y: 0, width: 10, height: 10 },
@@ -31,9 +21,9 @@ const defaultState = {
     },
     zonesDefPercent: {
         dev: { x: 0, y: 0, width: 100, height: 100 },
-        full: { x: 35, y: 35, width: 65, height: 30 },
-        main: { x: 35, y: 35, width: 30, height: 30 },
-        aside: { x: 70, y: 35, width: 30, height: 30 }
+        full: { x: 0, y: 0, width: 100, height: 100 },
+        main: { x: 40, y: 0, width: 60, height: 100 },
+        aside: { x: 0, y: 0, width: 35, height: 100 }
     },
     vizDefPercent: {
         useful_width: 70,
@@ -63,16 +53,6 @@ const defaultState = {
             y2: null
         }
     },
-    unitDimensions: {
-        main: {
-            origin: null,
-            target: null
-        },
-        aside: {
-            origin: null,
-            target: null
-        }
-    },
     detail: {
         main: false,
         aside: false
@@ -93,8 +73,6 @@ const display = (state = defaultState, action) => {
             ...state,
             mode: action.mode || state.mode,
             screen: action.screen || state.screen,
-            viewBox: action.viewBox || state.viewBox,
-            stage: action.stage || state.stage,
             grid: action.grid || state.grid,
             zones: action.zones || state.zones,
             viz: action.viz || state.viz
@@ -125,20 +103,6 @@ const display = (state = defaultState, action) => {
         return {
             ...state,
             selectedZone: newZone
-        }
-    case types.END_TRANSITION:
-        return {
-            ...state,
-            unitDimensions: {
-                main: {
-                    origin: state.unitDimensions.main.target ? state.unitDimensions.main.target : state.unitDimensions.main.origin,
-                    target: state.unitDimensions.main.target
-                },
-                aside: {
-                    origin: state.unitDimensions.aside.target ? state.unitDimensions.aside.target : state.unitDimensions.aside.origin,
-                    target: state.unitDimensions.aside.target
-                }
-            }
         }
     default:
         return state

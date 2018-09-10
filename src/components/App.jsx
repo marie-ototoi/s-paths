@@ -169,12 +169,7 @@ class App extends React.PureComponent {
                 ref = {(c) => { this['refView'] = c }}
                 width = { display.screen.width }
                 height = { display.screen.height }
-                viewBox = { `${display.viewBox.x}, ${display.viewBox.y}, ${display.viewBox.width}, ${display.viewBox.height}` }
-                preserveAspectRatio = "xMinYMin meet"
             >
-                { mode === 'dev' &&
-                    <Debug />
-                }
                 { mainConfig && this.state.main_step === 'launch' &&
                     <MainTransitionComponent
                         role = "target"
@@ -272,6 +267,9 @@ class App extends React.PureComponent {
                         zone = "aside"
                         config = { asideConfig }
                     />
+                }
+                { mode === 'dev' &&
+                    <Debug />
                 }
             </svg>
         </div>)

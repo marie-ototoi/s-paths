@@ -1,10 +1,4 @@
 
-export const scaleStage = (viewBoxDef, screen) => {
-    let width = Math.floor(screen.width * 100 / viewBoxDef.width)
-    let height = Math.floor(screen.height * 100 / viewBoxDef.height)
-    return { width, height }
-}
-
 export const scaleViewBox = (viewBoxDef, stage) => {
     let x = Math.floor(stage.width * viewBoxDef.x / 100)
     let y = Math.floor(stage.height * viewBoxDef.y / 100)
@@ -75,6 +69,20 @@ export const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width
             height: viz.useful_height + offset.height
         }
     case 'core':
+        return {
+            x: origin.x + viz.horizontal_margin + offset.x,
+            y: origin.y + viz.top_margin + offset.y,
+            width: viz.useful_width + offset.width,
+            height: viz.useful_height + offset.height
+        }
+    case 'main':
+        return {
+            x: origin.x + viz.horizontal_margin + offset.x,
+            y: origin.y + viz.top_margin + offset.y,
+            width: viz.useful_width + offset.width,
+            height: viz.useful_height + offset.height
+        }
+    case 'aside':
         return {
             x: origin.x + viz.horizontal_margin + offset.x,
             y: origin.y + viz.top_margin + offset.y,

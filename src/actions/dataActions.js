@@ -519,23 +519,3 @@ export const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => 
             console.error('Error getting data after view update', error)
         })
 }
-
-export const setUnitDimensions = (dispatch) => (dimensions, zone, configId, role, setTarget) => {
-    // console.log(dimensions, zone, configId, role)
-    dispatch({
-        type: types.SET_UNIT_DIMENSIONS,
-        unitDimensions: dimensions,
-        configId,
-        zone,
-        role
-    })
-    if (setTarget) {
-        dispatch({
-            type: types.SET_UNIT_DIMENSIONS,
-            unitDimensions: dimensions,
-            configId,
-            zone,
-            role: 'target'
-        })
-    }
-}
