@@ -1,11 +1,18 @@
-// import dotenv from 'dotenv'
+// import dotenv from 'dotenv/config'
 import cors from 'cors'
 import express from 'express'
 import bodyParser from 'body-parser'
-import index from './api/index'
+import mongoose from 'mongoose'
+import api from './api'
 
-// dotenv.config()
-require('./models/connection')
+mongoose.Promise = Promise
+mongoose
+    .connect(process.env.MONGODB_URI, {
+        autoReconnect: true,
+        useNewUrlParser: true,
+        reconnectTries: 20,
+    })
+    .catch(err => console.error('✘ ｢app｣: Unable to connect to the MongoDB database', err))
 
 // Router configuration
 const router = express.Router()
@@ -18,17 +25,17 @@ app.use(bodyParser.json({limit: '50mb'}))
 
 app.use('/', router)
 app.use('/', express.static('public'))
-app.use('/', index)
+app.use('/', api)
 
 // Development configuration
-// console.log('salut', process.env.NODE_ENV)
 if (process.env.NODE_ENV === 'development') {
     const config = require('./webpack.dev');
-
     const compiler = require('webpack')(config);
     const {publicPath} = config.output;
-    // console.log(publicPath)
-    require('webpack-hot-client')(compiler, { host: '0.0.0.0', port: { client: 8081, server: 8081 } });
+    require('webpack-hot-client')(compiler, {
+        host: '0.0.0.0',
+        port: { client: 8081, server: 8081 }
+    });
     app.use(require('webpack-dev-middleware')(compiler, {
         publicPath,
         watchOptions: {
