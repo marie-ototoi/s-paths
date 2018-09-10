@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import SelectionZone from '../elements/SelectionZone'
+// import SelectionZone from '../elements/SelectionZone'
 // d3
 
 // libs
@@ -28,40 +28,32 @@ class GeoMap extends React.Component {
         }
         this.prepareData(props)
     }
+    static onToggleHover (cursor, event) {
+        event.target.getCanvas().style.cursor = cursor
+    }
+    static onMouseClick (event) {
+        console.log(event.point.x, event.point.y, event.lngLat.lat)
+    }
     render () {
-        // console.log('salut GeoMap')
-        const { dimensions, display, role, selections, step, zone } = this.props
+        const { dimensions, role, step } = this.props
 
         return (<g className = { `GeoMap ${this.customState.elementName} role_${role}` } >
-            { role !== 'target' &&
-            <SelectionZone
-                zone = { zone }
-                dimensions = { dimensions }
-                handleMouseMove = { this.props.handleMouseMove }
-                layout = { this }
-                selections = { selections }
-            />
-            }
-            { step !== 'changing' && 
+            { step !== 'changing' &&
             <foreignObject
-                transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y + dimensions.top_padding})` }
-                width = { dimensions.useful_width }
-                height = { dimensions.useful_height }
-                // TODO: These event handlers need another layer to perform mouse selection over the map
-                // onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
-                // onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
-                // onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
+                transform={ `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y + dimensions.top_padding})` }
+                width={ dimensions.useful_width }
+                height={ dimensions.useful_height }
             >
                 <Map
-                    style = "mapbox://styles/mapbox/light-v9"
-                    containerStyle = {{
+                    style='mapbox://styles/mapbox/light-v9'
+                    containerStyle={{
                         height: '100%',
-                        width: '100%' 
+                        width: '100%',
+                        position: 'fixed'
                     }}
                     center={[0, 40]}
                     zoom={[1.2]}
                 >
-                   
                     <GeoJSONLayer
                         id='source_id'
                         data={this.customState.geodata}
@@ -70,27 +62,24 @@ class GeoMap extends React.Component {
                             clusterMaxZoom: 14,
                             clusterRadius: 50
                         }}
-                    />
-                    <ZoomControl/>
-                    <Layer
-                        id='unclustered_layer'
-                        sourceId='source_id'
-                        layerOptions={{
-                            filter: ["!", ["has", "point_count"]]
+                        symbolLayout={{
+                            'text-field': '{title}',
+                            'text-offset': [0, 0.6],
+                            'text-anchor': 'top'
                         }}
-                        paint={{
+                        circlePaint={{
                             'circle-color': 'green',
-                            'circle-radius': 10
+                            'circle-radius': 6
                         }}
-                        type='circle'
+                        circleOnMouseEnter={GeoMap.onToggleHover.bind(this, 'pointer')}
+                        circleOnMouseLeave={GeoMap.onToggleHover.bind(this, '')}
+                        circleOnClick={GeoMap.onMouseClick.bind(this)}
                     />
                     <Layer
                         id='cluster_layer'
                         sourceId='source_id'
                         layerOptions={{
-                            filter: [
-                                'has', 'point_count'
-                            ]
+                            filter: ['has', 'point_count']
                         }}
                         paint={{
                             'circle-color': {
@@ -98,7 +87,7 @@ class GeoMap extends React.Component {
                                 type: 'interval',
                                 stops: [
                                     [0, '#51bbd6'],
-                                    [100, '#f1f075'],
+                                    [10, '#f1f075'],
                                     [750, '#f28cb1']
                                 ]
                             },
@@ -107,7 +96,7 @@ class GeoMap extends React.Component {
                                 type: 'interval',
                                 stops: [
                                     [0, 20],
-                                    [100, 30],
+                                    [10, 30],
                                     [750, 40]
                                 ]
                             }
@@ -118,18 +107,15 @@ class GeoMap extends React.Component {
                         id='cluster_count'
                         sourceId='source_id'
                         layerOptions={{
-                            filter: [
-                                'has', 'point_count'
-                            ]
+                            filter: ['has', 'point_count']
                         }}
-                        layout = {{
-                            "text-field": "{point_count_abbreviated}",
-                            "text-font": ["DIN Offc Pro Medium", "Arial Unicode MS Bold"],
-                            "text-size": 12
+                        layout={{
+                            'text-field': '{point_count_abbreviated}',
+                            'text-size': 12
                         }}
                         type='symbol'
                     />
-                   
+                    <ZoomControl/>
                 </Map>
             </foreignObject>
             }
@@ -148,7 +134,7 @@ class GeoMap extends React.Component {
             (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
-        const { config, data, dataset, zone } = nextProps
+        const { data, dataset } = nextProps
         // prepare the data for display
         // const selectedConfig = getSelectedMatch(config, zone)
         // First prop
