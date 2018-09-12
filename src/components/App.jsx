@@ -96,7 +96,7 @@ class App extends React.PureComponent {
             // console.log('transition target laid out', zone, role, elements)
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_target`])) {
                 // console.log('2 - ON CHANGE, les elements sont modifies ', zone, elements)
-                console.log(this.props.dataset)
+                // console.log(this.props.dataset)
                 let transitionElements 
                 if (elements.length > 0) {
                     transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getSelectedView(getCurrentConfigs(configs, 'active'), zone), getSelectedView(getCurrentConfigs(configs, 'transition'), zone), getResults(data, zone, 'delta'), zone)
