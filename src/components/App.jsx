@@ -127,7 +127,6 @@ class App extends React.PureComponent {
     render () {
         const { configs, data, display, selections } = this.props
         // debug logs
-        // console.log('env', env)
         // console.log('display', display)
         // console.log('views', this.props.views)
         // console.log('dataset', this.props.dataset)

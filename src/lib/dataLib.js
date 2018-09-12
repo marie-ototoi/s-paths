@@ -122,6 +122,7 @@ const getCurrentData = (data, status) => {
 }
 
 export const getResults = (data, zone, status) => {
+
     data = getCurrentData(data, status)
     data = data.filter(d => d.zone === zone)
     let statementsType
