@@ -16,7 +16,5 @@ describe('reducers/display', () => {
         // console.log(display(undefined, addAction))
         expect(display(undefined, addAction).screen.width)
             .to.equal(100)
-        expect(display(undefined, addAction).viewBox.width)
-            .to.equal(10)
     })
 })

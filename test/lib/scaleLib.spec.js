@@ -21,15 +21,6 @@ const stages = [
 ]
 
 describe('lib/scale', () => {
-    it('should return the full dimensions of the stage based on the viewbox definition in percentage and the screen dimensions', () => {
-        let stage1 = scale.scaleStage(displayDef.dev, screens[0])
-        let stage2 = scale.scaleStage(displayDef.full, screens[0])
-        let stage3 = scale.scaleStage(displayDef.main, screens[0])
-        expect(stage1).to.deep.equal({ width: 1400, height: 700 })
-        expect(stage2).to.deep.equal({ width: 2153, height: 2333 })
-        expect(stage3).to.deep.equal({ width: 4666, height: 2333 })
-    })
-
     it('should return the actual dimensions of the viewbox based on the viewbox definition in percentage and the stage dimensions', () => {
 
         let vb1 = scale.scaleViewBox(displayDef.dev, stages[0])
