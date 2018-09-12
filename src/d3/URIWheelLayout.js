@@ -106,12 +106,8 @@ class URIWheelLayout extends AbstractLayout {
     }
 
     getElementsInZone (props) {
-        const selectedZone = {
-            x1: props.zoneDimensions.x1 - props.display.viz.horizontal_margin,
-            y1: props.zoneDimensions.y1 - props.display.viz.top_margin,
-            x2: props.zoneDimensions.x2 - props.display.viz.horizontal_margin,
-            y2: props.zoneDimensions.y2 - props.display.viz.top_margin
-        }
+        let { display, zone, zoneDimensions } = props
+        const selectedZone = zoneDimensions
         let selectedElements = []
         d3.select(this.el).selectAll('.radius path')
             .each(function (d, i) {
@@ -125,7 +121,7 @@ class URIWheelLayout extends AbstractLayout {
         const { display, nestedProp1, zone } = props
         let angle = 360 / (nestedProp1.length - 1)
         // console.log(angle)
-        let center = { x: display.viz.useful_width/2, y: display.viz.useful_height/2 }
+        let center = { x: display.viz[zone + '_useful_width']/2, y: display.viz[zone + '_useful_height']/2 }
         d3.select(this.el).selectAll('.radius')
             .attr('transform', (d, i) => `translate(${center.x}, ${center.y}) rotate(${(i * angle)} 0 0)`)
 

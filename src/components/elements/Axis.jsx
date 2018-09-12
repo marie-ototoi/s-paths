@@ -13,12 +13,12 @@ class Axis extends React.PureComponent {
         super(props)
         this.customState = {
             elementName: `ref${props.zone}_axis_${props.type}`,
-            dimensions: getDimensions('axis' + props.type, props.display.zones[props.zone], props.display.viz, props.offset)
+            dimensions: getDimensions(props.zone +'Axis' + props.type, props.display.viz, props.offset)
         }
     }
     render () {
         const { display, offset, type, zone } = this.props
-        this.customState.dimensions = getDimensions('axis' + type, display.zones[zone], display.viz, offset)
+        this.customState.dimensions = getDimensions(zone + 'Axis' + type, display.viz, offset)
         const { x, y } = this.customState.dimensions
         return (<g className = "Axis"
             transform = { `translate(${x}, ${y})` }

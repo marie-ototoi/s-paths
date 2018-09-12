@@ -125,15 +125,13 @@ class Header extends React.PureComponent {
         const { config, configs, data, dataset, display, selections, zone } = this.props
         
         // general
-        const dimensions = getDimensions('header', display.zones[zone], display.viz, { x:0, y:0, width:0, height: 0 })
-        const { x, y, width, height } = dimensions
+        const dimensions = getDimensions('header', display.viz, { x:0, y:0, width:0, height: 0 })
+        const { x, y, width, height, useful_width } = dimensions
         const fieldWidth = (display.viz.useful_width * 2 / 3)
         const barWidth = (display.viz.useful_width / 3)
         const activeConfigs = getConfigs(getCurrentConfigs(configs, 'active'), zone)
         let selectedConfig = getSelectedView(getCurrentConfigs(configs, 'active'), zone)
-        console.log(selectedConfig)
         let selectedProperties = getSelectedMatch(selectedConfig).properties
-        console.log(selectedProperties)
         let options = [
             { label: 'entities', total: dataset.stats.totalInstances },
             { label: 'selected', total: dataset.stats.selectionInstances },
@@ -174,14 +172,10 @@ class Header extends React.PureComponent {
         let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) ? {} : { 'disabled' : 'disabled' }
         return (
             <g className = "Header">
-                { ( (display.mode === 'main' && zone === 'main') || 
-                (display.mode === 'aside' && zone === 'aside') ||
-                ((display.mode === 'full' || display.mode === 'dev') && zone === 'main')) &&
                 <ReactKeymaster
                     keyName = "enter"
                     onKeyDown = { this.handleKeyDown }
                 />
-                }
                 <foreignObject
                     transform = { `translate(${x}, ${y})` }
                     width = { width }
@@ -189,9 +183,9 @@ class Header extends React.PureComponent {
                 >
                     <div>
                         <div className = "line">
-                            <div className = "logo" style = {{ width: display.viz.horizontal_margin + 'px' }}><img src = "/images/logo.svg" style = {{ height: '29px', paddingLeft:'5px' }} /></div>
+                            <div className = "logo" style = {{ width: display.viz.horizontal_padding + 'px' }}><img src = "/images/logo.svg" style = {{ height: '29px', paddingLeft:'5px' }} /></div>
                             <div className = "field" style = {{ width: fieldWidth + 'px' }}>
-                                <label className = "label">Set of resources</label>
+                                <label className = "label">Class of resources</label>
                                 <div className = "control">
                                     <ReactSelect
                                         classNamePrefix = "propSelector"
@@ -248,7 +242,7 @@ class Header extends React.PureComponent {
                             </span>
                         </div>
                         <div className = "line">
-                            <div className = "field" style = {{ marginLeft: display.viz.horizontal_margin + 'px', width: fieldWidth + 'px' }}>
+                            <div className = "field" style = {{ marginLeft: display.viz.horizontal_padding + 'px', width: fieldWidth + 'px' }}>
                                 <label
                                     className = "label"
                                 >Selection
@@ -307,7 +301,7 @@ class Header extends React.PureComponent {
                             
                         </div>
                         <div className = "line">
-                            <div className = "field" style = {{ marginLeft: display.viz.horizontal_margin + 'px', width: fieldWidth + 'px' }}>
+                            <div className = "field" style = {{ marginLeft: display.viz.horizontal_padding + 'px', width: fieldWidth + 'px' }}>
                                 <label
                                     className = "label"
                                 >Display
@@ -412,8 +406,8 @@ class Header extends React.PureComponent {
                         <div 
                             className = "explain" 
                             style = {{
-                                marginTop: Math.floor((display.viz.top_margin - 145)/2) + 'px',
-                                marginLeft: display.viz.horizontal_margin + 'px'
+                                marginTop: Math.floor((display.viz.top_margin - 175)/2) + 'px',
+                                marginLeft: display.viz.horizontal_padding + 'px'
                             }} >
                             <p>You are visualizing <strong>{ options[2].total } { pluralize('entity', options[2].total) } </strong>  
                             belonging to the class of ressources <strong>{ this.state.resourceList[this.state.displayedResource].label } </strong> 

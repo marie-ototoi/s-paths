@@ -12,9 +12,9 @@ class Transition extends React.PureComponent {
     }
     render () {
         // console.log('ici')
-        const { display, zone } = this.props
+        const { dimensions } = this.props
         return (<g className = "Transition"
-            transform = { `translate(${(display.zones[zone].x + display.viz.horizontal_margin)}, ${(display.zones[zone].y + display.viz.top_margin)})` }
+            transform = { `translate(${dimensions.x}, ${dimensions.y})` }
             ref = {(c) => { this[this.customState.elementName] = c }}
         >
         </g>)
@@ -28,7 +28,7 @@ class Transition extends React.PureComponent {
 }
 
 Transition.propTypes = {
-    display: PropTypes.object.isRequired,
+    dimensions: PropTypes.object,   
     zone: PropTypes.string.isRequired
 }
 

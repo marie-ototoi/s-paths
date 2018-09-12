@@ -4,7 +4,9 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 // components
+import History from './elements/History'
 import Settings from './elements/Settings'
+import Slider from './elements/Slider'
 import GeoMap from './views/GeoMap'
 import Header from './elements/Header'
 import HeatMap from './views/HeatMap'
@@ -15,7 +17,6 @@ import StackedChart from './views/StackedChart'
 import TreeMap from './views/TreeMap'
 import URIWheel from './views/URIWheel'
 import Transition from './elements/Transition'
-import Debug from './Debug'
 // libs
 import { getDimensions, getScreen } from '../lib/scaleLib'
 import { areLoaded, getCurrentState, getResults, getTransitionElements } from '../lib/dataLib'
@@ -124,10 +125,9 @@ class App extends React.PureComponent {
         }
     }
     render () {
-        const { configs, data, display, mode, selections } = this.props
+        const { configs, data, display, selections } = this.props
         // debug logs
         // console.log('env', env)
-        // console.log('mode', mode)
         // console.log('display', display)
         // console.log('views', this.props.views)
         // console.log('dataset', this.props.dataset)
@@ -156,8 +156,8 @@ class App extends React.PureComponent {
         const asideTransitionConfig = getSelectedView(getCurrentConfigs(configs, 'transition'), 'aside')
         const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
         const SideTransitionComponent = asideTransitionConfig ? componentIds[asideTransitionConfig.id] : ''
-        const coreDimensionsMain = getDimensions('core', display.zones['main'], display.viz)
-        const coreDimensionsAside = getDimensions('core', display.zones['aside'], display.viz)
+        const coreDimensionsMain = getDimensions('main', display.viz)
+        const coreDimensionsAside = getDimensions('aside', display.viz)
         // console.log( getResults(data, 'aside', 'active') )
         // console.log(getResults(data, 'main', 'transition'))
         // to do : avoid recalculate transition data at each render
@@ -211,15 +211,10 @@ class App extends React.PureComponent {
                         endTransition = { this.handleEndTransition }
                     />
                 }
-                { mainConfig &&
-                    <Header
-                        zone = "main"
-                        config = { mainConfig }
-                    />
-                }
+                
                 { (!mainConfig || display.settingsOpen.main) &&
                     <Settings
-                        dimensions = { getDimensions('settings', display.zones['main'], display.viz) }
+                        dimensions = { getDimensions('settings', display.viz) }
                     />
                 }
                 { asideConfig && this.state.aside_step === 'launch' &&
@@ -262,26 +257,24 @@ class App extends React.PureComponent {
                         endTransition = { this.handleEndTransition }
                     />
                 }
-                { asideConfig &&
+                { mainConfig &&
                     <Header
-                        zone = "aside"
-                        config = { asideConfig }
+                        zone = "main"
+                        config = { mainConfig }
                     />
                 }
-                { mode === 'dev' &&
-                    <Debug />
-                }
+                <Slider />
+                <History
+                    zone = "main"
+                />
             </svg>
         </div>)
     }
 
     onResize () {
-        const { display, mode } = this.props
+        const { display } = this.props
         // change this for an action function
         this.props.setDisplay({
-            mode,
-            zonesDef: display.zonesDefPercent,
-            gridDef: display.gridDefPercent,
             screen: getScreen(),
             vizDef: display.vizDefPercent
         })
@@ -293,12 +286,10 @@ App.propTypes = {
     data: PropTypes.object.isRequired,
     dataset: PropTypes.object.isRequired,
     display: PropTypes.object.isRequired,
-    mode: PropTypes.string.isRequired,
     selections: PropTypes.array.isRequired,
     role: PropTypes.string,
     step: PropTypes.string,
     views: PropTypes.array.isRequired,
-    zone: PropTypes.string,
     endTransition: PropTypes.func.isRequired,
     handleTransition: PropTypes.func,
     handleMouseUp: PropTypes.func,

@@ -15,7 +15,7 @@ class Legend extends React.PureComponent {
     }
     render () {
         const { display, offset, zone } = this.props
-        const dimensions = getDimensions('legend', display.zones[zone], display.viz, offset)
+        const dimensions = getDimensions(zone + 'Legend', display.viz, offset)
         this.customState.dimensions = dimensions
         return (<g className = "Legend"
             transform = { `translate(${dimensions.x}, ${dimensions.y})` }

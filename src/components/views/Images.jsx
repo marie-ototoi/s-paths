@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import History from '../elements/History'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 
@@ -60,7 +59,7 @@ class Images extends React.Component {
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
-                dimensions = { display.zones[zone] }
+                dimensions = { dimensions }
                 handleMouseMove = { this.props.handleMouseMove }
                 layout = { this }
                 selections = { selections }
@@ -68,7 +67,7 @@ class Images extends React.Component {
             }
             { step !== 'changing' && data && 
             <foreignObject
-                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
+                transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y})` }
                 with = { dimensions.width }
                 height = { dimensions.height }
                 onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
@@ -85,13 +84,6 @@ class Images extends React.Component {
                     </div>
                 </div>
             </foreignObject>
-            }
-            { role !== 'target' && step !== 'changing' &&
-            <g>
-                <History
-                    zone = { zone }
-                />
-            </g>
             }
         </g>)
     }

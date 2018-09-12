@@ -1,43 +1,41 @@
 import types from '../constants/ActionTypes'
 
+const initValue = 10
+
 const defaultState = {
     screen: {
-        width: 10,
-        height: 10
-    },
-    grid: {
-        xPoints: [],
-        yPoints: []
-    },
-    gridDefPercent: {
-        xPoints: [0, 35, 40, 100],
-        yPoints: [0, 17, 100]
-    },
-    zones: {
-        main: { x: 0, y: 0, width: 10, height: 10 },
-        aside: { x: 0, y: 0, width: 10, height: 10 },
-        full: { x: 0, y: 0, width: 10, height: 10 },
-        dev: { x: 0, y: 0, width: 10, height: 10 }
-    },
-    zonesDefPercent: {
-        dev: { x: 0, y: 0, width: 100, height: 100 },
-        full: { x: 0, y: 0, width: 100, height: 100 },
-        main: { x: 40, y: 0, width: 60, height: 100 },
-        aside: { x: 0, y: 0, width: 35, height: 100 }
+        width: initValue,
+        height: initValue
     },
     vizDefPercent: {
-        useful_width: 70,
         useful_height: 60,
         top_margin: 24,
-        bottom_margin: 16,
-        horizontal_margin: 15
+        bottom_margin: 5,
+        bottom_padding: 11,
+        horizontal_margin: 15,
+        main_width: 60,
+        aside_width: 40
     },
     viz: {
-        useful_width: 10,
-        useful_height: 10,
-        top_margin: 10,
-        bottom_margin: 10,
-        horizontal_margin: 10
+        useful_height: initValue,
+        width: initValue,
+        useful_width: initValue,
+        //
+        top_margin: initValue,
+        bottom_margin: initValue,
+        bottom_padding: initValue,
+        horizontal_padding: initValue,
+        //
+        main_x: initValue,
+        main_width: initValue,
+        main_useful_width: initValue,
+        main_useful_height: initValue,
+        main_top_padding: initValue,
+        aside_x: initValue,
+        aside_width: initValue,
+        aside_useful_width: initValue,
+        aside_useful_height: initValue,
+        aside_top_padding: initValue
     },
     selectedZone: {
         main: {
@@ -71,10 +69,7 @@ const display = (state = defaultState, action) => {
     case types.SET_DISPLAY:
         return {
             ...state,
-            mode: action.mode || state.mode,
             screen: action.screen || state.screen,
-            grid: action.grid || state.grid,
-            zones: action.zones || state.zones,
             viz: action.viz || state.viz
         }
     case types.SHOW_SETTINGS:

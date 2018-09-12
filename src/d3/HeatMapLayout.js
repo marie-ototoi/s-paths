@@ -99,12 +99,8 @@ class HeatMapLayout extends AbstractLayout {
     }
 
     getElementsInZone (props) {
-        const selectedZone = {
-            x1: props.zoneDimensions.x1 - props.display.viz.horizontal_margin,
-            y1: props.zoneDimensions.y1 - props.display.viz.top_margin,
-            x2: props.zoneDimensions.x2 - props.display.viz.horizontal_margin,
-            y2: props.zoneDimensions.y2 - props.display.viz.top_margin
-        }
+        let { display, zone, zoneDimensions } = props
+        const selectedZone = zoneDimensions
         let selectedElements = []
         d3.select(this.el).selectAll('.yUnits')
             .each(function (d, i) {
@@ -117,14 +113,14 @@ class HeatMapLayout extends AbstractLayout {
     }
 
     resize (props) {
-        const { nestedProp1, nestedProp2, display, selectedConfig } = props
+        const { nestedProp1, nestedProp2, display, selectedConfig, zone } = props
         let mapY = {}
         nestedProp2.forEach((p, i) => {
             mapY[p.key] = nestedProp2.length - 2 - i
         })
         let category = selectedConfig.properties[0].category
         let dico = dataLib.getDict(nestedProp1)
-        const xScale = d3.scaleLinear().range([0, display.viz.useful_width])
+        const xScale = d3.scaleLinear().range([0, display.viz[zone + '_useful_width']])
         if (category === 'number' || category === 'datetime') {
             xScale.domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
         } else if (category === 'text' || category === 'uri') {
@@ -145,9 +141,9 @@ class HeatMapLayout extends AbstractLayout {
             .each(d => {
                 if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
             })
-        let unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedProp1, category))
+        let unitWidth = Math.floor(display.viz[zone + '_useful_width'] / dataLib.getNumberOfUnits(nestedProp1, category))
         if (unitWidth < 1) unitWidth = 1
-        const unitHeight = Math.round(display.viz.useful_height / (props.nestedProp2.length - 1))
+        const unitHeight = Math.round(display.viz[zone + '_useful_height'] / (props.nestedProp2.length - 1))
         // todo : s'il n'y a pas de unitHeigth sauvé pour cette config on recalcule
         d3.select(this.el).selectAll('g.xUnits').selectAll('.yUnits')
             .each((d, i) => {
@@ -157,7 +153,7 @@ class HeatMapLayout extends AbstractLayout {
                 } else {
                     x1 = xScale(Number(dico[d.parent]))
                 }
-                let y1 = display.viz.useful_height - (mapY[d.key] * unitHeight)
+                let y1 = display.viz[zone + '_useful_height'] - (mapY[d.key] * unitHeight)
                 d.zone = {
                     x1: x1,
                     y1: y1 - unitHeight,

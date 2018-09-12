@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import History from '../elements/History'
 import Legend from '../elements/Legend'
 import SelectionZone from '../elements/SelectionZone'
 // d3
@@ -68,7 +67,7 @@ class URIWheel extends React.Component {
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
-                dimensions = { display.zones[zone] }
+                dimensions = { dimensions }
                 handleMouseMove = { this.props.handleMouseMove }
                 layout = { this.layout }
                 selections = { selections }
@@ -76,7 +75,7 @@ class URIWheel extends React.Component {
             }
             { step !== 'changing' &&
             <g
-                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
+                transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y})` }
                 ref = {(c) => { this[this.customState.elementName] = c }}
                 onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
                 onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this.layout, selections) } }
@@ -91,9 +90,6 @@ class URIWheel extends React.Component {
                     offset = { { x: 10, y: 0, width: -20, height: -30 } }
                     legend = { legend }
                     selectElements = { this.selectEnsemble }
-                />
-                <History
-                    zone = { zone }
                 />
             </g>
             }

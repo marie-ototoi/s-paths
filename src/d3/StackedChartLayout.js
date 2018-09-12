@@ -89,12 +89,8 @@ class StackedChartLayout extends AbstractLayout {
         return results
     }
     getElementsInZone (props) {
-        const selectedZone = {
-            x1: props.zoneDimensions.x1 - props.display.viz.horizontal_margin,
-            y1: props.zoneDimensions.y1 - props.display.viz.top_margin,
-            x2: props.zoneDimensions.x2 - props.display.viz.horizontal_margin,
-            y2: props.zoneDimensions.y2 - props.display.viz.top_margin
-        }
+        let { display, zone, zoneDimensions } = props
+        const selectedZone = zoneDimensions
         let selectedElements = []
         d3.select(this.el).selectAll('.elements')
             .each(function (d, i) {
@@ -104,10 +100,10 @@ class StackedChartLayout extends AbstractLayout {
         return selectedElements
     }
     resize (props) {
-        const { nestedProp1, display, selectedConfig } = props
+        const { nestedProp1, display, selectedConfig, zone } = props
         let category = selectedConfig.properties[0].category
         let dico = dataLib.getDict(nestedProp1)
-        const xScale = d3.scaleLinear().range([0, display.viz.useful_width])
+        const xScale = d3.scaleLinear().range([0, display.viz[zone + '_useful_width']])
         if (category === 'number' || category === 'datetime') {
             xScale.domain([Number(nestedProp1[0].key), Number(nestedProp1[nestedProp1.length - 1].key)])
         } else if (category === 'text' || category === 'uri') {
@@ -128,12 +124,12 @@ class StackedChartLayout extends AbstractLayout {
             .each(d => {
                 if (d.values.length > maxUnitsPerYear) maxUnitsPerYear = d.values.length
             })
-        let unitWidth = Math.floor(display.viz.useful_width / dataLib.getNumberOfUnits(nestedProp1, category))
+        let unitWidth = Math.floor(display.viz[zone + '_useful_width'] / dataLib.getNumberOfUnits(nestedProp1, category))
         if (unitWidth < 1) unitWidth = 1
-        const unitHeight = (display.viz.useful_height / maxUnitsPerYear)
+        const unitHeight = (display.viz[zone + '_useful_height'] / maxUnitsPerYear)
         const group = nestedProp1[0].group 
         d3.select(this.el).selectAll('g.time').selectAll('.elements')
-            .attr('transform', (d, i) => `translate(0, ${display.viz.useful_height - (i * unitHeight)})`)
+            .attr('transform', (d, i) => `translate(0, ${display.viz[zone + '_useful_height'] - (i * unitHeight)})`)
         d3.select(this.el).selectAll('g.time').selectAll('.elements')
             .each((d, i) => {
                 let x1
@@ -142,7 +138,7 @@ class StackedChartLayout extends AbstractLayout {
                 } else {
                     x1 = xScale(Number(dico[d.prop1.value]))
                 }
-                const y1 = display.viz.useful_height - (i * unitHeight)
+                const y1 = display.viz[zone + '_useful_height'] - (i * unitHeight)
                 d.zone = {
                     x1: x1,
                     y1: y1 - unitHeight,

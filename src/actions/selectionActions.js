@@ -1,9 +1,9 @@
 import types from '../constants/ActionTypes'
 import * as selectionLib from '../lib/selectionLib'
-import { getZoneCoord } from '../lib/scaleLib'
 
 export const handleMouseDown = (dispatch) => (e, zone, display) => {
-    let offset = getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen)
+    let offset = { x: (display.viz[zone + '_x'] + display.viz['horizontal_padding']), y: (display.viz['top_margin'] + display.viz[zone + '_top_padding']) }
+    // console.log('handleMouseDown', e.pageX - offset.x, e.pageY - offset.y)
     return dispatch({
         type: types.START_SELECTED_ZONE,
         x1: e.pageX - offset.x,
@@ -12,7 +12,8 @@ export const handleMouseDown = (dispatch) => (e, zone, display) => {
     })
 }
 export const handleMouseUp = (dispatch) => (e, zone, display, layout, selections) => {    
-    let offset = getZoneCoord(zone, display.mode, display.zonesDefPercent, display.screen)
+    // console.log('handleMouseUp')
+    let offset = { x: (display.viz[zone + '_x'] + display.viz['horizontal_padding']), y: (display.viz['top_margin'] + display.viz[zone + '_top_padding']) }
     let selectionZone = {
         x1: display.selectedZone[zone].x1 || e.pageX - offset.x,
         y1: display.selectedZone[zone].y1 || e.pageY - offset.y,

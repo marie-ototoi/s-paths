@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import History from '../elements/History'
 import Legend from '../elements/Legend'
 import Axis from '../elements/Axis'
 import PropSelector from '../elements/PropSelector'
@@ -80,7 +79,7 @@ class HeatMap extends React.Component {
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
-                dimensions = { display.zones[zone] }
+                dimensions = { dimensions }
                 handleMouseMove = { this.props.handleMouseMove }
                 layout = { this.layout }
                 selections = { selections }
@@ -88,7 +87,7 @@ class HeatMap extends React.Component {
             }
             { step !== 'changing' &&
             <g
-                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
+                transform = { `translate(${dimensions.x + dimensions.horizontal_padding }, ${dimensions.y + dimensions.top_padding})` }
                 ref = { (c) => { this[this.customState.elementName] = c } }
                 onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
                 onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this.layout, selections) } }
@@ -100,7 +99,7 @@ class HeatMap extends React.Component {
                 <Legend
                     type = "plain"
                     zone = { zone }
-                    offset = { { x: 10, y: 0, width: -20, height: 0 } }
+                    offset = { { x: 10, y: 0, width:0, height: 0 } }
                     legend = { legend }
                     selectElements = { this.selectEnsemble }
                 />
@@ -124,7 +123,7 @@ class HeatMap extends React.Component {
                     propList = { this.customState.propsLists[0] }
                     config = { config }
                     align = "right"
-                    dimensions = { getDimensions('legendAxisBottom', display.zones[zone], display.viz, { x: 0, y: -15, width: -35, height: 0 }) }
+                    dimensions = { getDimensions(zone + 'LegendAxisBottom', display.viz, { x: 0, y: -15, width: -35, height: 0 }) }
                     propIndex = { 0 }
                     zone = { zone }
                 />
@@ -134,11 +133,8 @@ class HeatMap extends React.Component {
                     propList = { this.customState.propsLists[1] }
                     config = { config }
                     align = "right"
-                    dimensions = { getDimensions('legendAxisLeft', display.zones[zone], display.viz, { x: 0, y: 30, width: 0, height: 0 }) }
+                    dimensions = { getDimensions(zone + 'LegendAxisLeft', display.viz, { x: 0, y: 30, width: 0, height: 0 }) }
                     propIndex = { 1 }
-                    zone = { zone }
-                />
-                <History
                     zone = { zone }
                 />
             </g>

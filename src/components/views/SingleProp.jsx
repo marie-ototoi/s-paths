@@ -3,7 +3,6 @@ import React from 'react'
 import shallowEqual from 'shallowequal'
 import { connect } from 'react-redux'
 // components
-import History from '../elements/History'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 
@@ -69,7 +68,7 @@ class SingleProp extends React.Component {
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
-                dimensions = { display.zones[zone] }
+                dimensions = { dimensions }
                 handleMouseMove = { this.props.handleMouseMove }
                 layout = { this }
                 selections = { selections }
@@ -77,7 +76,7 @@ class SingleProp extends React.Component {
             }
             { step !== 'changing' && this.customState.nestedProp1 &&
             <foreignObject
-                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
+                transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y})` }
                 with = { dimensions.width }
                 height = { dimensions.height }
                 onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
@@ -97,13 +96,6 @@ class SingleProp extends React.Component {
                     </div>
                 </div>
             </foreignObject>
-            }
-            { role !== 'target' && step !== 'changing' &&
-            <g>
-                <History
-                    zone = { zone }
-                />
-            </g>
             }
         </g>)
     }

@@ -10,10 +10,6 @@ const displayDef = {
     main: { x: 35, y: 35, width: 30, height: 30 },
     aside: { x: 70, y: 35, width: 30, height: 30 }
 }
-const gridDef = {
-    xPoints: [0, 30, 35, 65, 70, 85, 100],
-    yPoints: [0, 30, 35, 65, 70, 85, 100]
-}
 const screens = [
     { width: 1400, height: 700 },
     { width: 1500, height: 650 }
@@ -51,17 +47,5 @@ describe('lib/scale', () => {
         let pointY = scale.scaleY(10, stages[1])
         expect(pointX).to.equal(140)
         expect(pointY).to.equal(70)
-    })
-    it('should return actual values for lists of xPoints and yPoints defined in percentage', () => {
-        let grid = scale.getGrid(gridDef, stages[1])
-        expect(grid).to.deep.equal({
-            xPoints: [0, 420, 490, 910, 980, 1190, 1400],
-            yPoints: [0, 210, 245, 455, 490, 595, 700]
-        })
-    })
-    it('should return the coords of a point relative to its zone', () => {
-        expect(scale.getZoneCoord('aside', 'full', displayDef, screens[0])).to.deep.equal({ x: 753, y: 0 })
-        expect(scale.getZoneCoord('aside', 'aside', displayDef, screens[0])).to.deep.equal({ x: 0, y: 0 })
-        expect(scale.getZoneCoord('aside', 'dev', displayDef, screens[0])).to.deep.equal({ x: 980, y: 245 })
     })
 })

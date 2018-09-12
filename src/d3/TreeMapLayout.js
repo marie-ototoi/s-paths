@@ -91,12 +91,8 @@ class TreeMapLayout extends AbstractLayout {
     }
 
     getElementsInZone (props) {
-        const selectedZone = {
-            x1: props.zoneDimensions.x1 - props.display.viz.horizontal_margin,
-            y1: props.zoneDimensions.y1 - props.display.viz.top_margin,
-            x2: props.zoneDimensions.x2 - props.display.viz.horizontal_margin,
-            y2: props.zoneDimensions.y2 - props.display.viz.top_margin
-        }
+        let { display, zone, zoneDimensions } = props
+        const selectedZone = zoneDimensions
         let selectedElements = []
         d3.select(this.el).selectAll('g.units')
             .each(function (d, i) {
@@ -109,10 +105,10 @@ class TreeMapLayout extends AbstractLayout {
     }
 
     resize (props) {
-        const { display, nestedProp1 } = props
-        let width = display.viz.useful_width
-        let height = display.viz.useful_height // Math.floor(display.viz.useful_height * displayedInstances / dataset.stats.selectionInstances)
-        if (height > display.viz.useful_height) height = display.viz.useful_height
+        const { display, nestedProp1, zone } = props
+        let width = display.viz[zone + '_useful_width']
+        let height = display.viz[zone + '_useful_height'] // Math.floor(display.viz.useful_height * displayedInstances / dataset.stats.selectionInstances)
+        if (height > display.viz[zone + '_useful_height']) height = display.viz[zone + '_useful_height']
         let map = dataLib.splitRectangle({ x1: 0, y1: 0, width, height }, nestedProp1.map(propgroup => {
             return (propgroup.values.length > 0) ? {
                 name: propgroup.key,
@@ -124,10 +120,10 @@ class TreeMapLayout extends AbstractLayout {
             .each((d, i) => {
                 d.zone = {
                     ...map[i].zone,
-                    y1: (display.viz.useful_height - height) + map[i].zone.y1
+                    y1: (display.viz[zone + '_useful_height'] - height) + map[i].zone.y1
                 }
             })
-            .attr('transform', (d, i) => `translate(${map[i].zone.x1}, ${(display.viz.useful_height - height) + map[i].zone.y1})`)
+            .attr('transform', (d, i) => `translate(${map[i].zone.x1}, ${(display.viz[zone + '_useful_height'] - height) + map[i].zone.y1})`)
         d3.select(this.el).selectAll('g.units rect')
             .attr('width', (d, i) => map[i].zone.width)
             .attr('height', (d, i) => map[i].zone.height)

@@ -7,15 +7,6 @@ export const scaleViewBox = (viewBoxDef, stage) => {
     return { x, y, width, height }
 }
 
-export const getZones = (zonesDef, stage) => {
-    return {
-        main: scaleViewBox(zonesDef.main, stage),
-        aside: scaleViewBox(zonesDef.aside, stage),
-        full: scaleViewBox(zonesDef.full, stage),
-        dev: scaleViewBox(zonesDef.dev, stage)
-    }
-}
-
 export const getScreen = () => {
     return {
         height: window.innerHeight - 5,
@@ -24,25 +15,49 @@ export const getScreen = () => {
 }
 
 export const getViz = (vizDef, stage) => {
-    return {
-        useful_width: scaleX(vizDef.useful_width, stage),
-        useful_height: scaleY(vizDef.useful_height, stage),
-        horizontal_margin: scaleX(vizDef.horizontal_margin, stage),
-        top_margin: scaleY(vizDef.top_margin, stage),
-        bottom_margin: scaleY(vizDef.bottom_margin, stage)
+    let opt = { 
+        horizontal_padding_percent: 15,
+        horizontal_padding_min_width: 180,
+        min_ratio: 1.1
     }
-}
-
-export const getZoneCoord = (zone, mode, zonesDefPercent, screen) => {
-    // find top left of the zone
-    let factorX = zonesDefPercent[mode].width
-    let factorY = zonesDefPercent[mode].height
-    let offsetXPercent = (zonesDefPercent[zone].x - zonesDefPercent[mode].x) * 100 / factorX
-    let offsetYPercent = (zonesDefPercent[zone].y - zonesDefPercent[mode].y) * 100 / factorY
-    let offsetX = Math.floor(offsetXPercent * screen.width / 100)
-    let offsetY = Math.floor(offsetYPercent * screen.height / 100)
-    // console.log(factorX, factorY, offsetX, offsetY)
-    return { x: offsetX, y: offsetY }
+    //
+    let useful_height = scaleY(vizDef.useful_height, stage)
+    let bottom_padding = scaleY(vizDef.bottom_padding, stage)
+    //
+    let main_width = scaleX(vizDef.main_width, stage)
+    let aside_width = scaleX(vizDef.aside_width, stage)
+    let horizontal_main_padding = Math.floor(main_width * opt.horizontal_padding_percent / 100)
+    let horizontal_aside_padding = Math.floor(aside_width * opt.horizontal_padding_percent / 100)
+    let horizontal_padding = Math.max(horizontal_main_padding, horizontal_aside_padding, opt.horizontal_padding_min_width)
+    let main_useful_width = main_width - (horizontal_padding * 2)
+    let aside_useful_width = aside_width - (horizontal_padding * 2)
+    let main_useful_height = useful_height
+    let aside_useful_height = useful_height
+    while ((main_useful_width / main_useful_height) < opt.min_ratio) {
+        main_useful_height -= 10
+    }
+    while ((aside_useful_width / aside_useful_height) < opt.min_ratio) {
+        aside_useful_height -= 10
+    }
+    return {
+        useful_height,
+        width: stage.width,
+        useful_width: stage.width - (horizontal_padding * 2),
+        top_margin: scaleY(vizDef.top_margin, stage),
+        bottom_margin: scaleY(vizDef.bottom_margin, stage),
+        bottom_padding,
+        horizontal_padding,
+        main_x: aside_width,
+        main_width,
+        main_useful_width,
+        main_useful_height,
+        main_top_padding: useful_height - main_useful_height,
+        aside_x: 0,
+        aside_width,
+        aside_useful_width,
+        aside_useful_height,
+        aside_top_padding: useful_height - aside_useful_height
+    }
 }
 
 export const scaleX = (xPoint, stage) => {
@@ -53,96 +68,140 @@ export const scaleY = (yPoint, stage) => {
     return Math.floor(stage.height * yPoint / 100)
 }
 
-export const getGrid = (gridDef, stage) => {
-    let xPoints = gridDef.xPoints.map(point => scaleX(point, stage))
-    let yPoints = gridDef.yPoints.map(point => scaleY(point, stage))
-    return { xPoints, yPoints }
-}
-
-export const getDimensions = (element, origin, viz, offset = { x: 0, y: 0, width: 0, height: 0 }) => {
+export const getDimensions = (element, viz, offset = { x: 0, y: 0, width: 0, height: 0 }) => {
     switch (element) {
     case 'settings':
         return {
-            x: origin.x + viz.horizontal_margin + offset.x,
-            y: origin.y + viz.top_margin + offset.y,
+            x: viz.horizontal_padding + offset.x,
+            y: viz.top_margin + offset.y,
             width: viz.useful_width + offset.width,
             height: viz.useful_height + offset.height
         }
     case 'core':
         return {
-            x: origin.x + viz.horizontal_margin + offset.x,
-            y: origin.y + viz.top_margin + offset.y,
+            x: viz.horizontal_padding + offset.x,
+            y: viz.top_margin + offset.y,
             width: viz.useful_width + offset.width,
             height: viz.useful_height + offset.height
         }
     case 'main':
         return {
-            x: origin.x + viz.horizontal_margin + offset.x,
-            y: origin.y + viz.top_margin + offset.y,
-            width: viz.useful_width + offset.width,
-            height: viz.useful_height + offset.height
+            x: viz.main_x + offset.x,
+            y: viz.top_margin + offset.y,
+            width: viz.main_width + offset.width,
+            height: viz.useful_height + viz.bottom_padding + offset.height,
+            useful_width: viz.main_useful_width + offset.width,
+            useful_height: viz.useful_height - viz.main_top_padding + offset.height,
+            horizontal_padding: viz.horizontal_padding,
+            top_padding: viz.main_top_padding + offset.height
         }
     case 'aside':
         return {
-            x: origin.x + viz.horizontal_margin + offset.x,
-            y: origin.y + viz.top_margin + offset.y,
-            width: viz.useful_width + offset.width,
-            height: viz.useful_height + offset.height
+            x: viz.aside_x + offset.x,
+            y: viz.top_margin + offset.y,
+            width: viz.aside_width + offset.width,
+            height: viz.useful_height + viz.bottom_padding + offset.height,
+            useful_width: viz.aside_useful_width + offset.width,
+            useful_height: viz.useful_height - viz.aside_top_padding + offset.height,
+            horizontal_padding: viz.horizontal_padding,
+            top_padding: viz.aside_top_padding + offset.height
         }
-    case 'legend':
+    case 'mainLegend':
         return {
-            x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
-            y: origin.y + viz.top_margin + offset.y,
-            width: viz.horizontal_margin + offset.width,
-            height: viz.useful_height + offset.height
+            x: viz.main_x + viz.main_width - viz.horizontal_padding + offset.x,
+            y: viz.top_margin + viz.main_top_padding + offset.y,
+            width: viz.horizontal_padding + offset.width,
+            height: viz.main_useful_height + offset.height
+        }
+    case 'asideLegend':
+        return {
+            x: viz.aside_x + viz.aside_width - viz.horizontal_padding + offset.x,
+            y: viz.top_margin + viz.aside_top_padding + offset.y,
+            width: viz.horizontal_padding + offset.width,
+            height: viz.aside_useful_height + offset.height
         }
     case 'header':
         return {
-            x: origin.x +  offset.x,
-            y: origin.y + offset.y,
-            width: viz.useful_width + (viz.horizontal_margin * 2) + offset.width,
+            x: offset.x,
+            y: offset.y,
+            width: viz.width + offset.width,
             height: viz.top_margin + offset.height
         }
-    case 'axisBottom':
+    case 'mainAxisBottom':
         return {
-            x: origin.x + viz.horizontal_margin + offset.x,
-            y: origin.y + viz.useful_height + viz.top_margin + offset.y,
-            width: viz.useful_width + offset.width,
-            height: viz.top_margin + offset.height
+            x: viz.main_x + viz.horizontal_padding + offset.x,
+            y: viz.useful_height + viz.top_margin + offset.y,
+            width: viz.main_useful_width + offset.width,
+            height: viz.bottom_margin + offset.height
         }
-    case 'axisLeft':
+    case 'asideAxisBottom':
         return {
-            x: origin.x + offset.x,
-            y: origin.y + viz.top_margin + offset.y,
-            width: viz.horizontal_margin + offset.width,
-            height: viz.useful_height + offset.height
+            x: viz.aside_x + viz.horizontal_padding + offset.x,
+            y: viz.useful_height + viz.top_margin + offset.y,
+            width: viz.aside_useful_width + offset.width,
+            height: viz.bottom_margin + offset.height
         }
-    case 'legendAxisBottom':
+    case 'mainAxisLeft':
         return {
-            x: origin.x + offset.x,
-            y: origin.y + viz.useful_height + viz.top_margin + offset.y,
-            width: viz.horizontal_margin + offset.width,
+            x: viz.main_x + offset.x,
+            y: viz.top_margin + viz.main_top_padding + offset.y,
+            width: viz.horizontal_padding + offset.width,
+            height: viz.useful_height - viz.main_top_padding + offset.height
+        }
+    case 'asideAxisLeft':
+        return {
+            x: viz.aside_x + offset.x,
+            y: viz.top_margin + viz.aside_top_padding + offset.y,
+            width: viz.horizontal_padding + offset.width,
+            height: viz.useful_height - viz.aside_top_padding + offset.height
+        }
+    case 'mainLegendAxisBottom':
+        return {
+            x: viz.main_x + offset.x,
+            y: viz.useful_height + viz.top_margin + offset.y,
+            width: viz.horizontal_padding + offset.width,
             height: 20 + offset.height
         }
-    case 'legendAxisLeft':
+    case 'asideLegendAxisBottom':
         return {
-            x: origin.x + offset.x,
-            y: origin.y + viz.useful_height + viz.top_margin + offset.y,
-            width: viz.horizontal_margin + offset.width,
+            x: viz.aside_x + offset.x,
+            y: viz.useful_height + viz.top_margin + offset.y,
+            width: viz.horizontal_padding + offset.width,
             height: 20 + offset.height
         }
-    case 'legendLegend':
+    case 'mainLegendAxisLeft':
         return {
-            x: origin.x + viz.horizontal_margin + viz.useful_width + offset.x,
-            y: origin.y + (viz.useful_height * 3 / 4) + viz.top_margin + offset.y,
-            width: viz.horizontal_margin + offset.width,
+            x: viz.main_x + offset.x,
+            y: viz.useful_height + viz.top_margin + offset.y,
+            width: viz.horizontal_padding + offset.width,
+            height: 20 + offset.height
+        }
+    case 'asideLegendAxisLeft':
+        return {
+            x: viz.aside_x + offset.x,
+            y: viz.useful_height + viz.top_margin + offset.y,
+            width: viz.horizontal_padding + offset.width,
+            height: 20 + offset.height
+        }
+    case 'mainLegendLegend':
+        return {
+            x: viz.main_x + viz.horizontal_padding + viz.main_useful_width + offset.x,
+            y: (viz.useful_height * 3 / 4) + viz.top_margin + offset.y,
+            width: viz.horizontal_padding + offset.width,
+            height: 20 + offset.height
+        }
+    case 'asideLegendLegend':
+        return {
+            x: viz.aside_x + viz.horizontal_padding + viz.aside_useful_width + offset.x,
+            y: (viz.useful_height * 3 / 4) + viz.top_margin + offset.y,
+            width: viz.horizontal_padding + offset.width,
             height: 20 + offset.height
         }
     case 'history':
         return {
-            x: origin.x + 10 + offset.x,
-            y: origin.y + viz.useful_height + (viz.top_margin * 2) - 10 + offset.y,
-            width: (viz.horizontal_margin * 2) + viz.useful_width - 20 + offset.width,
+            x: 10 + offset.x,
+            y: viz.useful_height + viz.top_margin + viz.bottom_margin + viz.bottom_padding + offset.y,
+            width: (viz.horizontal_padding * 2) + viz.useful_width - 20 + offset.width,
             height: 20 + offset.height
         }
     }

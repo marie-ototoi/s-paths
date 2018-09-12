@@ -1,16 +1,11 @@
 import types from '../constants/ActionTypes'
 import * as scale from '../lib/scaleLib'
 
-export const setDisplay = (dispatch) => ({ env, mode, zonesDef, gridDef, screen, vizDef }) => {
-    let grid = scale.getGrid(gridDef, screen)
-    let zones = scale.getZones(zonesDef, screen)
-    let viz = scale.getViz(vizDef, { width: zones.main.width, height: zones.main.height })
+export const setDisplay = (dispatch) => ({ screen, vizDef }) => {
+    let viz = scale.getViz(vizDef, { width: screen.width, height: screen.height })
     return dispatch({
         type: types.SET_DISPLAY,
         screen,
-        mode,
-        grid,
-        zones,
         viz
     })
 }

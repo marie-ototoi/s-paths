@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 // components
-import History from '../elements/History'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 
@@ -37,7 +36,7 @@ class GeoMap extends React.Component {
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
-                dimensions = { display.zones[zone] }
+                dimensions = { dimensions }
                 handleMouseMove = { this.props.handleMouseMove }
                 layout = { this }
                 selections = { selections }
@@ -45,9 +44,9 @@ class GeoMap extends React.Component {
             }
             { step !== 'changing' && 
             <foreignObject
-                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
-                width = { dimensions.width }
-                height = { dimensions.height }
+                transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y + dimensions.top_padding})` }
+                width = { dimensions.useful_width }
+                height = { dimensions.useful_height }
                 // TODO: These event handlers need another layer to perform mouse selection over the map
                 // onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
                 // onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
@@ -133,13 +132,6 @@ class GeoMap extends React.Component {
                    
                 </Map>
             </foreignObject>
-            }
-            { role !== 'target' && step !== 'changing' &&
-            <g>
-                <History
-                    zone = { zone }
-                />
-            </g>
             }
         </g>)
     }

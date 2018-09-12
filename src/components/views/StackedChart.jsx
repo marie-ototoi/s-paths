@@ -3,7 +3,6 @@ import React from 'react'
 import { connect } from 'react-redux'
 import * as d3 from 'd3'
 // components
-import History from '../elements/History'
 import Legend from '../elements/Legend'
 import PropSelector from '../elements/PropSelector'
 import Axis from '../elements/Axis'
@@ -93,7 +92,7 @@ class StackedChart extends React.Component {
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
-                dimensions = { display.zones[zone] }
+                dimensions = { dimensions }
                 handleMouseMove = { this.props.handleMouseMove }
                 layout = { this.layout }
                 selections = { selections }
@@ -101,7 +100,7 @@ class StackedChart extends React.Component {
             }
             { step !== 'changing' &&
             <g
-                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
+                transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y + dimensions.top_padding})` }
                 ref = {(c) => { this[this.customState.elementName] = c }}
                 onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
                 onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this.layout, selections) } }
@@ -131,7 +130,7 @@ class StackedChart extends React.Component {
                     propList = { this.customState.propsLists[0] }
                     config = { config }
                     align = "right"
-                    dimensions = { getDimensions('legendAxisBottom', display.zones[zone], display.viz, { x: 0, y: -15, width: -35, height: 0 }) }
+                    dimensions = { getDimensions(zone + 'LegendAxisBottom', display.viz, { x: 0, y: -15, width: -35, height: 0 }) }
                     propIndex = { 0 }
                     zone = { zone }
                 />
@@ -140,11 +139,8 @@ class StackedChart extends React.Component {
                     key = { zone + '_propselector_22' }
                     propList = { this.customState.propsLists[1] }
                     config = { config }
-                    dimensions = { getDimensions('legendLegend', display.zones[zone], display.viz, { x: 0, y: 0, width: -35, height: 0 }) }
+                    dimensions = { getDimensions(zone + 'LegendLegend', display.viz, { x: 0, y: 0, width: -35, height: 0 }) }
                     propIndex = { 1 }
-                    zone = { zone }
-                />
-                <History
                     zone = { zone }
                 />
             </g>

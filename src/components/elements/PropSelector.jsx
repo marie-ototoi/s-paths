@@ -28,7 +28,6 @@ class PropSelector extends React.PureComponent {
     }
     render () {
         const { align, dimensions, propList } = this.props
-        // const dimensions = getDimensions('propSelector' + type, display.zones[zone], display.viz, offset)
         const { x, y, width, height } = dimensions
         const alignClass = (align === 'right') ? 'right' : 'left'
         let selectedPropIndex

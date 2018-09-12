@@ -3,7 +3,6 @@ import React from 'react'
 import formatMessage from 'format-message'
 import { connect } from 'react-redux'
 // components
-import History from '../elements/History'
 import SelectionZone from '../elements/SelectionZone'
 // d3
 
@@ -60,7 +59,7 @@ class ListAllProps extends React.Component {
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
-                dimensions = { display.zones[zone] }
+                dimensions = { dimensions }
                 handleMouseMove = { this.props.handleMouseMove }
                 layout = { this }
                 selections = { selections }
@@ -68,7 +67,7 @@ class ListAllProps extends React.Component {
             }
             { step !== 'changing' && this.customState.details &&
             <foreignObject
-                transform = { `translate(${dimensions.x}, ${dimensions.y})` }
+                transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y})` }
                 with = { dimensions.width }
                 height = { dimensions.height }
                 onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
@@ -118,13 +117,6 @@ class ListAllProps extends React.Component {
                     </div>
                 </div>
             </foreignObject>
-            }
-            { role !== 'target' && step !== 'changing' &&
-            <g>
-                <History
-                    zone = { zone }
-                />
-            </g>
             }
         </g>)
     }
