@@ -145,24 +145,19 @@ class App extends React.PureComponent {
         }
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')
-        const statusAside = getCurrentState(this.props.data, 'aside')
         const mainConfig = getSelectedView(getCurrentConfigs(configs, 'main', 'active'), 'main')
         // console.log(getCurrentConfigs(configs, 'transition'))
         const mainTransitionConfig = getSelectedView(getCurrentConfigs(configs, 'main', 'transition'), 'main')
         const MainComponent = mainConfig ? componentIds[mainConfig.id] : ''
         const MainTransitionComponent = mainTransitionConfig ? componentIds[mainTransitionConfig.id] : ''
         const asideConfig = getSelectedView(getCurrentConfigs(configs, 'aside', 'active'), 'aside')
-        const asideTransitionConfig = getSelectedView(getCurrentConfigs(configs, 'aside', 'transition'), 'aside')
         const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
-        const SideTransitionComponent = asideTransitionConfig ? componentIds[asideTransitionConfig.id] : ''
         const coreDimensionsMain = getDimensions('main', display.viz)
         const coreDimensionsAside = getDimensions('aside', display.viz)
         console.log(mainConfig, getCurrentConfigs(configs, 'main', 'active'))
         console.log(mainTransitionConfig, getCurrentConfigs(configs, 'main', 'transition'))
         console.log(asideConfig, getCurrentConfigs(configs, 'aside', 'active'))
-        console.log(asideTransitionConfig, getCurrentConfigs(configs, 'aside', 'transition'))
         console.log(getResults(data, 'aside', 'active'))
-        console.log(getResults(data, 'aside', 'transition'))
         // to do : avoid recalculate transition data at each render
         return (<div
             className = "view"
@@ -231,7 +226,7 @@ class App extends React.PureComponent {
                         role = "origin"
                         dimensions = { coreDimensionsAside }
                         step = { this.state.aside_step }
-                        status = { statusAside }
+                        status = { statusMain }
                         data = { getResults(data, 'aside', 'active') }
                         // coverage = { getResults(data, 'aside', 'coverage') }
                         config = { asideConfig }
