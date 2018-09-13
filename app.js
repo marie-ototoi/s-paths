@@ -1,4 +1,4 @@
-// import dotenv from 'dotenv/config'
+import dotenv from 'dotenv/config'
 import cors from 'cors'
 import express from 'express'
 import bodyParser from 'body-parser'
@@ -12,7 +12,7 @@ mongoose
         useNewUrlParser: true,
         reconnectTries: 20,
     })
-    .catch(err => console.error('✘ ｢app｣: Unable to connect to the MongoDB database', err))
+    .catch(err => console.error('✖ ｢app｣: Unable to connect to the MongoDB database', err))
 
 // Router configuration
 const router = express.Router()
@@ -44,4 +44,5 @@ if (process.env.NODE_ENV === 'development') {
     }));
 }
 
-app.listen(80, () => console.log('ℹ ｢app｣: Semantic Paths server running on port 80'))
+const appPort = process.env.APP_PORT || 80
+app.listen(appPort, () => console.log('ℹ ｢app｣: S-Paths server running on port', appPort))
