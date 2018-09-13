@@ -5,32 +5,21 @@ import * as data from '../../src/lib/dataLib'
 chai.use(sinonChai)
 
 const dataSet1 = {
-    present: [
-        {
-            zone: 'main',
-            statements: {
-                results: {
-                    bindings: [
-                        { prop1: 'toto' }
-                    ]
-                },
-                head: {
-                    vars: ['prop1']
-                }
+    present: {
+        zone: 'main',
+        statements: {
+            results: {
+                bindings: [
+                    { prop1: 'toto' }
+                ]
             },
-            status: 'active'
+            head: {
+                vars: ['prop1']
+            }
         },
-        {
-            zone: 'main',
-            statements: {},
-            status: 'transition'
-        },
-        {
-            zone: 'aside',
-            statements: {},
-            status: 'active'
-        }
-    ]
+        status: 'active'
+    },
+    past: {}
 }
 const dataSet2 = [
     {"entrypoint":{"type":"uri","value":"http://data.bnf.fr/ark:/12148/cb11885977m#foaf:Person"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"-106"},"prop2":{"type":"literal","value":"male"}},
@@ -101,7 +90,6 @@ describe('lib/data', () => {
     })
     it('should return data headings for a specific zone', () => {
         expect(data.getHeadings(dataSet1, 'main', 'active')).to.deep.equal(['prop1'])
-        expect(data.getHeadings(dataSet1, 'aside', 'active')).to.deep.equal([])
     })
     it('should return a nested set of data', () => {
         let groupA = data.nestData(dataSet2, [{ propName: 'prop1', category: 'datetime', max: 50 }, { propName: 'prop2', category: 'text' }])

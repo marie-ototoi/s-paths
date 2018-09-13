@@ -6,7 +6,7 @@ export const areLoaded = (data, zone, status) => {
     console.log('data1', data)
     data = getCurrentData(data, zone, status)
     console.log('data2', data)
-    return data.statements.results !== undefined &&
+    return data.statements !== undefined && data.statements.results !== undefined &&
         data.statements.results.bindings.length > 0
 }
 
@@ -146,8 +146,7 @@ export const getNbDisplayed = (data, zone, status) => {
 
 export const getHeadings = (data, zone, status) => {
     data = getCurrentData(data, zone, status)
-    const filtered = data.filter(d => (d.zone === zone && d.status === status))
-    return (filtered.length > 0 && filtered[0].statements.head) ? filtered[0].statements.head.vars : []
+    return (data.status === status && data.statements.head) ? data.statements.head.vars : []
 }
 
 export const guid = () => {

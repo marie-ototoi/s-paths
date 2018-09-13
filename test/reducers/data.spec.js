@@ -6,7 +6,7 @@ chai.use(sinonChai)
 
 describe('reducers/data', () => {
     it('should handle initial state', () => {
-        expect(data(undefined, { })[0].zone).to.equal('main')
+        expect(data(undefined, { }).status).to.equal('loading')
     })
     /*it('should handle SET_DATA', () => {
     })
