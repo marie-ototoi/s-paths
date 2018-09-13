@@ -28,15 +28,19 @@ class Slider extends React.Component {
     render () {
         const { display } = this.props
         let x = this.state.x || display.viz.aside_width
-        return (<line
-            onDrag = { this.drag }
-            onDragLeave = { this.dragLeave }
-            y1 = { display.viz.top_margin }
-            x1 = { x }
-            y2 = { display.viz.top_margin + display.viz.useful_height }
-            x2 = { x }
-            className = "Slider"
-        />)
+        //<i className="fas fa-columns"></i>
+        return (<g>
+            
+            <line
+                onDrag = { this.drag }
+                onDragLeave = { this.dragLeave }
+                y1 = { display.viz.top_margin + (display.viz.useful_height * 3 / 4) }
+                x1 = { x }
+                y2 = { display.viz.top_margin + display.viz.useful_height }
+                x2 = { x }
+                className = "Slider"
+            />
+        </g>)
     }
 }
 

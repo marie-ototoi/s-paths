@@ -168,6 +168,17 @@ class App extends React.PureComponent {
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
         >
+            { mainConfig &&
+                <Header
+                    zone = "main"
+                    config = { mainConfig }
+                />
+            }
+            { (!mainConfig || display.settingsOpen.main) &&
+                <Settings
+                    dimensions = { getDimensions('settings', display.viz) }
+                />
+            }
             <svg
                 ref = {(c) => { this['refView'] = c }}
                 width = { display.screen.width }
@@ -214,12 +225,6 @@ class App extends React.PureComponent {
                         endTransition = { this.handleEndTransition }
                     />
                 }
-                
-                { (!mainConfig || display.settingsOpen.main) &&
-                    <Settings
-                        dimensions = { getDimensions('settings', display.viz) }
-                    />
-                }
                 { asideConfig && getResults(data, 'aside', 'transition').length > 0 && this.state.aside_step === 'launch' &&
                     <SideTransitionComponent
                         role = "target"
@@ -258,12 +263,6 @@ class App extends React.PureComponent {
                         dimensions = { coreDimensionsAside }
                         elements = { this.state.aside_transition }
                         endTransition = { this.handleEndTransition }
-                    />
-                }
-                { mainConfig &&
-                    <Header
-                        zone = "main"
-                        config = { mainConfig }
                     />
                 }
                 <Slider />

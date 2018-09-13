@@ -26,7 +26,7 @@ class Header extends React.Component {
         this.state = this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
-        if (JSON.stringify(nextProps.configs) && JSON.stringify(this.props.configs) !== JSON.stringify(nextProps.configs)) {
+        if (nextProps.configs && this.props.configs && JSON.stringify(nextProps.configs) && JSON.stringify(this.props.configs) !== JSON.stringify(nextProps.configs)) {
             this.setState(this.prepareData(nextProps))
             return false
         }
@@ -190,12 +190,12 @@ class Header extends React.Component {
             let selectedLists = this.state.configsLists[this.state.selectedView]
             let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) ? {} : { 'disabled' : 'disabled' }
             return (
-                <g className = "Header">
+                <div className = "Header">
                     <ReactKeymaster
                         keyName = "enter"
                         onKeyDown = { this.handleKeyDown }
                     />
-                    <foreignObject
+                    <div
                         transform = { `translate(${x}, ${y})` }
                         width = { width }
                         height = { height }
@@ -425,8 +425,8 @@ class Header extends React.Component {
                             <div 
                                 className = "explain" 
                                 style = {{
-                                    marginTop: Math.floor((display.viz.top_margin - 175)/2) + 'px',
-                                    marginLeft: display.viz.horizontal_padding + 'px'
+                                    marginTop: Math.floor((display.viz.top_margin - 155)/2) + 'px',
+                                    marginLeft: display.viz.horizontal_padding + display.viz.main_x + 'px'
                                 }} >
                                 <p>You are visualizing <strong>{ options[2].total } { pluralize('entity', options[2].total) } </strong>  
                                 belonging to the class of ressources <strong>{ this.state.resourceList[this.state.displayedResource].label } </strong> 
@@ -461,8 +461,8 @@ class Header extends React.Component {
                             </div>
                             
                         </div>
-                    </foreignObject>
-                </g>
+                    </div>
+                </div>
             )
         } else {
             return null

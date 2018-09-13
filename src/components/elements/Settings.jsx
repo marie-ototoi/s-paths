@@ -12,62 +12,62 @@ class Settings extends React.PureComponent {
     render () {
         const { dataset, dimensions, zone } = this.props
         const { x, y, width, height } = dimensions
-        return (<g
-            className = "Settings"
-            transform = { `translate(${x}, ${y})` }
+        return (<div
+            className = "Settings box"
+            style = {
+                {
+                    width,
+                    height,
+                    position: 'absolute',
+                    left: x + 'px',
+                    top: y + 'px'
+                }
+            }
         >
-            <foreignObject
-                width = { width }
-                height = { height }
-                fill = "#fff"
-            >
-                <div className = "box">
-                    <div className = "content">
-                        <div className = "field">
-                            <label className = "label"></label>
-                            <div className ="control">
-                               
-                            </div>
-                        </div>
-                        <div className = "field">
-                            <label className = "label"></label>
-                            <div className ="control">
-                             
-                            </div>
-                        </div>
-
-                        { dataset.resources.lenght === 0 &&
-                        <button
-                            onClick = { e => {
-                                //console.log(this.props.dataset)
-                                this.props.analyseResources({ ...this.props.dataset, forceUpdate: true }, [])
-                            } }
-                        >
-                            Get Resources
-                        </button>
-                        }
-                        <table className = "table is-bordered">
-                            <tbody>
-                                { dataset.resources.map((resource, ri) => {
-                                    return (<tr key = { `resource_${zone}_${ri}` }>
-                                        <td>{ resource.type }</td>
-                                        <td><a onClick = { e => {
-                                            this.props.loadStats({
-                                                ...dataset,
-                                                analyse: true,
-                                                entrypoint: resource.type,
-                                                totalInstances: resource.total,
-                                                selectionInstances: resource.total
-                                            })
-                                        } }>analyze stats</a></td>
-                                    </tr>)
-                                }) }
-                            </tbody>
-                        </table>                   
+            <div className = "content">
+                <div className = "field">
+                    <label className = "label"></label>
+                    <div className ="control">
+                        
                     </div>
                 </div>
-            </foreignObject>
-        </g>)
+                <div className = "field">
+                    <label className = "label"></label>
+                    <div className ="control">
+                        
+                    </div>
+                </div>
+
+                { dataset.resources.lenght === 0 &&
+                <button
+                    onClick = { e => {
+                        //console.log(this.props.dataset)
+                        this.props.analyseResources({ ...this.props.dataset, forceUpdate: true }, [])
+                    } }
+                >
+                    Get Resources
+                </button>
+                }
+                <table className = "table is-bordered">
+                    <tbody>
+                        { dataset.resources.map((resource, ri) => {
+                            return (<tr key = { `resource_${zone}_${ri}` }>
+                                <td>{ resource.type }</td>
+                                <td><a onClick = { e => {
+                                    this.props.loadStats({
+                                        ...dataset,
+                                        analyse: true,
+                                        entrypoint: resource.type,
+                                        totalInstances: resource.total,
+                                        selectionInstances: resource.total
+                                    })
+                                } }>analyze stats</a></td>
+                            </tr>)
+                        }) }
+                    </tbody>
+                </table>                   
+            </div>
+        </div>)
     }
 }
 

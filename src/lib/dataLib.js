@@ -3,9 +3,7 @@ import shallowEqual from 'shallowequal'
 import * as queryLib from './queryLib'
 
 export const areLoaded = (data, zone, status) => {
-    console.log('data1', data)
     data = getCurrentData(data, zone, status)
-    console.log('data2', data)
     return data.statements !== undefined && data.statements.results !== undefined &&
         data.statements.results.bindings.length > 0
 }
