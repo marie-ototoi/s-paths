@@ -429,8 +429,8 @@ class Header extends React.Component {
                                     marginLeft: display.viz.horizontal_padding + display.viz.main_x + 'px'
                                 }} >
                                 <p>You are visualizing <strong>{ options[2].total } { pluralize('entity', options[2].total) } </strong>  
-                                belonging to the class of ressources <strong>{ this.state.resourceList[this.state.displayedResource].label } </strong> 
-                                according to <strong>{ selectedProperties.length } property { pluralize('path', selectedProperties.length) } </strong> 
+                                belonging to the class of ressources <strong>{ this.state.resourceList[this.state.displayedResource].label } </strong>
+                                    according to <strong>{ selectedProperties.length } property { pluralize('path', selectedProperties.length) } </strong> 
                                 traversing <strong>{ allgraphs.length } { pluralize('graph', allgraphs.length) }</strong></p><span className = "resource-def">?
                                     <div className = "resource-content" style = {{ margin: '-55px 0 0 0' + 'px' }}>
                                         <ul><span>Graphs: </span>  

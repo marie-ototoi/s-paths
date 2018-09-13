@@ -51,7 +51,8 @@ const initialState = {
         frbr: 'http://purl.org/vocab/frbr/core#',
         sim: 'http://purl.org/ontology/similarity/',
         slickm: 'http://slickmem.data.t-mus.org/',
-        slickmem: 'http://slickmem.data.t-mus.org/terms/'
+        slickmem: 'http://slickmem.data.t-mus.org/terms/',
+        umbel: 'http://umbel.org/umbel/rc/'
     },
     stats: []
 }

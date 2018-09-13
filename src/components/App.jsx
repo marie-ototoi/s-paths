@@ -225,20 +225,6 @@ class App extends React.PureComponent {
                         endTransition = { this.handleEndTransition }
                     />
                 }
-                { asideConfig && getResults(data, 'aside', 'transition').length > 0 && this.state.aside_step === 'launch' &&
-                    <SideTransitionComponent
-                        role = "target"
-                        zone = "aside"
-                        status = { statusAside }
-                        dimensions = { coreDimensionsAside }
-                        data = { getResults(data, 'aside', 'transition') }
-                        // coverage = { getResults(data, 'aside', 'coverage') }
-                        config = { getSelectedView(getCurrentConfigs(configs, 'aside', 'transition'), 'aside') }
-                        selections = { selectionLib.getSelections(selections, 'aside', 'transition') }
-                        ref = {(c) => { this.refAsideTransition = c }}
-                        handleTransition = { this.handleTransition }
-                    />
-                }
                 { asideConfig && data.past.length > 1 && areLoaded(data, 'aside', 'active') &&
                     <SideComponent
                         zone = "aside"
@@ -255,14 +241,6 @@ class App extends React.PureComponent {
                         handleMouseMove = { this.handleMouseMove }
                         handleMouseUp = { this.handleMouseUp }
                         handleTransition = { this.handleTransition }
-                    />
-                }
-                { asideConfig && getResults(data, 'aside', 'transition').length > 0 && this.state.aside_step === 'changing' &&
-                    <Transition
-                        zone = "aside"
-                        dimensions = { coreDimensionsAside }
-                        elements = { this.state.aside_transition }
-                        endTransition = { this.handleEndTransition }
                     />
                 }
                 <Slider />

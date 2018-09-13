@@ -13,8 +13,8 @@ const defaultState = {
         bottom_margin: 5,
         bottom_padding: 11,
         horizontal_margin: 15,
-        main_width: 70,
-        aside_width: 30
+        main_width: 65,
+        aside_width: 35
     },
     viz: {
         useful_height: initValue,
