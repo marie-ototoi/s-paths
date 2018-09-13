@@ -3,20 +3,15 @@ import shallowEqual from 'shallowequal'
 import * as queryLib from './queryLib'
 
 export const areLoaded = (data, zone, status) => {
-    data = getCurrentData(data, status)
-    const filtered = data.filter(d => (d.zone === zone && d.status === status))
-    return filtered.length > 0 &&
-        filtered[0].statements.results !== undefined &&
-        filtered[0].statements.results.bindings.length > 0
+    console.log('data1', data)
+    data = getCurrentData(data, zone, status)
+    console.log('data2', data)
+    return data.statements.results !== undefined &&
+        data.statements.results.bindings.length > 0
 }
 
 export const getCurrentState = (data, zone) => {
-    const filtered = data.present.filter(d => (d.zone === zone))
-    if (filtered[0].statements.length === 0) {
-        return 'loading'
-    } else {
-        return filtered[0].status
-    }
+    return data.present.status
 }
 
 export const getDict = (arrayWithKeys) => {
@@ -100,31 +95,32 @@ export const getNumberOfUnits = (nestedData, category) => {
     }
 }
 
-const getCurrentData = (data, status) => {
+const getCurrentData = (data, zone, status) => {
     const currentStateMain = getCurrentState(data, 'main')
-    const currentStateAside = getCurrentState(data, 'aside')
     let dataMain
-    let dataAside
-    if (currentStateMain === 'transition' && status === 'active') {
-        dataMain = data.past[data.past.length - 1].filter(d => d.zone === 'main')
+    if (zone === 'main') {
+        if (currentStateMain === 'transition' && status === 'active') {
+            dataMain = data.past[data.past.length - 1]
+        } else {
+            dataMain = data.present
+        }
     } else {
-        dataMain = data.present.filter(d => d.zone === 'main')
+        if (currentStateMain === 'transition' && status === 'active') {
+            console.log('ici ? cas 1', data.past)
+            dataMain = data.past.length >= 1 ? data.past[data.past.length - 1] : {}
+        } else {
+            console.log('ici ? cas 2', data.past)
+            dataMain = data.past.length >= 2 ? data.past[data.past.length - 2] : {}
+        }
     }
-    if (currentStateAside === 'transition' && status === 'active') {
-        dataAside = data.past[data.past.length - 1].filter(d => d.zone === 'aside')
-    } else {
-        dataAside = data.present.filter(d => d.zone === 'aside')
-    }
-    return [
-        ...dataMain,
-        ...dataAside
-    ]
+    return dataMain
 }
 
 export const getResults = (data, zone, status) => {
 
-    data = getCurrentData(data, status)
-    data = data.filter(d => d.zone === zone)
+    data = getCurrentData(data, zone, status)
+    
+    // data = data.filter(d => d.zone === zone)
     let statementsType
     if (status === 'delta') {
         status = 'transition'
@@ -135,22 +131,21 @@ export const getResults = (data, zone, status) => {
     } else {
         statementsType = 'statements'
     }
-    const filtered = data.filter(d => (d.status === status))
-    return (filtered.length > 0 && filtered[0][statementsType].results) ? filtered[0][statementsType].results.bindings : []
+    console.log(zone, data, statementsType, status)
+    // const filtered = data.filter(d => (d.status === status))
+    return (data[statementsType] && data[statementsType].results) ? data[statementsType].results.bindings : []
 }
 
 export const getNbDisplayed = (data, zone, status) => {
-    data = getCurrentData(data, status)
-    data = data.filter(d => d.zone === zone)
+    data = getCurrentData(data, zone, status)
     if (status === 'delta') {
         status = 'transition'
     }
-    const filtered = data.filter(d => (d.status === status))
-    return (filtered.length > 0 && filtered[0].displayed) ? filtered[0].displayed : 0
+    return (data.status === status && data.displayed) ? data.displayed : 0
 }
 
 export const getHeadings = (data, zone, status) => {
-    data = getCurrentData(data, status)
+    data = getCurrentData(data, zone, status)
     const filtered = data.filter(d => (d.zone === zone && d.status === status))
     return (filtered.length > 0 && filtered[0].statements.head) ? filtered[0].statements.head.vars : []
 }
@@ -452,7 +447,9 @@ export const getTransitionElements = (originElements, targetElements, originConf
         }
     })
     // console.log(deltaData)
-    if (!originConfig.entrypoint && originElements.length > 0) {
+    if (!originElements) {
+        originElements = []
+    } else if (!originConfig.entrypoint && originElements.length > 0) {
         originElements = splitTransitionElements(originElements, 'origin', zone, deltaData)
     } else {
         originElements = originElements.map(el => {
@@ -463,7 +460,9 @@ export const getTransitionElements = (originElements, targetElements, originConf
             }
         })
     }
-    if (!targetSelectedView.entrypoint && targetElements.length > 0) {
+    if (!targetElements) {
+        targetElements = []
+    } else if (!targetSelectedView.entrypoint && targetElements.length > 0) {
         targetElements = splitTransitionElements(targetElements, 'target', zone, deltaData)
     } else {
         targetElements = targetElements.map(el => {

@@ -26,7 +26,7 @@ class Header extends React.Component {
         this.state = this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
-        if (JSON.stringify(this.props.configs) !== JSON.stringify(nextProps.configs)) {
+        if (JSON.stringify(nextProps.configs) && JSON.stringify(this.props.configs) !== JSON.stringify(nextProps.configs)) {
             this.setState(this.prepareData(nextProps))
             return false
         }
@@ -45,10 +45,10 @@ class Header extends React.Component {
                 selected: resource.type === nextProps.dataset.entrypoint
             }
         })
-        let configsLists = getConfigs(getCurrentConfigs(nextProps.configs, 'active'), nextProps.zone).map(config => { 
+        let configsLists = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).map(config => { 
             return getPropsLists(config, nextProps.zone, nextProps.dataset)
         })
-        let displayedView = getConfigs(getCurrentConfigs(nextProps.configs, 'active'), nextProps.zone).reduce((acc, cur, i) => { return (cur.selected) ? i : acc }, null)
+        let displayedView = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).reduce((acc, cur, i) => { return (cur.selected) ? i : acc }, null)
         let displayedProps = configsLists[displayedView].map(prop => prop.reduce((acc, cur, i) => { return (cur.selected) ? i : acc }, 0))
         let selectedProps = displayedProps
         let selectedView = displayedView
@@ -99,7 +99,7 @@ class Header extends React.Component {
         let selectedLists = this.state.configsLists[this.state.selectedView]
         const propPaths =  this.state.selectedProps && selectedLists ? this.state.selectedProps.map((prop, i) => selectedLists[i][prop].path) : []
         this.setState({ propsAreLoading: true, errorSelection: '' })
-        this.props.displayConfig(this.state.selectedView, propPaths, getConfigs(getCurrentConfigs(configs, 'active'), zone), config, dataset, zone)
+        this.props.displayConfig(this.state.selectedView, propPaths, getConfigs(getCurrentConfigs(configs, zone, 'active'), zone), config, dataset, zone)
             .then(res => this.setState({
                 propsAreLoading: false,
                 displayedProps: this.state.selectedProps,
@@ -108,7 +108,7 @@ class Header extends React.Component {
     }
     displaySelection () {
         const { config, configs, dataset, selections, views, zone } = this.props
-        const activeConfigs = getCurrentConfigs(configs, 'active')
+        const activeConfigs = getCurrentConfigs(configs, zone, 'active')
         let newConstraints 
         if (selections.length > 0) {
             const selectedConfig = getSelectedMatch(config, zone)
@@ -145,11 +145,11 @@ class Header extends React.Component {
             
             // general
             const dimensions = getDimensions('header', display.viz, { x:0, y:0, width:0, height: 0 })
-            const { x, y, width, height, useful_width } = dimensions
+            const { x, y, width, height } = dimensions
             const fieldWidth = (display.viz.useful_width * 2 / 3)
             const barWidth = (display.viz.useful_width / 3)
-            const activeConfigs = getConfigs(getCurrentConfigs(configs, 'active'), zone)
-            let selectedConfig = getSelectedView(getCurrentConfigs(configs, 'active'), zone)
+            const activeConfigs = getConfigs(getCurrentConfigs(configs, zone, 'active'), zone)
+            let selectedConfig = getSelectedView(getCurrentConfigs(configs, zone, 'active'), zone)
             let selectedProperties = getSelectedMatch(selectedConfig).properties
             let options = [
                 { label: 'entities', total: dataset.stats.totalInstances },
@@ -361,7 +361,7 @@ class Header extends React.Component {
                                                             className = "dropdown-item"
                                                             onClick = { (e) => { this.setState({
                                                                 selectedView: i,
-                                                                selectedProps: getConfigs(getCurrentConfigs(configs, 'active'), zone)[i].constraints.map(c => 0),
+                                                                selectedProps: getConfigs(getCurrentConfigs(configs, zone, 'active'), zone)[i].constraints.map(c => 0),
                                                                 isNavOpen: false }) }
                                                             }
                                                         >

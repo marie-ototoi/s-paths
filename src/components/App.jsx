@@ -99,7 +99,7 @@ class App extends React.PureComponent {
                 // console.log(this.props.dataset)
                 let transitionElements 
                 if (elements.length > 0) {
-                    transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getSelectedView(getCurrentConfigs(configs, 'active'), zone), getSelectedView(getCurrentConfigs(configs, 'transition'), zone), getResults(data, zone, 'delta'), zone)
+                    transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getSelectedView(getCurrentConfigs(configs, zone, 'active'), zone), getSelectedView(getCurrentConfigs(configs, zone, 'transition'), zone), getResults(data, zone, 'delta'), zone)
                 } else {
                     transitionElements = { origin:this.state[`${zone}_origin`], target: [] }
                 }
@@ -130,8 +130,8 @@ class App extends React.PureComponent {
         // console.log('display', display)
         // console.log('views', this.props.views)
         // console.log('dataset', this.props.dataset)
-        // console.log('configs', configs)
-        // console.log('data', data)
+        console.log('configs', configs)
+        console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
             'GeoMap': GeoMap,
@@ -146,19 +146,23 @@ class App extends React.PureComponent {
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')
         const statusAside = getCurrentState(this.props.data, 'aside')
-        const mainConfig = getSelectedView(getCurrentConfigs(configs, 'active'), 'main')
+        const mainConfig = getSelectedView(getCurrentConfigs(configs, 'main', 'active'), 'main')
         // console.log(getCurrentConfigs(configs, 'transition'))
-        const mainTransitionConfig = getSelectedView(getCurrentConfigs(configs, 'transition'), 'main')
+        const mainTransitionConfig = getSelectedView(getCurrentConfigs(configs, 'main', 'transition'), 'main')
         const MainComponent = mainConfig ? componentIds[mainConfig.id] : ''
         const MainTransitionComponent = mainTransitionConfig ? componentIds[mainTransitionConfig.id] : ''
-        const asideConfig = getSelectedView(getCurrentConfigs(configs, 'active'), 'aside')
-        const asideTransitionConfig = getSelectedView(getCurrentConfigs(configs, 'transition'), 'aside')
+        const asideConfig = getSelectedView(getCurrentConfigs(configs, 'aside', 'active'), 'aside')
+        const asideTransitionConfig = getSelectedView(getCurrentConfigs(configs, 'aside', 'transition'), 'aside')
         const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
         const SideTransitionComponent = asideTransitionConfig ? componentIds[asideTransitionConfig.id] : ''
         const coreDimensionsMain = getDimensions('main', display.viz)
         const coreDimensionsAside = getDimensions('aside', display.viz)
-        // console.log( getResults(data, 'aside', 'active') )
-        // console.log(getResults(data, 'main', 'transition'))
+        console.log(mainConfig, getCurrentConfigs(configs, 'main', 'active'))
+        console.log(mainTransitionConfig, getCurrentConfigs(configs, 'main', 'transition'))
+        console.log(asideConfig, getCurrentConfigs(configs, 'aside', 'active'))
+        console.log(asideTransitionConfig, getCurrentConfigs(configs, 'aside', 'transition'))
+        console.log(getResults(data, 'aside', 'active'))
+        console.log(getResults(data, 'aside', 'transition'))
         // to do : avoid recalculate transition data at each render
         return (<div
             className = "view"
@@ -177,7 +181,7 @@ class App extends React.PureComponent {
                         dimensions = { coreDimensionsMain }
                         data = { getResults(data, 'main', 'transition') }
                         // coverage = { getResults(data, 'main', 'coverage') }
-                        config = { getSelectedView(getCurrentConfigs(configs, 'transition'), 'main') }
+                        config = { getSelectedView(getCurrentConfigs(configs, 'main', 'transition'), 'main') }
                         selections = { selectionLib.getSelections(selections, 'main', 'transition') }
                         ref = {(c) => { this.refMainTransition = c }}
                         handleTransition = { this.handleTransition }
@@ -216,7 +220,7 @@ class App extends React.PureComponent {
                         dimensions = { getDimensions('settings', display.viz) }
                     />
                 }
-                { asideConfig && this.state.aside_step === 'launch' &&
+                { asideConfig && getResults(data, 'aside', 'transition').length > 0 && this.state.aside_step === 'launch' &&
                     <SideTransitionComponent
                         role = "target"
                         zone = "aside"
@@ -224,13 +228,13 @@ class App extends React.PureComponent {
                         dimensions = { coreDimensionsAside }
                         data = { getResults(data, 'aside', 'transition') }
                         // coverage = { getResults(data, 'aside', 'coverage') }
-                        config = { getSelectedView(getCurrentConfigs(configs, 'transition'), 'aside') }
+                        config = { getSelectedView(getCurrentConfigs(configs, 'aside', 'transition'), 'aside') }
                         selections = { selectionLib.getSelections(selections, 'aside', 'transition') }
                         ref = {(c) => { this.refAsideTransition = c }}
                         handleTransition = { this.handleTransition }
                     />
                 }
-                { asideConfig && areLoaded(data, 'aside', 'active') &&
+                { asideConfig && data.past.length > 1 && areLoaded(data, 'aside', 'active') &&
                     <SideComponent
                         zone = "aside"
                         role = "origin"
@@ -248,7 +252,7 @@ class App extends React.PureComponent {
                         handleTransition = { this.handleTransition }
                     />
                 }
-                { asideConfig && this.state.aside_step === 'changing' &&
+                { asideConfig && getResults(data, 'aside', 'transition').length > 0 && this.state.aside_step === 'changing' &&
                     <Transition
                         zone = "aside"
                         dimensions = { coreDimensionsAside }

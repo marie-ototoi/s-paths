@@ -122,7 +122,6 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
             }
             let newConfigs = defineConfigs(views, newStats)
             let mainSelected
-            let asideSelected
             //for (let i = 0; i < newConfigs.length; i++) {
             for (let i = 0; i < newConfigs[0].views.length; i++) {
                 let check = matchesToCheck[newConfigs[0].views[i].id]
@@ -142,20 +141,12 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
                                 }
                                 if (newConfigs[0].views.length > 1) j++
                                 break
-                            } else if (!asideSelected) {
-                                asideSelected = true
-                                newConfigs[1].views[i].matches[j].selected = true
-                                for (let k = 0; k < newConfigs[1].views.length; k++) {
-                                    newConfigs[1].views[k].selected = (k === i)
-                                }
-                                j = newConfigs[0].views.length
-                                break
-                            }
+                            } 
                         }
                     }
                 }
             }
-            if (!mainSelected || !asideSelected) {
+            if (!mainSelected) {
                 for (let i = 0; i < newConfigs[0].views.length; i++) {
                     if (newConfigs[0].views[i].id === 'ListAllPropss') {
                         for (let j = 0; j < newConfigs[0].views[i].matches.length; j++) {
@@ -166,13 +157,6 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
                                     newConfigs[0].views[i].matches[j].selected = true
                                     for (let k = 0; k < newConfigs[0].views.length; k++) {
                                         newConfigs[0].views[k].selected = (k === i)
-                                    }
-                                }
-                                if (!asideSelected) {
-                                    asideSelected = true
-                                    newConfigs[1].views[i].matches[j].selected = true
-                                    for (let k = 0; k < newConfigs[1].views.length; k++) {
-                                        newConfigs[1].views[k].selected = (k === i)
                                     }
                                 }
                                 j = newConfigs[0].views.length
@@ -216,37 +200,25 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                 .then(([newConfigs, newStats]) => {
                     // console.log('then ? ',newConfigs, newStats)
                     const previousConfigMain = getSelectedView(previousConfigs, 'main')
-                    const previousConfigAside = getSelectedView(previousConfigs, 'aside')
                     const configMain = getSelectedView(newConfigs, 'main')
                     const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
                     const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
                     let queryTransitionMain = makeTransitionQuery(configMain, dataset, previousConfigMain, previousOptions, 'main')
-                    const configAside = getSelectedView(newConfigs, 'aside')
-                    const queryAside = makeQuery(entrypoint, configAside, 'aside',  { ...dataset, maxDepth: (configAside.id === 'ListAllProps') ? 1 : null })
-                    const queryAsideUnique = makeQuery(entrypoint, configAside, 'aside', { ...dataset, unique: true })
-                    let queryTransitionAside = makeTransitionQuery(configAside, dataset, previousConfigAside, previousOptions, 'aside')
                     // console.log(queryMain)
                     return Promise.all([
                         getData(endpoint, queryMain, prefixes),
-                        (queryMain === queryAside) ? null : getData(endpoint, queryAside, prefixes),
                         getData(endpoint, queryTransitionMain, prefixes),
-                        (queryTransitionMain === queryTransitionAside) ? null : getData(endpoint, queryTransitionAside, prefixes),
-                        getData(endpoint, queryMainUnique, prefixes),
-                        (queryMain === queryAside) ? null : getData(endpoint, queryAsideUnique, prefixes)
+                        getData(endpoint, queryMainUnique, prefixes)
                     ])
-                        .then(([dataMain, dataAside, dataDeltaMain, dataDeltaAside, uniqueMain, uniqueAside]) => { // , coverageMain, coverageAside
+                        .then(([dataMain, dataDeltaMain, uniqueMain]) => { // , coverageMain, coverageAside
                             dispatch({
                                 type: types.SET_CONFIGS,
                                 constraints,
                                 main: { ...dataMain },
-                                aside: dataAside ? { ...dataAside } : { ...dataMain },
                                 mainDelta: dataDeltaMain,
                                 stats,
-                                asideDelta: dataDeltaAside ? dataDeltaAside : dataDeltaMain,
                                 mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMain.results.bindings[0].displayed.value),
-                                asideDisplayed: uniqueAside ? Number(uniqueAside.results.bindings[0].displayed.value) : Number(uniqueMain.results.bindings[0].displayed.value),
-                                mainConfig: newConfigs[0].views,
-                                asideConfig: newConfigs[1].views
+                                mainConfig: newConfigs[0].views
                             })
                         })
                 })
@@ -288,66 +260,52 @@ export const loadResources = (dispatch) => (dataset, views) => {
     let totalInstances
     getResources(dataset)
         .then(resources => {
-            if (resources[0].subgraph) {
-                dataset.entrypoint = resources[0].type
-                dataset.totalInstances = resources[0].total
-             
-                getStats({ ...dataset, stats: [], resources })
-                    .then(stats => {
-                        prefixes = stats.options.prefixes
-                        // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
-                        // for each views, checks which properties ou sets of properties could match and evaluate
-                        let configs = activateDefaultConfigs(defineConfigs(views, stats))
+            dataset.entrypoint = resources[0].type
+            dataset.totalInstances = resources[0].total
+            
+            getStats({ ...dataset, stats: [], resources })
+                .then(stats => {
+                    prefixes = stats.options.prefixes
+                    // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
+                    // for each views, checks which properties ou sets of properties could match and evaluate
+                    let configs = activateDefaultConfigs(defineConfigs(views, stats))
+                    //
+                    const configMain = getSelectedView(configs, 'main')
+                    if (configMain) {
+                        const queryMain = makeQuery(dataset.entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
+                        
+                        const queryMainUnique = makeQuery(dataset.entrypoint, configMain, 'main', { ...dataset, unique: true })
                         //
-                        const configMain = getSelectedView(configs, 'main')
-                        if (configMain) {
-                            const queryMain = makeQuery(dataset.entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
-                            const configAside = getSelectedView(configs, 'aside')
-                            const queryAside = makeQuery(dataset.entrypoint, configAside, 'aside', { ...dataset, maxDepth: (configAside.id === 'ListAllProps') ? 1 : null })
-                            
-                            const queryMainUnique = makeQuery(dataset.entrypoint, configMain, 'main', { ...dataset, unique: true })
-                            const queryAsideUnique = makeQuery(dataset.entrypoint, configAside, 'aside', { ...dataset, unique: true })
-                            //
-                            Promise.all([
-                                getData(endpoint, queryMain, prefixes),
-                                (queryMain === queryAside) ? null : getData(endpoint, queryAside, prefixes),
-                                getData(endpoint, queryMainUnique, prefixes),
-                                (queryMain === queryAside) ? null : getData(endpoint, queryAsideUnique, prefixes)
-                            ])
-                                .then(([dataMain, dataAside, uniqueMainPromise, uniqueAsidePromise]) => { // , coverageMain, coverageAside
-                                    dispatch({
-                                        type: types.SET_RESOURCES,
-                                        resources,
-                                        stats,
-                                        entrypoint: dataset.entrypoint,
-                                        totalInstances,
-                                        prefixes: stats.options.prefixes,
-                                        labels: stats.options.labels,
-                                        constraints: '',
-                                        mainConfig: configs[0].views,
-                                        asideConfig: configs[1].views,
-                                        main: { ...dataMain },
-                                        aside: dataAside ? { ...dataAside } : { ...dataMain },
-                                        mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value),
-                                        asideDisplayed: uniqueAsidePromise ? Number(uniqueAsidePromise.results.bindings[0].displayed.value): Number(uniqueMainPromise.results.bindings[0].displayed.value)
-                                    })
+                        Promise.all([
+                            getData(endpoint, queryMain, prefixes),
+                            getData(endpoint, queryMainUnique, prefixes)
+                        ])
+                            .then(([dataMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
+                                dispatch({
+                                    type: types.SET_RESOURCES,
+                                    resources,
+                                    stats,
+                                    entrypoint: dataset.entrypoint,
+                                    totalInstances,
+                                    prefixes: stats.options.prefixes,
+                                    labels: stats.options.labels,
+                                    constraints: '',
+                                    mainConfig: configs[0].views,
+                                    main: { ...dataMain },
+                                    mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value)
                                 })
-                        } else {
-                            dispatch({
-                                type: types.SET_RESOURCES,
-                                resources
                             })
-                        } 
-                    })
-            } else {
-                dispatch({
-                    type: types.SET_RESOURCES,
-                    resources
+                    } else {
+                        dispatch({
+                            type: types.SET_RESOURCES,
+                            resources
+                        })
+                    } 
                 })
-            }
+    
         })
         .catch(error => {
-            console.error('Error getting data main + aside', error)
+            console.error('Error getting data', error)
         })
 }
 
@@ -361,19 +319,13 @@ export const selectResource = (dispatch) => (dataset, views) => {
             let configs = activateDefaultConfigs(defineConfigs(views, stats))
             const configMain = getSelectedView(configs, 'main')
             const queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
-            const configAside = getSelectedView(configs, 'aside')
-            const queryAside = makeQuery(entrypoint, configAside, 'aside', { ...dataset, maxDepth: (configAside.id === 'ListAllProps') ? 1 : null })
             const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
-            const queryAsideUnique = makeQuery(entrypoint, configAside, 'aside', { ...dataset, unique: true })
-            // const coverageQueryAside = makeQuery(entrypoint, configAside, 'aside', { ...dataset, prop1only: true })
-       
+           
             return Promise.all([
                 getData(endpoint, queryMain, prefixes),
-                (queryMain === queryAside) ? null : getData(endpoint, queryAside, prefixes),
-                getData(endpoint, queryMainUnique, prefixes),
-                (queryMain === queryAside) ? null : getData(endpoint, queryAsideUnique, prefixes)
+                getData(endpoint, queryMainUnique, prefixes)
             ])
-                .then(([dataMain, dataAside, uniqueMainPromise, uniqueAsidePromise]) => { // , coverageMain, coverageAside
+                .then(([dataMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
                     // console.log('ok on a bien reçu les promesses')
                     dispatch({
                         type: types.SET_STATS,
@@ -384,11 +336,8 @@ export const selectResource = (dispatch) => (dataset, views) => {
                         labels: stats.options.labels,
                         constraints,
                         mainConfig: configs[0].views,
-                        asideConfig: configs[1].views,
                         main: { ...dataMain },
-                        aside: dataAside ? { ...dataAside } : { ...dataMain },
-                        mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value),
-                        asideDisplayed: uniqueAsidePromise ? Number(uniqueAsidePromise.results.bindings[0].displayed.value): Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                        mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value)
                     })
                 })
                 

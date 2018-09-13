@@ -5,20 +5,32 @@ export const getSelectedMatch = (config) => {
     return thematch.length > 0 ? thematch[0] : []
 }
 export const getConfigs = (configs, zone) => {
-    return configs.filter(c => c.zone === zone)[0].views
+    return configs[0].views
 }
 export const getSelectedView = (configs, zone) => {
-    return configs.filter(c => c.zone === zone)[0].views.filter(v => v.selected)[0]
+    return configs.length > 0 ? configs[0].views.filter(v => v.selected)[0] : undefined
 }
 export const getViewByName = (views, name) => {
     let filtered = views.filter(c => c.id === name)
     return (filtered.length > 0) ? filtered[0] : null
 }
-export const getCurrentConfigs = (configs, status) => {
-    if (configs.present[0].status === 'transition') {
-        return (status === 'active') ? configs.past[configs.past.length - 1] : configs.present
+export const getCurrentConfigs = (configs, zone, status) => {
+    if (zone === 'main') {
+        if (configs.present[0].status === 'transition' && status === 'active') {
+            console.log('main', status, configs.present[0].status, 'PREV')
+            return configs.past[configs.past.length - 1]
+        } else {
+            console.log('main', status, configs.present[0].status, 'PRES')
+            return configs.present
+        }
     } else {
-        return configs.present
+        if (configs.present.status === 'transition' && status === 'active') {
+            console.log('aside', status, configs.present[0].status, 'PREV')
+            return configs.past.length >= 1 ? configs.past[configs.past.length - 1] : []
+        } else {
+            console.log('aside', status, configs.present[0].status, 'PRES')
+            return configs.past.length >= 2 ? configs.past[configs.past.length - 2] : []
+        }
     }
 }
 export const getViewDef = (views, id) => {
