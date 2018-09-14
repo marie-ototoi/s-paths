@@ -7,3 +7,7 @@ body {
 .button {
     position: fixed !important;
 }
+
+svg {
+    user-select: none;
+}
