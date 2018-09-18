@@ -69,10 +69,11 @@ class AxisLayout extends AbstractLayout {
             .attr('x2', legendLinePoints.x2)
             .attr('y2', legendLinePoints.y2)
         const ticks = d3.select(this.el).selectAll(`.axis${type} .tick`)
-        const tickWidth = (type === 'Bottom') ? Math.floor(dimensions.width / ticks.size()) : 7
-        const tickHeight = (type === 'Bottom') ? 7 : Math.floor(dimensions.height / (ticks.size() - 1))
-        const tickX = (type === 'Bottom') ? 0 : -7
+        const tickWidth = (type === 'Bottom') ? Math.floor(dimensions.width / ticks.size()) : 14
+        const tickHeight = (type === 'Bottom') ? 28 : Math.floor(dimensions.height / (ticks.size() - 1))
+        const tickX = (type === 'Bottom') ? 10 : -14
         const tickY = (type === 'Bottom') ? 2 : 0
+        const skewX = (type === 'Bottom') ? -45 : 0
 
         // console.log(dimensions.height, tickX, tickY, tickWidth, tickHeight)
         ticks.append('rect')
@@ -81,6 +82,7 @@ class AxisLayout extends AbstractLayout {
             .attr('x', tickX)
             .attr('y', tickY)
             .attr('height', tickHeight)
+            .attr('transform', `skewX(${skewX})`)
         // console.log(axis.info)
         d3.select(this.el).selectAll('.tick')
             .on('click', (d, indexD) => {
