@@ -26,7 +26,8 @@ class Header extends React.Component {
         this.state = this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
-        if (nextProps.configs && this.props.configs && JSON.stringify(nextProps.configs) && JSON.stringify(this.props.configs) !== JSON.stringify(nextProps.configs)) {
+        // console.log(nextProps.configs.past.length, this.props.configs.past.length)
+        if (nextProps.configs.past.length !== this.props.configs.past.length) {
             this.setState(this.prepareData(nextProps))
             return false
         }
@@ -34,7 +35,6 @@ class Header extends React.Component {
     }
     prepareData (nextProps) {
         let displayedResource = 0
-        let selectedResource = displayedResource
         let resourceList = nextProps.dataset.resources.map((resource, i) => {
             if (resource.type === nextProps.dataset.entrypoint) displayedResource = i
             return {
@@ -45,6 +45,7 @@ class Header extends React.Component {
                 selected: resource.type === nextProps.dataset.entrypoint
             }
         })
+        let selectedResource = displayedResource
         let configsLists = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).map(config => { 
             return getPropsLists(config, nextProps.zone, nextProps.dataset)
         })
@@ -71,12 +72,12 @@ class Header extends React.Component {
         }
     }
     handleKeyDown (e) {
-        const { selections, zone } = this.props
+        const { selections } = this.props
         // console.log(e, this, selections)
         if (e === 'enter') {
             if (this.state.selectedResource !== this.state.displayedResource) {
                 this.displayResource()
-            } else if (selections.filter(s => s.zone === zone).length > 0 || this.state.keyword.length > 3) {
+            } else if (selections.length > 0 || this.state.keyword.length > 3) {
                 this.displaySelection()
             } else if (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) {
                 this.displayConfig()
@@ -108,21 +109,39 @@ class Header extends React.Component {
     }
     displaySelection () {
         const { config, configs, dataset, selections, views, zone } = this.props
-        const activeConfigs = getCurrentConfigs(configs, zone, 'active')
-        let newConstraints 
-        if (selections.length > 0) {
-            const selectedConfig = getSelectedMatch(config, zone)
+        let activeConfigs
+        let selectedConfig
+        let newConstraints
+        let entrypoint = dataset.entrypoint
+        if (selections.some(s => s.zone === 'main')) {
+            // console.log('THERE ?????')
+            activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+            selectedConfig = getSelectedMatch(config, zone)
             newConstraints = makeSelectionConstraints(selections, selectedConfig, zone, dataset)
+            // console.log(activeConfigs, selectedConfig, newConstraints)
+        } else if (selections.length > 0) {
+            // console.log('HERE ?????')
+            activeConfigs = getCurrentConfigs(configs, 'aside', 'active')
+            // console.log(activeConfigs)
+            // in case the entrypoint has changed
+            entrypoint = activeConfigs.entrypoint
+            // console.log(activeConfigs, selectedConfig)
+            const selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'), 'aside')
+            
+            newConstraints = makeSelectionConstraints(selections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats })
         } else {
+            // console.log('here and THERE ?????')
             // keep old constraints
             newConstraints = dataset.constraints
         }
         if (this.state.keyword.length > 3) {
-            newConstraints = newConstraints.concat(makeKeywordConstraints(this.state.keyword, dataset))
+            newConstraints = newConstraints.concat(makeKeywordConstraints(this.state.keyword, { ...dataset, entrypoint, stats: activeConfigs.stats }))
         }
         let newDataset = {
             ...dataset,
-            constraints: newConstraints
+            entrypoint,
+            constraints: newConstraints,
+            stats: activeConfigs.stats
         }
         this.setState({ selectionIsLoading: true, errorSelection: '' })
         this.props.loadSelection(newDataset, views, activeConfigs, dataset)
@@ -177,9 +196,10 @@ class Header extends React.Component {
 
             // first line - resources
             let selectResourceEnabled = (this.state.selectedResource !== this.state.displayedResource) ?  {} : { 'disabled' : 'disabled' }
+            // console.log('PPPPPP', this.state.selectedResource, this.state.displayedResource)
             
             // second line - keyword + pointer
-            let pointerEnabled = selections.filter(s => s.zone === zone).length > 0
+            let pointerEnabled = selections.length > 0
             let keywordEnabled = this.state.keyword.length > 3
             let pointerClass = pointerEnabled ? '' : 'greyed' 
             let andClass = pointerEnabled && keywordEnabled ? '' : 'greyed' 

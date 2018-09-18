@@ -1,11 +1,12 @@
 import * as d3 from 'd3'
 import AbstractLayout from './AbstractLayout'
 import * as dataLib from '../lib/dataLib'
-import * as selectionLib from '../lib/selectionLib'
+import { areSelected, detectRectCollision } from '../lib/selectionLib'
+import { getRelativeRectangle } from '../lib/scaleLib'
 
 class HeatMapLayout extends AbstractLayout {
     draw (props) {
-        const { nestedProp1, legend, selectedConfig, selections, zone } = props
+        const { nestedProp1, legend, selectedConfig, selections, step, zone } = props
         // console.log(nestedProp1)
         const xUnits = d3.select(this.el)
             .selectAll('g.xUnits')
@@ -28,6 +29,8 @@ class HeatMapLayout extends AbstractLayout {
         yUnits
             .exit()
             .remove()
+        
+        let thisZone = selections.some(s => s.zone === zone)
         d3.select(this.el)
             .selectAll('g.xUnits g.yUnits')
             .each((d, i) => {
@@ -40,6 +43,7 @@ class HeatMapLayout extends AbstractLayout {
                 d.selection = {
                     selector: `heatmap_element_p1_${dataLib.makeId(d.values[0].prop1.value)}_p2_${dataLib.makeId(d.values[0].prop2.value)}`,
                     count: Number(d.countprop2),
+                    index: i,
                     query: {
                         type: 'set',
                         value: [{
@@ -56,12 +60,16 @@ class HeatMapLayout extends AbstractLayout {
                 }
                 d.shape = 'rectangle'
                 d.zone = {}
-                d.selected = selectionLib.areSelected([d.selection], zone, selections)
+                d.selected = areSelected([d.selection], zone, selections)
             })
             .attr('id', d => d.selection.selector) // only needed to better understand html source code
             .classed('selected', d => d.selected)
             .attr('fill', d => d.color)
-            .attr('opacity', d => (selections.filter(s => s.zone === zone).length > 0 && d.selected !== true) ? 0.5 : 1)
+            .attr('opacity', d => {
+                return selections.length > 0 && 
+                    ((thisZone && d.selected !== true) ||
+                    (!thisZone && selections.length > 0)) ? 0.5 : 1
+            })
     }
 
     getElements (propName, value, propCategory) {
@@ -100,15 +108,12 @@ class HeatMapLayout extends AbstractLayout {
 
     getElementsInZone (props) {
         let { display, zone, zoneDimensions } = props
-        const selectedZone = zoneDimensions
         let selectedElements = []
+        let relativeZone = getRelativeRectangle(zoneDimensions, zone, display)
         d3.select(this.el).selectAll('.yUnits')
             .each(function (d, i) {
-                // console.log(d.zone)
-                // console.log(selectionLib.detectRectCollision(selectedZone, elementZone), d3.select(this).node().parentNode.getAttribute('id'), d.selection)
-                if (selectionLib.detectRectCollision(selectedZone, d.zone)) selectedElements.push(d.selection)
+                if (detectRectCollision(relativeZone, d.zone)) selectedElements.push(d.selection)
             })
-        // console.log(selectedElements, selectedZone)
         return selectedElements
     }
 

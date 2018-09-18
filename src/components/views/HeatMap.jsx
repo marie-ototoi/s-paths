@@ -75,22 +75,21 @@ class HeatMap extends React.Component {
     render () {
         const { axisBottom, axisLeft, legend } = this.customState
         const { config, display, dimensions, role, selections, step, zone } = this.props
-        return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` }>
+        return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` } ref = {(c) => { this.refHeatMap = c }}>
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
                 dimensions = { dimensions }
-                handleMouseMove = { this.props.handleMouseMove }
-                layout = { this.layout }
+                component = { this }
                 selections = { selections }
             />
             }
             { step !== 'changing' &&
             <g
+                className = "content"
                 transform = { `translate(${dimensions.x + dimensions.horizontal_padding }, ${dimensions.y + dimensions.top_padding})` }
                 ref = { (c) => { this[this.customState.elementName] = c } }
-                onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
-                onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this.layout, selections) } }
+                onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             ></g>
             }
@@ -141,6 +140,9 @@ class HeatMap extends React.Component {
             }
         </g>)
     }
+    getElementsInZone (zoneDimensions) {
+        return this.layout.getElementsInZone({ ...this.props, zoneDimensions })
+    }
     selectEnsemble (prop, value, category) {
         const elements = this.layout.getElements(prop, value, category)
         const { selectElements, zone, selections } = this.props
@@ -171,7 +173,8 @@ HeatMap.propTypes = {
     handleMouseMove: PropTypes.func,
     handleMouseUp: PropTypes.func,
     handleTransition: PropTypes.func,
-    selectElements: PropTypes.func
+    selectElements: PropTypes.func,
+    getElementsInZone: PropTypes.func
 }
 
 function mapStateToProps (state) {
@@ -192,6 +195,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const HeatMapConnect = connect(mapStateToProps, mapDispatchToProps)(HeatMap)
+const HeatMapConnect = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(HeatMap)
 
 export default HeatMapConnect

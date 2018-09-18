@@ -14,6 +14,7 @@ const selection = (state, action) => {
     case types.ADD_SELECTION:
         return {
             selector: action.selector,
+            index: action.index,
             zone: action.zone,
             query: action.query,
             count: action.count || 0
@@ -35,10 +36,10 @@ const selections = (state = defaultState, action) => {
             ).length === 0
         })
         elementsAdded = elements2Add.map(el => {
-            return selection(undefined, { ...action, query: el.query, selector: el.selector, count: el.count })
+            return selection(undefined, { ...action, query: el.query, selector: el.selector, count: el.count, index: el.index })
         })
         return [
-            ...state,
+            ...state.filter(sel => sel.zone === action.zone),
             ...elementsAdded
         ]
     case types.REMOVE_SELECTION:
@@ -48,13 +49,7 @@ const selections = (state = defaultState, action) => {
         })
     case types.RESET_SELECTION:
     case types.END_TRANSITION:
-        return state.filter(sel => {
-            if (action.zone) {
-                return !(sel.zone === action.zone)
-            } else {
-                return false
-            }
-        })
+        return []
     default:
         return state
     }

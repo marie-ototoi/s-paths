@@ -37,7 +37,6 @@ class GeoMap extends React.Component {
             <SelectionZone
                 zone = { zone }
                 dimensions = { dimensions }
-                handleMouseMove = { this.props.handleMouseMove }
                 layout = { this }
                 selections = { selections }
             />
@@ -48,7 +47,6 @@ class GeoMap extends React.Component {
                 width = { dimensions.useful_width }
                 height = { dimensions.useful_height }
                 // TODO: These event handlers need another layer to perform mouse selection over the map
-                // onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
                 // onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
                 // onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             >
@@ -135,7 +133,7 @@ class GeoMap extends React.Component {
             }
         </g>)
     }
-    getElementsInZone () {
+    getElementsInZone (zoneDimensions) {
         return []
     }
     shouldComponentUpdate (nextProps, nextState) {
@@ -211,6 +209,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const GeoMapConnect = connect(mapStateToProps, mapDispatchToProps)(GeoMap)
+const GeoMapConnect = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(GeoMap)
 
 export default GeoMapConnect

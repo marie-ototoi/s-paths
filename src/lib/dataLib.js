@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
 import shallowEqual from 'shallowequal'
-import * as queryLib from './queryLib'
+import { convertPath, getSplitUri, usePrefix } from './queryLib'
 
 export const areLoaded = (data, zone, status) => {
     data = getCurrentData(data, zone, status)
@@ -104,10 +104,10 @@ const getCurrentData = (data, zone, status) => {
         }
     } else {
         if (currentStateMain === 'transition' && status === 'active') {
-            console.log('ici ? cas 1', data.past)
+            // console.log('ici ? cas 1', data.past)
             dataMain = data.past.length >= 1 ? data.past[data.past.length - 1] : {}
         } else {
-            console.log('ici ? cas 2', data.past)
+            // console.log('ici ? cas 2', data.past)
             dataMain = data.past.length >= 2 ? data.past[data.past.length - 2] : {}
         }
     }
@@ -129,7 +129,7 @@ export const getResults = (data, zone, status) => {
     } else {
         statementsType = 'statements'
     }
-    console.log(zone, data, statementsType, status)
+    // console.log(zone, data, statementsType, status)
     // const filtered = data.filter(d => (d.status === status))
     return (data[statementsType] && data[statementsType].results) ? data[statementsType].results.bindings : []
 }
@@ -227,7 +227,7 @@ export const getDeltaIndex = (dataPiece, elements, options) => {
     let indexElement
     elements.forEach((el, indexEl) => {
         if (entrypoint) {
-            if (el.query.value === dataPiece.entrypoint.value) indexElement = indexEl
+            if (el.query && dataPiece.entrypoint && el.query.value === dataPiece.entrypoint.value) indexElement = indexEl
         } else {
             // console.log(el)
             let conditions = el.query.value.map((condition, index) => {
@@ -300,17 +300,18 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
             }, [])
             allDelta = splitRectangle(element.zone, allDelta)
             accElements = accElements.concat(allDelta)
+        } else {
+            accElements.push({ ...element, signature: element.query.value, size: 1 })
         }
         return accElements
     }, [])
 }
 
-export const prepareSinglePropData = (data, category) => {
+export const prepareSinglePropData = (data, category, prefixes) => {
     return d3.nest().key(prop => prop.prop1.value).entries(data)
         .map(d => {
             if (category === 'uri') {
-                let split = queryLib.getSplitUri(d.key)
-                return { value: d.key, root: split.root, name: split.name, count: d.values.length }
+                return { value: d.key, name: usePrefix(d.key, prefixes), count: d.values.length }
             } else {
                 return { value: d.key, name: d.key, count: d.values.length }
             }
@@ -372,7 +373,7 @@ export const prepareDetailData = (data, dataset) => {
                     }
                 } else {
                     let newItem = cur
-                    newItem.path = queryLib.convertPath(fullPath, prefixes)
+                    newItem.path = convertPath(fullPath, prefixes)
                     newItem.readablePath = getReadablePathsParts(newItem.path, labels, prefixes)
                     newItem.fullPath = fullPath
                     newItem[`prop${i}`] = Array.isArray(newItem[`prop${i}`]) ? newItem[`prop${i}`] : [newItem[`prop${i}`]]
@@ -433,7 +434,7 @@ export const deduplicate = (data, props) => {
 }
 
 export const getTransitionElements = (originElements, targetElements, originConfig, targetSelectedView, deltaData, zone) => {
-    console.log('before', zone, originElements, targetElements, originConfig, targetSelectedView, deltaData)
+    // console.log('before', zone, originElements, targetElements, originConfig, targetSelectedView, deltaData)
     deltaData = deltaData.map(data => {
         let indexOrigin = getDeltaIndex(data, originElements, { entrypoint: originConfig.entrypoint, isTarget: false })
         let indexTarget = getDeltaIndex(data, targetElements, { entrypoint: targetSelectedView.entrypoint, isTarget: true })
@@ -453,7 +454,7 @@ export const getTransitionElements = (originElements, targetElements, originConf
             let cur = deltaData.filter(dp => dp.entrypoint.value === el.query.value)[0]
             return {
                 ...el,
-                signature: cur ? `${zone}_origin${cur.indexOrigin}_target${cur.indexTarget}` : ''
+                signature: cur ? `${zone}_origin${cur.indexOrigin}_target${cur.indexTarget}` : el.query.value
             }
         })
     }
@@ -466,7 +467,7 @@ export const getTransitionElements = (originElements, targetElements, originConf
             let cur = deltaData.filter(dp => dp.entrypoint.value === el.query.value)[0]
             return {
                 ...el,
-                signature: cur ? `${zone}_origin${cur.indexOrigin}_target${cur.indexTarget}` : ''
+                signature: cur ? `${zone}_origin${cur.indexOrigin}_target${cur.indexTarget}` : el.query.value
             }
         })
     }

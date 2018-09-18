@@ -16,6 +16,7 @@ import SingleProp from './views/SingleProp'
 import StackedChart from './views/StackedChart'
 import TreeMap from './views/TreeMap'
 import URIWheel from './views/URIWheel'
+import BrushLink from './elements/BrushLink'
 import Transition from './elements/Transition'
 // libs
 import { getDimensions, getScreen } from '../lib/scaleLib'
@@ -45,8 +46,10 @@ class App extends React.PureComponent {
             aside_target: null,
             aside_origin: null,
             main_transition: null,
-            aside_transition: []
+            aside_transition: null
         }
+        this.refmain = React.createRef()
+        this.refaside = React.createRef()
     }
     componentDidMount () {
         this.onResize()
@@ -55,22 +58,26 @@ class App extends React.PureComponent {
         this.props.loadResources(dataset, views)
     }
     handleMouseMove (e, zone) {
-        /* const { display } = this.props
+        /* const { display, selections } = this.props
         if (display.selectedZone[zone].x1 !== null) {
-            const zoneDimensions = selectionLib.getRectSelection(display.selectedZone[zone])
-            const selectedZone = {
-                x1: zoneDimensions.x1 - this.props.display.viz.horizontal_margin,
-                y1: zoneDimensions.y1 - this.props.display.viz.top_margin,
-                x2: zoneDimensions.x2 - this.props.display.viz.horizontal_margin,
-                y2: zoneDimensions.y2 - this.props.display.viz.bottom_margin
-            }
+            //console.log(this.refmain.getWrappedInstance().getElementsInZone({zoneDimensions:}))
+            const selectedZone = selectionLib.getRectSelection({
+                ...display.selectedZone[zone],
+                x2: e.pageX,
+                y2: e.pageY
+            })
+            // console.log(zone, selectedZone, display.viz[zone + '_x'])
             d3.select(this['refView']).selectAll('rect.selection')
                 .data([selectedZone])
                 .enter()
                 .append('rect')
                 .attr('class', 'selection')
                 .on('mouseup', d => {
-                    this.props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, zone, display)
+                    console.log(d3.event.pageX, d3.event.pageY)
+                    this.props.handleMouseUp({
+                        pageX: d3.event.pageX - display.viz[zone + '_x'],
+                        pageY: d3.event.pageY - display.viz[zone + '_top_padding'] - display.viz.top_margin
+                    }, zone, display, this.refmain.getWrappedInstance(), selections)
                 })
             d3.select(this['refView']).select('rect.selection')
                 .attr('width', selectedZone.x2 - selectedZone.x1)
@@ -99,7 +106,13 @@ class App extends React.PureComponent {
                 // console.log(this.props.dataset)
                 let transitionElements 
                 if (elements.length > 0) {
-                    transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getSelectedView(getCurrentConfigs(configs, zone, 'active'), zone), getSelectedView(getCurrentConfigs(configs, zone, 'transition'), zone), getResults(data, zone, 'delta'), zone)
+                    if (zone === 'main')  {
+                        transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getSelectedView(getCurrentConfigs(configs, zone, 'active'), zone), getSelectedView(getCurrentConfigs(configs, zone, 'transition'), zone), getResults(data, zone, 'delta'), zone)
+                    } else {
+                        // on en est la
+                        transitionElements = getTransitionElements(elements, this.state[`${zone}_origin`], getSelectedView(getCurrentConfigs(configs, 'aside', 'active'), 'aside'), getSelectedView(getCurrentConfigs(configs, 'main', 'active'), 'main'), getResults(data, 'main', 'delta'), 'aside')
+                        // console.log('yiyi ', transitionElements)
+                    }
                 } else {
                     transitionElements = { origin:this.state[`${zone}_origin`], target: [] }
                 }
@@ -130,8 +143,8 @@ class App extends React.PureComponent {
         // console.log('display', display)
         // console.log('views', this.props.views)
         // console.log('dataset', this.props.dataset)
-        console.log('configs', configs)
-        console.log('data', data)
+        // console.log('configs', configs)
+        // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
             'GeoMap': GeoMap,
@@ -152,12 +165,13 @@ class App extends React.PureComponent {
         const MainTransitionComponent = mainTransitionConfig ? componentIds[mainTransitionConfig.id] : ''
         const asideConfig = getSelectedView(getCurrentConfigs(configs, 'aside', 'active'), 'aside')
         const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
+        const SideTransitionComponent = asideConfig ? componentIds[asideConfig.id] : ''
         const coreDimensionsMain = getDimensions('main', display.viz)
         const coreDimensionsAside = getDimensions('aside', display.viz)
-        console.log(mainConfig, getCurrentConfigs(configs, 'main', 'active'))
-        console.log(mainTransitionConfig, getCurrentConfigs(configs, 'main', 'transition'))
-        console.log(asideConfig, getCurrentConfigs(configs, 'aside', 'active'))
-        console.log(getResults(data, 'aside', 'active'))
+        // console.log(mainConfig, getCurrentConfigs(configs, 'main', 'active'))
+        // console.log(mainTransitionConfig, getCurrentConfigs(configs, 'main', 'transition'))
+        // console.log(asideConfig, getCurrentConfigs(configs, 'aside', 'active'))
+        // console.log(getResults(data, 'aside', 'active'))
         // to do : avoid recalculate transition data at each render
         return (<div
             className = "view"
@@ -204,11 +218,10 @@ class App extends React.PureComponent {
                         // coverage = { getResults(data, 'main', 'coverage') }
                         data = { getResults(data, 'main', 'active') }
                         config = { mainConfig }
-                        selections = { selectionLib.getSelections(selections, 'main', 'active') }
-                        ref = {(c) => { this.refMain = c }}
+                        selections = { selections }
+                        ref = {(c) => { this.refmain = c }}
                         handleMouseDown = { this.handleMouseDown }
                         handleMouseMove = { this.handleMouseMove }
-                        handleMouseUp = { this.handleMouseUp }
                         handleTransition = { this.handleTransition }
                     />
                 }
@@ -220,22 +233,48 @@ class App extends React.PureComponent {
                         endTransition = { this.handleEndTransition }
                     />
                 }
+                { this.state.main_transition &&
+                    <BrushLink
+                        zone = "main"
+                        dimensions = { coreDimensionsMain }
+                        elements = { this.state.main_transition }
+                    />
+                }
+                { asideConfig && this.state.main_step === 'launch' &&
+                    <SideTransitionComponent
+                        role = "target"
+                        zone = "aside"
+                        status = { statusMain }
+                        dimensions = { coreDimensionsMain }
+                        data = { getResults(data, 'main', 'transition') }
+                        selections = { [] }
+                        // coverage = { getResults(data, 'main', 'coverage') }
+                        config = { asideConfig }
+                        handleTransition = { this.handleTransition }
+                    />
+                }
                 { asideConfig && data.past.length > 1 && areLoaded(data, 'aside', 'active') &&
                     <SideComponent
                         zone = "aside"
                         role = "origin"
                         dimensions = { coreDimensionsAside }
-                        step = { this.state.aside_step }
+                        step = { this.state.main_step }
                         status = { statusMain }
                         data = { getResults(data, 'aside', 'active') }
                         // coverage = { getResults(data, 'aside', 'coverage') }
                         config = { asideConfig }
-                        selections = { selectionLib.getSelections(selections, 'aside', 'active') }
-                        ref = {(c) => { this.refAside = c }}
+                        selections = { selections }
+                        ref = {(c) => { this.refaside = c }}
                         handleMouseDown = { this.handleMouseDown }
                         handleMouseMove = { this.handleMouseMove }
-                        handleMouseUp = { this.handleMouseUp }
                         handleTransition = { this.handleTransition }
+                    />
+                }
+                { this.state.aside_transition &&
+                    <BrushLink
+                        zone = "aside"
+                        dimensions = { coreDimensionsAside }
+                        elements = { this.state.aside_transition }
                     />
                 }
                 <Slider />
@@ -294,6 +333,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const AppConnect = connect(mapStateToProps, mapDispatchToProps)(App)
+const AppConnect = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(App)
 
 export default AppConnect

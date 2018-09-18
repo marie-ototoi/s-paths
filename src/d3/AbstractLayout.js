@@ -1,4 +1,5 @@
 import * as d3 from 'd3'
+import * as selectionLib from '../lib/selectionLib'
 
 class AbstractLayout {
     constructor (el, props) {
@@ -16,7 +17,6 @@ class AbstractLayout {
             this.el = el
             this.draw(props)
             this.resize(props)
-            
         }
         // console.log('vidé ?', this.el)
     }
@@ -30,6 +30,8 @@ class AbstractLayout {
     }    
     getElementsInZone(props) {
         return []
+    }
+    checkSelection (props) {
     }
 }
 

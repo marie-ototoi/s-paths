@@ -5,7 +5,7 @@ import { handleMouseDown, handleMouseUp } from '../../actions/selectionActions'
 
 class SelectionZone extends React.PureComponent {
     render () {
-        const { dimensions, display, layout, selections, zone } = this.props
+        const { dimensions, display, component, selections, zone } = this.props
         return (<rect
             className = "SelectionZone"
             ref = { `selectionZone_${zone}` }
@@ -13,8 +13,7 @@ class SelectionZone extends React.PureComponent {
             width = { dimensions.width }
             height = { dimensions.height }
             onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
-            onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, layout, selections) } }
-            onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
+            onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, component, selections) } }
             transform = { `translate(${dimensions.x}, ${dimensions.y})` }
         ></rect>)
     }
@@ -23,7 +22,7 @@ class SelectionZone extends React.PureComponent {
 SelectionZone.propTypes = {
     dimensions: PropTypes.object,
     display: PropTypes.object,
-    layout: PropTypes.object,
+    component: PropTypes.object,
     selections: PropTypes.array,
     zone: PropTypes.string,
     handleMouseDown: PropTypes.func,
@@ -45,6 +44,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const SelectionZoneConnect = connect(mapStateToProps, mapDispatchToProps)(SelectionZone)
+const SelectionZoneConnect = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(SelectionZone)
 
 export default SelectionZoneConnect

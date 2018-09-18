@@ -48,7 +48,7 @@ class Images extends React.Component {
         const { selectElements, zone, selections } = this.props
         selectElements(elements, zone, selections)
     }
-    getElementsInZone () {
+    getElementsInZone (zoneDimensions) {
         return []
     }
     render () {
@@ -70,11 +70,10 @@ class Images extends React.Component {
                 transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y})` }
                 with = { dimensions.width }
                 height = { dimensions.height }
-                onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
                 onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             >
-                <div className = "box" style = {{ width: dimensions.width + 'px' }}>
+                <div className = "box" style = {{ width: dimensions.useful_width + 'px' }}>
                     <div className = "content">
                         { 
                             uniqueData.map((el, i) => 
@@ -132,6 +131,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const ImagesConnect = connect(mapStateToProps, mapDispatchToProps)(Images)
+const ImagesConnect = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(Images)
 
 export default ImagesConnect

@@ -2,6 +2,7 @@ import * as d3 from 'd3'
 import AbstractLayout from './AbstractLayout'
 import * as dataLib from '../lib/dataLib'
 import * as selectionLib from '../lib/selectionLib'
+import { getRelativeRectangle } from '../lib/scaleLib'
 
 class TreeMapLayout extends AbstractLayout {
     draw (props) {
@@ -33,6 +34,7 @@ class TreeMapLayout extends AbstractLayout {
                 d.selection = {
                     selector: `treemap_element_p1_${dataLib.makeId(d.key)}`,
                     count: (d.values.length > 0) ? Number(d.values[0].countprop1.value) : 1,
+                    index: i,
                     query: {
                         type: 'set',
                         value: [{
@@ -52,7 +54,7 @@ class TreeMapLayout extends AbstractLayout {
             .classed('selected', d => d.selected)
             // .attr('fill', d => d.color)
             .attr('opacity', d => {
-                return (selections.length > 0 && d.selected !== true) ? 0.5 : 1
+                return (selections.length > 0 && ((selections.some(s => s.zone === zone) && d.selected !== true) || !selections.some(s => s.zone === zone))) ? 0.5 : 1
             })
     }
 
@@ -92,15 +94,12 @@ class TreeMapLayout extends AbstractLayout {
 
     getElementsInZone (props) {
         let { display, zone, zoneDimensions } = props
-        const selectedZone = zoneDimensions
         let selectedElements = []
+        let relativeZone = getRelativeRectangle(zoneDimensions, zone, display)
         d3.select(this.el).selectAll('g.units')
             .each(function (d, i) {
-                // console.log(d.zone)
-                // console.log(selectionLib.detectRectCollision(selectedZone, elementZone), d3.select(this).node().parentNode.getAttribute('id'), d.selection)
-                if (selectionLib.detectRectCollision(selectedZone, d.zone)) selectedElements.push(d.selection)
+                if (selectionLib.detectRectCollision(relativeZone, d.zone)) selectedElements.push(d.selection)
             })
-        // console.log(selectedElements, selectedZone)
         return selectedElements
     }
 

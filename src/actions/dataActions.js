@@ -91,7 +91,7 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
     // console.log(configs)
     let propsToCheck = []
     let matchesToCheck = {}
-    let views = configs[0].views
+    let views = configs.views
     let double = []
     let newStats
     for (let i = 0; i < views.length; i++) {
@@ -123,11 +123,11 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
             let newConfigs = defineConfigs(views, newStats)
             let mainSelected
             //for (let i = 0; i < newConfigs.length; i++) {
-            for (let i = 0; i < newConfigs[0].views.length; i++) {
-                let check = matchesToCheck[newConfigs[0].views[i].id]
+            for (let i = 0; i < newConfigs.views.length; i++) {
+                let check = matchesToCheck[newConfigs.views[i].id]
                 if (check) {
-                    for (let j = 0; j < newConfigs[0].views[i].matches.length; j++) {
-                        let match = newConfigs[0].views[i].matches[j].properties
+                    for (let j = 0; j < newConfigs.views[i].matches.length; j++) {
+                        let match = newConfigs.views[i].matches[j].properties
                         let ok = true
                         match.forEach((p, index) => {
                             if (check[index].fullPath !== p.fullPath) ok = false
@@ -135,11 +135,11 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
                         if (ok === true) {
                             if (!mainSelected) {
                                 mainSelected = true
-                                newConfigs[0].views[i].matches[j].selected = true
-                                for (let k = 0; k < newConfigs[0].views.length; k++) {
-                                    newConfigs[0].views[k].selected = (k === i)
+                                newConfigs.views[i].matches[j].selected = true
+                                for (let k = 0; k < newConfigs.views.length; k++) {
+                                    newConfigs.views[k].selected = (k === i)
                                 }
-                                if (newConfigs[0].views.length > 1) j++
+                                if (newConfigs.views.length > 1) j++
                                 break
                             } 
                         }
@@ -147,19 +147,19 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
                 }
             }
             if (!mainSelected) {
-                for (let i = 0; i < newConfigs[0].views.length; i++) {
-                    if (newConfigs[0].views[i].id === 'ListAllPropss') {
-                        for (let j = 0; j < newConfigs[0].views[i].matches.length; j++) {
-                            let match = newConfigs[0].views[i].matches[j].properties
+                for (let i = 0; i < newConfigs.views.length; i++) {
+                    if (newConfigs.views[i].id === 'ListAllPropss') {
+                        for (let j = 0; j < newConfigs.views[i].matches.length; j++) {
+                            let match = newConfigs.views[i].matches[j].properties
                             if (match[0].checked) {
                                 if (!mainSelected) {
                                     mainSelected = true
                                     newConfigs[0].views[i].matches[j].selected = true
-                                    for (let k = 0; k < newConfigs[0].views.length; k++) {
-                                        newConfigs[0].views[k].selected = (k === i)
+                                    for (let k = 0; k < newConfigs.views.length; k++) {
+                                        newConfigs.views[k].selected = (k === i)
                                     }
                                 }
-                                j = newConfigs[0].views.length
+                                j = newConfigs.views.length
                                 break
                             }
                         }
@@ -181,17 +181,19 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
     // console.log(countInstancesQuery)
     return getData(endpoint, countInstancesQuery, prefixes)
         .then(countInstances => {
-            // console.log(countInstances)
+            // console.log('countInstances', countInstances)
             return new Promise((resolve, reject) => {
                 let selectionInstances = Number(countInstances.results.bindings[0].total.value)
                 // console.log('selectionInstances', selectionInstances)
                 let configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }))
+                // console.log('alors ?', configs)
                 if (selectionInstances === 1) {
                     resolve([configs, { ...stats, selectionInstances }])
                 } else if (selectionInstances > 1) {
                     stats = evaluateSubStats({ ...stats, selectionInstances })
                     // console.log('evaluateSubStats', stats)
                     // for each views, checks which properties ou sets of properties could match and evaluate
+                    // console.log('checkFirstValidConfigs', checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset))
                     resolve(checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset))
                 } else {
                     reject('No results')
@@ -207,18 +209,20 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                     // console.log(queryMain)
                     return Promise.all([
                         getData(endpoint, queryMain, prefixes),
-                        getData(endpoint, queryTransitionMain, prefixes),
+                        dataset.entrypoint === previousConfigs.entrypoint ? getData(endpoint, queryTransitionMain, prefixes) : [],
                         getData(endpoint, queryMainUnique, prefixes)
                     ])
                         .then(([dataMain, dataDeltaMain, uniqueMain]) => { // , coverageMain, coverageAside
+                            // console.log('DELTA', dataDeltaMain, newConfigs.entrypoint, previousConfigs.entrypoint)
                             dispatch({
                                 type: types.SET_CONFIGS,
                                 constraints,
                                 main: { ...dataMain },
                                 mainDelta: dataDeltaMain,
                                 stats,
+                                entrypoint,
                                 mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMain.results.bindings[0].displayed.value),
-                                mainConfig: newConfigs[0].views
+                                mainConfig: newConfigs.views
                             })
                         })
                 })
@@ -227,7 +231,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
 }
 
 export const analyseResources = (dispatch) => (dataset, resources) => {
-    console.log('ICI intwe', dataset, resources)
+    // console.log('ICI', dataset, resources)
     getResources({ ...dataset, toAnalyse: resources })
 }
 
@@ -290,7 +294,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
                                     prefixes: stats.options.prefixes,
                                     labels: stats.options.labels,
                                     constraints: '',
-                                    mainConfig: configs[0].views,
+                                    mainConfig: configs.views,
                                     main: { ...dataMain },
                                     mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value)
                                 })
@@ -335,7 +339,7 @@ export const selectResource = (dispatch) => (dataset, views) => {
                         prefixes: stats.options.prefixes,
                         labels: stats.options.labels,
                         constraints,
-                        mainConfig: configs[0].views,
+                        mainConfig: configs.views,
                         main: { ...dataMain },
                         mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value)
                     })
@@ -381,6 +385,8 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
                 type: types.SET_CONFIGS,
                 zone: zone
             }
+            action.entrypoint = entrypoint
+            action.stats = dataset.stats
             action[zone] = newData
             action[zone + 'Config'] = updatedConfigs
             action[zone + 'Delta'] = newDelta

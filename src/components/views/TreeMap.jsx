@@ -67,7 +67,6 @@ class TreeMap extends React.Component {
             <SelectionZone
                 zone = { zone }
                 dimensions = { dimensions }
-                handleMouseMove = { this.props.handleMouseMove }
                 layout = { this.layout }
                 selections = { selections }
             />
@@ -76,8 +75,7 @@ class TreeMap extends React.Component {
             <g
                 transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y + dimensions.top_padding})` }
                 ref = {(c) => { this[this.customState.elementName] = c } }
-                onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
-                onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this.layout, selections) } }
+                onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             ></g>
             }
@@ -93,6 +91,9 @@ class TreeMap extends React.Component {
             </g>
             }
         </g>)
+    }
+    getElementsInZone (zoneDimensions) {
+        return this.layout.getElementsInZone({ ...this.props, zoneDimensions })
     }
     componentDidMount () {
         this.layout = new TreeMapLayout(this[this.customState.elementName], { ...this.props, ...this.customState })
@@ -139,6 +140,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const TreeMapConnect = connect(mapStateToProps, mapDispatchToProps)(TreeMap)
+const TreeMapConnect = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(TreeMap)
 
 export default TreeMapConnect

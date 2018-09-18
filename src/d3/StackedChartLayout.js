@@ -2,6 +2,7 @@ import * as d3 from 'd3'
 import AbstractLayout from './AbstractLayout'
 import * as dataLib from '../lib/dataLib'
 import * as selectionLib from '../lib/selectionLib'
+import { getRelativeRectangle } from '../lib/scaleLib'
 
 class StackedChartLayout extends AbstractLayout {
     draw (props) {
@@ -37,6 +38,7 @@ class StackedChartLayout extends AbstractLayout {
                 // console.log(zone, d)
                 d.selection = {
                     selector: `stackedchart_element_${dataLib.makeId(d.entrypoint.value)}`,
+                    index: i,
                     query: {
                         type: 'uri',
                         value: d.entrypoint.value
@@ -50,7 +52,7 @@ class StackedChartLayout extends AbstractLayout {
             .classed('selected', d => d.selected)
             .attr('fill', d => d.color)
             .attr('opacity', d => {
-                d.opacity = (selections.filter(s => s.zone === zone).length > 0 && d.selected !== true) ? 0.5 : 1
+                d.opacity = (selections.length > 0 && ((selections.some(s => s.zone === zone) && d.selected !== true) || !selections.some(s => s.zone === zone))) ? 0.5 : 1
                 return d.opacity
             })
     }
@@ -90,12 +92,11 @@ class StackedChartLayout extends AbstractLayout {
     }
     getElementsInZone (props) {
         let { display, zone, zoneDimensions } = props
-        const selectedZone = zoneDimensions
         let selectedElements = []
+        let relativeZone = getRelativeRectangle(zoneDimensions, zone, display)
         d3.select(this.el).selectAll('.elements')
             .each(function (d, i) {
-                // console.log(selectionLib.detectRectCollision(selectedZone, elementZone), d3.select(this).node().parentNode.getAttribute('id'), d.selection)
-                if (selectionLib.detectRectCollision(selectedZone, d.zone)) selectedElements.push(d.selection)
+                if (selectionLib.detectRectCollision(relativeZone, d.zone)) selectedElements.push(d.selection)
             })
         return selectedElements
     }

@@ -30,9 +30,6 @@ class History extends React.PureComponent {
             configs.present,
             ...configs.future
         ]
-            .map(c => {
-                return c.filter(cz => cz.zone === zone)[0]
-            })
         // console.log(this.customState.configs)
         const dimensions = getDimensions('history', display.viz, offset)
         const { x, y } = dimensions

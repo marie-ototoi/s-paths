@@ -5,10 +5,10 @@ export const getSelectedMatch = (config) => {
     return thematch.length > 0 ? thematch[0] : []
 }
 export const getConfigs = (configs, zone) => {
-    return configs[0].views
+    return configs.views
 }
 export const getSelectedView = (configs, zone) => {
-    return configs.length > 0 ? configs[0].views.filter(v => v.selected)[0] : undefined
+    return configs.views ? configs.views.filter(v => v.selected)[0] : undefined
 }
 export const getViewByName = (views, name) => {
     let filtered = views.filter(c => c.id === name)
@@ -16,19 +16,19 @@ export const getViewByName = (views, name) => {
 }
 export const getCurrentConfigs = (configs, zone, status) => {
     if (zone === 'main') {
-        if (configs.present[0].status === 'transition' && status === 'active') {
-            console.log('main', status, configs.present[0].status, 'PREV')
+        if (configs.present.status === 'transition' && status === 'active') {
+            // console.log('main', status, configs.present.status, 'PREV')
             return configs.past[configs.past.length - 1]
         } else {
-            console.log('main', status, configs.present[0].status, 'PRES')
+            // console.log('main', status, configs.present.status, 'PRES')
             return configs.present
         }
     } else {
         if (configs.present.status === 'transition' && status === 'active') {
-            console.log('aside', status, configs.present[0].status, 'PREV')
+            // console.log('aside', status, configs.present.status, 'PREV')
             return configs.past.length >= 1 ? configs.past[configs.past.length - 1] : []
         } else {
-            console.log('aside', status, configs.present[0].status, 'PRES')
+            // console.log('aside', status, configs.present.status, 'PRES')
             return configs.past.length >= 2 ? configs.past[configs.past.length - 2] : []
         }
     }
@@ -219,43 +219,28 @@ export const defineConfigs = (views, stats) => {
             return b.matches[0].score - a.matches[0].score
         })
     // if (configSetUp.matches) console.log('salut la config', configSetUp.matches.map(p => p.fullPath))
-    return [
-        { zone: 'main', views: [...configSetUp] },
-        { zone: 'aside', views: [...configSetUp] }
-    ]
+    return { views: [...configSetUp] }
 }
-export const activateDefaultConfigs = (configs) => {
+export const activateDefaultConfigs = (config) => {
     // console.log('activateDefaultConfigs', configs)
-    return configs.map((config, cIndex) => {
-        return {
-            ...config,
-            views: config.views.map((view, vIndex) => {
-                let selected = ((cIndex === 0 && vIndex === 0) ||
-                    (cIndex === 1 && vIndex === 1) ||
-                    (cIndex === 1 && vIndex === 0 && config.views.length === 1))
-                let selectedMatchIndex
-                if (selected) {
-                    if (cIndex === 0 || (cIndex === 1 && config.views.length === 1) || cIndex === 1) {
-                        selectedMatchIndex = 0
-                    } else {
-                        selectedMatchIndex = 1
-                        // would be interesting to check that properties for the second choice are different,
-                        // if possible, from those of the first choice
+    return {
+        ...config,
+        views: config.views.map((view, vIndex) => {
+            let selected = (vIndex === 0)
+            let selectedMatchIndex
+            if (selected) selectedMatchIndex = 0
+            return {
+                ...view,
+                selected,
+                matches: view.matches.map((match, mIndex) => {
+                    return {
+                        ...match,
+                        selected: selected && selectedMatchIndex === mIndex
                     }
-                }
-                return {
-                    ...view,
-                    selected,
-                    matches: view.matches.map((match, mIndex) => {
-                        return {
-                            ...match,
-                            selected: selectedMatchIndex === mIndex
-                        }
-                    })
-                }
-            })
-        }
-    })
+                })
+            }
+        })
+    }
 }
 export const getPropsLists = (configs, zone, dataset) => {
     // const { labels, prefixes } = dataset

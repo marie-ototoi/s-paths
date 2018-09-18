@@ -49,7 +49,7 @@ class ListAllProps extends React.Component {
         const { selectElements, zone, selections } = this.props
         selectElements(elements, zone, selections)
     }
-    getElementsInZone () {
+    getElementsInZone (zoneDimensions) {
         return []
     }
     render () {
@@ -60,7 +60,6 @@ class ListAllProps extends React.Component {
             <SelectionZone
                 zone = { zone }
                 dimensions = { dimensions }
-                handleMouseMove = { this.props.handleMouseMove }
                 layout = { this }
                 selections = { selections }
             />
@@ -70,11 +69,10 @@ class ListAllProps extends React.Component {
                 transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y})` }
                 with = { dimensions.width }
                 height = { dimensions.height }
-                onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
                 onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             >
-                <div className = "box" style = {{ width: dimensions.width + 'px' }}>
+                <div className = "box" style = {{ width: dimensions.useful_width + 'px' }}>
                     <div className = "tabs">
                         <ul>
                             { Array.from(Array(this.customState.details.length)).map((el, i) => { return (
@@ -165,6 +163,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const ListAllPropsConnect = connect(mapStateToProps, mapDispatchToProps)(ListAllProps)
+const ListAllPropsConnect = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(ListAllProps)
 
 export default ListAllPropsConnect

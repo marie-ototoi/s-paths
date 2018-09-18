@@ -22,6 +22,7 @@ const initialState = {
         map: 'http://data.nobelprize.org/resource/#',
         meta: 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#',
         nobel: 'http://data.nobelprize.org/terms/',
+        nobelprizes: 'http://nobelprize.org/nobel_prizes/',
         owl: 'http://www.w3.org/2002/07/owl#',
         rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
         rdfs: 'http://www.w3.org/2000/01/rdf-schema#',

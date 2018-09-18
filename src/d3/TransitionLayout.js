@@ -5,20 +5,19 @@ class TransitionLayout extends AbstractLayout {
     draw (props) {
         this.drawShapes(props, props.elements.origin, 'origin')
         this.drawShapes(props, props.elements.target, 'target')
-        // console.log('draw B', props.elements.origin)
+        
+        // console.log(props.elements.origin.length, props.elements.target.length)
         // console.log('meoui',  props.elements.target)
     }
     drawShapes (props, shapes, type) {
         // console.log(`|||||drawRectangles`, props.zone, type)
         const shapesSelection = d3.select(this.el).selectAll('rect')
-            .data(shapes, (d) => {
-                return (d.signature) ? d.signature : d.query.value
-            })
-
+            .data(shapes, (d) => d.signature)
         const tChange = d3.transition()
             .duration(750)
-
         const tRemove = d3.transition()
+            .duration(500)
+        const tEnter = d3.transition()
             .duration(250)
         if (shapes.length > 0) {
             shapesSelection
@@ -30,16 +29,18 @@ class TransitionLayout extends AbstractLayout {
                 .attr('height', d => d.zone.height)
                 .attr('fill', d => d.color)
                 .attr('transform', d => `rotate(${d.rotation} ${d.zone.x1} ${d.zone.y1})`)
-                .attr('fill-opacity', 0)
-                .transition(tRemove)
+                .attr('fill-opacity', d => type === 'target' ? 0 : d.opacity)
+                .transition(tEnter)
                 .attr('fill-opacity', d => d.opacity)
         }
-        shapesSelection.exit()
-            .transition(tRemove)
-            .attr('fill-opacity', 0)
-            .remove()
-
+          
         shapesSelection
+            .exit()
+            .transition(tRemove)
+            .attr('opacity', 0)
+            .remove()           
+
+        d3.select(this.el).selectAll('rect')
             .transition(tChange)
             .attr('x', d => d.zone.x1)
             .attr('y', d => d.zone.y1)

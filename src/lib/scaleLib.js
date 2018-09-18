@@ -206,3 +206,12 @@ export const getDimensions = (element, viz, offset = { x: 0, y: 0, width: 0, hei
         }
     }
 }
+
+export const getRelativeRectangle = (rectangle, zone, display) => {
+    return {
+        x1: rectangle.x1 - display.viz[zone + '_x'] - display.viz.horizontal_padding,
+        y1: rectangle.y1 - display.viz[zone + '_top_padding'] - display.viz.top_margin,
+        x2: rectangle.x2 - display.viz[zone + '_x'] - display.viz.horizontal_padding,
+        y2: rectangle.y2 - display.viz[zone + '_top_padding'] - display.viz.top_margin
+    }
+}

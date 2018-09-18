@@ -39,7 +39,7 @@ class SingleProp extends React.Component {
         const categoryProp1 = selectedConfig.properties[0].category
         // First prop
         
-        const nestedProp1 = prepareSinglePropData(data, categoryProp1)
+        const nestedProp1 = prepareSinglePropData(data, categoryProp1, dataset.prefixes)
         const propsLists = getPropsLists(config, zone, dataset)
         const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
         // 
@@ -58,7 +58,7 @@ class SingleProp extends React.Component {
         const { selectElements, zone, selections } = this.props
         selectElements(elements, zone, selections)
     }
-    getElementsInZone () {
+    getElementsInZone (zoneDimensions) {
         return []
     }
     render () {
@@ -69,7 +69,6 @@ class SingleProp extends React.Component {
             <SelectionZone
                 zone = { zone }
                 dimensions = { dimensions }
-                handleMouseMove = { this.props.handleMouseMove }
                 layout = { this }
                 selections = { selections }
             />
@@ -79,16 +78,15 @@ class SingleProp extends React.Component {
                 transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y})` }
                 with = { dimensions.width }
                 height = { dimensions.height }
-                onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
                 onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             >
-                <div className = "box" style = {{ width: dimensions.width + 'px' }}>
+                <div className = "box" style = {{ width: dimensions.useful_width + 'px' }}>
                     <div className = "content">
                         <p style = {{lineHeight: '1em'}}>
                             { this.customState.nestedProp1.map((d, i) => {
                                 return (<span key = { `contentprop_${zone}_${i}` }  className = "is-size-7">
-                                    { d.root ? d.root : '' }<span style = {{ color: this.customState.color[0] }}>{ d.name }</span><span style = {{ color: '#999' }}>{ (d.count > 1) ? ` (${d.count})` : `` }</span><br />
+                                    <span style = {{ color: this.customState.color[0] }}>{ d.name }</span><span style = {{ color: '#999' }}>{ (d.count > 1) ? ` (${d.count})` : `` }</span><br />
                                 </span>)
                             }) 
                             }
@@ -144,6 +142,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const SinglePropConnect = connect(mapStateToProps, mapDispatchToProps)(SingleProp)
+const SinglePropConnect = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(SingleProp)
 
 export default SinglePropConnect

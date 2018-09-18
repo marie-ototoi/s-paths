@@ -1,76 +1,47 @@
 import types from '../constants/ActionTypes'
 
-const initialConfig = [
-    { zone: 'main', views: [] },
-    { zone: 'aside', views: [] }
-]
-
-const configstatus = (state, action) => {
-    switch (action.type) {
-    case types.END_TRANSITION:
-        // console.log('END_TRANSITION')
-        if (action.zone === state.zone) {
-            return {
-                ...state,
-                status: 'active'
-            }
-        } else {
-            return state
-        }
-    default:
-        return state
-    }
-}
-
-const configzone = (state, action) => {
-    switch (action.type) {
-    case types.SET_CONFIGS:
-    case types.SET_RESOURCES:
-    case types.SET_STATS:
-        if (action[state.zone + 'Config']) {
-            // except at first load a new config is always a transition
-            let status = (state.views[0]) ? 'transition' : 'active'
-            return {
-                ...state,
-                views: action[state.zone + 'Config'],
-                status
-            }
-        } else {
-            return state
-        }
-    case types.SET_CONFIG:
-        if (action.zone === state.zone) {
-            // console.log(state)
-            return {
-                ...state,
-                views: state.views.map(v => {
-                    return (v.id === action.config.id) ? {
-                        ...action.config,
-                        selected: true
-                    } : {
-                        ...v,
-                        selected: false
-                    }
-                }),
-                status: 'transition'
-            }
-        } else {
-            return state
-        }
-    default:
-        return state
-    }
+const initialConfig = {
+    entrypoint: undefined,
+    views: []
 }
 
 const configs = (state = initialConfig, action) => {
+    let status
     switch (action.type) {
     case types.SET_CONFIGS:
-    case types.SET_CONFIG:
     case types.SET_RESOURCES:
     case types.SET_STATS:
-        return state.map(dz => configzone(dz, action))
+        // except at first load a new config is always a transition
+        status = (state.views[0]) ? 'transition' : 'active'
+        return {
+            ...state,
+            views: action.mainConfig,
+            status,
+            entrypoint: action.entrypoint,
+            stats: action.stats
+        }
+    case types.SET_CONFIG:
+        return {
+            ...state,
+            views: state.views.map(v => {
+                return (v.id === action.config.id) ? {
+                    ...action.config,
+                    selected: true
+                } : {
+                    ...v,
+                    selected: false
+                }
+            }),
+            status: 'transition',
+            entrypoint: action.entrypoint,
+            stats: action.stats
+        }
     case types.END_TRANSITION:
-        return state.map(dz => configstatus(dz, action))
+        // console.log('END_TRANSITION')
+        return {
+            ...state,
+            status: 'active'
+        }
     default:
         return state
     }
