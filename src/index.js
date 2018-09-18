@@ -6,7 +6,11 @@ import { Provider } from 'react-redux'
 import reducers from './reducers'
 import App from './components/App'
 
-const store = createStore(reducers)
+const store = createStore(
+    reducers,
+    // eslint-disable-next-line no-underscore-dangle
+    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+)
 
 const render = Component =>
     // eslint-disable-next-line react/no-render-return-value
