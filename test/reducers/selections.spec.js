@@ -9,6 +9,7 @@ const newState = [{
         type: 'uri',
         value: 'http://unique.com'
     },
+    index:1,
     zone: 'main'
 }]
 const initialState = []
@@ -29,6 +30,7 @@ describe('reducers/selections', () => {
                         value: 'http://unique.com'
                     },
                     count: 0,
+                    index: 2,
                     zone: 'main'
                 }
             ],
@@ -43,6 +45,7 @@ describe('reducers/selections', () => {
                         type: 'uri',
                         value: 'http://unique.com'
                     },
+                    index: 2,
                     zone: 'main'
                 }
             ])
@@ -54,6 +57,7 @@ describe('reducers/selections', () => {
                         type: 'uri',
                         value: 'http://unique.com'
                     },
+                    index: 1,
                     zone: 'main'
                 },
                 {
@@ -63,6 +67,7 @@ describe('reducers/selections', () => {
                         type: 'uri',
                         value: 'http://unique.com'
                     },
+                    index: 2,
                     zone: 'main'
                 }
             ])
@@ -80,6 +85,7 @@ describe('reducers/selections', () => {
                     path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*',
                     value: 'female'
                 }],
+                index: 1,
                 zone: 'main'
             },
             {
@@ -88,6 +94,7 @@ describe('reducers/selections', () => {
                     path: 'nobel:LaureateAward/nobel:year/*',
                     value: '1945'
                 }],
+                index: 2,
                 zone: 'main'
             }
         ]
