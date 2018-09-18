@@ -32,7 +32,7 @@ class GeoMap extends React.Component {
         event.target.getCanvas().style.cursor = cursor
     }
     static onMouseClick (event) {
-        console.log(event.point.x, event.point.y, event.lngLat.lat)
+        console.log(event.features[0]._vectorTileFeature, event.point.x, event.point.y, event.lngLat.lat)
     }
     render () {
         const { dimensions, role, selections, step, zone } = this.props
