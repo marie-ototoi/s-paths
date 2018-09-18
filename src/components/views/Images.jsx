@@ -61,7 +61,7 @@ class Images extends React.Component {
                 zone = { zone }
                 dimensions = { dimensions }
                 handleMouseMove = { this.props.handleMouseMove }
-                layout = { this }
+                component = { this }
                 selections = { selections }
             />
             }

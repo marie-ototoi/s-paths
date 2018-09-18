@@ -330,7 +330,7 @@ export const prepareGeoData = (data, dataset) => {
                 },
                 geometry: {
                     type: "Point",
-                    coordinates: [ Number(place.prop1.value), Number(place.prop2.value), 0.0 ] 
+                    coordinates: [ Number(place.prop2.value), Number(place.prop1.value) ] 
                 }
             }
         })
