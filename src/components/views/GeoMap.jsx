@@ -9,6 +9,7 @@ import SelectionZone from '../elements/SelectionZone'
 import { prepareGeoData } from '../../lib/dataLib'
 import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
+import { getRelativeRectangle } from '../../lib/scaleLib'
 // redux functions
 // import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 import ReactMapboxGl, { GeoJSONLayer, Layer, ZoomControl } from 'react-mapbox-gl'
@@ -21,28 +22,52 @@ const Map = ReactMapboxGl({
 class GeoMap extends React.Component {
     constructor (props) {
         super(props)
-        // this.selectElements = this.selectElements.bind(this)
+        this.getElementsForTransition = this.getElementsForTransition.bind(this)
+        this.getElementsInZone = this.getElementsInZone.bind(this)
+        this.onToggleHover = this.onToggleHover.bind(this)
+        this.onMouseClick = this.onMouseClick.bind(this)
         this.customState = {
             // selectElements: this.selectElements,
             elementName: `refGeoMap_${props.zone}`
         }
         this.prepareData(props)
     }
-    static onToggleHover (cursor, event) {
+    onToggleHover (cursor, event) {
         event.target.getCanvas().style.cursor = cursor
     }
-    static onMouseClick (event) {
-        console.log(event.features[0]._vectorTileFeature, event.point.x, event.point.y, event.lngLat.lat)
+    onMouseClick (event) {
+        console.log(event)
+        if (event.features[0].properties.id) {
+            console.log(event.features[0]._vectorTileFeature, event.point.x, event.point.y, event.lngLat.lat)
+        } else {
+            var features = this.map.state.map.queryRenderedFeatures(event.point, { layers: ['cluster_layer'] })
+            var clusterId = features[0].properties.cluster_id,
+                point_count = features[0].properties.point_count,
+                clusterSource = this.map.state.map.getSource('source_id');
+
+            // Get Next level cluster Children
+            // 
+            clusterSource.getClusterChildren(clusterId, function(err, aFeatures){
+                console.log('getClusterChildren', err, aFeatures);
+            });
+
+            // Get all points under a cluster
+            clusterSource.getClusterLeaves(clusterId, point_count, 0, function(err, aFeatures){
+                console.log('getClusterLeaves', err, aFeatures);
+            })
+        }
+        
     }
     render () {
         const { dimensions, role, selections, step, zone } = this.props
 
-        return (<g className = { `GeoMap ${this.customState.elementName} role_${role}` } >
+        return (<g
+            className = { `GeoMap ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
                 dimensions = { dimensions }
-                layout = { this }
+                component = { this }
                 selections = { selections }
             />
             }
@@ -53,6 +78,7 @@ class GeoMap extends React.Component {
                 height = { dimensions.useful_height }
             >
                 <Map
+                    ref={(e) => { this.map = e }}
                     style='mapbox://styles/mapbox/light-v9'
                     containerStyle={{
                         height: '100%',
@@ -61,6 +87,10 @@ class GeoMap extends React.Component {
                     }}
                     center={[0, 40]}
                     zoom={[1.2]}
+                    onStyleLoad = { e => { 
+                        // c'est moche mais ça marche
+                        
+                    } }
                 >
                     <GeoJSONLayer
                         id='source_id'
@@ -79,9 +109,9 @@ class GeoMap extends React.Component {
                             'circle-color': 'green',
                             'circle-radius': 6
                         }}
-                        circleOnMouseEnter={GeoMap.onToggleHover.bind(this, 'pointer')}
-                        circleOnMouseLeave={GeoMap.onToggleHover.bind(this, '')}
-                        circleOnClick={GeoMap.onMouseClick.bind(this)}
+                        circleOnMouseEnter = { e => { this.onToggleHover('pointer', e) } }
+                        circleOnMouseLeave = { e => { this.onToggleHover('', e) } }
+                        circleOnClick = { e => { this.onMouseClick(e) } }
                     />
                     <Layer
                         id='cluster_layer'
@@ -129,10 +159,29 @@ class GeoMap extends React.Component {
             }
         </g>)
     }
-    getElementsInZone (zoneDimensions) {
-        return []
+    getElementsForTransition () {
+        let { display, dimensions, zone } = this.props
+        let results = []
+        let rendered = this.map && this.map.state.map && this.map.state.map.getLayer('cluster_layer') ? this.map.state.map.queryRenderedFeatures([[0, 0], [dimensions.useful_width, dimensions.useful_height]], { layers: ['cluster_layer'] }) : []
+        // select all displayed features
+        // results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity, shape: d.shape, rotation: 0 })
+        console.log(rendered.map(el => {
+            return el
+        }))
+        return results
+    }
+    getElementsInZone (props) {
+        let { display, zone, zoneDimensions } = props
+        let selectedElements = []
+        let relativeZone = getRelativeRectangle(zoneDimensions, zone, display)
+        /* d3.select(this.el).selectAll('.yUnits')
+            .each(function (d, i) {
+                if (detectRectCollision(relativeZone, d.zone)) selectedElements.push(d.selection)
+            }) */
+        return selectedElements
     }
     shouldComponentUpdate (nextProps, nextState) {
+        // if (this.props.step === 'launch' && nextProps.step === 'launch') return false
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
@@ -142,12 +191,14 @@ class GeoMap extends React.Component {
             (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
-        const { data, dataset } = nextProps
+        const { data, dataset, role } = nextProps
         // prepare the data for display
         // const selectedConfig = getSelectedMatch(config, zone)
         // First prop
         // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
+        console.log(data, role)
         let geodata = prepareGeoData(data, dataset)
+        console.log(geodata.features.sort((a, b) => a.properties.title ? a.properties.title.localeCompare(b.properties.title) : 0 ))
         // 
         // Save to reuse in render
         this.customState = {
@@ -162,10 +213,21 @@ class GeoMap extends React.Component {
         selectElements(elements, zone, selections)
     }
     componentDidMount () {
-        this.props.handleTransition(this.props, [])
+        if (this.map && this.map.state.map) {
+            this.map.state.map.on('load', (e) => {
+                console.log('BRAVO', e)
+                
+            })
+        }
+        window.setTimeout(() => { this.props.handleTransition(this.props, this.getElementsForTransition()) }, 1000)
+        // let elements = this.getElementsForTransition()
+        //if (elements.length > 0) this.props.handleTransition(this.props, elements)
     }
     componentDidUpdate () {
-        this.props.handleTransition(this.props, [])
+        //let elements = this.getElementsForTransition()
+        //if (elements.length > 0) this.props.handleTransition(this.props, elements)
+    }
+    componentWillUnmount () {       
     }
 }
 
