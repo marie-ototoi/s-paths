@@ -79,8 +79,32 @@ const defaultState = [
         ]
     },
     {
+        id: 'Timeline',
+        name: 'timeline',
+        thumb : '/images/timeline.svg',
+        constraints: [
+            [
+                {
+                    category: 'datetime',
+                    unique: { min: 1 },
+                    multiple: true
+                }
+            ],
+            [
+                {
+                    category: 'text',
+                    unique: { min: 2, max: 70, optimal: [10, 40] }
+                },
+                {
+                    category: 'uri',
+                    unique: { min: 2, max: 70, optimal: [10, 40] }
+                }
+            ]
+        ]
+    },
+    {
         id: 'Pyramid',
-        name: 'pyramid',
+        name: 'pyramid - this is a vega test',
         thumb : '/images/pyramid.svg',
         constraints: [
             [
