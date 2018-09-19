@@ -6,7 +6,7 @@ import { getRelativeRectangle } from '../lib/scaleLib'
 
 class StackedChartLayout extends AbstractLayout {
     draw (props) {
-        const { nestedProp1, legend, selections, zone } = props
+        const { nestedProp1, display, legend, selections, zone } = props
         //console.log(selections)
         const timeUnits = d3.select(this.el)
             .selectAll('g.time')
@@ -52,7 +52,7 @@ class StackedChartLayout extends AbstractLayout {
             .classed('selected', d => d.selected)
             .attr('fill', d => d.color)
             .attr('opacity', d => {
-                d.opacity = (selections.length > 0 && ((selections.some(s => s.zone === zone) && d.selected !== true) || !selections.some(s => s.zone === zone))) ? 0.5 : 1
+                d.opacity = (selections.length > 0 && ((selections.some(s => s.zone === zone) && d.selected !== true) || !selections.some(s => s.zone === zone))) ? display.faded[zone] : 1
                 return d.opacity
             })
     }
