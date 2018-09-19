@@ -29,12 +29,13 @@ services:
   image: docker
   tags:
     - docker
-  script:
+  before_script:
     - mkdir -pv ~/.docker
     - echo "$TLSCACERT" > ~/.docker/ca.pem
-    - echo "$TLSCERT" > ~/.docker/cert.pem
+    - echo "$TLSCERT " > ~/.docker/cert.pem
     - echo "$TLSKEY" > ~/.docker/key.pem
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
     - docker stack deploy --compose-file docker-compose.yml --with-registry-auth semanticStack
     # - docker service update  --with-registry-auth semanticStack_semanticpaths
 
@@ -54,20 +55,22 @@ Assets:
 
 Docker:
   tags:
-   - docker
+    - docker
   stage: build
+  before_script:
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN registry.gitlab.inria.fr
-    - docker build -t registry.gitlab.inria.fr/mdestand/semantic-paths .
-    - docker push registry.gitlab.inria.fr/mdestand/semantic-paths
+    - docker pull $CI_REGISTRY_IMAGE:latest || true
+    - docker build -t $CI_REGISTRY_IMAGE .
+    - docker push $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:$CI_BUILD_REF
   only:
     - master
-
 
 # Deploy stage
 # -> Automate deployment and provide continuous deployment
 
-Staging:
+Production:
   <<: *docker-deploy
   variables:
     DOCKER_TLS_VERIFY: 1
@@ -77,14 +80,18 @@ Staging:
     - master
   when: manual
   environment:
-    name: Staging
+    name: production
     url: http://semantic-paths.lri.fr
 
-#Production:
-#  <<: *docker-deploy
-#  variables:
-#    DOCKER_TLS_VERIFY: 1
-#    DOCKER_HOST:
-#    DOCKER_MACHINE_NAME: default
-#  only:
-#    - tags
+Staging:
+  <<: *docker-deploy
+  variables:
+    DOCKER_TLS_VERIFY: 0
+    DOCKER_HOST: tcp://195.83.213.227:2375
+    DOCKER_MACHINE_NAME: default
+  only:
+    - master
+  when: manual
+  environment:
+    name: staging
+    url: https://s-paths.inria.fr
