@@ -10,6 +10,7 @@ import Slider from './elements/Slider'
 import GeoMap from './views/GeoMap'
 import Header from './elements/Header'
 import HeatMap from './views/HeatMap'
+import Pyramid from './views/Pyramid'
 import Images from './views/Images'
 import ListAllProps from './views/ListAllProps'
 import SingleProp from './views/SingleProp'
@@ -104,7 +105,7 @@ class App extends React.PureComponent {
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_target`])) {
                 // console.log('2 - ON CHANGE, les elements sont modifies ', zone, elements)
                 // console.log(this.props.dataset)
-                let transitionElements 
+                let transitionElements
                 if (elements.length > 0) {
                     if (zone === 'main')  {
                         transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getSelectedView(getCurrentConfigs(configs, zone, 'active'), zone), getSelectedView(getCurrentConfigs(configs, zone, 'transition'), zone), getResults(data, zone, 'delta'), zone)
@@ -147,6 +148,7 @@ class App extends React.PureComponent {
         // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
+            'Pyramid': Pyramid,
             'GeoMap': GeoMap,
             'HeatMap': HeatMap,
             'Images': Images,
