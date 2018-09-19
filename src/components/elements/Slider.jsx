@@ -7,14 +7,10 @@ class Slider extends React.Component {
     constructor (props) {
         super(props)
         this.drag = this.drag.bind(this)
-        this.dragLeave = this.dragLeave.bind(this)
-        this.state = {
-        }
     }
-    dragLeave (e) {
+    drag (event) {
         const { display, setDisplay } = this.props
-        let asidePercent = Math.floor(100 * this.state.x / display.screen.width)
-        this.setState({ x : null })
+        let asidePercent = event.target.value
         if (asidePercent !== 0) {
             setDisplay({
                 screen: display.screen,
@@ -22,25 +18,19 @@ class Slider extends React.Component {
             })
         }
     }
-    drag (e) {
-        this.setState({ x : e.pageX })
-    }
     render () {
-        const { display } = this.props
-        let x = this.state.x || display.viz.aside_width
-        //<i className="fas fa-columns"></i>
-        return (<g>
-            
-            <line
-                onDrag = { this.drag }
-                onDragLeave = { this.dragLeave }
-                y1 = { display.viz.top_margin + (display.viz.useful_height * 3 / 4) }
-                x1 = { x }
-                y2 = { display.viz.top_margin + display.viz.useful_height }
-                x2 = { x }
-                className = "Slider"
-            />
-        </g>)
+        return (
+            <foreignObject>
+                <input
+                    type='range'
+                    className='Slider'
+                    min={0}
+                    max={50}
+                    step={25}
+                    onChange={this.drag}
+                />
+            </foreignObject>
+        )
     }
 }
 
