@@ -11,15 +11,8 @@ import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 import { getRelativeRectangle } from '../../lib/scaleLib'
 // redux functions
-// import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
-import ReactMapboxGl, { GeoJSONLayer, Layer, ZoomControl } from 'react-mapbox-gl'
 
-const Map = ReactMapboxGl({
-    accessToken: "pk.eyJ1IjoibWFyaWVkZXN0YW5kYXUiLCJhIjoiY2ppb2E2Y3hlMG5xMzNrbzI3Ynk0MDlmaSJ9.XmflFu2QUBjFDVVWAKFBKQ",
-    dragRotate: false
-})
-
-class GeoMap extends React.Component {
+class Timeline extends React.Component {
     constructor (props) {
         super(props)
         this.getElementsForTransition = this.getElementsForTransition.bind(this)
@@ -166,14 +159,6 @@ class GeoMap extends React.Component {
         // select all displayed features
         // results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity, shape: d.shape, rotation: 0 })
         console.log(rendered.map(el => {
-            if (el.properties.cluster) {
-                /* let leaves = clusterSource.getClusterLeaves(clusterId, point_count, 0, function(err, aFeatures){
-                    console.log('getClusterLeaves', err, aFeatures);
-                }) */
-            } else {
-                //
-            }
-            //let zone = 
             return el
         }))
         return results
@@ -239,7 +224,7 @@ class GeoMap extends React.Component {
     }
 }
 
-GeoMap.propTypes = {
+Timeline.propTypes = {
     config: PropTypes.object,
     data: PropTypes.array,
     dataset: PropTypes.object,
@@ -275,6 +260,6 @@ function mapDispatchToProps (dispatch) {
     }
 }
 
-const GeoMapConnect = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(GeoMap)
+const TimelineConnect = connect(mapStateToProps, mapDispatchToProps, null, { withRef: true })(Timeline)
 
-export default GeoMapConnect
+export default TimelineConnect

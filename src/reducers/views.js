@@ -79,6 +79,38 @@ const defaultState = [
         ]
     },
     {
+        id: 'Pyramid',
+        name: 'pyramid',
+        thumb : '/images/pyramid.svg',
+        constraints: [
+            [
+                {
+                    category: 'datetime',
+                    unique: { min: 2 }
+                },
+                {
+                    category: 'text',
+                    avg: { max: 70, optimal: [10, 40] },
+                    unique: { min: 2, max: 150 }
+                },
+                {
+                    category: 'uri',
+                    unique: { min: 2, max: 150 }
+                }
+            ],
+            [
+                {
+                    category: 'text',
+                    unique: { min: 2, max: 70, optimal: [10, 40] }
+                },
+                {
+                    category: 'uri',
+                    unique: { min: 2, max: 70, optimal: [10, 40] }
+                }
+            ]
+        ]
+    },
+    {
         id: 'TreeMap',
         name: 'treemap',
         thumb : '/images/treemap.svg',

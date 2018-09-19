@@ -10,6 +10,7 @@ import Slider from './elements/Slider'
 import GeoMap from './views/GeoMap'
 import Header from './elements/Header'
 import HeatMap from './views/HeatMap'
+import Pyramid from './views/Pyramid'
 import Images from './views/Images'
 import ListAllProps from './views/ListAllProps'
 import SingleProp from './views/SingleProp'
@@ -89,11 +90,11 @@ class App extends React.PureComponent {
     handleTransition (props, elements) {
         const { role, status, zone } = props
         const { data, configs } = this.props
-        console.log(role, status, zone)
+        // console.log(role, status, zone)
         if (role === 'origin') {
             let updateState = {}
             if (zone === 'aside') {
-                console.log(this.state.main_origin, elements)
+                // console.log(this.state.main_origin, elements)
                 if (this.state.main_origin) updateState[`${zone}_transition`] = getTransitionElements(this.state.main_origin, elements, getSelectedView(getCurrentConfigs(configs, 'aside', 'active'), 'aside'), getSelectedView(getCurrentConfigs(configs, 'main', 'active'), 'main'), getResults(data, 'main', 'delta'), 'aside')
             } 
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_origin`])) {
@@ -148,6 +149,7 @@ class App extends React.PureComponent {
         // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
+            'Pyramid': Pyramid,
             'GeoMap': GeoMap,
             'HeatMap': HeatMap,
             'Images': Images,
@@ -168,9 +170,9 @@ class App extends React.PureComponent {
         const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
         const coreDimensionsMain = getDimensions('main', display.viz)
         const coreDimensionsAside = getDimensions('aside', display.viz)
-        console.log(mainConfig, getCurrentConfigs(configs, 'main', 'active'))
-        console.log(mainTransitionConfig, getCurrentConfigs(configs, 'main', 'transition'))
-        console.log(asideConfig, getCurrentConfigs(configs, 'aside', 'active'))
+        // console.log(mainConfig, getCurrentConfigs(configs, 'main', 'active'))
+        // console.log(mainTransitionConfig, getCurrentConfigs(configs, 'main', 'transition'))
+        // console.log(asideConfig, getCurrentConfigs(configs, 'aside', 'active'))
         // console.log(getResults(data, 'aside', 'active'))
         // to do : avoid recalculate transition data at each render
         return (<div
@@ -241,7 +243,7 @@ class App extends React.PureComponent {
                         step = { this.state.main_step }
                     />
                 }
-                { asideConfig && data.past.length > 1 && areLoaded(data, 'aside', 'active') &&
+                { asideConfig && data.past.length > 1 && this.state.main_step === 'active' && areLoaded(data, 'aside', 'active') &&
                     <SideComponent
                         zone = "aside"
                         role = "origin"
@@ -258,7 +260,7 @@ class App extends React.PureComponent {
                         handleTransition = { this.handleTransition }
                     />
                 }
-                { asideConfig && data.past.length > 1 && areLoaded(data, 'aside', 'active') && this.state.aside_transition &&
+                { asideConfig && data.past.length > 1 && this.state.main_step === 'active' && this.state.aside_transition &&
                     <BrushLink
                         zone = "aside"
                         dimensions = { coreDimensionsAside }
