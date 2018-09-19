@@ -238,6 +238,7 @@ class App extends React.PureComponent {
                         zone = "main"
                         dimensions = { coreDimensionsMain }
                         elements = { this.state.main_transition }
+                        step = { this.state.main_step }
                     />
                 }
                 { asideConfig && data.past.length > 1 && areLoaded(data, 'aside', 'active') &&
