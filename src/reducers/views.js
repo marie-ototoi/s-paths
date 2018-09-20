@@ -69,7 +69,8 @@ const defaultState = [
             [
                 {
                     category: 'text',
-                    unique: { min: 2, max: 70, optimal: [10, 40] }
+                    unique: { min: 2, max: 70, optimal: [10, 40] },
+                    avg: { max: 70, optimal: [10, 40] }
                 },
                 {
                     category: 'uri',
@@ -82,18 +83,19 @@ const defaultState = [
         id: 'Timeline',
         name: 'timeline',
         thumb : '/images/timeline.svg',
+        entrypoint: { min: 2, max: 30, optimal: [4, 20] },
         constraints: [
             [
                 {
                     category: 'datetime',
-                    unique: { min: 1 },
-                    multiple: true
+                    unique: { min: 1 }
                 }
             ],
             [
                 {
                     category: 'text',
-                    unique: { min: 2, max: 70, optimal: [10, 40] }
+                    unique: { min: 2, max: 70, optimal: [10, 40] },
+                    avg: { max: 70, optimal: [10, 40] }
                 },
                 {
                     category: 'uri',
@@ -102,7 +104,7 @@ const defaultState = [
             ]
         ]
     },
-    {
+    /* {
         id: 'Pyramid',
         name: 'pyramid - this is a vega test',
         thumb : '/images/pyramid.svg',
@@ -133,7 +135,7 @@ const defaultState = [
                 }
             ]
         ]
-    },
+    }, */
     {
         id: 'TreeMap',
         name: 'treemap',

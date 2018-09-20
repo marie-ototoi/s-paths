@@ -1,14 +1,12 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-import ReactDOM from 'react-dom';
 import Vega from 'react-vega';
 // components
 import SelectionZone from '../elements/SelectionZone'
 // d3
 
 // libs
-import { prepareGeoData } from '../../lib/dataLib'
 import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 import { getRelativeRectangle } from '../../lib/scaleLib'
@@ -22,7 +20,7 @@ class Pyramid extends React.Component {
         this.handleHover = this.handleHover.bind(this)
         this.customState = {
             // selectElements: this.selectElements,
-            elementName: `refGeoMap_${props.zone}`
+            elementName: `refPyramidMap_${props.zone}`
         }
         this.prepareData(props)
     }
