@@ -1,45 +1,43 @@
 version: "3.5"
 services:
   virtuoso:
-    image: openlink/virtuoso_opensource:latest
+    image: openlink/virtuoso_opensource
     volumes:
       - db-virtuoso:/opt/virtuoso-opensource/database
-      #- db-virtuosobnf:/opt/virtuoso-opensource/database
-      #- ./dump:/opt/virtuoso-opensource/vad
     ports:
       - 8890:8890
       - 1111:1111
   mongo:
     image: mongo
     env_file:
-     - .env.dev
+      - .env
     ports:
-     - 27017:27017
+      - 27017:27017
     volumes:
-     - db-mongo:/data/db
-  semanticpaths:
+      - db-mongo:/data/db
+  s-paths:
     build:
       context: ./
       dockerfile: Dockerfile-dev
       args:
-      - http_proxy
-      - https_proxy
-      - no_proxy
+        - http_proxy
+        - https_proxy
+        - no_proxy
     restart: always
     env_file:
-     - .env.dev
+      - .env
     ports:
-     - 80:80
-     - 8081:8081
-     - 9229:9229
+      - 80:80
+      - 8081:8081
+      - 9229:9229
     volumes:
-     - ./src:/src/
+      - ./src:/src/
     depends_on:
-     - mongo
-     - virtuoso
+      - virtuoso
+      - mongo
     links:
-     - virtuoso
-     - mongo
+      - virtuoso
+      - mongo
 volumes:
-  db-mongo:
   db-virtuoso:
+  db-mongo:

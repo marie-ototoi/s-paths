@@ -1,7 +1,7 @@
 version: "3.5"
 services:
   virtuoso:
-    image: openlink/virtuoso_opensource:latest
+    image: openlink/virtuoso_opensource
     volumes:
       - db-virtuoso:/opt/virtuoso-opensource/database
     ports:
@@ -10,30 +10,30 @@ services:
   mongo:
     image: mongo
     env_file:
-     - .env.prod
+      - .env
     ports:
-     - 27017:27017
+      - 27017:27017
     volumes:
-     - db-mongo:/data/db
-  semanticpaths:
+      - db-mongo:/data/db
+  s-paths:
     image: registry.gitlab.inria.fr/mdestand/semantic-paths:latest
     build:
       context: ./
       args:
-      - http_proxy
-      - https_proxy
-      - no_proxy
+        - http_proxy
+        - https_proxy
+        - no_proxy
     restart: always
     env_file:
-     - .env.prod
+      - .env
     ports:
-     - 80:80
+      - 80:80
     depends_on:
-     - mongo
-     - virtuoso
+      - virtuoso
+      - mongo
     links:
-     - virtuoso
-     - mongo
+      - virtuoso
+      - mongo
 volumes:
-  db-mongo:
   db-virtuoso:
+  db-mongo:

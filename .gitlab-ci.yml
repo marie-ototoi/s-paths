@@ -34,6 +34,7 @@ services:
     - echo "$TLSCACERT" > ~/.docker/ca.pem
     - echo "$TLSCERT" > ~/.docker/cert.pem
     - echo "$TLSKEY" > ~/.docker/key.pem
+    - echo "$ENV_FILE" > ./.env
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - docker stack deploy --compose-file docker-compose.yml --with-registry-auth semanticStack
@@ -76,6 +77,7 @@ Production:
     TLSCACERT: $TLSCACERT_production
     TLSCERT: $TLSCERT_production
     TLSKEY: $TLSKEY_production
+    ENV_FILE: $ENV_FILE_production
     DOCKER_TLS_VERIFY: 1
     DOCKER_MACHINE_NAME: default
     DOCKER_HOST: tcp://129.175.22.62:2376
@@ -92,6 +94,7 @@ Staging:
     TLSCACERT: $TLSCACERT_staging
     TLSCERT: $TLSCERT_staging
     TLSKEY: $TLSKEY_staging
+    ENV_FILE: $ENV_FILE_staging
     DOCKER_TLS_VERIFY: 1
     DOCKER_MACHINE_NAME: default
     DOCKER_HOST: tcp://195.83.213.227:2376

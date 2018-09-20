@@ -2,7 +2,8 @@ coverage/
 node_modules/
 public/
 db/
-.env
+*.env*
+!.env.example
 .tmp/
 .nyc_output/
 .vscode/
