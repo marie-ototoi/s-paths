@@ -228,7 +228,7 @@ export const getDeltaIndex = (dataPiece, elements, options) => {
     elements.forEach((el, indexEl) => {
         if (entrypoint) {
             if (el.query && dataPiece.entrypoint && el.query.value === dataPiece.entrypoint.value) indexElement = indexEl
-        } else if (el.query.value && el.query.value.length > 0) {
+        } else if (el.query.value && Array.isArray(el.query.value)) {
             // console.log(el)
             let conditions = el.query.value.map((condition, index) => {
                 const propIndex = index + 1
