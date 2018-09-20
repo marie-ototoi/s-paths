@@ -17,10 +17,12 @@ class Slider extends React.Component {
         })
     }
     render () {
+        const { display } = this.props
         return (
             <input
                 type='range'
                 className='Slider'
+                value={display.viz.aside_width / 10}
                 min={0}
                 max={50}
                 step={25}
