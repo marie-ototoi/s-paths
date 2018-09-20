@@ -29,7 +29,7 @@ services:
   image: docker
   tags:
     - docker
-  variables:
+  variables: &docker-deploy-variables
     DOCKER_TLS_VERIFY: 1
     DOCKER_MACHINE_NAME: default
     TLSCACERT: TLSCACERT_$CI_ENVIRONMENT_NAME
@@ -79,6 +79,7 @@ Docker:
 Production:
   <<: *docker-deploy
   variables:
+    <<: *docker-deploy-variables
     DOCKER_HOST: tcp://129.175.22.62:2376
   only:
     - master
@@ -90,6 +91,7 @@ Production:
 Staging:
   <<: *docker-deploy
   variables:
+    <<: *docker-deploy-variables
     DOCKER_HOST: tcp://195.83.213.227:2376
   when: manual
   environment:
