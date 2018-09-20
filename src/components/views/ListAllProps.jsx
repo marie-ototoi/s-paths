@@ -60,7 +60,7 @@ class ListAllProps extends React.Component {
             <SelectionZone
                 zone = { zone }
                 dimensions = { dimensions }
-                layout = { this }
+                component = { this }
                 selections = { selections }
             />
             }

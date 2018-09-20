@@ -10,6 +10,7 @@ import Slider from './elements/Slider'
 import GeoMap from './views/GeoMap'
 import Header from './elements/Header'
 import HeatMap from './views/HeatMap'
+import Pyramid from './views/Pyramid'
 import Images from './views/Images'
 import ListAllProps from './views/ListAllProps'
 import SingleProp from './views/SingleProp'
@@ -91,28 +92,29 @@ class App extends React.PureComponent {
         const { data, configs } = this.props
         // console.log(role, status, zone)
         if (role === 'origin') {
+            let updateState = {}
+            if (zone === 'aside') {
+                // console.log(this.state.main_origin, elements)
+                if (this.state.main_origin) updateState[`${zone}_transition`] = getTransitionElements(this.state.main_origin, elements, getSelectedView(getCurrentConfigs(configs, 'aside', 'active'), 'aside'), getSelectedView(getCurrentConfigs(configs, 'main', 'active'), 'main'), getResults(data, 'main', 'delta'), 'aside')
+            } 
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_origin`])) {
                 // console.log('x - transition ORIGIN LAID OUT', zone, elements)
-                this.setState({ [`${zone}_origin`]: elements })
+                updateState[`${zone}_origin`] =  elements
             }
             if (this.state[`${zone}_step`] === 'done' && status === 'active') {
                 // console.log('4 - c est fini, on peut faire un reset ?', zone, this.state)
-                this.setState({ [`${zone}_step`]: 'active', [`${zone}_target`]: null })
+                updateState[`${zone}_step`] = 'active'
+                updateState[`${zone}_target`] = null 
             }
+            this.setState(updateState)
         } else if (role === 'target') {
             // console.log('transition target laid out', zone, role, elements)
             if (JSON.stringify(elements) !== JSON.stringify(this.state[`${zone}_target`])) {
                 // console.log('2 - ON CHANGE, les elements sont modifies ', zone, elements)
                 // console.log(this.props.dataset)
-                let transitionElements 
-                if (elements.length > 0) {
-                    if (zone === 'main')  {
-                        transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getSelectedView(getCurrentConfigs(configs, zone, 'active'), zone), getSelectedView(getCurrentConfigs(configs, zone, 'transition'), zone), getResults(data, zone, 'delta'), zone)
-                    } else {
-                        // on en est la
-                        transitionElements = getTransitionElements(elements, this.state[`${zone}_origin`], getSelectedView(getCurrentConfigs(configs, 'aside', 'active'), 'aside'), getSelectedView(getCurrentConfigs(configs, 'main', 'active'), 'main'), getResults(data, 'main', 'delta'), 'aside')
-                        // console.log('yiyi ', transitionElements)
-                    }
+                let transitionElements
+                if (elements.length > 0 && zone === 'main') {
+                    transitionElements = getTransitionElements(this.state[`${zone}_origin`], elements, getSelectedView(getCurrentConfigs(configs, zone, 'active'), zone), getSelectedView(getCurrentConfigs(configs, zone, 'transition'), zone), getResults(data, zone, 'delta'), zone)
                 } else {
                     transitionElements = { origin:this.state[`${zone}_origin`], target: [] }
                 }
@@ -147,6 +149,7 @@ class App extends React.PureComponent {
         // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
+            'Pyramid': Pyramid,
             'GeoMap': GeoMap,
             'HeatMap': HeatMap,
             'Images': Images,
@@ -165,7 +168,6 @@ class App extends React.PureComponent {
         const MainTransitionComponent = mainTransitionConfig ? componentIds[mainTransitionConfig.id] : ''
         const asideConfig = getSelectedView(getCurrentConfigs(configs, 'aside', 'active'), 'aside')
         const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
-        const SideTransitionComponent = asideConfig ? componentIds[asideConfig.id] : ''
         const coreDimensionsMain = getDimensions('main', display.viz)
         const coreDimensionsAside = getDimensions('aside', display.viz)
         // console.log(mainConfig, getCurrentConfigs(configs, 'main', 'active'))
@@ -238,22 +240,10 @@ class App extends React.PureComponent {
                         zone = "main"
                         dimensions = { coreDimensionsMain }
                         elements = { this.state.main_transition }
+                        step = { this.state.main_step }
                     />
                 }
-                { asideConfig && this.state.main_step === 'launch' &&
-                    <SideTransitionComponent
-                        role = "target"
-                        zone = "aside"
-                        status = { statusMain }
-                        dimensions = { coreDimensionsMain }
-                        data = { getResults(data, 'main', 'transition') }
-                        selections = { [] }
-                        // coverage = { getResults(data, 'main', 'coverage') }
-                        config = { asideConfig }
-                        handleTransition = { this.handleTransition }
-                    />
-                }
-                { asideConfig && data.past.length > 1 && areLoaded(data, 'aside', 'active') &&
+                { asideConfig && data.past.length > 1 && this.state.main_step === 'active' && areLoaded(data, 'aside', 'active') &&
                     <SideComponent
                         zone = "aside"
                         role = "origin"
@@ -270,11 +260,12 @@ class App extends React.PureComponent {
                         handleTransition = { this.handleTransition }
                     />
                 }
-                { this.state.aside_transition &&
+                { asideConfig && data.past.length > 1 && this.state.main_step === 'active' && this.state.aside_transition &&
                     <BrushLink
                         zone = "aside"
                         dimensions = { coreDimensionsAside }
                         elements = { this.state.aside_transition }
+                        step = { this.state.main_step }
                     />
                 }
                 <Slider />

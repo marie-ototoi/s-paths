@@ -93,7 +93,7 @@ class StackedChart extends React.Component {
             <SelectionZone
                 zone = { zone }
                 dimensions = { dimensions }
-                layout = { this.layout }
+                component = { this }
                 selections = { selections }
             />
             }

@@ -6,6 +6,7 @@ import { handleMouseDown, handleMouseUp } from '../../actions/selectionActions'
 class SelectionZone extends React.PureComponent {
     render () {
         const { dimensions, display, component, selections, zone } = this.props
+        
         return (<rect
             className = "SelectionZone"
             ref = { `selectionZone_${zone}` }

@@ -6,7 +6,7 @@ import { getRelativeRectangle } from '../lib/scaleLib'
 
 class TreeMapLayout extends AbstractLayout {
     draw (props) {
-        const { color, nestedProp1, selectedConfig, selections, zone } = props
+        const { color, display, nestedProp1, selectedConfig, selections, zone } = props
         // console.log(nestedProp1)
         const units = d3.select(this.el)
             .selectAll('g.units')
@@ -54,7 +54,7 @@ class TreeMapLayout extends AbstractLayout {
             .classed('selected', d => d.selected)
             // .attr('fill', d => d.color)
             .attr('opacity', d => {
-                return (selections.length > 0 && ((selections.some(s => s.zone === zone) && d.selected !== true) || !selections.some(s => s.zone === zone))) ? 0.5 : 1
+                return (selections.length > 0 && ((selections.some(s => s.zone === zone) && d.selected !== true) || !selections.some(s => s.zone === zone))) ? display.faded[zone] : 1
             })
     }
 

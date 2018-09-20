@@ -1,4 +1,4 @@
-.role_target {
+.role_target, .role_target * {
     display: none;
 }
 

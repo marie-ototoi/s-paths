@@ -16,6 +16,10 @@ const defaultState = {
         main_width: 65,
         aside_width: 35
     },
+    faded: {
+        main: 0.5,
+        aside: 0.3
+    },
     viz: {
         useful_height: initValue,
         width: initValue,

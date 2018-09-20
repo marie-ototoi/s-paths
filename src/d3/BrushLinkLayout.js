@@ -24,8 +24,7 @@ class BrushLinkLayout extends AbstractLayout {
                 .attr('height', d => d.zone.height)
                 .attr('fill', d => d.color)
                 .attr('transform', d => `rotate(${d.rotation} ${d.zone.x1} ${d.zone.y1})`)
-                .attr('fill-opacity', 0)
-                .attr('fill-opacity', d => 0.3)
+                .attr('visibility', 'hidden')
         }
         shapesSelection.exit()
             .attr('fill-opacity', 0)
@@ -33,7 +32,7 @@ class BrushLinkLayout extends AbstractLayout {
 
         let indexSelections = props.selections.map(sel => sel.index)
         let thisZone = props.selections.some(sel => sel.zone === props.zone)
-        
+        let ready = props.step === 'active'
         shapesSelection
             .attr('x', d => d.zone.x1)
             .attr('y', d => d.zone.y1)
@@ -41,7 +40,7 @@ class BrushLinkLayout extends AbstractLayout {
             .attr('height', d => d.zone.height)
             .attr('transform', d => `rotate(${d.rotation} ${d.zone.x1} ${d.zone.y1})`)
             .attr('fill', d => d.color)
-            .attr('fill-opacity', (d, i) => d.indexTarget >= 0 && !thisZone && indexSelections.includes(d.indexOrigin) ? 1 : 0)
+            .attr('visibility', (d, i) => ready && d.indexTarget >= 0 && !thisZone && indexSelections.includes(d.indexOrigin) ? 'visible' : 'hidden')
             
         // console.log('drawn')
     }

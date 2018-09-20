@@ -6,7 +6,7 @@ import { getRelativeRectangle } from '../lib/scaleLib'
 
 class HeatMapLayout extends AbstractLayout {
     draw (props) {
-        const { nestedProp1, legend, selectedConfig, selections, step, zone } = props
+        const { nestedProp1, legend, display, selectedConfig, selections, step, zone } = props
         // console.log(nestedProp1)
         const xUnits = d3.select(this.el)
             .selectAll('g.xUnits')
@@ -68,7 +68,7 @@ class HeatMapLayout extends AbstractLayout {
             .attr('opacity', d => {
                 return selections.length > 0 && 
                     ((thisZone && d.selected !== true) ||
-                    (!thisZone && selections.length > 0)) ? 0.5 : 1
+                    (!thisZone && selections.length > 0)) ? display.faded[zone] : 1
             })
     }
 
