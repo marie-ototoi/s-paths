@@ -57,13 +57,11 @@ class Timeline extends React.Component {
     getElementsForTransition () {
         let { display, dimensions, zone } = this.props
         let results = []
-
         return results
     }
     getElementsInZone (props) {
         let { display, zone, zoneDimensions } = props
         let selectedElements = []
-
         return selectedElements
     }
     shouldComponentUpdate (nextProps, nextState) {
