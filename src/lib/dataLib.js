@@ -341,6 +341,25 @@ export const prepareGeoData = (data, dataset) => {
     }
 }
 
+export const prepareVegaTimelineData = (data, dataset) => {
+    return {
+        type: 'FeatureCollection',
+        features: data.map(place => {
+            return {
+                type: 'Feature', 
+                properties: {
+                    id: makeId(place.entrypoint.value),
+                    title: place.prop3 ? place.prop3.value : place.prop1.value + '/' +  place.prop2.value
+                },
+                geometry: {
+                    type: "Point",
+                    coordinates: [ Number(place.prop1.value), Number(place.prop2.value), 0.0 ] 
+                }
+            }
+        })
+    }
+}
+
 export const prepareDetailData = (data, dataset) => {
     // console.log('prepare only once', data.length)
     let { entrypoint, prefixes, labels } = dataset
