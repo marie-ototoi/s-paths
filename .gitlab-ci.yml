@@ -81,7 +81,7 @@ Production:
   when: manual
   environment:
     name: production
-    url: http://semantic-paths.lri.fr
+    url: http://s-paths.lri.fr
 
 Staging:
   <<: *docker-deploy
