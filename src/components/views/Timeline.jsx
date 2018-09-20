@@ -10,6 +10,8 @@ import SelectionZone from '../elements/SelectionZone'
 import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 import { getRelativeRectangle } from '../../lib/scaleLib'
+import { getSelectedMatch } from '../../lib/configLib'
+import { usePrefix } from '../../lib/queryLib'
 // redux functions
 
 class Timeline extends React.Component {
@@ -75,53 +77,38 @@ class Timeline extends React.Component {
             (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
-        const { data, dataset, dimensions, role } = nextProps
+        const { config, data, dataset, display, dimensions, role, zone } = nextProps
         // prepare the data for display
         // const selectedConfig = getSelectedMatch(config, zone)
         // First prop
         // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
         console.log(data, role)
+        const selectedConfig = getSelectedMatch(config, zone)
+        const categoryProp2 = selectedConfig.properties[1].category
+        
         const datatest = [{
             "name": "entities",
-            "values": [{
-                "prop2": "Washington",
-                "prop1": -7506057600000,
-            },
-            {
-                "prop2": "Adams",
-                "prop1": -7389766800000,
-                "died": -4528285200000,
-                "enter": -5453884800000,
-                "leave": -5327740800000
-            },
-            {
-                "prop2": "Jefferson",
-                "prop1": -7154586000000,
-                "died": -4528285200000,
-                "enter": -5327740800000,
-                "leave": -5075280000000
-            },
-            {
-                "prop2": "Madison",
-                "prop1": -6904544400000,
-                "died": -4213184400000,
-                "enter": -5075280000000,
-                "leave": -4822819200000
-            },
-            {
-                "prop2": "Monroe",
-                "prop1": -6679904400000,
-                "died": -4370518800000,
-                "enter": -4822819200000,
-                "leave": -4570358400000
-            }]
+            "values": data.map(dp => {
+                return {
+                    "prop2": (categoryProp2 === 'uri') ? usePrefix(dp.prop2.value, dataset.prefixes) : dp.prop2.value,
+                    "prop1": dp.prop1.value,
+                    "prop1-2": undefined,
+                    "prop1label": "date of birth: " + dp.prop1.value,
+                    "name": (categoryProp2 === 'uri') ? usePrefix(dp.prop2.value, dataset.prefixes) : dp.prop2.value
+                }
+            })
         }]
         const spec = {
             "$schema": "https://vega.github.io/schema/vega/v4.json",
             "width": dimensions.useful_width,
             "height": dimensions.useful_height,
-            "padding": 5,
-
+            "config": {
+                "axisBand": {
+                    "bandPosition": 1,
+                    "tickExtra": true,
+                    "tickOffset": 0
+                }
+            },
             "data": datatest,
             "scales": [{
                 "name": "yscale",
@@ -134,48 +121,46 @@ class Timeline extends React.Component {
                 "type": "time",
                 "range": "width",
                 "round": true,
-                "domain": {"data": "entities", "fields": ["prop1", "died"]}
+                "domain": {"data": "entities", "field": "prop1"}
             }],
             "axes": [
-                {"orient": "bottom", "scale": "xscale", "format": "%Y"}
+                {"orient": "bottom", "scale": "xscale", "format": "%Y"},
+                {"orient": "left", "scale": "yscale", "ticks": false, "gridColor": "#fff"}
             ],
             "marks": [{
-                "type": "text",
+                "type": "symbol",
                 "from": {"data": "entities"},
                 "encode": {
                     "enter": {
-                        "x": {"scale": "xscale", "field": "prop1"},
-                        "y": {"scale": "yscale", "field": "prop2", "offset": -3},
-                        "fill": {"value": "#000"},
-                        "text": {"field": "prop2"},
-                        "fontSize": {"value": 10}
+                        "xc": {"scale": "xscale", "field": "prop1"},
+                        "yc": {"scale": "yscale", "field": "prop2", "offset": 5 + Math.floor(dimensions.useful_height / datatest[0].values.length / 2)},
+                        "fill": {"value": "#557"},
+                        "size": {"value": Math.floor(dimensions.useful_height / datatest[0].values.length) * 5},
+                        "tooltip": {"field": "prop1label", "type": "nominal"}
                     }
                 }
             },
             {
-                "type": "line",
+                "type": "symbol",
                 "from": {"data": "entities"},
                 "encode": {
                     "enter": {
-                        "x": {"scale": "xscale", "value": 0},
-                        "x2": {"scale": "xscale", "value": dimensions.useful_width},
-                        "y": {"scale": "yscale", "field": "label"},
-                        "y2": {"scale": "yscale", "field": "label"},
-                        "stroke": {"value": "#557"},
-                        "strokeWidth": {"value": 1}
+                        "xc": {"scale": "xscale", "field": "prop1-2"},
+                        "yc": {"scale": "yscale", "field": "prop2", "offset": 5 + Math.floor(dimensions.useful_height / datatest[0].values.length / 2)},
+                        "fill": {"value": "#f00"},
+                        "size": {"value": Math.floor(dimensions.useful_height / datatest[0].values.length) * 5},
                     }
                 }
             },
             {
-                "type": "rect",
+                "type": "symbol",
                 "from": {"data": "entities"},
                 "encode": {
                     "enter": {
-                        "x": {"scale": "xscale", "field": "enter"},
-                        "x2": {"scale": "xscale", "field": "leave"},
-                        "y": {"scale": "yscale", "field": "prop2", "offset":-1},
-                        "height": {"value": 4},
-                        "fill": {"value": "#e44"}
+                        "xc": {"scale": "xscale", "field": "prop1-3"},
+                        "yc": {"scale": "yscale", "field": "prop2", "offset": 5 + Math.floor(dimensions.useful_height / datatest[0].values.length / 2)},
+                        "fill": {"value": "#00f"},
+                        "size": {"value": Math.floor(dimensions.useful_height / datatest[0].values.length) * 2},
                     }
                 }
             }]
@@ -228,6 +213,7 @@ Timeline.propTypes = {
 
 function mapStateToProps (state) {
     return {
+        dataset: state.dataset,
         display: state.display,
         palettes: state.palettes,
         selections: state.selections
