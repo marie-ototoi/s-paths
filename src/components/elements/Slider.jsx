@@ -11,25 +11,21 @@ class Slider extends React.Component {
     drag (event) {
         const { display, setDisplay } = this.props
         let asidePercent = event.target.value
-        if (asidePercent !== 0) {
-            setDisplay({
-                screen: display.screen,
-                vizDef: { ...display.vizDefPercent, aside_width: asidePercent, main_width: 100 - asidePercent }
-            })
-        }
+        setDisplay({
+            screen: display.screen,
+            vizDef: { ...display.vizDefPercent, aside_width: asidePercent, main_width: 100 - asidePercent }
+        })
     }
     render () {
         return (
-            <foreignObject>
-                <input
-                    type='range'
-                    className='Slider'
-                    min={0}
-                    max={50}
-                    step={25}
-                    onChange={this.drag}
-                />
-            </foreignObject>
+            <input
+                type='range'
+                className='Slider'
+                min={0}
+                max={50}
+                step={25}
+                onChange={this.drag}
+            />
         )
     }
 }

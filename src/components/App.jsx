@@ -270,11 +270,11 @@ class App extends React.PureComponent {
                         step = { this.state.main_step }
                     />
                 }
-                <Slider />
                 <History
                     zone = "main"
                 />
             </svg>
+            <Slider />
         </div>)
     }
 

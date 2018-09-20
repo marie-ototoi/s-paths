@@ -1,7 +1,6 @@
 .Slider {
     position: absolute;
-    top: 150px;
-    left: 50px;
-    width: 150px;
-    height: 150px;
+    bottom: 6px;
+    right: 5%;
+    width: 30%;
 }
