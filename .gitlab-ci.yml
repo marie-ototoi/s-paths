@@ -71,7 +71,7 @@ Docker:
 # Deploy stage
 # -> Automate deployment and provide continuous deployment
 
-Production:
+Production Nobel:
   <<: *docker-deploy
   variables:
     TLSCACERT: $TLSCACERT_production
