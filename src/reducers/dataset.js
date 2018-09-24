@@ -1,8 +1,8 @@
 import types from '../constants/ActionTypes'
 
 const initialState = {
-    endpoint: process.env.ENDPOINT || 'http://0.0.0.0:8890/sparql',
-    localEndpoint: process.env.LOCAL_ENDPOINT || 'http://0.0.0.0:8890/sparql',
+    endpoint: process.env.ENDPOINT || 'http://virtuoso:8890/sparql',
+    localEndpoint: process.env.LOCAL_ENDPOINT || 'http://virtuoso:8890/sparql',
     entrypoint: '',
     graphs: ['http://nobel.ilda.fr', 'http://nobeladdon.ilda.fr'],
     resourceGraph: null,
