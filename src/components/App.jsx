@@ -4,21 +4,22 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 // components
+import BrushLink from './elements/BrushLink'
+import Header from './elements/Header'
 import History from './elements/History'
 import Settings from './elements/Settings'
 import Slider from './elements/Slider'
+import Transition from './elements/Transition'
 import GeoMap from './views/GeoMap'
-import Header from './elements/Header'
 import HeatMap from './views/HeatMap'
 import Pyramid from './views/Pyramid'
 import Images from './views/Images'
 import ListAllProps from './views/ListAllProps'
 import SingleProp from './views/SingleProp'
 import StackedChart from './views/StackedChart'
+import Timeline from './views/Timeline'
 import TreeMap from './views/TreeMap'
 import URIWheel from './views/URIWheel'
-import BrushLink from './elements/BrushLink'
-import Transition from './elements/Transition'
 // libs
 import { getDimensions, getScreen } from '../lib/scaleLib'
 import { areLoaded, getCurrentState, getResults, getTransitionElements } from '../lib/dataLib'
@@ -149,13 +150,14 @@ class App extends React.PureComponent {
         // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
-            'Pyramid': Pyramid,
             'GeoMap': GeoMap,
             'HeatMap': HeatMap,
             'Images': Images,
             'ListAllProps': ListAllProps,
+            'Pyramid': Pyramid,
             'SingleProp': SingleProp,
             'StackedChart': StackedChart,
+            'Timeline': Timeline,
             'TreeMap': TreeMap,
             'URIWheel': URIWheel
         }

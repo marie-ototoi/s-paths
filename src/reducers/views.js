@@ -69,7 +69,8 @@ const defaultState = [
             [
                 {
                     category: 'text',
-                    unique: { min: 2, max: 70, optimal: [10, 40] }
+                    unique: { min: 2, max: 70, optimal: [10, 40] },
+                    avg: { max: 70, optimal: [10, 40] }
                 },
                 {
                     category: 'uri',
@@ -78,31 +79,7 @@ const defaultState = [
             ]
         ]
     },
-    {
-        id: 'Timeline',
-        name: 'timeline',
-        thumb : '/images/timeline.svg',
-        constraints: [
-            [
-                {
-                    category: 'datetime',
-                    unique: { min: 1 },
-                    multiple: true
-                }
-            ],
-            [
-                {
-                    category: 'text',
-                    unique: { min: 2, max: 70, optimal: [10, 40] }
-                },
-                {
-                    category: 'uri',
-                    unique: { min: 2, max: 70, optimal: [10, 40] }
-                }
-            ]
-        ]
-    },
-    {
+    /* {
         id: 'Pyramid',
         name: 'pyramid - this is a vega test',
         thumb : '/images/pyramid.svg',
@@ -130,6 +107,32 @@ const defaultState = [
                 {
                     category: 'uri',
                     unique: { min: 2, max: 70, optimal: [10, 40] }
+                }
+            ]
+        ]
+    }, */
+    {
+        id: 'Timeline',
+        name: 'timeline',
+        thumb : '/images/timeline.svg',
+        entrypoint: { min: 2, max: 40, optimal: [10, 30] },
+        constraints: [
+            [
+                {
+                    category: 'datetime',
+                    unique: { min: 2 },
+                    multiple: true
+                }
+            ],
+            [
+                {
+                    category: 'text',
+                    unique: { min: 2 },
+                    avg: { max: 70, optimal: [10, 40] }
+                },
+                {
+                    category: 'uri',
+                    unique: { min: 2 }
                 }
             ]
         ]

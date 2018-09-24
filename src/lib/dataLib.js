@@ -228,7 +228,7 @@ export const getDeltaIndex = (dataPiece, elements, options) => {
     elements.forEach((el, indexEl) => {
         if (entrypoint) {
             if (el.query && dataPiece.entrypoint && el.query.value === dataPiece.entrypoint.value) indexElement = indexEl
-        } else if (el.query.value && el.query.value.length > 0) {
+        } else if (el.query.value && Array.isArray(el.query.value)) {
             // console.log(el)
             let conditions = el.query.value.map((condition, index) => {
                 const propIndex = index + 1
@@ -335,6 +335,25 @@ export const prepareGeoData = (data, dataset) => {
                 geometry: {
                     type: "Point",
                     coordinates: [ Number(place.prop2.value), Number(place.prop1.value) ] 
+                }
+            }
+        })
+    }
+}
+
+export const prepareVegaTimelineData = (data, dataset) => {
+    return {
+        type: 'FeatureCollection',
+        features: data.map(place => {
+            return {
+                type: 'Feature', 
+                properties: {
+                    id: makeId(place.entrypoint.value),
+                    title: place.prop3 ? place.prop3.value : place.prop1.value + '/' +  place.prop2.value
+                },
+                geometry: {
+                    type: "Point",
+                    coordinates: [ Number(place.prop1.value), Number(place.prop2.value), 0.0 ] 
                 }
             }
         })

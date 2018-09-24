@@ -1,61 +1,67 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
+import Vega from 'react-vega';
 // components
 import SelectionZone from '../elements/SelectionZone'
 // d3
 
 // libs
-import { prepareGeoData } from '../../lib/dataLib'
 import { getPropPalette } from '../../actions/palettesActions'
-import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
+import { handleMouseDown, handleMouseUp, selectElements, resetSelection } from '../../actions/selectionActions'
 import { getRelativeRectangle } from '../../lib/scaleLib'
+import { getSelectedMatch } from '../../lib/configLib'
+import { usePrefix } from '../../lib/queryLib'
+import * as dataLib from '../../lib/dataLib'
 // redux functions
 
 class Timeline extends React.Component {
     constructor (props) {
         super(props)
         this.getElementsForTransition = this.getElementsForTransition.bind(this)
-        this.getElementsInZone = this.getElementsInZone.bind(this)
-        this.onToggleHover = this.onToggleHover.bind(this)
-        this.onMouseClick = this.onMouseClick.bind(this)
+        this.handleSelect = this.handleSelect.bind(this)
+        this.handleNewView = this.handleNewView.bind(this)
+        this.handleZoneSelected = this.handleZoneSelected.bind(this)
         this.customState = {
             // selectElements: this.selectElements,
-            elementName: `refGeoMap_${props.zone}`
+            elementName: `refTimelineMap_${props.zone}`
         }
         this.prepareData(props)
     }
-    onToggleHover (cursor, event) {
-        event.target.getCanvas().style.cursor = cursor
-    }
-    onMouseClick (event) {
-        console.log(event)
-        if (event.features[0].properties.id) {
-            console.log(event.features[0]._vectorTileFeature, event.point.x, event.point.y, event.lngLat.lat)
-        } else {
-            var features = this.map.state.map.queryRenderedFeatures(event.point, { layers: ['cluster_layer'] })
-            var clusterId = features[0].properties.cluster_id,
-                point_count = features[0].properties.point_count,
-                clusterSource = this.map.state.map.getSource('source_id');
-
-            // Get Next level cluster Children
-            // 
-            clusterSource.getClusterChildren(clusterId, function(err, aFeatures){
-                console.log('getClusterChildren', err, aFeatures);
-            });
-
-            // Get all points under a cluster
-            clusterSource.getClusterLeaves(clusterId, point_count, 0, function(err, aFeatures){
-                console.log('getClusterLeaves', err, aFeatures);
+    handleSelect(...args) {
+        const { selections, selectElements, zone } = this.props
+        // console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items[10].items)
+        let selected = this.customState.view.scenegraph().root.items[0].items[10].items.filter(it =>it.selected)
+        // console.log('salut', selected)
+        if (selected.length > 0) {
+            selected = selected.map(el => {
+                return {
+                    selector: `timeline_element_${dataLib.makeId(el.datum.entrypoint)}`,
+                    index: el.datum.index,
+                    query: {
+                        type: 'uri',
+                        value: el.datum.entrypoint
+                    }
+                }
             })
+            selectElements(selected, zone, selections)
+        } else {
+            resetSelection(zone)
         }
-        
+    }
+    handleNewView(args) {
+        // console.log('view created', args.scenegraph())
+        this.customState = {...this.customState, view: args, transitionSent: true}
+        this.props.handleTransition(this.props, this.getElementsForTransition())
+    }
+    handleZoneSelected(args) {
+        // console.log('coucou', args.scenegraph())
     }
     render () {
         const { dimensions, role, selections, step, zone } = this.props
-
+        
         return (<g
-            className = { `GeoMap ${this.customState.elementName} role_${role}` } >
+            className = { `Timeline ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
@@ -64,113 +70,54 @@ class Timeline extends React.Component {
                 selections = { selections }
             />
             }
-            { step !== 'changing' && 
+            { step !== 'changing' &&
             <foreignObject
-                transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y + dimensions.top_padding})` }
+                transform = { `translate(${dimensions.x}, ${dimensions.y + dimensions.top_padding})` }
                 width = { dimensions.useful_width }
                 height = { dimensions.useful_height }
             >
-                <Map
-                    ref={(e) => { this.map = e }}
-                    style='mapbox://styles/mapbox/light-v9'
-                    containerStyle={{
-                        height: '100%',
-                        width: '100%',
-                        position: 'fixed'
-                    }}
-                    center={[0, 40]}
-                    zoom={[1.2]}
-                    onStyleLoad = { e => { 
-                        // c'est moche mais ça marche
-                        
-                    } }
-                >
-                    <GeoJSONLayer
-                        id='source_id'
-                        data={this.customState.geodata}
-                        sourceOptions={{
-                            cluster: true,
-                            clusterMaxZoom: 14,
-                            clusterRadius: 50
-                        }}
-                        symbolLayout={{
-                            'text-field': '{title}',
-                            'text-offset': [0, 0.6],
-                            'text-anchor': 'top'
-                        }}
-                        circlePaint={{
-                            'circle-color': 'green',
-                            'circle-radius': 6
-                        }}
-                        circleOnMouseEnter = { e => { this.onToggleHover('pointer', e) } }
-                        circleOnMouseLeave = { e => { this.onToggleHover('', e) } }
-                        circleOnClick = { e => { this.onMouseClick(e) } }
+                { this.customState.spec &&
+                    <Vega
+                        spec = { this.customState.spec }
+                        onSignalEndZone = { this.handleSelect }
+                        onSignalZoneSelected  = { this.handleZoneSelected }
+                        onNewView = { this.handleNewView }
                     />
-                    <Layer
-                        id='cluster_layer'
-                        sourceId='source_id'
-                        layerOptions={{
-                            filter: ['has', 'point_count']
-                        }}
-                        paint={{
-                            'circle-color': {
-                                property: 'point_count',
-                                type: 'interval',
-                                stops: [
-                                    [0, '#51bbd6'],
-                                    [10, '#f1f075'],
-                                    [750, '#f28cb1']
-                                ]
-                            },
-                            'circle-radius': {
-                                property: 'point_count',
-                                type: 'interval',
-                                stops: [
-                                    [0, 20],
-                                    [10, 30],
-                                    [750, 40]
-                                ]
-                            }
-                        }}
-                        type='circle'
-                    />
-                    <Layer
-                        id='cluster_count'
-                        sourceId='source_id'
-                        layerOptions={{
-                            filter: ['has', 'point_count']
-                        }}
-                        layout={{
-                            'text-field': '{point_count_abbreviated}',
-                            'text-size': 12
-                        }}
-                        type='symbol'
-                    />
-                    <ZoomControl/>
-                </Map>
+                }
             </foreignObject>
             }
         </g>)
     }
     getElementsForTransition () {
-        let { display, dimensions, zone } = this.props
-        let results = []
-        let rendered = this.map && this.map.state.map && this.map.state.map.getLayer('cluster_layer') ? this.map.state.map.queryRenderedFeatures([[0, 0], [dimensions.useful_width, dimensions.useful_height]], { layers: ['cluster_layer'] }) : []
-        // select all displayed features
-        // results.push({ zone: d.zone, ...d.selection, color: d.color, opacity: d.opacity, shape: d.shape, rotation: 0 })
-        console.log(rendered.map(el => {
-            return el
-        }))
-        return results
+        // console.log(this.customState.view.scenegraph().root.source.value[0].items[10].items)
+        let items = this.customState.view.scenegraph().root.source.value[0].items[10].items.map(el => {
+            return { 
+                zone: {
+                    x1: el.x,
+                    y1: el.y,
+                    x2: el.x + 5,
+                    y2: el.y + 5,
+                    width: 5,
+                    height: 5
+                },
+                selector: `timeline_element_${dataLib.makeId(el.datum.entrypoint)}`,
+                index: el.datum.index,
+                query: {
+                    type: 'uri',
+                    value: el.datum.entrypoint
+                },
+                color: el.stroke,
+                opacity: el.opacity,
+                shape: 'rectangle',
+                rotation: 0
+            }
+        })
+        // console.log(items)
+        return items
     }
     getElementsInZone (props) {
         let { display, zone, zoneDimensions } = props
         let selectedElements = []
-        let relativeZone = getRelativeRectangle(zoneDimensions, zone, display)
-        /* d3.select(this.el).selectAll('.yUnits')
-            .each(function (d, i) {
-                if (detectRectCollision(relativeZone, d.zone)) selectedElements.push(d.selection)
-            }) */
         return selectedElements
     }
     shouldComponentUpdate (nextProps, nextState) {
@@ -178,49 +125,389 @@ class Timeline extends React.Component {
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
+        if (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) {
+            if (nextProps.selections.some(s => s.zone !== nextProps.zone)) {
+                this.customState.view.signal('otherZoneSelected', true)
+                this.customState.view.signal('zoneSelected', false)
+            } else {
+                this.customState.view.signal('otherZoneSelected', false)
+            }
+        }
         return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
             (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
             (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
             (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
-        const { data, dataset, role } = nextProps
+        const { config, data, dataset, display, dimensions, getPropPalette, palettes, role, selections, zone } = nextProps
         // prepare the data for display
         // const selectedConfig = getSelectedMatch(config, zone)
         // First prop
         // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
-        console.log(data, role)
-        let geodata = prepareGeoData(data, dataset)
-        console.log(geodata.features.sort((a, b) => a.properties.title ? a.properties.title.localeCompare(b.properties.title) : 0 ))
-        // 
+        // console.log(data, role)
+        const selectedConfig = getSelectedMatch(config, zone)
+        const pathProp1 = selectedConfig.properties[0].path
+        const colors = getPropPalette(palettes, pathProp1, 1)
+        // console.log(colors)
+        const datatest = [{
+            "name": "entities",
+            "values": data.map((dp, i) => {
+                let categoryProp2 = selectedConfig.properties[1].path
+                //let legend = (categoryProp2 === 'uri') ? usePrefix(dp.prop2.value, dataset.prefixes) : dp.prop2.value
+                let name = (selectedConfig.properties[1].level === 1 && selectedConfig.properties[1].property === 'http://www.w3.org/2000/01/rdf-schema#label') ? dp.prop2.value : usePrefix(dp.entrypoint.value, dataset.prefixes)
+                return {
+                    "prop1": new Date(dp.prop1.value).getTime(),
+                    "prop2": (categoryProp2 === 'uri') ? usePrefix(dp.prop2.value, dataset.prefixes) : dp.prop2.value,
+                    "prop12": undefined,
+                    "prop1label": selectedConfig.properties[0].readablePath.map(p => p.label).join(' / * / ') ,
+                    "entrypoint": dp.entrypoint.value,
+                    "name": name,
+                    "selected": false,
+                    "index": i
+                }
+            })
+        },
+        {
+            "name": "selectedEntities",
+            "source": "entities",
+            "transform": [{"type": "filter", "expr": "!otherZoneSelected && datum.selected"}]
+
+        }]
+        const spec = {
+            "$schema": "https://vega.github.io/schema/vega/v4.json",
+            "width": dimensions.useful_width + display.viz.horizontal_padding,
+            "height": dimensions.useful_height - 10,
+            "config": {
+                "axisBand": {
+                    "bandPosition": 1,
+                    "maxExtent": display.viz.horizontal_padding,
+                    "minExtent": display.viz.horizontal_padding
+
+                },
+                "view": {
+                    "autosize": "none"
+                }
+            },
+            "data": datatest,
+            "signals": [
+                {
+                    "name": "tooltip",
+                    "value": {},
+                    "on": [
+                        {"events": "symbol:mouseover", "update": "datum"},
+                        {"events": "symbol:mouseout",  "update": "{}"}
+                    ]
+                },
+                {
+                    "name": "select",
+                    "value": {},
+                    "on": [
+                        {"events": "symbol:mouseup", "update": "datum"}
+                    ]
+                },
+                {
+                    "name": "endZone", "value": true,
+                    "on": [
+                        {
+                            "events": "mouseup",
+                            "update": "true"
+                        },
+                        {
+                            "events": "mousedown",
+                            "update": "false"
+                        }
+                    ]
+                },
+                {
+                    "name": "zone",
+                    "value": null,
+                    "on": [
+                        
+                        {
+                            "events": "[mousedown, mouseup] > mousemove{100}",
+                            "update": "zone ? [zone[0], [x(), y()]] : [[0, 0],[0, 0]]"
+                        },
+                        {
+                            "events": "mousedown",
+                            "update": "[[x(), y()], [x(), y()]]"
+                        },
+                        {
+                            "events": "mouseup",
+                            "update": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "domainX",
+                    "on": [
+                        {
+                            "events": {"signal": "zone"},
+                            "update": "zone && span([zone[0][0],zone[1][0]]) ? invert('xscale', [zone[0][0],zone[1][0]]) : domainX"
+                        }
+                    ]
+                },
+                {
+                    "name": "domainY",
+                    "on": [ 
+                        {
+                            "events": {"signal": "zone"},
+                            "update": "zone ? [zone[0][1],zone[1][1]] : domainY"
+                        }
+                    ]
+                },
+                {
+                    "name": "otherZoneSelected",
+                    "init": selections.some(s => s.zone !== zone)
+                },
+                {
+                    "name": "zoneSelected",
+                    "init": selections.some(s => s.zone === zone),
+                    "on": [
+                        {
+                            "events": {"signal": "domainX"},
+                            "update": "domainX ? true : false"
+                        }
+                    ]
+                }
+            ],
+            "scales": [{
+                "name": "yscale",
+                "type": "band",
+                "range": [0, {"signal": "height"}],
+                "domain": {"data": "entities", "field": "entrypoint"}
+            },
+            {
+                "name": "xscale",
+                "type": "time",
+                "range": [0, dimensions.useful_width],
+                "domain": {"data": "entities", "fields": ["prop1"]}
+            },
+            {
+                "name": "color",
+                "type": "ordinal",
+                "range": {"scheme": "category10"},
+                "domain": {"data": "entities", "field": "prop2"}
+            }],
+            "axes": [
+                {"orient": "bottom", "scale": "xscale", "format": "%Y", "labelOverlap": "parity"},
+                {"orient": "left", "scale": "yscale", "ticks": false, "labels": false, "domainColor": "#fff"}
+            ],
+            "marks": [{
+                "type": "rect",
+                "name": "xaxis",
+                "interactive": true,
+                "encode": {
+                    "enter": {
+                        "x": {"value": 0},
+                        "height": {"value": 35},
+                        "fill": {"value": "transparent"},
+                        "cursor": {"value": "ew-resize"}
+                    },
+                    "update": {
+                        "y": {"signal": "height"},
+                        "width": {"signal": "span(range('xscale'))"}
+                    }
+                }
+            },
+            {
+                "type": "rect",
+                "interactive": false,
+                "encode": {
+                    "enter": {
+                        "y": {"value": 0},
+                        "fill": {"value": "#ddd"}
+                    },
+                    "update": {
+                        "x": {"signal": "zone ? zone[0][0] : 0"},
+                        "x2": {"signal": "zone ? zone[1][0] : 0"},
+                        "y": {"signal": "zone ? zone[0][1] : 0"},
+                        "y2": {"signal": "zone ? zone[1][1] : 0"},
+                        "fillOpacity": {"signal": "zone ? 0.2 : 0"}
+                    }
+                }
+            },
+            {
+                "type": "rect",
+                "interactive": false,
+                "encode": {
+                    "enter": {
+                        "width": {"value": 1},
+                        "fill": {"value": "#666"}
+                    },
+                    "update": {
+                        "fillOpacity": {"signal": "zone ? 1 : 0"},
+                        "x": {"signal": "zone ? zone[0][0] : 0"},
+                        "y": {"signal": "zone ? zone[0][1] : 0"},
+                        "y2": {"signal": "zone ? zone[1][1] : 0"},
+                    }
+                }
+            },
+            {
+                "type": "rect",
+                "interactive": false,
+                "encode": {
+                    "enter":{
+                        "y": {"value": 0},
+                        "width": {"value": 1},
+                        "fill": {"value": "#666"}
+                    },
+                    "update": {
+                        "fillOpacity": {"signal": "zone ? 1 : 0"},
+                        "x": {"signal": "zone ? zone[1][0] : 0"},
+                        "y": {"signal": "zone ? zone[0][1] : 0"},
+                        "y2": {"signal": "zone ? zone[1][1] : 0"},
+                    }
+                }
+            },
+            {
+                "type": "rect",
+                "interactive": false,
+                "encode": {
+                    "enter":{
+                        "y": {"value": 0},
+                        "height": {"value": 1},
+                        "fill": {"value": "#666"}
+                    },
+                    "update": {
+                        "fillOpacity": {"signal": "zone ? 1 : 0"},
+                        "x": {"signal": "zone ? zone[0][0] : 0"},
+                        "x2": {"signal": "zone ? zone[1][0] : 0"},
+                        "y": {"signal": "zone ? zone[0][1] : 0"},
+                    }
+                }
+            },
+            {
+                "type": "rect",
+                "interactive": false,
+                "encode": {
+                    "enter":{
+                        "y": {"value": 0},
+                        "height": {"value": 1},
+                        "fill": {"value": "#666"}
+                    },
+                    "update": {
+                        "fillOpacity": {"signal": "zone ? 1 : 0"},
+                        "x": {"signal": "zone ? zone[0][0] : 0"},
+                        "x2": {"signal": "zone ? zone[1][0] : 0"},
+                        "y": {"signal": "zone ? zone[1][1] : 0"},
+                    }
+                }
+            },
+            {
+                "type": "rule",
+                "name": "entitylines",
+                "from": {"data": "entities"},
+                "encode": {
+                    "enter": {
+                        "x": {"value": 0},
+                        "y": {"scale": "yscale", "field": "entrypoint"},
+                        "x2": {"value": dimensions.useful_width},
+                        "stroke": {"value": "#ccc"}
+                    }
+                }
+            },
+            {
+                "type": "text",
+                "from": {"data": "entities"},
+                "encode": {
+                    "enter": {
+                        "align": {"value": "right"},
+                        "x": {"value": 0},
+                        "y": {"scale": "yscale", "field": "entrypoint"},
+                        "text": {"field": "entrypoint"},
+                        "fill": [
+                            {"test": "(otherZoneSelected || (zoneSelected && (!inrange(datum.prop1, domainX) || !inrange(item.y, domainY))))", "value": "#ccc"},
+                            {"value": "#333"}
+                        ],
+                        "limit": {"value": display.viz.horizontal_padding}
+                    }
+                }
+            },
+            {
+                "type": "symbol",
+                "name": "test",
+                "from": {"data": "entities"},
+                "encode": {
+                    "enter": {
+                        "xc": {"scale": "xscale", "field": "prop1"},
+                        "yc": {"scale": "yscale", "field": "entrypoint"},
+                        "size": {"value": 100},
+                        "strokeWidth": {"value": 2},
+                        "opacity": [
+                            {"value": 0.7}
+                        ],
+                        "fill": {"value": "transparent"}
+                    },
+                    "update": {
+                        "stroke": [
+                            {"test": "(otherZoneSelected || (zoneSelected && (!inrange(datum.prop1, domainX) || !inrange(item.y, domainY))))", "value": "#ccc"},
+                            {"scale": "color", "field": "prop2"}
+                        ],
+                        "selected": [
+                            {"test": "zoneSelected && (!inrange(datum.prop1, domainX) || !inrange(item.y, domainY))", "value": false},
+                            {"value": true}
+                        ]
+                    }
+                }
+            },
+            {
+                "type": "symbol",
+                "from": {"data": "entities"},
+                "encode": {
+                    "enter": {
+                        "xc": {
+                            "scale": "xscale", 
+                            "value": -100,
+                            "condition": {"test": "datum.prop12 == undefined", "field": "prop12"},
+                        },
+                        "yc": {"scale": "yscale", "field": "entrypoint"},
+                        "fill": {"value": "#f00"},
+                        "size": {"value": 100},
+                        "opacity": {
+                            "condition": {"test": "datum.prop12 != undefined", "value": 1},
+                            "value": 0
+                        }
+                    }
+                }
+            },
+            {
+                "type": "text",
+                "encode": {
+                    "enter": {
+                        "align": {"value": "left"},
+                        "baseline": {"value": "bottom"},
+                        "fill": {
+                            "value": "#333",
+                            "condition": {"test": "datum.selected == true", "value": "#f00"}
+                        }
+                    },
+                    "update": {
+                        "x": {"scale": "xscale", "signal": "tooltip.prop1", "offset": 5},
+                        "y": {"scale": "yscale", "signal": "tooltip.entrypoint", "offset": -3},
+                        "text": {"signal": "tooltip.prop1label"},
+                        "fillOpacity": [
+                            {"test": "datum === tooltip", "value": 0},
+                            {"value": 1}
+                        ]
+                    }
+                }
+            }]
+        }
+
+        //
         // Save to reuse in render
         this.customState = {
             ...this.customState,
-            geodata
+            spec,
+            datatest
             //selectedConfig
         }
     }
-    selectEnsemble (prop, value, category) {
-        const elements = this.getElements(prop, value, category)
-        const { selectElements, zone, selections } = this.props
-        selectElements(elements, zone, selections)
-    }
-    componentDidMount () {
-        if (this.map && this.map.state.map) {
-            this.map.state.map.on('load', (e) => {
-                console.log('BRAVO', e)
-                
-            })
-        }
-        window.setTimeout(() => { this.props.handleTransition(this.props, this.getElementsForTransition()) }, 1000)
-        // let elements = this.getElementsForTransition()
-        //if (elements.length > 0) this.props.handleTransition(this.props, elements)
-    }
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
-        //if (elements.length > 0) this.props.handleTransition(this.props, elements)
+        if (this.customState.transitionSent) this.props.handleTransition(this.props, this.getElementsForTransition())
     }
-    componentWillUnmount () {       
+    componentWillUnmount () {
     }
 }
 
@@ -245,6 +532,7 @@ Timeline.propTypes = {
 
 function mapStateToProps (state) {
     return {
+        dataset: state.dataset,
         display: state.display,
         palettes: state.palettes,
         selections: state.selections
@@ -256,6 +544,7 @@ function mapDispatchToProps (dispatch) {
         getPropPalette: getPropPalette(dispatch),
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
+        resetSelection: resetSelection(dispatch),
         selectElements: selectElements(dispatch)
     }
 }
