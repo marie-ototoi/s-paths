@@ -25,7 +25,7 @@ class Slider extends React.Component {
             <input
                 type='range'
                 className='Slider'
-                value={display.viz.aside_width / 10}
+                value={display.vizDefPercent.aside_width}
                 min={0}
                 max={50}
                 step={this.state.step}
