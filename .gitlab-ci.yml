@@ -90,6 +90,9 @@ Production:
 
 Staging:
   <<: *docker-deploy
+  tag:
+    - docker
+    - vpn
   variables:
     TLSCACERT: $TLSCACERT_staging
     TLSCERT: $TLSCERT_staging
