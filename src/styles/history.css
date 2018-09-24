@@ -1,6 +1,9 @@
 .History .config {
     fill: #000;
 }
+.History .hidden {
+    display: none;
+}
 .History .config.selected, .History .config:hover {
     fill: #ff0090;
 }

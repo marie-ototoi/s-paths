@@ -5,9 +5,9 @@ import shallowEqual from 'shallowequal'
 class HistoryLayout extends AbstractLayout {
 
     draw (props) {
-        const { configs, currentIndex } = props
+        const { historyConfigs, currentIndex } = props
         d3.select(this.el).selectAll('circle.config')
-            .data(configs)
+            .data(historyConfigs)
             .enter()
             .append('circle')
             .attr('class', 'config')
@@ -17,12 +17,10 @@ class HistoryLayout extends AbstractLayout {
 
         d3.select(this.el).selectAll('circle.config')
             .attr('class', (d, i) => {
-                if (d.status !== 'active') {
+                if (d.status !== 'active' || i === 0) {
                     return 'config hidden'
                 } else if (i === currentIndex) {
                     return 'config selected'
-                } else if (i > 0 && shallowEqual(configs[i], configs[i - 1])) {
-                    return 'config nochange'
                 } else {
                     return 'config'
                 }
@@ -33,7 +31,7 @@ class HistoryLayout extends AbstractLayout {
     }
     resize (props) {
         d3.select(this.el).selectAll('circle.config')
-            .attr('cx', (d, i) => i * 10)
+            .attr('cx', (d, i) => i * 5)
     }
     checkSelection (props) {}
 }

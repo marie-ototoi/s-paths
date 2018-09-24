@@ -18,19 +18,20 @@ class History extends React.PureComponent {
         }
     }
     jumpHistory (index) {
-        // console.log(index, this.customState.currentIndex)
+        console.log(index, this.customState.currentIndex)
         this.props.jump(index, this.customState.currentIndex)
     }
     render () {
         const { configs, display, offset, zone } = this.props
-        this.customState.currentIndex = configs.past.length
+        
         // console.log(this.customState.currentIndex)
-        this.customState.configs = [
+        this.customState.historyConfigs = [
             ...configs.past,
             configs.present,
             ...configs.future
         ]
-        // console.log(this.customState.configs)
+        this.customState.currentIndex = configs.past.length
+        // console.log(this.customState.currentIndex)
         const dimensions = getDimensions('history', display.viz, offset)
         const { x, y } = dimensions
         return (<g
