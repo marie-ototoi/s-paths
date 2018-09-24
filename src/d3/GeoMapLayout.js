@@ -8,7 +8,7 @@ class GeoMapLayout extends AbstractLayout {
     draw (props) {
 
     }
-    drawSelection = (props) => {
+    drawSelection (props) {
         const zoneDimensions = selectionLib.getRectSelection(props.display.selectedZone[props.zone])
         // console.log(zoneDimensions)
         const selectedZone = {
