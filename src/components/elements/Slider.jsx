@@ -7,6 +7,9 @@ class Slider extends React.Component {
     constructor (props) {
         super(props)
         this.drag = this.drag.bind(this)
+        this.state = {
+            step: 25 // TODO: if window size < 1500 ? 50 : 25 (#68)
+        }
     }
     drag (event) {
         const { display, setDisplay } = this.props
@@ -25,7 +28,7 @@ class Slider extends React.Component {
                 value={display.viz.aside_width / 10}
                 min={0}
                 max={50}
-                step={25}
+                step={this.state.step}
                 onChange={this.drag}
             />
         )
