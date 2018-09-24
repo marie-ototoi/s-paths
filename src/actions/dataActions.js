@@ -15,7 +15,7 @@ export const loadStats = (dispatch) => (dataset) => {
 }
 
 const getStats = (options) => {
-    return fetch((process.env.API + 'stats'),
+    return fetch((`${process.env.API || '/'}stats`),
         {
             method: 'POST',
             body: JSON.stringify(options),
@@ -32,7 +32,7 @@ const getStats = (options) => {
     // return rp('http://localhost:80/stats/' + entrypoint)
 }
 const getResources = (options) => {
-    return fetch((process.env.API + 'resources'),
+    return fetch((`${process.env.API || '/'}resources`),
         {
             method: 'POST',
             body: JSON.stringify(options),
