@@ -90,7 +90,7 @@ Production:
 
 Staging:
   <<: *docker-deploy
-  tag:
+  tags:
     - docker
     - vpn
   variables:
