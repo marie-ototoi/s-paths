@@ -8,10 +8,11 @@ import SelectionZone from '../elements/SelectionZone'
 
 // libs
 import { getPropPalette } from '../../actions/palettesActions'
-import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
+import { handleMouseDown, handleMouseUp, selectElements, resetSelection } from '../../actions/selectionActions'
 import { getRelativeRectangle } from '../../lib/scaleLib'
 import { getSelectedMatch } from '../../lib/configLib'
 import { usePrefix } from '../../lib/queryLib'
+import * as dataLib from '../../lib/dataLib'
 // redux functions
 
 class Timeline extends React.Component {
@@ -20,6 +21,7 @@ class Timeline extends React.Component {
         this.getElementsForTransition = this.getElementsForTransition.bind(this)
         this.getElementsForTransition = this.getElementsForTransition.bind(this)
         this.handleSelect = this.handleSelect.bind(this)
+        this.handleZoneSelected = this.handleZoneSelected.bind(this)
         this.handleNewView = this.handleNewView.bind(this)
         this.customState = {
             // selectElements: this.selectElements,
@@ -28,7 +30,32 @@ class Timeline extends React.Component {
         this.prepareData(props)
     }
     handleSelect(...args) {
+        const { selections, selectElements, zone } = this.props
         console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items[9].items)
+        let selected = this.customState.view.scenegraph().root.items[0].items[9].items.map((it,i) => { return {...it, index: i}}).filter(it =>it.selected)
+        console.log('salut', selected)
+        if (selected.length > 0) {
+            selected = selected.map(el => {
+                return {
+                    selector: `stackedchart_element_${dataLib.makeId(el.datum.entrypoint)}`,
+                    index: el.index,
+                    query: {
+                        type: 'uri',
+                        value: el.datum.entrypoint
+                    }
+                }
+            })
+            selectElements(selected, zone, selections)
+        } else {
+            resetSelection(zone)
+        }
+    }
+    handleZoneSelected(...args) {
+        console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items[9].items)
+        if(args[1] === true) {
+            let selected = this.customState.view.scenegraph().root.items[0].items[9].items.filter(it =>it.selected)
+            console.log('salut', selected)
+        }
     }
     handleNewView(args) {
         console.log('yes we can', args.scenegraph())
@@ -36,7 +63,7 @@ class Timeline extends React.Component {
     }
     render () {
         const { dimensions, role, selections, step, zone } = this.props
-
+        
         return (<g
             className = { `GeoMap ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&
@@ -56,6 +83,7 @@ class Timeline extends React.Component {
                 <Vega
                     spec = { this.customState.spec }
                     onSignalDomain = { this.handleSelect }
+                    onSignalZoneSelected = { this.handleSelect }
                     onSignalSelectedElements = { this.handleSelect }
                     onNewView = { this.handleNewView }
                 />
@@ -78,13 +106,21 @@ class Timeline extends React.Component {
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
+        if (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) {
+            if (nextProps.selections.some(s => s.zone !== nextProps.zone)) {
+                this.customState.view.signal('otherZoneSelected', true)
+                this.customState.view.signal('zoneSelected', false)
+            } else {
+                this.customState.view.signal('otherZoneSelected', false)
+            }
+        }
         return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
             (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
             (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
             (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
-        const { config, data, dataset, display, dimensions, getPropPalette, palettes, role, zone } = nextProps
+        const { config, data, dataset, display, dimensions, getPropPalette, palettes, role, selections, zone } = nextProps
         // prepare the data for display
         // const selectedConfig = getSelectedMatch(config, zone)
         // First prop
@@ -105,9 +141,16 @@ class Timeline extends React.Component {
                     "prop2": (categoryProp2 === 'uri') ? usePrefix(dp.prop2.value, dataset.prefixes) : dp.prop2.value,
                     "prop12": undefined,
                     "prop1label": selectedConfig.properties[1].readablePath.map(p => p.label).join(' / * / ') ,
-                    "entrypoint": name
+                    "entrypoint": name,
+                    "selected": false
                 }
             })
+        },
+        {
+            "name": "selectedEntities",
+            "source": "entities",
+            "transform": [{"type": "filter", "expr": "!otherZoneSelected && datum.selected"}]
+
         }]
         const spec = {
             "$schema": "https://vega.github.io/schema/vega/v4.json",
@@ -173,27 +216,6 @@ class Timeline extends React.Component {
                     ]
                 },
                 {
-                    "name": "zone", "value": 0,
-                    "on": [
-                        {
-                            "events": {"signal": "clear"},
-                            "update": "clear ? [0, 0, 0, 0] : brush"
-                        },
-                        {
-                            "events": "@xaxis:mousedown",
-                            "update": "[x(), x()]"
-                        },
-                        {
-                            "events": "[@xaxis:mousedown, window:mouseup] > window:mousemove!",
-                            "update": "[brush[0], clamp(x(), 0, width)]"
-                        },
-                        {
-                            "events": {"signal": "delta"},
-                            "update": "clampRange([anchor[0] + delta, anchor[1] + delta], 0, width)"
-                        }
-                    ]
-                },
-                {
                     "name": "anchor", "value": null,
                     "on": [{"events": "@brush:mousedown", "update": "slice(brush)"}]
                 },
@@ -216,6 +238,20 @@ class Timeline extends React.Component {
                         {
                             "events": {"signal": "brush"},
                             "update": "span(brush) ? invert('xscale', brush) : null"
+                        }
+                    ]
+                },
+                {
+                    "name": "otherZoneSelected",
+                    "value": selections.some(s => s.zone !== zone)
+                },
+                {
+                    "name": "zoneSelected",
+                    "value": selections.some(s => s.zone === zone),
+                    "on": [
+                        {
+                            "events": {"signal": "domain"},
+                            "update": "domain ? true : false"
                         }
                     ]
                 }
@@ -360,16 +396,15 @@ class Timeline extends React.Component {
                         "size": {"value": 100},
                         "strokeWidth": {"value": 2},
                         "opacity": [
-                            {"test": "(!domain || inrange(datum.prop1, domain))", "value": 0.7},
-                            {"value": 0.15}
+                            {"value": 0.7}
                         ],
                         "stroke": [
-                            {"test": "(!domain || inrange(datum.prop1, domain))", "scale": "color", "field": "prop2"},
-                            {"value": "#ccc"}
+                            {"test": "(otherZoneSelected || (zoneSelected && !inrange(datum.prop1, domain)))", "value": "#ccc"},
+                            {"scale": "color", "field": "prop2"}
                         ],
                         "selected": [
-                            {"test": "(!domain || inrange(datum.prop1, domain))", "value": true},
-                            {"value": false}
+                            {"test": "(!zoneSelected || (zoneSelected && !inrange(datum.prop1, domain)))", "value": false},
+                            {"value": true}
                         ],
                         "fill": {"value": "transparent"}
                     }
@@ -478,6 +513,7 @@ function mapDispatchToProps (dispatch) {
         getPropPalette: getPropPalette(dispatch),
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
+        resetSelection: resetSelection(dispatch),
         selectElements: selectElements(dispatch)
     }
 }
