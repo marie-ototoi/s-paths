@@ -153,21 +153,11 @@ class Geo extends React.Component {
         console.log(geodata)
         const datatest = [{
             "name": "entities",
-            "values": data.map((dp, i) => {
-                let categoryProp2 = selectedConfig.properties[1].path
-                //let legend = (categoryProp2 === 'uri') ? usePrefix(dp.prop2.value, dataset.prefixes) : dp.prop2.value
-                let name = (selectedConfig.properties[1].level === 1 && selectedConfig.properties[1].property === 'http://www.w3.org/2000/01/rdf-schema#label') ? dp.prop2.value : usePrefix(dp.entrypoint.value, dataset.prefixes)
-                return {
-                    "prop1": dp.prop1.value,
-                    "prop2": dp.prop2.value,
-                    "prop1label": selectedConfig.properties[0].readablePath.map(p => p.label).join(' / * / ') ,
-                    "prop2label": selectedConfig.properties[1].readablePath.map(p => p.label).join(' / * / ') ,
-                    "entrypoint": dp.entrypoint.value,
-                    "name": name,
-                    "selected": false,
-                    "index": i
-                }
-            })
+            "values": geodata,
+            "format": {
+                "type": "json",
+                "property": "features"
+            }
         },
         {
             "name": "world",
@@ -250,6 +240,23 @@ class Geo extends React.Component {
                         }
                     }
                 },
+                {
+                    "type": "shape",
+                    "from": {"data": "entities"},
+                    "encode": {
+                        "update": {
+                            "opacity": {"value": 0.25},
+                            "fill": {"value": "red"}
+                        }
+                    },
+                    "transform": [
+                        {
+                            "type": "geoshape",
+                            "projection": "projection",
+                            "pointRadius": {"expr": "scale('size', exp(datum.properties.mag))"}
+                        }
+                    ]
+                }
             ]
         }
 

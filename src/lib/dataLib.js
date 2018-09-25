@@ -327,14 +327,14 @@ export const prepareGeoData = (data, dataset) => {
                 properties: {
                     id: makeId(place.entrypoint.value),
                     title: place.prop3 ? place.prop3.value : place.prop1.value + '/' +  place.prop2.value,
-                    lat: place.prop1.value,
-                    long: place.prop2.value,
+                    lat:  Number(place.prop1.value),
+                    long:  Number(place.prop2.value),
                     label: place.prop3.value,
                     entrypoint: place.entrypoint.value
                 },
                 geometry: {
                     type: "Point",
-                    coordinates: [ Number(place.prop2.value), Number(place.prop1.value) ] 
+                    coordinates: [ Number(place.prop2.value), Number(place.prop1.value), 0] 
                 }
             }
         })
