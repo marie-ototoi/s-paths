@@ -74,7 +74,8 @@ const display = (state = defaultState, action) => {
         return {
             ...state,
             screen: action.screen || state.screen,
-            viz: action.viz || state.viz
+            viz: action.viz || state.viz,
+            vizDefPercent: Object.assign(state.vizDefPercent, action.vizDef)
         }
     case types.SHOW_SETTINGS:
         newSettings = state.settingsOpen

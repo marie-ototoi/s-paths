@@ -20,12 +20,11 @@ class Slider extends React.Component {
         })
     }
     render () {
-        const { display } = this.props
         return (
             <input
                 type='range'
                 className='Slider'
-                value={display.vizDefPercent.aside_width}
+                value={this.props.display.vizDefPercent.aside_width}
                 min={0}
                 max={50}
                 step={this.state.step}
@@ -33,11 +32,11 @@ class Slider extends React.Component {
             />
         )
     }
-}
 
-Slider.propTypes = {
-    display: PropTypes.object,
-    setDisplay: PropTypes.func.isRequired
+    static propTypes = {
+        display: PropTypes.object,
+        setDisplay: PropTypes.func.isRequired
+    }
 }
 
 function mapStateToProps (state) {

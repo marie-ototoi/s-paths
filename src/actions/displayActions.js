@@ -6,7 +6,8 @@ export const setDisplay = (dispatch) => ({ screen, vizDef }) => {
     return dispatch({
         type: types.SET_DISPLAY,
         screen,
-        viz
+        viz,
+        vizDef
     })
 }
 
