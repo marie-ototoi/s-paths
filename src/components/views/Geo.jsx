@@ -30,13 +30,13 @@ class Geo extends React.Component {
     }
     handleSelect(...args) {
         const { selections, selectElements, zone } = this.props
-        // console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items[10].items)
+        // console.log('yes we can', args, this.customState.view.scenegraph().root.source.value[0].items[1].items)
         let selected = this.customState.view.scenegraph().root.source.value[0].items[1].items.filter(it =>it.selected)
-        console.log('salut', selected)
+        // console.log('salut', selected)
         if (selected.length > 0) {
             selected = selected.map(el => {
                 return {
-                    selector: `geo_element_${dataLib.makeId(el.datum.entrypoint)}`,
+                    selector: `geo_element_${dataLib.makeId(el.datum.properties.entrypoint)}`,
                     index: el.datum.properties.index,
                     query: {
                         type: 'uri',
@@ -50,28 +50,19 @@ class Geo extends React.Component {
         }
     }
     handleNewView(args) {
-        args.run()
         console.log('view created', args.scenegraph(), args.getState())
         this.customState = {...this.customState, view: args, transitionSent: true}
         //this.props.handleTransition(this.props, this.getElementsForTransition())
         window.setTimeout(() => { this.props.handleTransition(this.props, this.getElementsForTransition()) }, 300)
     }
-    handleZoneSelected(args) {
-        // console.log('coucou', args.scenegraph())
+    handleZoneSelected(...args) {
+        // console.log('coucou', ...args)
     }
     render () {
         const { dimensions, role, selections, step, zone } = this.props
         
         return (<g
             className = { `Geo ${this.customState.elementName} role_${role}` } >
-            { role !== 'target' &&
-            <SelectionZone
-                zone = { zone }
-                dimensions = { dimensions }
-                component = { this }
-                selections = { selections }
-            />
-            }
             { step !== 'changing' &&
             <foreignObject
                 transform = { `translate(${dimensions.x}, ${dimensions.y + dimensions.top_padding})` }
@@ -121,11 +112,6 @@ class Geo extends React.Component {
         // console.log(items)
         return items
     }
-    getElementsInZone (props) {
-        let { display, zone, zoneDimensions } = props
-        let selectedElements = []
-        return selectedElements
-    }
     shouldComponentUpdate (nextProps, nextState) {
         // if (this.props.step === 'launch' && nextProps.step === 'launch') return false
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
@@ -155,7 +141,7 @@ class Geo extends React.Component {
         const pathProp1 = selectedConfig.properties[0].path
         const colors = getPropPalette(palettes, pathProp1, 1)
         let geodata = dataLib.prepareGeoData(data, dataset)
-        console.log(geodata)
+        // console.log(geodata)
         const datatest = [{
             "name": "entities",
             "values": geodata,
@@ -208,7 +194,7 @@ class Geo extends React.Component {
         const spec = {
             "$schema": "https://vega.github.io/schema/vega/v4.json",
             "width": dimensions.useful_width + display.viz.horizontal_padding,
-            "height": dimensions.useful_height - 10,
+            "height": dimensions.useful_height,
             "autosize": "none",
             "signals": [
                 {
@@ -248,7 +234,7 @@ class Geo extends React.Component {
                     "on": [
                         {
                             "events": {"signal": "zone"},
-                            "update": "zone ? [zone[0][0],zone[1][0]] : domainY"
+                            "update": "zone ? [zone[0][0],zone[1][0]] : domainX"
                         }
                     ]
                 },
@@ -315,8 +301,12 @@ class Geo extends React.Component {
                         "update": {
                             "opacity": {"value": 0.25},
                             "fill": [
-                                {"test": "(otherZoneSelected || (zoneSelected && (!inrange(item.x, domainX) || !inrange(item.y, domainY))))", "value": "#666"},
+                                {"test": "(otherZoneSelected || (zoneSelected && (!inrange(item.bounds.x1, domainX) || !inrange(item.bounds.y1, domainY))))", "value": "#666"},
                                 {"value": "red"}
+                            ],
+                            "selected": [
+                                {"test": "(zoneSelected && (!inrange(item.bounds.x1, domainX) || !inrange(item.bounds.y1, domainY)))", "value": false},
+                                {"value": true}
                             ]
                         }
                     },

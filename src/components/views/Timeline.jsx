@@ -62,14 +62,6 @@ class Timeline extends React.Component {
         
         return (<g
             className = { `Timeline ${this.customState.elementName} role_${role}` } >
-            { role !== 'target' &&
-            <SelectionZone
-                zone = { zone }
-                dimensions = { dimensions }
-                component = { this }
-                selections = { selections }
-            />
-            }
             { step !== 'changing' &&
             <foreignObject
                 transform = { `translate(${dimensions.x}, ${dimensions.y + dimensions.top_padding})` }
@@ -114,11 +106,6 @@ class Timeline extends React.Component {
         })
         // console.log(items)
         return items
-    }
-    getElementsInZone (props) {
-        let { display, zone, zoneDimensions } = props
-        let selectedElements = []
-        return selectedElements
     }
     shouldComponentUpdate (nextProps, nextState) {
         // if (this.props.step === 'launch' && nextProps.step === 'launch') return false
