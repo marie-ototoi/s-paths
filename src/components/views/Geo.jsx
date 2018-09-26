@@ -13,6 +13,7 @@ import { getRelativeRectangle } from '../../lib/scaleLib'
 import { getSelectedMatch } from '../../lib/configLib'
 import { usePrefix } from '../../lib/queryLib'
 import * as dataLib from '../../lib/dataLib'
+import defaultSpec from '../../lib/spec'
 // redux functions
 
 class Geo extends React.Component {
@@ -31,7 +32,7 @@ class Geo extends React.Component {
     handleSelect(...args) {
         const { selections, selectElements, zone } = this.props
         // console.log('yes we can', args, this.customState.view.scenegraph().root.source.value[0].items[1].items)
-        let selected = this.customState.view.scenegraph().root.source.value[0].items[1].items.filter(it =>it.selected)
+        let selected = this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected)
         // console.log('salut', selected)
         if (selected.length > 0) {
             selected = selected.map(el => {
@@ -50,7 +51,7 @@ class Geo extends React.Component {
         }
     }
     handleNewView(args) {
-        console.log('view created', args.scenegraph(), args.getState())
+        // console.log('view created', args.scenegraph(), args.getState())
         this.customState = {...this.customState, view: args, transitionSent: true}
         //this.props.handleTransition(this.props, this.getElementsForTransition())
         window.setTimeout(() => { this.props.handleTransition(this.props, this.getElementsForTransition()) }, 300)
@@ -59,13 +60,13 @@ class Geo extends React.Component {
         // console.log('coucou', ...args)
     }
     render () {
-        const { dimensions, role, selections, step, zone } = this.props
+        const { dimensions, display, role, selections, step, zone } = this.props
         
         return (<g
             className = { `Geo ${this.customState.elementName} role_${role}` } >
             { step !== 'changing' &&
             <foreignObject
-                transform = { `translate(${dimensions.x}, ${dimensions.y + dimensions.top_padding})` }
+                transform = { `translate(${dimensions.x + display.viz.horizontal_padding}, ${dimensions.y + dimensions.top_padding})` }
                 width = { dimensions.useful_width }
                 height = { dimensions.useful_height }
             >
@@ -86,7 +87,7 @@ class Geo extends React.Component {
         // console.log(this.customState.view.scenegraph().root.items[0].items[1])
         let items = []
         if (this.customState.view.scenegraph() && this.customState.view.scenegraph().root.source.value[0]) {
-            items = this.customState.view.scenegraph().root.source.value[0].items[1].items.map(el => {
+            items = this.customState.view.scenegraph().root.source.value[0].items[6].items.map(el => {
                 return { 
                     zone: {
                         x1: el.bounds.x1,
@@ -117,6 +118,14 @@ class Geo extends React.Component {
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
+        // console.log('redraw ?', nextProps.display.viz[this.props.zone + '_useful_width'], nextProps.display.viz[this.props.zone + '_useful_height'])
+        /* if (this.customState.view &&
+            ((this.props.display.viz[this.props.zone + '_useful_width'] !== nextProps.display.viz[this.props.zone + '_useful_width']) ||
+            (this.props.display.viz[this.props.zone + '_height'] !== nextProps.display.viz[this.props.zone + '_useful_height']))) {
+            console.log('redraw ?', nextProps.display.viz[this.props.zone + '_useful_width'], nextProps.display.viz[this.props.zone + '_useful_height'])
+            this.customState.view.width(nextProps.display.viz[this.props.zone + '_useful_width'])
+            this.customState.view.height(nextProps.display.viz[this.props.zone + '_useful_height'])
+        } */
         if (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) {
             if (nextProps.selections.some(s => s.zone !== nextProps.zone)) {
                 this.customState.view.signal('otherZoneSelected', true)
@@ -140,113 +149,14 @@ class Geo extends React.Component {
         const selectedConfig = getSelectedMatch(config, zone)
         const pathProp1 = selectedConfig.properties[0].path
         const colors = getPropPalette(palettes, pathProp1, 1)
-        let geodata = dataLib.prepareGeoData(data, dataset)
-        // console.log(geodata)
-        const datatest = [{
-            "name": "entities",
-            "values": geodata,
-            "format": {
-                "type": "json",
-                "property": "features"
-            }
-        },
-        {
-            "name": "countries",
-            "url": "data/world-110m.json",
-            "format": {"type": "topojson", "feature": "countries"},
-            "transform": [
-                {
-                    "type": "geopath",
-                    "projection": "projection"
-                }
-            ]
-        },
-        {
-            "name": "entitygroups",
-            "source": "entities",
-            "transform": [
-                {
-                    "type": "formula",
-                    "as": "latg",
-                    "expr": "round(datum.properties.lat / 10) * 10"
-                },
-                {
-                    "type": "formula",
-                    "as": "longg",
-                    "expr": "round(datum.properties.long / 10) * 10"
-                },
-                {
-                    "type": "aggregate",
-                    "groupby": ["longg", "latg"]
-                },
-                {
-                    "type": "formula",
-                    "as": "geometry",
-                    "expr": "{ type: 'Point', coordinates : [datum.longg, datum.latg, 0]}"
-                },
-                {
-                    "type": "formula",
-                    "as": "type",
-                    "expr": "'Feature'"
-                }
-            ]
-        }]
+
+        // console.log(defaultSpec)
         const spec = {
-            "$schema": "https://vega.github.io/schema/vega/v4.json",
-            "width": dimensions.useful_width + display.viz.horizontal_padding,
+            ...defaultSpec,
+            "width": dimensions.useful_width,
             "height": dimensions.useful_height,
-            "autosize": "none",
             "signals": [
-                {
-                    "name": "endZone", "value": true,
-                    "on": [
-                        {
-                            "events": "mouseup",
-                            "update": "true"
-                        },
-                        {
-                            "events": "mousedown",
-                            "update": "false"
-                        }
-                    ]
-                },
-                {
-                    "name": "zone",
-                    "value": null,
-                    "on": [
-                        
-                        {
-                            "events": "[mousedown, mouseup] > mousemove{100}",
-                            "update": "zone ? [zone[0], [x(), y()]] : [[0, 0],[0, 0]]"
-                        },
-                        {
-                            "events": "mousedown",
-                            "update": "[[x(), y()], [x(), y()]]"
-                        },
-                        {
-                            "events": "mouseup",
-                            "update": "null"
-                        }
-                    ]
-                },
-                {
-                    "name": "domainX",
-                    "on": [
-                        {
-                            "events": {"signal": "zone"},
-                            "update": "zone ? [zone[0][0],zone[1][0]] : domainX"
-                        }
-                    ]
-                },
-                {
-                    "name": "domainY",
-                    "on": [ 
-                        {
-                            "events": {"signal": "zone"},
-                            "update": "zone ? [zone[0][1],zone[1][1]] : domainY"
-                        }
-                    ]
-                },
+                ...defaultSpec.signals,
                 {
                     "name": "otherZoneSelected",
                     "init": selections.some(s => s.zone !== zone)
@@ -262,7 +172,55 @@ class Geo extends React.Component {
                     ]
                 }
             ],
-            "data": datatest,
+            "data": [{
+                "name": "entities",
+                "values": dataLib.prepareGeoData(data, dataset),
+                "format": {
+                    "type": "json",
+                    "property": "features"
+                }
+            },
+            {
+                "name": "countries",
+                "url": "data/world-110m.json",
+                "format": {"type": "topojson", "feature": "countries"},
+                "transform": [
+                    {
+                        "type": "geopath",
+                        "projection": "projection"
+                    }
+                ]
+            },
+            {
+                "name": "entitygroups",
+                "source": "entities",
+                "transform": [
+                    {
+                        "type": "formula",
+                        "as": "latg",
+                        "expr": "round(datum.properties.lat / 10) * 10"
+                    },
+                    {
+                        "type": "formula",
+                        "as": "longg",
+                        "expr": "round(datum.properties.long / 10) * 10"
+                    },
+                    {
+                        "type": "aggregate",
+                        "groupby": ["longg", "latg"]
+                    },
+                    {
+                        "type": "formula",
+                        "as": "geometry",
+                        "expr": "{ type: 'Point', coordinates : [datum.longg, datum.latg, 0]}"
+                    },
+                    {
+                        "type": "formula",
+                        "as": "type",
+                        "expr": "'Feature'"
+                    }
+                ]
+            }],
             "scales": [
                 {
                     "name": "size",
@@ -280,6 +238,7 @@ class Geo extends React.Component {
                 }
             ],
             "marks": [
+                ...defaultSpec.marks,
                 {
                     "type": "path",
                     "from": {"data": "countries"},
@@ -338,100 +297,16 @@ class Geo extends React.Component {
                             "fields": ["datum.longg", "datum.latg"]
                         }
                     ]
-                },
-                {
-                    "type": "rect",
-                    "interactive": false,
-                    "encode": {
-                        "enter": {
-                            "y": {"value": 0},
-                            "fill": {"value": "#ddd"}
-                        },
-                        "update": {
-                            "x": {"signal": "zone ? zone[0][0] : 0"},
-                            "x2": {"signal": "zone ? zone[1][0] : 0"},
-                            "y": {"signal": "zone ? zone[0][1] : 0"},
-                            "y2": {"signal": "zone ? zone[1][1] : 0"},
-                            "fillOpacity": {"signal": "zone ? 0.2 : 0"}
-                        }
-                    }
-                },
-                {
-                    "type": "rect",
-                    "interactive": false,
-                    "encode": {
-                        "enter": {
-                            "width": {"value": 1},
-                            "fill": {"value": "#666"}
-                        },
-                        "update": {
-                            "fillOpacity": {"signal": "zone ? 1 : 0"},
-                            "x": {"signal": "zone ? zone[0][0] : 0"},
-                            "y": {"signal": "zone ? zone[0][1] : 0"},
-                            "y2": {"signal": "zone ? zone[1][1] : 0"},
-                        }
-                    }
-                },
-                {
-                    "type": "rect",
-                    "interactive": false,
-                    "encode": {
-                        "enter":{
-                            "y": {"value": 0},
-                            "width": {"value": 1},
-                            "fill": {"value": "#666"}
-                        },
-                        "update": {
-                            "fillOpacity": {"signal": "zone ? 1 : 0"},
-                            "x": {"signal": "zone ? zone[1][0] : 0"},
-                            "y": {"signal": "zone ? zone[0][1] : 0"},
-                            "y2": {"signal": "zone ? zone[1][1] : 0"},
-                        }
-                    }
-                },
-                {
-                    "type": "rect",
-                    "interactive": false,
-                    "encode": {
-                        "enter":{
-                            "y": {"value": 0},
-                            "height": {"value": 1},
-                            "fill": {"value": "#666"}
-                        },
-                        "update": {
-                            "fillOpacity": {"signal": "zone ? 1 : 0"},
-                            "x": {"signal": "zone ? zone[0][0] : 0"},
-                            "x2": {"signal": "zone ? zone[1][0] : 0"},
-                            "y": {"signal": "zone ? zone[0][1] : 0"},
-                        }
-                    }
-                },
-                {
-                    "type": "rect",
-                    "interactive": false,
-                    "encode": {
-                        "enter":{
-                            "y": {"value": 0},
-                            "height": {"value": 1},
-                            "fill": {"value": "#666"}
-                        },
-                        "update": {
-                            "fillOpacity": {"signal": "zone ? 1 : 0"},
-                            "x": {"signal": "zone ? zone[0][0] : 0"},
-                            "x2": {"signal": "zone ? zone[1][0] : 0"},
-                            "y": {"signal": "zone ? zone[1][1] : 0"},
-                        }
-                    }
                 }
             ]
         }
+        // console.log(spec)
         // "pointRadius": {"expr": "scale('size', exp(datum.properties.mag))"}
         //
         // Save to reuse in render
         this.customState = {
             ...this.customState,
-            spec,
-            datatest
+            spec
             //selectedConfig
         }
     }
