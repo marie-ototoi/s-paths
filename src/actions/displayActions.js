@@ -1,12 +1,13 @@
 import types from '../constants/ActionTypes'
 import * as scale from '../lib/scaleLib'
 
-export const setDisplay = (dispatch) => ({ screen, vizDef }) => {
-    let viz = scale.getViz(vizDef, { width: screen.width, height: screen.height })
+export const setDisplay = (dispatch) => ({ screen, vizDefPercent }) => {
+    let viz = scale.getViz(vizDefPercent, screen)
     return dispatch({
         type: types.SET_DISPLAY,
         screen,
-        viz
+        viz,
+        vizDefPercent
     })
 }
 

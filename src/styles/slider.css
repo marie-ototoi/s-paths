@@ -1,5 +1,5 @@
 .Slider {
-    stroke: #dedede;
-    stroke-width: 4px;
-    cursor: pointer;
+    position: absolute;
+    left: 10px;
+    width: 5%;
 }

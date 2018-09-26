@@ -7,46 +7,39 @@ class Slider extends React.Component {
     constructor (props) {
         super(props)
         this.drag = this.drag.bind(this)
-        this.dragLeave = this.dragLeave.bind(this)
         this.state = {
+            step: 5 // TODO: if window size < 1500 ? 50 : 25 (#68)
         }
     }
-    dragLeave (e) {
+    drag (event) {
         const { display, setDisplay } = this.props
-        let asidePercent = Math.floor(100 * this.state.x / display.screen.width)
-        this.setState({ x : null })
-        if (asidePercent !== 0) {
-            setDisplay({
-                screen: display.screen,
-                vizDef: { ...display.vizDefPercent, aside_width: asidePercent, main_width: 100 - asidePercent }
-            })
-        }
-    }
-    drag (e) {
-        this.setState({ x : e.pageX })
+        let asidePercent = event.target.value
+        setDisplay({
+            screen: display.screen,
+            vizDefPercent: { ...display.vizDefPercent, aside_width: asidePercent, main_width: 100 - asidePercent }
+        })
     }
     render () {
-        const { display } = this.props
-        let x = this.state.x || display.viz.aside_width
-        //<i className="fas fa-columns"></i>
-        return (<g>
-            
-            <line
-                onDrag = { this.drag }
-                onDragLeave = { this.dragLeave }
-                y1 = { display.viz.top_margin + (display.viz.useful_height * 3 / 4) }
-                x1 = { x }
-                y2 = { display.viz.top_margin + display.viz.useful_height }
-                x2 = { x }
-                className = "Slider"
+        return (
+            <input
+                type='range'
+                className='Slider'
+                value={this.props.display.vizDefPercent.aside_width}
+                min={0}
+                max={50}
+                step={this.state.step}
+                onChange={this.drag}
+                style = {{
+                    top: (90) + 'px'
+                }}
             />
-        </g>)
+        )
     }
-}
 
-Slider.propTypes = {
-    display: PropTypes.object,
-    setDisplay: PropTypes.func.isRequired
+    static propTypes = {
+        display: PropTypes.object,
+        setDisplay: PropTypes.func.isRequired
+    }
 }
 
 function mapStateToProps (state) {

@@ -13,8 +13,8 @@ const defaultState = {
         bottom_margin: 5,
         bottom_padding: 11,
         horizontal_margin: 15,
-        main_width: 65,
-        aside_width: 35
+        main_width: 75,
+        aside_width: 25
     },
     faded: {
         main: 0.5,
@@ -74,7 +74,8 @@ const display = (state = defaultState, action) => {
         return {
             ...state,
             screen: action.screen || state.screen,
-            viz: action.viz || state.viz
+            viz: action.viz || state.viz,
+            vizDefPercent: action.vizDefPercent || state.vizDefPercent,
         }
     case types.SHOW_SETTINGS:
         newSettings = state.settingsOpen
