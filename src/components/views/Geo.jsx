@@ -31,16 +31,16 @@ class Geo extends React.Component {
     handleSelect(...args) {
         const { selections, selectElements, zone } = this.props
         // console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items[10].items)
-        let selected = this.customState.view.scenegraph().root.items[0].items[10].items.filter(it =>it.selected)
-        // console.log('salut', selected)
+        let selected = this.customState.view.scenegraph().root.source.value[0].items[1].items.filter(it =>it.selected)
+        console.log('salut', selected)
         if (selected.length > 0) {
             selected = selected.map(el => {
                 return {
                     selector: `geo_element_${dataLib.makeId(el.datum.entrypoint)}`,
-                    index: el.datum.index,
+                    index: el.datum.properties.index,
                     query: {
                         type: 'uri',
-                        value: el.datum.entrypoint
+                        value: el.datum.properties.entrypoint
                     }
                 }
             })
@@ -50,9 +50,11 @@ class Geo extends React.Component {
         }
     }
     handleNewView(args) {
-        // console.log('view created', args.scenegraph())
+        args.run()
+        console.log('view created', args.scenegraph(), args.getState())
         this.customState = {...this.customState, view: args, transitionSent: true}
-        this.props.handleTransition(this.props, this.getElementsForTransition())
+        //this.props.handleTransition(this.props, this.getElementsForTransition())
+        window.setTimeout(() => { this.props.handleTransition(this.props, this.getElementsForTransition()) }, 300)
     }
     handleZoneSelected(args) {
         // console.log('coucou', args.scenegraph())
@@ -89,32 +91,35 @@ class Geo extends React.Component {
         </g>)
     }
     getElementsForTransition () {
-        // console.log(this.customState.view.scenegraph().root.source.value[0].items[10].items)
-        return []
-        /* let items = this.customState.view.scenegraph().root.source.value[0].items[10].items.map(el => {
-            return { 
-                zone: {
-                    x1: el.x,
-                    y1: el.y,
-                    x2: el.x + 5,
-                    y2: el.y + 5,
-                    width: 5,
-                    height: 5
-                },
-                selector: `timeline_element_${dataLib.makeId(el.datum.entrypoint)}`,
-                index: el.datum.index,
-                query: {
-                    type: 'uri',
-                    value: el.datum.entrypoint
-                },
-                color: el.stroke,
-                opacity: el.opacity,
-                shape: 'rectangle',
-                rotation: 0
-            }
-        })
+        // console.log("coucou geo", this.customState.view.scenegraph().root.source.value)
+        // console.log(this.customState.view.scenegraph().root.items[0].items[1])
+        let items = []
+        if (this.customState.view.scenegraph() && this.customState.view.scenegraph().root.source.value[0]) {
+            items = this.customState.view.scenegraph().root.source.value[0].items[1].items.map(el => {
+                return { 
+                    zone: {
+                        x1: el.bounds.x1,
+                        y1: el.bounds.y1,
+                        x2: el.bounds.x2,
+                        y2: el.bounds.y2,
+                        width: 5,
+                        height: 5
+                    },
+                    selector: `geo_element_${dataLib.makeId(el.datum.properties.entrypoint)}`,
+                    index: el.datum.properties.index,
+                    query: {
+                        type: 'uri',
+                        value: el.datum.properties.entrypoint
+                    },
+                    color: el.fill,
+                    opacity: el.opacity,
+                    shape: 'rectangle',
+                    rotation: 0
+                }
+            })
+        }
         // console.log(items)
-        return items */
+        return items
     }
     getElementsInZone (props) {
         let { display, zone, zoneDimensions } = props
@@ -160,9 +165,9 @@ class Geo extends React.Component {
             }
         },
         {
-            "name": "world",
+            "name": "countries",
             "url": "data/world-110m.json",
-            "format": {"type": "topojson", "feature": "states"},
+            "format": {"type": "topojson", "feature": "countries"},
             "transform": [
                 {
                     "type": "geopath",
@@ -171,13 +176,32 @@ class Geo extends React.Component {
             ]
         },
         {
-            "name": "states",
-            "url": "data/world-110m.json",
-            "format": {"type": "topojson", "feature": "countries"},
+            "name": "entitygroups",
+            "source": "entities",
             "transform": [
                 {
-                    "type": "geopath",
-                    "projection": "projection"
+                    "type": "formula",
+                    "as": "latg",
+                    "expr": "round(datum.properties.lat / 10) * 10"
+                },
+                {
+                    "type": "formula",
+                    "as": "longg",
+                    "expr": "round(datum.properties.long / 10) * 10"
+                },
+                {
+                    "type": "aggregate",
+                    "groupby": ["longg", "latg"]
+                },
+                {
+                    "type": "formula",
+                    "as": "geometry",
+                    "expr": "{ type: 'Point', coordinates : [datum.longg, datum.latg, 0]}"
+                },
+                {
+                    "type": "formula",
+                    "as": "type",
+                    "expr": "'Feature'"
                 }
             ]
         }]
@@ -188,24 +212,67 @@ class Geo extends React.Component {
             "autosize": "none",
             "signals": [
                 {
-                    "name": "hover",
-                    "value": null,
+                    "name": "endZone", "value": true,
                     "on": [
-                        {"events": "@cell:mouseover", "update": "datum"},
-                        {"events": "@cell:mouseout", "update": "null"}
+                        {
+                            "events": "mouseup",
+                            "update": "true"
+                        },
+                        {
+                            "events": "mousedown",
+                            "update": "false"
+                        }
                     ]
                 },
                 {
-                    "name": "title",
-                    "value": "U.S. Airports, 2008",
-                    "update": "hover ? hover.name + ' (' + hover.iata + ')' : 'U.S. Airports, 2008'"
-                },
-                {
-                    "name": "cell_stroke",
+                    "name": "zone",
                     "value": null,
                     "on": [
-                        {"events": "dblclick", "update": "cell_stroke ? null : 'brown'"},
-                        {"events": "mousedown!", "update": "cell_stroke"}
+                        
+                        {
+                            "events": "[mousedown, mouseup] > mousemove{100}",
+                            "update": "zone ? [zone[0], [x(), y()]] : [[0, 0],[0, 0]]"
+                        },
+                        {
+                            "events": "mousedown",
+                            "update": "[[x(), y()], [x(), y()]]"
+                        },
+                        {
+                            "events": "mouseup",
+                            "update": "null"
+                        }
+                    ]
+                },
+                {
+                    "name": "domainX",
+                    "on": [
+                        {
+                            "events": {"signal": "zone"},
+                            "update": "zone ? [zone[0][0],zone[1][0]] : domainY"
+                        }
+                    ]
+                },
+                {
+                    "name": "domainY",
+                    "on": [ 
+                        {
+                            "events": {"signal": "zone"},
+                            "update": "zone ? [zone[0][1],zone[1][1]] : domainY"
+                        }
+                    ]
+                },
+                {
+                    "name": "otherZoneSelected",
+                    "init": selections.some(s => s.zone !== zone)
+                },
+                {
+                    "name": "zoneSelected",
+                    "init": selections.some(s => s.zone === zone),
+                    "on": [
+                        {
+                            "events": {"signal": "domainX"},
+                            "update": "domainX ? true : false"
+                        }
                     ]
                 }
             ],
@@ -229,7 +296,7 @@ class Geo extends React.Component {
             "marks": [
                 {
                     "type": "path",
-                    "from": {"data": "states"},
+                    "from": {"data": "countries"},
                     "encode": {
                         "enter": {
                             "fill": {"value": "#dedede"},
@@ -242,24 +309,133 @@ class Geo extends React.Component {
                 },
                 {
                     "type": "shape",
+                    "name": "singlepoints",
                     "from": {"data": "entities"},
                     "encode": {
                         "update": {
                             "opacity": {"value": 0.25},
-                            "fill": {"value": "red"}
+                            "fill": [
+                                {"test": "(otherZoneSelected || (zoneSelected && (!inrange(item.x, domainX) || !inrange(item.y, domainY))))", "value": "#666"},
+                                {"value": "red"}
+                            ]
                         }
                     },
                     "transform": [
                         {
                             "type": "geoshape",
                             "projection": "projection",
-                            "pointRadius": {"expr": "scale('size', exp(datum.properties.mag))"}
+                            "pointRadius": 5
                         }
                     ]
+                },
+                {
+                    "type": "symbol",
+                    "from": {"data": "entitygroups"},
+                    "name": "aggregates",
+                    "encode": {
+                        "update": {
+                            "opacity": {"value": 0.25},
+                            "fill": {"value": "blue"},
+                            "size":  {"field": "count", "mult": 100},
+                            "x":  {"field": "x"},
+                            "y":  {"field": "y"}
+                        }
+                    },
+                    "transform": [
+                        {
+                            "type": "geopoint",
+                            "projection": "projection",
+                            "fields": ["datum.longg", "datum.latg"]
+                        }
+                    ]
+                },
+                {
+                    "type": "rect",
+                    "interactive": false,
+                    "encode": {
+                        "enter": {
+                            "y": {"value": 0},
+                            "fill": {"value": "#ddd"}
+                        },
+                        "update": {
+                            "x": {"signal": "zone ? zone[0][0] : 0"},
+                            "x2": {"signal": "zone ? zone[1][0] : 0"},
+                            "y": {"signal": "zone ? zone[0][1] : 0"},
+                            "y2": {"signal": "zone ? zone[1][1] : 0"},
+                            "fillOpacity": {"signal": "zone ? 0.2 : 0"}
+                        }
+                    }
+                },
+                {
+                    "type": "rect",
+                    "interactive": false,
+                    "encode": {
+                        "enter": {
+                            "width": {"value": 1},
+                            "fill": {"value": "#666"}
+                        },
+                        "update": {
+                            "fillOpacity": {"signal": "zone ? 1 : 0"},
+                            "x": {"signal": "zone ? zone[0][0] : 0"},
+                            "y": {"signal": "zone ? zone[0][1] : 0"},
+                            "y2": {"signal": "zone ? zone[1][1] : 0"},
+                        }
+                    }
+                },
+                {
+                    "type": "rect",
+                    "interactive": false,
+                    "encode": {
+                        "enter":{
+                            "y": {"value": 0},
+                            "width": {"value": 1},
+                            "fill": {"value": "#666"}
+                        },
+                        "update": {
+                            "fillOpacity": {"signal": "zone ? 1 : 0"},
+                            "x": {"signal": "zone ? zone[1][0] : 0"},
+                            "y": {"signal": "zone ? zone[0][1] : 0"},
+                            "y2": {"signal": "zone ? zone[1][1] : 0"},
+                        }
+                    }
+                },
+                {
+                    "type": "rect",
+                    "interactive": false,
+                    "encode": {
+                        "enter":{
+                            "y": {"value": 0},
+                            "height": {"value": 1},
+                            "fill": {"value": "#666"}
+                        },
+                        "update": {
+                            "fillOpacity": {"signal": "zone ? 1 : 0"},
+                            "x": {"signal": "zone ? zone[0][0] : 0"},
+                            "x2": {"signal": "zone ? zone[1][0] : 0"},
+                            "y": {"signal": "zone ? zone[0][1] : 0"},
+                        }
+                    }
+                },
+                {
+                    "type": "rect",
+                    "interactive": false,
+                    "encode": {
+                        "enter":{
+                            "y": {"value": 0},
+                            "height": {"value": 1},
+                            "fill": {"value": "#666"}
+                        },
+                        "update": {
+                            "fillOpacity": {"signal": "zone ? 1 : 0"},
+                            "x": {"signal": "zone ? zone[0][0] : 0"},
+                            "x2": {"signal": "zone ? zone[1][0] : 0"},
+                            "y": {"signal": "zone ? zone[1][1] : 0"},
+                        }
+                    }
                 }
             ]
         }
-
+        // "pointRadius": {"expr": "scale('size', exp(datum.properties.mag))"}
         //
         // Save to reuse in render
         this.customState = {

@@ -31,7 +31,7 @@ class Timeline extends React.Component {
     handleSelect(...args) {
         const { selections, selectElements, zone } = this.props
         // console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items[10].items)
-        let selected = this.customState.view.scenegraph().root.items[0].items[10].items.filter(it =>it.selected)
+        let selected = this.customState.view.scenegraph().root.items[0].items[9].items.filter(it =>it.selected)
         // console.log('salut', selected)
         if (selected.length > 0) {
             selected = selected.map(el => {
@@ -90,7 +90,7 @@ class Timeline extends React.Component {
     }
     getElementsForTransition () {
         // console.log(this.customState.view.scenegraph().root.source.value[0].items[10].items)
-        let items = this.customState.view.scenegraph().root.source.value[0].items[10].items.map(el => {
+        let items = this.customState.view.scenegraph().root.source.value[0].items[9].items.map(el => {
             return { 
                 zone: {
                     x1: el.x,
@@ -293,23 +293,6 @@ class Timeline extends React.Component {
                 {"orient": "left", "scale": "yscale", "ticks": false, "labels": false, "domainColor": "#fff"}
             ],
             "marks": [{
-                "type": "rect",
-                "name": "xaxis",
-                "interactive": true,
-                "encode": {
-                    "enter": {
-                        "x": {"value": 0},
-                        "height": {"value": 35},
-                        "fill": {"value": "transparent"},
-                        "cursor": {"value": "ew-resize"}
-                    },
-                    "update": {
-                        "y": {"signal": "height"},
-                        "width": {"signal": "span(range('xscale'))"}
-                    }
-                }
-            },
-            {
                 "type": "rect",
                 "interactive": false,
                 "encode": {

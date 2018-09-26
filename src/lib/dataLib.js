@@ -320,8 +320,8 @@ export const prepareSinglePropData = (data, category, prefixes) => {
 
 export const prepareGeoData = (data, dataset) => {
     return {
-        type: 'FeatureCollection',
-        features: data.map(place => {
+        type: 'FeatureColle(ction',
+        features: data.map((place, index) => {
             return {
                 type: 'Feature', 
                 properties: {
@@ -330,11 +330,12 @@ export const prepareGeoData = (data, dataset) => {
                     lat:  Number(place.prop1.value),
                     long:  Number(place.prop2.value),
                     label: place.prop3.value,
-                    entrypoint: place.entrypoint.value
+                    entrypoint: place.entrypoint.value,
+                    index
                 },
                 geometry: {
                     type: "Point",
-                    coordinates: [ Number(place.prop2.value), Number(place.prop1.value), 0] 
+                    coordinates: [Number(place.prop2.value), Number(place.prop1.value), 0] 
                 }
             }
         })
