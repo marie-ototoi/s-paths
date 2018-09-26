@@ -245,7 +245,10 @@ class App extends React.PureComponent {
                         step = { this.state.main_step }
                     />
                 }
-                { asideConfig && data.past.length > 1 && this.state.main_step === 'active' && areLoaded(data, 'aside', 'active') &&
+                { asideConfig && data.past.length > 1 && 
+                    this.state.main_step === 'active' && 
+                    areLoaded(data, 'aside', 'active') &&
+                    display.vizDefPercent.aside_width > 20 &&
                     <SideComponent
                         zone = "aside"
                         role = "origin"
@@ -262,7 +265,10 @@ class App extends React.PureComponent {
                         handleTransition = { this.handleTransition }
                     />
                 }
-                { asideConfig && data.past.length > 1 && this.state.main_step === 'active' && this.state.aside_transition &&
+                { asideConfig && data.past.length > 1 &&
+                    this.state.main_step === 'active' &&
+                    this.state.aside_transition &&
+                    display.vizDefPercent.aside_width > 20 &&
                     <BrushLink
                         zone = "aside"
                         dimensions = { coreDimensionsAside }
@@ -283,7 +289,7 @@ class App extends React.PureComponent {
         // change this for an action function
         this.props.setDisplay({
             screen: getScreen(),
-            vizDef: display.vizDefPercent
+            vizDefPercent: display.vizDefPercent
         })
     }
 }

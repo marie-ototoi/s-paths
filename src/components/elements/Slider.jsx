@@ -8,7 +8,7 @@ class Slider extends React.Component {
         super(props)
         this.drag = this.drag.bind(this)
         this.state = {
-            step: 25 // TODO: if window size < 1500 ? 50 : 25 (#68)
+            step: 5 // TODO: if window size < 1500 ? 50 : 25 (#68)
         }
     }
     drag (event) {
@@ -16,7 +16,7 @@ class Slider extends React.Component {
         let asidePercent = event.target.value
         setDisplay({
             screen: display.screen,
-            vizDef: { ...display.vizDefPercent, aside_width: asidePercent, main_width: 100 - asidePercent }
+            vizDefPercent: { ...display.vizDefPercent, aside_width: asidePercent, main_width: 100 - asidePercent }
         })
     }
     render () {
@@ -30,7 +30,7 @@ class Slider extends React.Component {
                 step={this.state.step}
                 onChange={this.drag}
                 style = {{
-                    top: Math.floor((this.props.display.viz.top_margin - 155)/2) + 'px'
+                    top: (90) + 'px'
                 }}
             />
         )
