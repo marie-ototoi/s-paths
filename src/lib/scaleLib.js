@@ -8,16 +8,40 @@ export const scaleViewBox = (viewBoxDef, stage) => {
 }
 
 export const getScreen = () => {
+    console.log(window.innerHeight)
     return {
-        height: window.innerHeight - 5,
-        width: window.innerWidth - 5
+        height: window.innerHeight - 10,
+        width: window.innerWidth
     }
 }
+
+//https://codeburst.io/throttling-and-debouncing-in-javascript-b01cad5c8edf
+export const throttle = (func, limit) => {
+    let lastFunc
+    let lastRan
+    return function() {
+        const context = this
+        const args = arguments
+        if (!lastRan) {
+            func.apply(context, args)
+            lastRan = Date.now()
+        } else {
+            clearTimeout(lastFunc)
+            lastFunc = setTimeout(function() {
+                if ((Date.now() - lastRan) >= limit) {
+                    func.apply(context, args)
+                    lastRan = Date.now()
+                }
+            }, limit - (Date.now() - lastRan))
+        }
+    }
+}
+
 
 export const getViz = (vizDef, stage) => {
     let opt = { 
         horizontal_padding_percent: 15,
-        horizontal_padding_min_width: 180,
+        horizontal_padding_min_width: 150,
         min_ratio: 1.1
     }
     //

@@ -21,7 +21,7 @@ import Timeline from './views/Timeline'
 import TreeMap from './views/TreeMap'
 import URIWheel from './views/URIWheel'
 // libs
-import { getDimensions, getScreen } from '../lib/scaleLib'
+import { getDimensions, getScreen, throttle } from '../lib/scaleLib'
 import { areLoaded, getCurrentState, getResults, getTransitionElements } from '../lib/dataLib'
 import { getSelectedView, getCurrentConfigs } from '../lib/configLib'
 import * as selectionLib from '../lib/selectionLib'
@@ -35,7 +35,6 @@ class App extends React.PureComponent {
         super(props)
         // resize handled in the app component only: it updates display reducer that triggers rerender if needed
         this.onResize = this.onResize.bind(this)
-        window.addEventListener('resize', this.onResize)
         // transition state is handled locally in the component, to avoid re-rendering
         this.handleMouseMove = this.handleMouseMove.bind(this)
         this.handleTransition = this.handleTransition.bind(this)
@@ -58,6 +57,7 @@ class App extends React.PureComponent {
         const { dataset, views } = this.props
         // this is where it all starts
         this.props.loadResources(dataset, views)
+        window.addEventListener('resize', throttle(this.onResize, 500))
     }
     handleMouseMove (e, zone) {
         /* const { display, selections } = this.props
@@ -248,7 +248,7 @@ class App extends React.PureComponent {
                 { asideConfig && data.past.length > 1 && 
                     this.state.main_step === 'active' && 
                     areLoaded(data, 'aside', 'active') &&
-                    display.vizDefPercent.aside_width > 20 &&
+                    display.viz.aside_width > 500 &&
                     <SideComponent
                         zone = "aside"
                         role = "origin"
@@ -268,7 +268,7 @@ class App extends React.PureComponent {
                 { asideConfig && data.past.length > 1 &&
                     this.state.main_step === 'active' &&
                     this.state.aside_transition &&
-                    display.vizDefPercent.aside_width > 20 &&
+                    display.viz.aside_width > 500 &&
                     <BrushLink
                         zone = "aside"
                         dimensions = { coreDimensionsAside }
@@ -287,10 +287,12 @@ class App extends React.PureComponent {
     onResize () {
         const { display } = this.props
         // change this for an action function
+        // Throttled function
         this.props.setDisplay({
             screen: getScreen(),
             vizDefPercent: display.vizDefPercent
         })
+        
     }
 }
 
