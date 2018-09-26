@@ -29,6 +29,9 @@ class Slider extends React.Component {
                 max={50}
                 step={this.state.step}
                 onChange={this.drag}
+                style = {{
+                    top: Math.floor((this.props.display.viz.top_margin - 155)/2) + 'px'
+                }}
             />
         )
     }
