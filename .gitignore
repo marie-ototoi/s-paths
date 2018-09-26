@@ -8,5 +8,6 @@ db/
 .nyc_output/
 .vscode/
 package-lock.json
+docker-compose-*.yml
 .babelignore
 dump/
