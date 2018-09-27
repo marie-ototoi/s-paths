@@ -13,8 +13,6 @@ services:
 
 .node: &node
   image: node
-  tags:
-    - node
   before_script:
     - npm install
   script: npm run $CI_JOB_STAGE
@@ -27,8 +25,6 @@ services:
 .docker-deploy: &docker-deploy
   stage: deploy
   image: docker
-  tags:
-    - docker
   before_script:
     - mkdir -pv ~/.docker
     - echo "$TLSCACERT" > ~/.docker/ca.pem
@@ -55,9 +51,8 @@ Assets:
   stage: build
 
 Docker:
-  tags:
-    - docker
   stage: build
+  image: docker
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
@@ -91,7 +86,6 @@ Production Nobel:
 Staging:
   <<: *docker-deploy
   tags:
-    - docker
     - vpn
   variables:
     TLSCACERT: $TLSCACERT_staging
