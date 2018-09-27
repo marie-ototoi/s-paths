@@ -55,9 +55,10 @@ Assets:
   stage: build
 
 Docker:
+  stage: build
+  image: docker
   tags:
     - docker
-  stage: build
   before_script:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
