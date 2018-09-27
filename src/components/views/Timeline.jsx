@@ -30,23 +30,25 @@ class Timeline extends React.Component {
     }
     handleSelect(...args) {
         const { selections, selectElements, zone } = this.props
-        // console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items[10].items)
-        let selected = this.customState.view.scenegraph().root.items[0].items[9].items.filter(it =>it.selected)
-        // console.log('salut', selected)
-        if (selected.length > 0) {
-            selected = selected.map(el => {
-                return {
-                    selector: `timeline_element_${dataLib.makeId(el.datum.entrypoint)}`,
-                    index: el.datum.index,
-                    query: {
-                        type: 'uri',
-                        value: el.datum.entrypoint
+        if (args[1]) {
+            // console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items[10].items)
+            let selected = this.customState.view.scenegraph().root.items[0].items[9].items.filter(it =>it.selected)
+            // console.log('salut', selected)
+            if (selected.length > 0) {
+                selected = selected.map(el => {
+                    return {
+                        selector: `timeline_element_${dataLib.makeId(el.datum.entrypoint)}`,
+                        index: el.datum.index,
+                        query: {
+                            type: 'uri',
+                            value: el.datum.entrypoint
+                        }
                     }
-                }
-            })
-            selectElements(selected, zone, selections)
-        } else {
-            resetSelection(zone)
+                })
+                selectElements(selected, zone, selections)
+            } else {
+                resetSelection(zone)
+            }
         }
     }
     handleNewView(args) {

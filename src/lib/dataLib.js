@@ -320,7 +320,7 @@ export const prepareSinglePropData = (data, category, prefixes) => {
 
 export const prepareGeoData = (data, dataset) => {
     return {
-        type: 'FeatureColle(ction',
+        type: 'FeatureCollection',
         features: data.map((place, index) => {
             return {
                 type: 'Feature', 

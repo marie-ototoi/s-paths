@@ -31,23 +31,26 @@ class Geo extends React.Component {
     }
     handleSelect(...args) {
         const { selections, selectElements, zone } = this.props
-        // console.log('yes we can', args, this.customState.view.scenegraph().root.source.value[0].items[1].items)
-        let selected = this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected)
-        // console.log('salut', selected)
-        if (selected.length > 0) {
-            selected = selected.map(el => {
-                return {
-                    selector: `geo_element_${dataLib.makeId(el.datum.properties.entrypoint)}`,
-                    index: el.datum.properties.index,
-                    query: {
-                        type: 'uri',
-                        value: el.datum.properties.entrypoint
+        if (args[1]) {
+            // console.log('yes we can', args, this.customState.view.scenegraph().root.source.value[0].items[1].items)
+            let selected = this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected)
+            // console.log('salut', selected)
+            if (selected.length > 0) {
+                selected = selected.map(el => {
+                    return {
+                        selector: `geo_element_${dataLib.makeId(el.datum.properties.entrypoint)}`,
+                        index: el.datum.properties.index,
+                        query: {
+                            type: 'uri',
+                            value: el.datum.properties.entrypoint
+                        }
                     }
-                }
-            })
-            selectElements(selected, zone, selections)
-        } else {
-            resetSelection(zone)
+                })
+                // console.log(selected)
+                selectElements(selected, zone, selections)
+            } else {
+                resetSelection(zone)
+            }
         }
     }
     handleNewView(args) {
@@ -113,6 +116,7 @@ class Geo extends React.Component {
         // console.log(items)
         return items
     }
+
     shouldComponentUpdate (nextProps, nextState) {
         // if (this.props.step === 'launch' && nextProps.step === 'launch') return false
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
@@ -146,11 +150,60 @@ class Geo extends React.Component {
         // First prop
         // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
         // console.log(data, role)
-        const selectedConfig = getSelectedMatch(config, zone)
-        const pathProp1 = selectedConfig.properties[0].path
-        const colors = getPropPalette(palettes, pathProp1, 1)
+        // const selectedConfig = getSelectedMatch(config, zone)
+        // const pathProp1 = selectedConfig.properties[0].path
+        // const colors = getPropPalette(palettes, pathProp1, 1)
 
         // console.log(defaultSpec)
+        const geodata = [{
+            "name": "entities",
+            "values": dataLib.prepareGeoData(data, dataset),
+            "format": {
+                "type": "json",
+                "property": "features"
+            }
+        },
+        {
+            "name": "countries",
+            "url": "data/world-110m.json",
+            "format": {"type": "topojson", "feature": "countries"},
+            "transform": [
+                {
+                    "type": "geopath",
+                    "projection": "projection"
+                }
+            ]
+        },
+        {
+            "name": "entitygroups",
+            "source": "entities",
+            "transform": [
+                {
+                    "type": "formula",
+                    "as": "latg",
+                    "expr": "round(datum.properties.lat / 10) * 10"
+                },
+                {
+                    "type": "formula",
+                    "as": "longg",
+                    "expr": "round(datum.properties.long / 10) * 10"
+                },
+                {
+                    "type": "aggregate",
+                    "groupby": ["longg", "latg"]
+                },
+                {
+                    "type": "formula",
+                    "as": "geometry",
+                    "expr": "{ type: 'Point', coordinates : [datum.longg, datum.latg, 0]}"
+                },
+                {
+                    "type": "formula",
+                    "as": "type",
+                    "expr": "'Feature'"
+                }
+            ]
+        }]
         const spec = {
             ...defaultSpec,
             "width": dimensions.useful_width,
@@ -172,55 +225,7 @@ class Geo extends React.Component {
                     ]
                 }
             ],
-            "data": [{
-                "name": "entities",
-                "values": dataLib.prepareGeoData(data, dataset),
-                "format": {
-                    "type": "json",
-                    "property": "features"
-                }
-            },
-            {
-                "name": "countries",
-                "url": "data/world-110m.json",
-                "format": {"type": "topojson", "feature": "countries"},
-                "transform": [
-                    {
-                        "type": "geopath",
-                        "projection": "projection"
-                    }
-                ]
-            },
-            {
-                "name": "entitygroups",
-                "source": "entities",
-                "transform": [
-                    {
-                        "type": "formula",
-                        "as": "latg",
-                        "expr": "round(datum.properties.lat / 10) * 10"
-                    },
-                    {
-                        "type": "formula",
-                        "as": "longg",
-                        "expr": "round(datum.properties.long / 10) * 10"
-                    },
-                    {
-                        "type": "aggregate",
-                        "groupby": ["longg", "latg"]
-                    },
-                    {
-                        "type": "formula",
-                        "as": "geometry",
-                        "expr": "{ type: 'Point', coordinates : [datum.longg, datum.latg, 0]}"
-                    },
-                    {
-                        "type": "formula",
-                        "as": "type",
-                        "expr": "'Feature'"
-                    }
-                ]
-            }],
+            "data": geodata,
             "scales": [
                 {
                     "name": "size",
@@ -306,6 +311,7 @@ class Geo extends React.Component {
         // Save to reuse in render
         this.customState = {
             ...this.customState,
+            geodata,
             spec
             //selectedConfig
         }

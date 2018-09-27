@@ -129,6 +129,7 @@ class Header extends React.Component {
             const selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'), 'aside')
             
             newConstraints = makeSelectionConstraints(selections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats })
+            // console.log('here and THERE ?????', newConstraints)
         } else {
             // console.log('here and THERE ?????')
             // keep old constraints

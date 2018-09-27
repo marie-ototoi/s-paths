@@ -197,7 +197,8 @@ class App extends React.PureComponent {
                 width = { display.screen.width }
                 height = { display.screen.height }
             >
-                { mainConfig && this.state.main_step === 'launch' &&
+                { mainConfig && 
+                    this.state.main_step === 'launch' &&
                     <MainTransitionComponent
                         role = "target"
                         zone = "main"
@@ -212,7 +213,8 @@ class App extends React.PureComponent {
                     />
                 }
                 
-                { mainConfig && areLoaded(data, 'main', 'active') &&
+                { mainConfig &&
+                    areLoaded(data, 'main', 'active') &&
                     <MainComponent
                         role = "origin"
                         zone = "main"
@@ -229,7 +231,8 @@ class App extends React.PureComponent {
                         handleTransition = { this.handleTransition }
                     />
                 }
-                { mainConfig && this.state.main_step === 'changing' &&
+                { mainConfig && 
+                    this.state.main_step === 'changing' &&
                     <Transition
                         zone = "main"
                         dimensions = { coreDimensionsMain }
