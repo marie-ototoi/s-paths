@@ -13,6 +13,7 @@ import { getRelativeRectangle } from '../../lib/scaleLib'
 import { getSelectedMatch } from '../../lib/configLib'
 import { usePrefix } from '../../lib/queryLib'
 import * as dataLib from '../../lib/dataLib'
+import defaultSpec from '../../lib/spec'
 // redux functions
 
 class Timeline extends React.Component {
@@ -31,8 +32,8 @@ class Timeline extends React.Component {
     handleSelect(...args) {
         const { selections, selectElements, zone } = this.props
         if (args[1]) {
-            // console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items[10].items)
-            let selected = this.customState.view.scenegraph().root.items[0].items[9].items.filter(it =>it.selected)
+            console.log('yes we can', args, this.customState.view.scenegraph().root.items)
+            let selected = this.customState.view.scenegraph().root.items[0].items[4].items.filter(it =>it.selected)
             // console.log('salut', selected)
             if (selected.length > 0) {
                 selected = selected.map(el => {
@@ -84,7 +85,7 @@ class Timeline extends React.Component {
     }
     getElementsForTransition () {
         // console.log(this.customState.view.scenegraph().root.source.value[0].items[10].items)
-        let items = this.customState.view.scenegraph().root.source.value[0].items[9].items.map(el => {
+        let items = this.customState.view.scenegraph().root.source.value[0].items[4].items.map(el => {
             return { 
                 zone: {
                     x1: el.x,
@@ -138,7 +139,7 @@ class Timeline extends React.Component {
         const pathProp1 = selectedConfig.properties[0].path
         const colors = getPropPalette(palettes, pathProp1, 1)
         // console.log(colors)
-        const datatest = [{
+        const timedata = [{
             "name": "entities",
             "values": data.map((dp, i) => {
                 let categoryProp2 = selectedConfig.properties[1].path
@@ -163,22 +164,20 @@ class Timeline extends React.Component {
 
         }]
         const spec = {
-            "$schema": "https://vega.github.io/schema/vega/v4.json",
+            ...defaultSpec,
             "width": dimensions.useful_width + display.viz.horizontal_padding,
-            "height": dimensions.useful_height - 10,
+            "height": dimensions.useful_height,
+            "padding": {"bottom": display.viz.bottom_padding, "top": 10},
             "config": {
                 "axisBand": {
                     "bandPosition": 1,
                     "maxExtent": display.viz.horizontal_padding,
                     "minExtent": display.viz.horizontal_padding
 
-                },
-                "view": {
-                    "autosize": "none"
                 }
             },
-            "data": datatest,
             "signals": [
+                ...defaultSpec.signals,
                 {
                     "name": "tooltip",
                     "value": {},
@@ -195,34 +194,16 @@ class Timeline extends React.Component {
                     ]
                 },
                 {
-                    "name": "endZone", "value": true,
-                    "on": [
-                        {
-                            "events": "mouseup",
-                            "update": "true"
-                        },
-                        {
-                            "events": "mousedown",
-                            "update": "false"
-                        }
-                    ]
+                    "name": "otherZoneSelected",
+                    "value": selections.some(s => s.zone !== zone)
                 },
                 {
-                    "name": "zone",
-                    "value": null,
+                    "name": "zoneSelected",
+                    "value": selections.some(s => s.zone === zone),
                     "on": [
-                        
                         {
-                            "events": "[mousedown, mouseup] > mousemove{100}",
-                            "update": "zone ? [zone[0], [x(), y()]] : [[0, 0],[0, 0]]"
-                        },
-                        {
-                            "events": "mousedown",
-                            "update": "[[x(), y()], [x(), y()]]"
-                        },
-                        {
-                            "events": "mouseup",
-                            "update": "null"
+                            "events": {"signal": "domainX"},
+                            "update": "domainX ? true : false"
                         }
                     ]
                 },
@@ -245,20 +226,15 @@ class Timeline extends React.Component {
                     ]
                 },
                 {
-                    "name": "otherZoneSelected",
-                    "init": selections.some(s => s.zone !== zone)
+                    "name": "horizontalPadding",
+                    "value": display.viz.horizontal_padding
                 },
                 {
-                    "name": "zoneSelected",
-                    "init": selections.some(s => s.zone === zone),
-                    "on": [
-                        {
-                            "events": {"signal": "domainX"},
-                            "update": "domainX ? true : false"
-                        }
-                    ]
+                    "name": "usefulWidth",
+                    "value": dimensions.useful_width
                 }
             ],
+            "data": timedata,
             "scales": [{
                 "name": "yscale",
                 "type": "band",
@@ -282,90 +258,6 @@ class Timeline extends React.Component {
                 {"orient": "left", "scale": "yscale", "ticks": false, "labels": false, "domainColor": "#fff"}
             ],
             "marks": [{
-                "type": "rect",
-                "interactive": false,
-                "encode": {
-                    "enter": {
-                        "y": {"value": 0},
-                        "fill": {"value": "#ddd"}
-                    },
-                    "update": {
-                        "x": {"signal": "zone ? zone[0][0] : 0"},
-                        "x2": {"signal": "zone ? zone[1][0] : 0"},
-                        "y": {"signal": "zone ? zone[0][1] : 0"},
-                        "y2": {"signal": "zone ? zone[1][1] : 0"},
-                        "fillOpacity": {"signal": "zone ? 0.2 : 0"}
-                    }
-                }
-            },
-            {
-                "type": "rect",
-                "interactive": false,
-                "encode": {
-                    "enter": {
-                        "width": {"value": 1},
-                        "fill": {"value": "#666"}
-                    },
-                    "update": {
-                        "fillOpacity": {"signal": "zone ? 1 : 0"},
-                        "x": {"signal": "zone ? zone[0][0] : 0"},
-                        "y": {"signal": "zone ? zone[0][1] : 0"},
-                        "y2": {"signal": "zone ? zone[1][1] : 0"},
-                    }
-                }
-            },
-            {
-                "type": "rect",
-                "interactive": false,
-                "encode": {
-                    "enter":{
-                        "y": {"value": 0},
-                        "width": {"value": 1},
-                        "fill": {"value": "#666"}
-                    },
-                    "update": {
-                        "fillOpacity": {"signal": "zone ? 1 : 0"},
-                        "x": {"signal": "zone ? zone[1][0] : 0"},
-                        "y": {"signal": "zone ? zone[0][1] : 0"},
-                        "y2": {"signal": "zone ? zone[1][1] : 0"},
-                    }
-                }
-            },
-            {
-                "type": "rect",
-                "interactive": false,
-                "encode": {
-                    "enter":{
-                        "y": {"value": 0},
-                        "height": {"value": 1},
-                        "fill": {"value": "#666"}
-                    },
-                    "update": {
-                        "fillOpacity": {"signal": "zone ? 1 : 0"},
-                        "x": {"signal": "zone ? zone[0][0] : 0"},
-                        "x2": {"signal": "zone ? zone[1][0] : 0"},
-                        "y": {"signal": "zone ? zone[0][1] : 0"},
-                    }
-                }
-            },
-            {
-                "type": "rect",
-                "interactive": false,
-                "encode": {
-                    "enter":{
-                        "y": {"value": 0},
-                        "height": {"value": 1},
-                        "fill": {"value": "#666"}
-                    },
-                    "update": {
-                        "fillOpacity": {"signal": "zone ? 1 : 0"},
-                        "x": {"signal": "zone ? zone[0][0] : 0"},
-                        "x2": {"signal": "zone ? zone[1][0] : 0"},
-                        "y": {"signal": "zone ? zone[1][1] : 0"},
-                    }
-                }
-            },
-            {
                 "type": "rule",
                 "name": "entitylines",
                 "from": {"data": "entities"},
@@ -386,7 +278,7 @@ class Timeline extends React.Component {
                         "align": {"value": "right"},
                         "x": {"value": 0},
                         "y": {"scale": "yscale", "field": "entrypoint"},
-                        "text": {"field": "entrypoint"},
+                        "text": {"field": "name"},
                         "fill": [
                             {"test": "(otherZoneSelected || (zoneSelected && (!inrange(datum.prop1, domainX) || !inrange(item.y, domainY))))", "value": "#ccc"},
                             {"value": "#333"}
@@ -463,7 +355,8 @@ class Timeline extends React.Component {
                         ]
                     }
                 }
-            }]
+            },
+            ...defaultSpec.marks]
         }
 
         //
@@ -471,7 +364,7 @@ class Timeline extends React.Component {
         this.customState = {
             ...this.customState,
             spec,
-            datatest
+            timedata
             //selectedConfig
         }
     }

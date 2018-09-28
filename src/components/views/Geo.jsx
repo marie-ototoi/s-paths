@@ -33,7 +33,7 @@ class Geo extends React.Component {
         const { selections, selectElements, zone } = this.props
         if (args[1]) {
             // console.log('yes we can', args, this.customState.view.scenegraph().root.source.value[0].items[1].items)
-            let selected = this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected)
+            let selected = this.customState.view.scenegraph().root.source.value[0].items[1].items.filter(it =>it.selected)
             // console.log('salut', selected)
             if (selected.length > 0) {
                 selected = selected.map(el => {
@@ -90,7 +90,7 @@ class Geo extends React.Component {
         // console.log(this.customState.view.scenegraph().root.items[0].items[1])
         let items = []
         if (this.customState.view.scenegraph() && this.customState.view.scenegraph().root.source.value[0]) {
-            items = this.customState.view.scenegraph().root.source.value[0].items[6].items.map(el => {
+            items = this.customState.view.scenegraph().root.source.value[0].items[1].items.map(el => {
                 return { 
                     zone: {
                         x1: el.bounds.x1,
@@ -223,6 +223,24 @@ class Geo extends React.Component {
                             "update": "domainX ? true : false"
                         }
                     ]
+                },
+                {
+                    "name": "domainX",
+                    "on": [
+                        {
+                            "events": {"signal": "zone"},
+                            "update": "zone ? [zone[0][0],zone[1][0]] : domainX"
+                        }
+                    ]
+                },
+                {
+                    "name": "domainY",
+                    "on": [ 
+                        {
+                            "events": {"signal": "zone"},
+                            "update": "zone ? [zone[0][1],zone[1][1]] : domainY"
+                        }
+                    ]
                 }
             ],
             "data": geodata,
@@ -243,7 +261,6 @@ class Geo extends React.Component {
                 }
             ],
             "marks": [
-                ...defaultSpec.marks,
                 {
                     "type": "path",
                     "from": {"data": "countries"},
@@ -302,7 +319,8 @@ class Geo extends React.Component {
                             "fields": ["datum.longg", "datum.latg"]
                         }
                     ]
-                }
+                },
+                ...defaultSpec.marks
             ]
         }
         // console.log(spec)

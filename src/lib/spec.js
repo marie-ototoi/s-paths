@@ -36,24 +36,6 @@ export default {
                     "update": "null"
                 }
             ]
-        },
-        {
-            "name": "domainX",
-            "on": [
-                {
-                    "events": {"signal": "zone"},
-                    "update": "zone ? [zone[0][0],zone[1][0]] : domainX"
-                }
-            ]
-        },
-        {
-            "name": "domainY",
-            "on": [ 
-                {
-                    "events": {"signal": "zone"},
-                    "update": "zone ? [zone[0][1],zone[1][1]] : domainY"
-                }
-            ]
         }
     ],
     "data": [],

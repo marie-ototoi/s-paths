@@ -8,7 +8,7 @@ export const scaleViewBox = (viewBoxDef, stage) => {
 }
 
 export const getScreen = () => {
-    console.log(window.innerHeight)
+    // console.log(window.innerHeight)
     return {
         height: window.innerHeight - 10,
         width: window.innerWidth
