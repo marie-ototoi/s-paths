@@ -24,6 +24,7 @@ class Header extends React.Component {
         this.handleKeyDown = this.handleKeyDown.bind(this)
         this.prepareData = this.prepareData.bind(this)
         this.state = this.prepareData(props)
+        this.state.showConfig = (new URLSearchParams(window.location.search)).has('admin')
     }
     shouldComponentUpdate (nextProps, nextState) {
         // console.log(nextProps.configs.past.length, this.props.configs.past.length)
@@ -277,9 +278,11 @@ class Header extends React.Component {
                                     className = "text-progress is-size-7"
                                 >{ options[0].total } <span className = "is-pulled-right">&nbsp;{ options[0].label }</span>
                                 </p>
-                                <span className = "icon" onClick = { (e) => { this.props.showSettings(zone) } }>
-                                    <i className = "fas fa-cogs"></i>
-                                </span>
+                                { this.state.showConfig && (
+                                    <span className = "icon" onClick = { (e) => { this.props.showSettings(zone) } }>
+                                        <i className = "fas fa-cogs"></i>
+                                    </span>
+                                )}
                             </div>
                             <div className = "line">
                                 <div className = "field" style = {{ marginLeft: display.viz.horizontal_padding + 'px', width: fieldWidth + 'px' }}>
