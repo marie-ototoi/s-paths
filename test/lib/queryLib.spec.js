@@ -128,6 +128,16 @@ WHERE {
 ?entrypoint rdf:type nobel:Laureate . ?entrypoint dbpedia-owl:affiliation ?prop1inter1 . FILTER (?prop1inter1 != ?entrypoint) . ?prop1inter1 dbpedia-owl:country ?prop1 . FILTER (?prop1 != ?prop1inter1 && ?prop1 != ?entrypoint) . 
 } GROUP BY ?prop1  ORDER BY ?prop1 ?countprop1 `)
     })
+    it('should make a valid SPARQL query to retrieve additional multiple property', () => {
+
+        expect(queryLib.makeMultipleQuery('nobel:LaureateAward', 'nobel:LaureateAward/nobel:year/*', 2, 'main', { graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'], constraints: '' }))
+            .to.equal(`SELECT ?entrypoint ?multiple2 FROM <http://localhost:8890/nobel> FROM <http://localhost:8890/geonames> 
+WHERE {
+    
+    ?entrypoint rdf:type <nobel:LaureateAward> .
+    ?entrypoint nobel:year ?multiple2 . FILTER (?multiple2 != ?entrypoint) . 
+}`)
+    })
     it('should make a valid SPARQL to get stats for a prop', () => {
         let prefixes = {
             nobel: 'http://data.nobelprize.org/terms/',

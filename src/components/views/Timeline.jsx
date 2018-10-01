@@ -3,14 +3,14 @@ import React from 'react'
 import { connect } from 'react-redux'
 import Vega from 'react-vega';
 // components
-import SelectionZone from '../elements/SelectionZone'
 // d3
-
+import * as d3 from 'd3'
 // libs
 import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements, resetSelection } from '../../actions/selectionActions'
-import { getRelativeRectangle } from '../../lib/scaleLib'
-import { getSelectedMatch } from '../../lib/configLib'
+import { loadMultiple } from '../../actions/dataActions'
+
+import { getTimelineDict, getSelectedMatch } from '../../lib/configLib'
 import { usePrefix } from '../../lib/queryLib'
 import * as dataLib from '../../lib/dataLib'
 import defaultSpec from '../../lib/spec'
@@ -19,21 +19,29 @@ import defaultSpec from '../../lib/spec'
 class Timeline extends React.Component {
     constructor (props) {
         super(props)
+        this.fetchMultiple = this.fetchMultiple.bind(this)
         this.getElementsForTransition = this.getElementsForTransition.bind(this)
         this.handleSelect = this.handleSelect.bind(this)
         this.handleNewView = this.handleNewView.bind(this)
         this.handleZoneSelected = this.handleZoneSelected.bind(this)
+        this.initData = this.initData.bind(this)
+        this.prepareData = this.prepareData.bind(this)
         this.customState = {
             // selectElements: this.selectElements,
-            elementName: `refTimelineMap_${props.zone}`
+            elementName: `refTimelineMap_${props.zone}`,
+            multipleLoaded: [],
+            multipleLoading: [],
+            data: [],
+            multipleData: {}
         }
+        this.initData(props)
         this.prepareData(props)
     }
     handleSelect(...args) {
         const { selections, selectElements, zone } = this.props
         if (args[1]) {
-            console.log('yes we can', args, this.customState.view.scenegraph().root.items)
-            let selected = this.customState.view.scenegraph().root.items[0].items[4].items.filter(it =>it.selected)
+            // console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items)
+            let selected = this.customState.view.scenegraph().root.items[0].items[5].items.filter(it =>it.selected)
             // console.log('salut', selected)
             if (selected.length > 0) {
                 selected = selected.map(el => {
@@ -49,13 +57,54 @@ class Timeline extends React.Component {
                 selectElements(selected, zone, selections)
             } else {
                 resetSelection(zone)
+                this.customState.view.signal('zoneSelected', false)
+            }
+        }
+    }
+    fetchMultiple() {
+        const { config, dataset, role, zone } = this.props
+        const selectedConfig = getSelectedMatch(config, zone)
+        if (role !== 'target') {
+            for(let mi = 0; mi <selectedConfig.multiple[0].length; mi++) {
+                let m = selectedConfig.multiple[0][mi]
+                if (! (this.customState.multipleLoaded.includes(mi) || this.customState.multipleLoading.includes(mi))) {
+                    this.customState.multipleLoading.push(mi)
+                    this.props.loadMultiple(dataset, m.path, 0, mi, zone)
+                        .then(results => {
+                            // update multipleLoaded && multipleLoading
+                            this.customState.multipleLoaded.push(mi)
+                            this.customState.multipleLoading = this.customState.multipleLoading.filter(i => i !== mi)
+                            // add Data
+                            results.results.bindings.forEach((dp, dpi) => {
+                            //    this.customState.multipleData[dp.entrypoint.value] = d
+                                let key = dp.entrypoint.value
+                                if (!this.customState.multipleData[key]) {
+                                    this.customState.multipleData[key] = { events: [] }
+                                }
+                                let theProp = results.head.vars[1]
+                                let theIndex = Number(theProp.replace('multiple', ''))
+                                let theDate = new Date(dp[theProp].value).getTime()
+                                this.customState.multipleData[key].events.push({
+                                    date: theDate,
+                                    label: selectedConfig.multiple[0][theIndex].readablePath.map(p => p.label).join(' / * / ')
+                                })
+                            })
+                            // console.log('multipleData', this.customState.multipleData)
+                            //load next index
+                            this.fetchMultiple()
+                            this.prepareData(this.props)
+                            this.render()                          
+                        })
+                    break;
+                }
             }
         }
     }
     handleNewView(args) {
         // console.log('view created', args.scenegraph())
         this.customState = {...this.customState, view: args, transitionSent: true}
-        this.props.handleTransition(this.props, this.getElementsForTransition())
+        window.setTimeout(() => { this.props.handleTransition(this.props, this.getElementsForTransition()) }, 300)
+        this.fetchMultiple()
     }
     handleZoneSelected(args) {
         // console.log('coucou', args.scenegraph())
@@ -84,16 +133,16 @@ class Timeline extends React.Component {
         </g>)
     }
     getElementsForTransition () {
-        // console.log(this.customState.view.scenegraph().root.source.value[0].items[10].items)
-        let items = this.customState.view.scenegraph().root.source.value[0].items[4].items.map(el => {
+        // console.log(this.customState.view.scenegraph().root)
+        let items = this.customState.view.scenegraph().root.source.value[0].items[5].items.map(el => {
             return { 
                 zone: {
-                    x1: el.x,
-                    y1: el.y,
-                    x2: el.x + 5,
-                    y2: el.y + 5,
-                    width: 5,
-                    height: 5
+                    x1: el.bounds.x1,
+                    y1: el.bounds.y1,
+                    x2: el.bounds.x2,
+                    y2: el.bounds.y2,
+                    width:  el.bounds.x2 - el.bounds.x1,
+                    height: el.bounds.y2 - el.bounds.y1
                 },
                 selector: `timeline_element_${dataLib.makeId(el.datum.entrypoint)}`,
                 index: el.datum.index,
@@ -115,6 +164,8 @@ class Timeline extends React.Component {
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
+        if (this.props.dimensions.width !== nextProps.dimensions.width) this.customState.view.signal('width', nextProps.dimensions.useful_width)
+        if (this.props.dimensions.height !== nextProps.dimensions.height) this.customState.view.signal('height', nextProps.dimensions.useful_height)
         if (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) {
             if (nextProps.selections.some(s => s.zone !== nextProps.zone)) {
                 this.customState.view.signal('otherZoneSelected', true)
@@ -128,54 +179,180 @@ class Timeline extends React.Component {
             (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
             (this.props.step !== nextProps.step)
     }
-    prepareData (nextProps) {
-        const { config, data, dataset, display, dimensions, getPropPalette, palettes, role, selections, zone } = nextProps
-        // prepare the data for display
-        // const selectedConfig = getSelectedMatch(config, zone)
-        // First prop
-        // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
-        // console.log(data, role)
+    initData (nextProps) {
+        this.customState.multipleData = getTimelineDict(nextProps.data, 'entrypoint')
+        const { config, dataset, zone } = nextProps
         const selectedConfig = getSelectedMatch(config, zone)
-        const pathProp1 = selectedConfig.properties[0].path
-        const colors = getPropPalette(palettes, pathProp1, 1)
-        // console.log(colors)
+        let categoryProp2 = selectedConfig.properties[1].path
+        for (let dpe in this.customState.multipleData) {
+            let dp = this.customState.multipleData[dpe]
+            let name = (selectedConfig.properties[1].level === 1 && selectedConfig.properties[1].property === 'http://www.w3.org/2000/01/rdf-schema#label') ? dp.prop2 : usePrefix(dp.entrypoint, dataset.prefixes)
+            this.customState.multipleData[dpe] = {
+                ...this.customState.multipleData[dpe],
+                prop2: (categoryProp2 === 'uri') ? usePrefix(dp.prop2, dataset.prefixes) : dp.prop2,
+                name,
+                events: [{
+                    date: new Date(dp.prop1).getTime(),
+                    label: selectedConfig.properties[0].readablePath.map(p => p.label).join(' / * / ')
+                }]
+            }
+        }
+    }
+    prepareData (nextProps) {
+        const { display, dimensions, selections, zone } = nextProps
+        // prepare the data for display
+       
+        let fullData = []
+        for (let cle in this.customState.multipleData) {
+            fullData.push(this.customState.multipleData[cle])
+        }
+        let events = []
+        fullData = fullData.map((dp, i) => {
+            let first = dp.events.sort((a,b) => a.date - b.date)[0]
+            let last = dp.events.sort((a,b) => a.date - b.date)[dp.events.length-1]
+            dp.events.forEach(ev => {
+                events.push({
+                    ...ev,
+                    first: first.date,
+                    last: last.date,
+                    entrypoint: dp.entrypoint,
+                    prop2: dp.prop2
+                })
+            })
+            return {
+                ...dp,
+                first: first.date,
+                last: last.date,
+                "selected": false,
+                "index": i
+            }
+        })
+        
+        // console.log(fullData)
+        // console.log(this.customState)
         const timedata = [{
             "name": "entities",
-            "values": data.map((dp, i) => {
-                let categoryProp2 = selectedConfig.properties[1].path
-                //let legend = (categoryProp2 === 'uri') ? usePrefix(dp.prop2.value, dataset.prefixes) : dp.prop2.value
-                let name = (selectedConfig.properties[1].level === 1 && selectedConfig.properties[1].property === 'http://www.w3.org/2000/01/rdf-schema#label') ? dp.prop2.value : usePrefix(dp.entrypoint.value, dataset.prefixes)
-                return {
-                    "prop1": new Date(dp.prop1.value).getTime(),
-                    "prop2": (categoryProp2 === 'uri') ? usePrefix(dp.prop2.value, dataset.prefixes) : dp.prop2.value,
-                    "prop12": undefined,
-                    "prop1label": selectedConfig.properties[0].readablePath.map(p => p.label).join(' / * / ') ,
-                    "entrypoint": dp.entrypoint.value,
-                    "name": name,
-                    "selected": false,
-                    "index": i
-                }
-            })
+            "values": fullData
         },
         {
             "name": "selectedEntities",
             "source": "entities",
             "transform": [{"type": "filter", "expr": "!otherZoneSelected && datum.selected"}]
 
+        },
+        {
+            "name": "events",
+            "values": events
         }]
+        // console.log(timedata)
+        let marks = [{
+            "type": "rule",
+            "name": "entitylines",
+            "from": {"data": "entities"},
+            "encode": {
+                "enter": {
+                    "x": {"value": 0},
+                    "y": {"scale": "yscale", "field": "entrypoint"},
+                    "x2": {"value": dimensions.useful_width},
+                    "stroke": {"value": "#dedede"}
+                }
+            }
+        },
+        {
+            "type": "text",
+            "from": {"data": "entities"},
+            "encode": {
+                "enter": {
+                    "align": {"value": "right"},
+                    "key": "entrypoint",
+                    "x": {"value": -3},
+                    "y": {"scale": "yscale", "field": "entrypoint", "offset": 3},
+                    "text": {"field": "name"},
+                    "fill": [
+                        {"test": "(otherZoneSelected || (zoneSelected && (!inrange(datum.prop1, domainX) || !inrange(item.y, domainY))))", "value": "#ccc"},
+                        {"value": "#333"}
+                    ],
+                    "limit": {"value": display.viz.horizontal_padding}
+                }
+            }
+        },
+        {
+            "type": "symbol",
+            "name": "test",
+            "from": {"data": "events"},
+            "key": "date",
+            "encode": {
+                "enter": {
+                    "xc": {"scale": "xscale", "field": "date"},
+                    "yc": {"scale": "yscale", "field": "entrypoint"},
+                    "size": {"value": 60},
+                    "opacity": [
+                        {"value": 0.7}
+                    ]
+                },
+                "update": {
+                    "fill": [
+                        {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
+                        {"scale": "color", "field": "prop2"}
+                    ]
+                }
+            }
+        },
+        {
+            "type": "rule",
+            "name": "entitytimelines",
+            "from": {"data": "entities"},
+            "key": "entrypoint",
+            "encode": {
+                "update": {
+                    "x": {"scale": "xscale", "signal": "datum.first"},
+                    "y": {"scale": "yscale", "field": "entrypoint"},
+                    "x2": {"scale": "xscale", "signal": "datum.last"},
+                    "stroke": [
+                        {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
+                        {"scale": "color", "field": "prop2"}
+                    ],
+                    "selected": [
+                        {"test": "zoneSelected && inrange(item.y, domainY)", "value": true},
+                        {"value": false}
+                    ]
+                }
+            }
+        },
+        {
+            "type": "text",
+            "encode": {
+                "enter": {
+                    "baseline": {"value": "bottom"},
+                    "fill": {
+                        "value": "#333",
+                        "condition": {"test": "datum.selected == true", "value": "#f00"}
+                    }
+                },
+                "update": {
+                    "align": [
+                        {"test": "scale('xscale', tooltip.date) > width / 2", "value": "right"},
+                        {"value": "left"}
+                    ],
+                    "x": [
+                        {"test": "scale('xscale', tooltip.date) > width / 2", "scale": "xscale", "signal": "tooltip.date", "offset": -3},
+                        {"scale": "xscale", "signal": "tooltip.date", "offset": 3}
+                    ],
+                    "y": {"scale": "yscale", "signal": "tooltip.entrypoint", "offset": -1},
+                    "text": {"signal": "tooltip.label"},
+                    "fillOpacity": [
+                        {"test": "datum === tooltip", "value": 0},
+                        {"value": 1}
+                    ]
+                }
+            }
+        },
+        ...defaultSpec.marks]
         const spec = {
             ...defaultSpec,
-            "width": dimensions.useful_width + display.viz.horizontal_padding,
+            "width": dimensions.useful_width,
             "height": dimensions.useful_height,
-            "padding": {"bottom": display.viz.bottom_padding, "top": 10},
-            "config": {
-                "axisBand": {
-                    "bandPosition": 1,
-                    "maxExtent": display.viz.horizontal_padding,
-                    "minExtent": display.viz.horizontal_padding
-
-                }
-            },
+            "padding": {"bottom": display.viz.bottom_padding, "left": display.viz.horizontal_padding, "right": display.viz.horizontal_padding, "top": 10},
             "signals": [
                 ...defaultSpec.signals,
                 {
@@ -190,7 +367,7 @@ class Timeline extends React.Component {
                     "name": "select",
                     "value": {},
                     "on": [
-                        {"events": "symbol:mouseup", "update": "datum"}
+                        {"events": "mouseup", "update": "datum"}
                     ]
                 },
                 {
@@ -203,7 +380,7 @@ class Timeline extends React.Component {
                     "on": [
                         {
                             "events": {"signal": "domainX"},
-                            "update": "domainX ? true : false"
+                            "update": "domainX && (abs(domainX[0] - domainX[1]) > 2 && abs(domainY[0] - domainY[1]) > 2) ? true : false"
                         }
                     ]
                 },
@@ -245,7 +422,7 @@ class Timeline extends React.Component {
                 "name": "xscale",
                 "type": "time",
                 "range": [0, dimensions.useful_width],
-                "domain": {"data": "entities", "fields": ["prop1"]}
+                "domain": {"data": "events", "fields": ["date"]}
             },
             {
                 "name": "color",
@@ -257,109 +434,8 @@ class Timeline extends React.Component {
                 {"orient": "bottom", "scale": "xscale", "format": "%Y", "labelOverlap": "parity"},
                 {"orient": "left", "scale": "yscale", "ticks": false, "labels": false, "domainColor": "#fff"}
             ],
-            "marks": [{
-                "type": "rule",
-                "name": "entitylines",
-                "from": {"data": "entities"},
-                "encode": {
-                    "enter": {
-                        "x": {"value": 0},
-                        "y": {"scale": "yscale", "field": "entrypoint"},
-                        "x2": {"value": dimensions.useful_width},
-                        "stroke": {"value": "#ccc"}
-                    }
-                }
-            },
-            {
-                "type": "text",
-                "from": {"data": "entities"},
-                "encode": {
-                    "enter": {
-                        "align": {"value": "right"},
-                        "x": {"value": 0},
-                        "y": {"scale": "yscale", "field": "entrypoint"},
-                        "text": {"field": "name"},
-                        "fill": [
-                            {"test": "(otherZoneSelected || (zoneSelected && (!inrange(datum.prop1, domainX) || !inrange(item.y, domainY))))", "value": "#ccc"},
-                            {"value": "#333"}
-                        ],
-                        "limit": {"value": display.viz.horizontal_padding}
-                    }
-                }
-            },
-            {
-                "type": "symbol",
-                "name": "test",
-                "from": {"data": "entities"},
-                "encode": {
-                    "enter": {
-                        "xc": {"scale": "xscale", "field": "prop1"},
-                        "yc": {"scale": "yscale", "field": "entrypoint"},
-                        "size": {"value": 100},
-                        "strokeWidth": {"value": 2},
-                        "opacity": [
-                            {"value": 0.7}
-                        ],
-                        "fill": {"value": "transparent"}
-                    },
-                    "update": {
-                        "stroke": [
-                            {"test": "(otherZoneSelected || (zoneSelected && (!inrange(datum.prop1, domainX) || !inrange(item.y, domainY))))", "value": "#ccc"},
-                            {"scale": "color", "field": "prop2"}
-                        ],
-                        "selected": [
-                            {"test": "zoneSelected && (!inrange(datum.prop1, domainX) || !inrange(item.y, domainY))", "value": false},
-                            {"value": true}
-                        ]
-                    }
-                }
-            },
-            {
-                "type": "symbol",
-                "from": {"data": "entities"},
-                "encode": {
-                    "enter": {
-                        "xc": {
-                            "scale": "xscale", 
-                            "value": -100,
-                            "condition": {"test": "datum.prop12 == undefined", "field": "prop12"},
-                        },
-                        "yc": {"scale": "yscale", "field": "entrypoint"},
-                        "fill": {"value": "#f00"},
-                        "size": {"value": 100},
-                        "opacity": {
-                            "condition": {"test": "datum.prop12 != undefined", "value": 1},
-                            "value": 0
-                        }
-                    }
-                }
-            },
-            {
-                "type": "text",
-                "encode": {
-                    "enter": {
-                        "align": {"value": "left"},
-                        "baseline": {"value": "bottom"},
-                        "fill": {
-                            "value": "#333",
-                            "condition": {"test": "datum.selected == true", "value": "#f00"}
-                        }
-                    },
-                    "update": {
-                        "x": {"scale": "xscale", "signal": "tooltip.prop1", "offset": 5},
-                        "y": {"scale": "yscale", "signal": "tooltip.entrypoint", "offset": -3},
-                        "text": {"signal": "tooltip.prop1label"},
-                        "fillOpacity": [
-                            {"test": "datum === tooltip", "value": 0},
-                            {"value": 1}
-                        ]
-                    }
-                }
-            },
-            ...defaultSpec.marks]
+            "marks": marks
         }
-
-        //
         // Save to reuse in render
         this.customState = {
             ...this.customState,
@@ -392,7 +468,8 @@ Timeline.propTypes = {
     handleMouseMove: PropTypes.func,
     handleMouseUp: PropTypes.func,
     handleTransition: PropTypes.func,
-    selectElements: PropTypes.func
+    selectElements: PropTypes.func,
+    loadMultiple: PropTypes.func
 }
 
 function mapStateToProps (state) {
@@ -410,7 +487,8 @@ function mapDispatchToProps (dispatch) {
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
         resetSelection: resetSelection(dispatch),
-        selectElements: selectElements(dispatch)
+        selectElements: selectElements(dispatch),
+        loadMultiple: loadMultiple(dispatch)
     }
 }
 

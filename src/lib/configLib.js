@@ -119,7 +119,30 @@ export const findAllMatches = (inputList, addList) => {
         return a.concat(b)
     }, [])
 }
+export const getDictStats = (stats) => {
+    let statsDict = { '*' : stats.statements }
+    let nestedStats = d3.nest().key(stat => stat.category).entries(stats.statements)
+    nestedStats.forEach(ns => {
+        statsDict[ns.key] = ns.values
+    })
+    return statsDict
+}
+export const getTimelineDict = (data, propName) => {
+    let dict = { }
+    let nestedStats = d3.nest().key(dp => dp[propName].value).entries(data)
+    nestedStats.forEach(ns => {
+        dict[ns.key] = { events: [] }
+        for (let i = 0; i < ns.values.length; i ++) {
+            dict[ns.key].entrypoint = ns.values[i].entrypoint.value
+            dict[ns.key].prop1 = ns.values[i].prop1.value
+            dict[ns.key].prop2 = ns.values[i].prop2.value
+        }
+        
+    })
+    return dict
+}
 export const defineConfigs = (views, stats) => {
+    let statsDict = getDictStats(stats)
     const configSetUp = views.map(view => {
         let propList = []
         if (view.entrypoint) {
@@ -136,21 +159,22 @@ export const defineConfigs = (views, stats) => {
             // make a list of all possible properties for each constrained prop zone
             view.constraints.forEach(constraintSet => {
                 let propSet = []
-                stats.statements.forEach(prop => {
-                    constraintSet.forEach(constraint => {
-                        // generic conditions
-                        if (prop.total > 0 && prop.category !== 'entrypoint' &&
-                        (prop.category === constraint.category || constraint.category === '*') &&
-                        (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
-                        (!constraint.unique.min || (constraint.unique.min && (prop.unique >= constraint.unique.min && stats.selectionInstances >= constraint.unique.min))) &&
-                        (!constraint.unique.max || (constraint.unique.max && prop.unique <= constraint.unique.max))
-                        ) {
-                            propSet.push({
-                                ...prop,
-                                score: scoreProp(prop, constraint)
-                            })
-                        }
-                    })
+                constraintSet.forEach(constraint => {
+                    if(statsDict[constraint.category]) {
+                        statsDict[constraint.category].forEach(prop => {                
+                            // generic conditions
+                            if (prop.total > 0 &&
+                            (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
+                            (!constraint.unique.min || (constraint.unique.min && (prop.unique >= constraint.unique.min && stats.selectionInstances >= constraint.unique.min))) &&
+                            (!constraint.unique.max || (constraint.unique.max && prop.unique <= constraint.unique.max))
+                            ) {
+                                propSet.push({
+                                    ...prop,
+                                    score: scoreProp(prop, constraint)
+                                })
+                            }
+                        })
+                    }
                 })
                 propList.push(propSet.sort((a, b) => {
                     return b.score - a.score
@@ -200,11 +224,21 @@ export const defineConfigs = (views, stats) => {
                     return {
                         properties: match,
                         entrypointFactor,
+                        multiple: view.constraints.map((cs, csi) => {
+                            let xt = []
+                            cs.forEach(c => {
+                                if(c.multiple) {
+                                    xt = statsDict[c.category].filter(stat =>  stat.path !== match[csi].path)
+                                }
+                            })
+                            return xt
+                        }),
                         score: scoreMatch(match, entrypointFactor) /*,
                         entrypoint: (view.entrypoint !== undefined) */
                     }
                 })
             }
+            // console.log(view.id, scoredMatches)
             // sort by score and return
             return {
                 ...view,

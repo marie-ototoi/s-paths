@@ -434,7 +434,23 @@ ${constraints}
 ${defList}
 } ${groupList} ${orderList}`
 }
-
+export const makeMultipleQuery = (entrypoint, path, index, zone, options) => {
+    const { graphs, constraints, resourceGraph } = options
+    let graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+    
+    let defList = FSL2SPARQL(path, {
+        propName: `multiple${index}`,
+        entrypointName: 'entrypoint',
+        resourceGraph,
+        graphs
+    })
+    return `SELECT DISTINCT ?entrypoint ?multiple${index} ${graph}
+WHERE {
+    ${constraints}
+    ?entrypoint rdf:type <${entrypoint}> .
+    ${defList}
+}`
+}
 export const makeQueryResources = (options) => {
     const { graphs } = options
     const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``

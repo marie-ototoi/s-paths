@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import types from '../constants/ActionTypes'
 import { activateDefaultConfigs, defineConfigs, getSelectedView, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
-import { getData, makePropQuery, makeQuery, makeTransitionQuery } from '../lib/queryLib'
+import { getData, makePropQuery, makeQuery, makeMultipleQuery, makeTransitionQuery } from '../lib/queryLib'
 
 export const endTransition = (dispatch) => (zone) => {
     return dispatch({
@@ -473,4 +473,52 @@ export const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => 
             // to do : get back to state previous transition
             console.error('Error getting data after view update', error)
         })
+}
+
+export const loadMultiple = (dispatch) => (dataset, path, indexC, indexP, zone) => {
+    let { endpoint, entrypoint, prefixes } = dataset
+    let queryMain = makeMultipleQuery(entrypoint, path, indexP, 'main', dataset)
+    console.log(queryMain)
+    return getData(endpoint, queryMain, prefixes)
+        .then(data => {
+            /* dispatch({
+                type: types.SET_MULTIPLE,
+                indexC,
+                indexP,
+                zone,
+                elements: data
+            }) */
+            console.log('youpi', data)
+            return data
+        })
+}
+
+
+export const loadDetail = (dispatch) => (dataset, configs, zone) => {
+    // console.log('load Detail ', dataset.constraints)
+    // would like to use async await rather than imbricated promise but compilation fails
+    let { endpoint, entrypoint, maxLevel, prefixes } = dataset
+    const configMain = getSelectedView(configs, 'main')
+    let queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: 1 } )
+    getData(endpoint, queryMain, prefixes)
+        .then(data => {
+            dispatch({
+                type: types.SET_DETAIL,
+                level: 1,
+                zone,
+                elements: data
+            })
+            for (let i = 1; i < maxLevel; i ++) {
+                queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: i } )
+                getData(endpoint, queryMain, prefixes)
+                    .then(newdata => {
+                        dispatch({
+                            type: types.SET_DETAIL,
+                            level: i,
+                            zone,
+                            elements: newdata
+                        })
+                    })
+            }
+        })   
 }

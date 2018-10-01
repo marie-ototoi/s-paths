@@ -25,7 +25,8 @@ const data = (state = initialState, action) => {
             statements: action.main,
             status,
             deltaStatements: action.mainDelta || {},
-            displayed: action.mainDisplayed
+            displayed: action.mainDisplayed,
+            multiple: []
         }
     case types.SET_DETAIL:
         // if data are already set, make a transition
@@ -45,6 +46,13 @@ const data = (state = initialState, action) => {
             ...state,
             detailStatements
         }
+    case types.SET_MULTIPLE:
+        return {
+            ...state,
+            multiple: [...state.multiple,
+                action.elements.results.bindings
+            ]
+        }   
     case types.END_TRANSITION:
         // console.log('en transition')
         return {
