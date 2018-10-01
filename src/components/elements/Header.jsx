@@ -210,12 +210,16 @@ class Header extends React.Component {
             // third line - view + props
             let navClassName = this.state.isNavOpen ? 'dropdown is-active' : 'dropdown'
             let selectedLists = this.state.configsLists[this.state.selectedView]
-            const selectOptions = selectedLists.map((selectList) =>
+            const propsOptions = selectedLists.map((selectList) =>
                 selectList.map((elt, value) => ({
                     value,
                     label: `/ ${elt.readablePath.map(p => p.label).join(' / * / ')} / * /`
                 }))
             )
+            const resourcesOptions = this.state.resourceList.map((resource, value) => ({
+                value,
+                label: `${resource.label} (${resource.total})`,
+            }))
             let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) ? {} : { 'disabled' : 'disabled' }
             return (
                 <div className = "Header">
@@ -235,19 +239,12 @@ class Header extends React.Component {
                                     <label className = "label">Class of resources</label>
                                     <div className = "control">
                                         <ReactSelect
-                                            classNamePrefix = "propSelector"
-                                            placeholder = {this.state.resourceList[this.state.selectedResource].label}
-                
-                                            value = { this.state.resourceList[this.state.selectedResource].value }
-                                            onChange = {(selectedOption) => {
+                                            classNamePrefix="propSelector"
+                                            defaultValue={resourcesOptions[this.state.selectedResource]}
+                                            onChange={(selectedOption) => {
                                                 this.setState({ selectedResource: Number(selectedOption.value) })
                                             }}
-                                            options = {this.state.resourceList.map((resource, i) => {
-                                                return {
-                                                    label: `${resource.label} (${resource.total})` ,
-                                                    value: i
-                                                }
-                                            })}
+                                            options = {resourcesOptions}
                                         />
                                     </div>
                                     <div className = "submit">
@@ -408,13 +405,13 @@ class Header extends React.Component {
                                             
                                             <ReactSelect
                                                 classNamePrefix="propSelector"
-                                                defaultValue={selectOptions[index][this.state.selectedProps[index]]}
+                                                defaultValue={propsOptions[index][this.state.selectedProps[index]]}
                                                 onChange={(selectedOption) => {
                                                     let newProps = [...this.state.selectedProps]
                                                     newProps[index] = Number(selectedOption.value)
                                                     this.setState({ selectedProps: newProps })
                                                 }}
-                                                options={selectOptions[index]}
+                                                options={propsOptions[index]}
                                             />
                                         </div>) 
                                     }) }
