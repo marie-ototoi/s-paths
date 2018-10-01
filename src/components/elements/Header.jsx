@@ -210,6 +210,12 @@ class Header extends React.Component {
             // third line - view + props
             let navClassName = this.state.isNavOpen ? 'dropdown is-active' : 'dropdown'
             let selectedLists = this.state.configsLists[this.state.selectedView]
+            const selectOptions = selectedLists.map((selectList) =>
+                selectList.map((elt, value) => ({
+                    value,
+                    label: `/ ${elt.readablePath.map(p => p.label).join(' / * / ')} / * /`
+                }))
+            )
             let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) ? {} : { 'disabled' : 'disabled' }
             return (
                 <div className = "Header">
@@ -401,17 +407,14 @@ class Header extends React.Component {
                                         return (<div className ="control is-small" key = { `${zone}selectprop${index}` }>
                                             
                                             <ReactSelect
-                                                placeholder = {list[this.state.selectedProps[index]].readablePath.map(p => p.label).join(' / ')}
-                                                classNamePrefix = "propSelector"
-                                                value = { list[this.state.selectedProps[index]].value }
-                                                onChange = {(selectedOption) => {
+                                                classNamePrefix="propSelector"
+                                                defaultValue={selectOptions[index][this.state.selectedProps[index]]}
+                                                onChange={(selectedOption) => {
                                                     let newProps = [...this.state.selectedProps]
                                                     newProps[index] = Number(selectedOption.value)
                                                     this.setState({ selectedProps: newProps })
                                                 }}
-                                                options = {list.map((elt, indexElt) => {
-                                                    return { value: indexElt, label: '/ ' + elt.readablePath.map(p => p.label).join(' / * / ') + ' / * /' }
-                                                })}
+                                                options={selectOptions[index]}
                                             />
                                         </div>) 
                                     }) }
