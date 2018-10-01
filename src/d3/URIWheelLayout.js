@@ -81,9 +81,6 @@ class URIWheelLayout extends AbstractLayout {
                 d.opacity = (selections.filter(s => s.zone === zone).length > 0 && d.selected !== true) ? 0.5 : 1
                 return d.opacity
             })
-            .on('mouseup', d => {
-                props.handleMouseUp({ pageX: d3.event.pageX, pageY: d3.event.pageY }, zone)
-            })
     }
     
     getElements (propName, value, propCategory) {

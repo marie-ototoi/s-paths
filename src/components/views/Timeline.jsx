@@ -93,7 +93,7 @@ class Timeline extends React.Component {
                             //load next index
                             this.fetchMultiple()
                             this.prepareData(this.props)
-                            this.render()                          
+                            this.render()
                         })
                     break;
                 }
@@ -110,15 +110,20 @@ class Timeline extends React.Component {
         // console.log('coucou', args.scenegraph())
     }
     render () {
-        const { dimensions, role, selections, step, zone } = this.props
+        const { dimensions, display, role, selections, step, zone } = this.props
         
-        return (<g
+        return (<div
             className = { `Timeline ${this.customState.elementName} role_${role}` } >
             { step !== 'changing' &&
-            <foreignObject
-                transform = { `translate(${dimensions.x}, ${dimensions.y + dimensions.top_padding})` }
-                width = { dimensions.useful_width }
-                height = { dimensions.useful_height }
+            <div
+                style = {{ 
+                    position: 'relative',
+                    left : `${dimensions.x}px`,
+                    top: `${dimensions.y + dimensions.top_padding}px`,
+                    width: `${dimensions.useful_width}px`,
+                    height: `${dimensions.useful_height}px`
+                }}
+                
             >
                 { this.customState.spec &&
                     <Vega
@@ -128,9 +133,9 @@ class Timeline extends React.Component {
                         onNewView = { this.handleNewView }
                     />
                 }
-            </foreignObject>
+            </div>
             }
-        </g>)
+        </div>)
     }
     getElementsForTransition () {
         // console.log(this.customState.view.scenegraph().root)
@@ -164,8 +169,8 @@ class Timeline extends React.Component {
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
-        if (this.props.dimensions.width !== nextProps.dimensions.width) this.customState.view.signal('width', nextProps.dimensions.useful_width)
-        if (this.props.dimensions.height !== nextProps.dimensions.height) this.customState.view.signal('height', nextProps.dimensions.useful_height)
+        if (this.props.dimensions.width !== nextProps.dimensions.width) this.customState.view.signal('width', nextProps.dimensions.useful_width).run()
+        if (this.props.dimensions.height !== nextProps.dimensions.height) this.customState.view.signal('height', nextProps.dimensions.useful_height).run()
         if (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) {
             if (nextProps.selections.some(s => s.zone !== nextProps.zone)) {
                 this.customState.view.signal('otherZoneSelected', true)
@@ -251,25 +256,29 @@ class Timeline extends React.Component {
             "from": {"data": "entities"},
             "encode": {
                 "enter": {
+                    "stroke": {"value": "#dedede"}
+                },
+                "update": {
                     "x": {"value": 0},
                     "y": {"scale": "yscale", "field": "entrypoint"},
-                    "x2": {"value": dimensions.useful_width},
-                    "stroke": {"value": "#dedede"}
+                    "x2": {"expr": "width"},
                 }
             }
         },
         {
             "type": "text",
             "from": {"data": "entities"},
+            "key": "entrypoint",
             "encode": {
                 "enter": {
                     "align": {"value": "right"},
-                    "key": "entrypoint",
+                },
+                "update": {
                     "x": {"value": -3},
                     "y": {"scale": "yscale", "field": "entrypoint", "offset": 3},
                     "text": {"field": "name"},
                     "fill": [
-                        {"test": "(otherZoneSelected || (zoneSelected && (!inrange(datum.prop1, domainX) || !inrange(item.y, domainY))))", "value": "#ccc"},
+                        {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
                         {"value": "#333"}
                     ],
                     "limit": {"value": display.viz.horizontal_padding}
@@ -283,14 +292,14 @@ class Timeline extends React.Component {
             "key": "date",
             "encode": {
                 "enter": {
-                    "xc": {"scale": "xscale", "field": "date"},
-                    "yc": {"scale": "yscale", "field": "entrypoint"},
                     "size": {"value": 60},
                     "opacity": [
                         {"value": 0.7}
                     ]
                 },
                 "update": {
+                    "xc": {"scale": "xscale", "field": "date"},
+                    "yc": {"scale": "yscale", "field": "entrypoint"},
                     "fill": [
                         {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
                         {"scale": "color", "field": "prop2"}
@@ -421,7 +430,7 @@ class Timeline extends React.Component {
             {
                 "name": "xscale",
                 "type": "time",
-                "range": [0, dimensions.useful_width],
+                "range": [0, {"signal": "width"}],
                 "domain": {"data": "events", "fields": ["date"]}
             },
             {
@@ -446,7 +455,10 @@ class Timeline extends React.Component {
     }
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
-        if (this.customState.transitionSent) this.props.handleTransition(this.props, this.getElementsForTransition())
+        if (this.customState.transitionSent) {
+            this.props.handleTransition(this.props, this.getElementsForTransition())
+            this.customState.view.run()
+        }
     }
     componentWillUnmount () {
     }

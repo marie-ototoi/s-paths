@@ -63,7 +63,11 @@ class URIWheel extends React.Component {
     render () {
         const { legend } = this.customState
         const { dimensions, display, role, selections, step, zone } = this.props
-        return (<g className = { `URIWheel ${this.customState.elementName} role_${role}` } >
+        return (<svg
+            width = { display.viz[zone + '_width'] }
+            height = { display.screen.height - 10 }
+            className = { `URIWheel ${this.customState.elementName} role_${role}` }
+        >
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
@@ -91,7 +95,7 @@ class URIWheel extends React.Component {
                 />
             </g>
             }
-        </g>)
+        </svg>)
     }
     getElementsInZone (zoneDimensions) {
         return this.layout.getElementsInZone({ ...this.props, zoneDimensions })

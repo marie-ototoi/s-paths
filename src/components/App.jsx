@@ -12,7 +12,6 @@ import Slider from './elements/Slider'
 import Transition from './elements/Transition'
 import GeoMap from './views/Geo'
 import HeatMap from './views/HeatMap'
-import Pyramid from './views/Pyramid'
 import Images from './views/Images'
 import ListAllProps from './views/ListAllProps'
 import SingleProp from './views/SingleProp'
@@ -154,7 +153,6 @@ class App extends React.PureComponent {
             'HeatMap': HeatMap,
             'Images': Images,
             'ListAllProps': ListAllProps,
-            'Pyramid': Pyramid,
             'SingleProp': SingleProp,
             'StackedChart': StackedChart,
             'Timeline': Timeline,
@@ -195,8 +193,68 @@ class App extends React.PureComponent {
             <svg
                 ref = {(c) => { this['refView'] = c }}
                 width = { display.screen.width }
-                height = { display.screen.height }
+                height = { display.screen.height - 10 }
+                style = {{ position: 'absolute' }}
             >
+                
+                { mainConfig && 
+                    this.state.main_step === 'changing' &&
+                    <Transition
+                        zone = "main"
+                        dimensions = { coreDimensionsMain }
+                        elements = { this.state.main_transition }
+                        endTransition = { this.handleEndTransition }
+                    />
+                }
+                { asideConfig && data.past.length > 1 &&
+                    this.state.main_step === 'active' &&
+                    this.state.aside_transition &&
+                    display.viz.aside_width > 500 &&
+                    <BrushLink
+                        zone = "aside"
+                        dimensions = { coreDimensionsAside }
+                        elements = { this.state.aside_transition }
+                        step = { this.state.main_step }
+                    />
+                }
+                { this.state.main_transition &&
+                    <BrushLink
+                        zone = "main"
+                        dimensions = { coreDimensionsMain }
+                        elements = { this.state.main_transition }
+                        step = { this.state.main_step }
+                    />
+                }
+               
+                <History
+                    zone = "main"
+                />
+            </svg>
+            <div style = {{ position: 'absolute', width: display.viz.aside_width + 'px', height: display.screen.height - 10 + 'px' }}> 
+                { asideConfig && data.past.length > 1 && 
+                    this.state.main_step === 'active' && 
+                    areLoaded(data, 'aside', 'active') &&
+                    display.viz.aside_width > 500 &&
+                    <SideComponent
+                        zone = "aside"
+                        role = "origin"
+                        dimensions = { coreDimensionsAside }
+                        step = { this.state.main_step }
+                        status = { statusMain }
+                        data = { getResults(data, 'aside', 'active') }
+                        // coverage = { getResults(data, 'aside', 'coverage') }
+                        config = { asideConfig }
+                        selections = { selections }
+                        ref = {(c) => { this.refaside = c }}
+                        handleMouseDown = { this.handleMouseDown }
+                        handleMouseMove = { this.handleMouseMove }
+                        handleTransition = { this.handleTransition }
+                    />
+                }
+                
+            
+            </div>
+            <div style = {{ position: 'absolute', left: display.vizDefPercent.aside_width + '%', width: display.viz.main_width + 'px', height: display.screen.height - 10 + 'px' }}>
                 { mainConfig && 
                     this.state.main_step === 'launch' &&
                     <MainTransitionComponent
@@ -231,58 +289,8 @@ class App extends React.PureComponent {
                         handleTransition = { this.handleTransition }
                     />
                 }
-                { mainConfig && 
-                    this.state.main_step === 'changing' &&
-                    <Transition
-                        zone = "main"
-                        dimensions = { coreDimensionsMain }
-                        elements = { this.state.main_transition }
-                        endTransition = { this.handleEndTransition }
-                    />
-                }
-                { this.state.main_transition &&
-                    <BrushLink
-                        zone = "main"
-                        dimensions = { coreDimensionsMain }
-                        elements = { this.state.main_transition }
-                        step = { this.state.main_step }
-                    />
-                }
-                { asideConfig && data.past.length > 1 && 
-                    this.state.main_step === 'active' && 
-                    areLoaded(data, 'aside', 'active') &&
-                    display.viz.aside_width > 500 &&
-                    <SideComponent
-                        zone = "aside"
-                        role = "origin"
-                        dimensions = { coreDimensionsAside }
-                        step = { this.state.main_step }
-                        status = { statusMain }
-                        data = { getResults(data, 'aside', 'active') }
-                        // coverage = { getResults(data, 'aside', 'coverage') }
-                        config = { asideConfig }
-                        selections = { selections }
-                        ref = {(c) => { this.refaside = c }}
-                        handleMouseDown = { this.handleMouseDown }
-                        handleMouseMove = { this.handleMouseMove }
-                        handleTransition = { this.handleTransition }
-                    />
-                }
-                { asideConfig && data.past.length > 1 &&
-                    this.state.main_step === 'active' &&
-                    this.state.aside_transition &&
-                    display.viz.aside_width > 500 &&
-                    <BrushLink
-                        zone = "aside"
-                        dimensions = { coreDimensionsAside }
-                        elements = { this.state.aside_transition }
-                        step = { this.state.main_step }
-                    />
-                }
-                <History
-                    zone = "main"
-                />
-            </svg>
+            
+            </div>
             <Slider />
         </div>)
     }

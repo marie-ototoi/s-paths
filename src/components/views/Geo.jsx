@@ -65,13 +65,18 @@ class Geo extends React.Component {
     render () {
         const { dimensions, display, role, selections, step, zone } = this.props
         
-        return (<g
+        return (<div
             className = { `Geo ${this.customState.elementName} role_${role}` } >
             { step !== 'changing' &&
-            <foreignObject
-                transform = { `translate(${dimensions.x + display.viz.horizontal_padding}, ${dimensions.y + dimensions.top_padding})` }
-                width = { dimensions.useful_width }
-                height = { dimensions.useful_height }
+            <div
+                style = {{ 
+                    position: 'relative',
+                    left : `${dimensions.x + display.viz.horizontal_padding}px`,
+                    top: `${dimensions.y + dimensions.top_padding}px`,
+                    width: `${dimensions.useful_width}px`,
+                    height: `${dimensions.useful_height}px`
+                }}
+                
             >
                 { this.customState.spec &&
                     <Vega
@@ -81,13 +86,13 @@ class Geo extends React.Component {
                         onNewView = { this.handleNewView }
                     />
                 }
-            </foreignObject>
+            </div>
             }
-        </g>)
+        </div>)
     }
     getElementsForTransition () {
         // console.log("coucou geo", this.customState.view.scenegraph().root.source.value)
-        // console.log(this.customState.view.scenegraph().root.items[0].items[1])
+        // console.log(this.customState.view.scenegraph().root.source.value[0].items[1].items)
         let items = []
         if (this.customState.view.scenegraph() && this.customState.view.scenegraph().root.source.value[0]) {
             items = this.customState.view.scenegraph().root.source.value[0].items[1].items.map(el => {
@@ -122,6 +127,9 @@ class Geo extends React.Component {
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
         }
+        if (this.props.dimensions.width !== nextProps.dimensions.width) this.customState.view.signal('width', nextProps.dimensions.useful_width).run()
+        if (this.props.dimensions.height !== nextProps.dimensions.height) this.customState.view.signal('height', nextProps.dimensions.useful_height).run()
+        
         // console.log('redraw ?', nextProps.display.viz[this.props.zone + '_useful_width'], nextProps.display.viz[this.props.zone + '_useful_height'])
         /* if (this.customState.view &&
             ((this.props.display.viz[this.props.zone + '_useful_width'] !== nextProps.display.viz[this.props.zone + '_useful_width']) ||
@@ -212,11 +220,11 @@ class Geo extends React.Component {
                 ...defaultSpec.signals,
                 {
                     "name": "otherZoneSelected",
-                    "init": selections.some(s => s.zone !== zone)
+                    "value": selections.some(s => s.zone !== zone)
                 },
                 {
                     "name": "zoneSelected",
-                    "init": selections.some(s => s.zone === zone),
+                    "value": selections.some(s => s.zone === zone),
                     "on": [
                         {
                             "events": {"signal": "domainX"},

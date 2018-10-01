@@ -88,7 +88,11 @@ class StackedChart extends React.Component {
         const { config, dimensions, display, role, selections, step, zone } = this.props
         // display settings
         const classN = `StackedChart ${this.customState.elementName} role_${role}`
-        return (<g className = { classN } >
+        return (<svg
+            width = { display.viz[zone + '_width'] }
+            height = { display.screen.height - 10 }
+            className = { classN }
+        >
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
@@ -143,7 +147,7 @@ class StackedChart extends React.Component {
                 />
             </g>
             }
-        </g>)
+        </svg>)
     }
     getElementsInZone (zoneDimensions) {
         return this.layout.getElementsInZone({ ...this.props, zoneDimensions })

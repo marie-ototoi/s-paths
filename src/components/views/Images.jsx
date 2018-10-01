@@ -55,23 +55,32 @@ class Images extends React.Component {
         const { dimensions, display, data, role, selections, step, zone } = this.props
         const { uniqueData } = this.customState
        
-        return (<g className = { `Images ${this.customState.elementName} role_${role}` } >
+        return (<div
+            className = { `Images ${this.customState.elementName} role_${role}` } >
             { role !== 'target' &&
-            <SelectionZone
-                zone = { zone }
-                dimensions = { dimensions }
-                handleMouseMove = { this.props.handleMouseMove }
-                component = { this }
-                selections = { selections }
-            />
+            <svg
+                style = {{ position: 'absolute' }}
+                width = { display.viz[zone + '_width'] }
+                height = { display.screen.height - 10 }
+            >
+                <SelectionZone
+                    zone = { zone }
+                    dimensions = { dimensions }
+                    handleMouseMove = { this.props.handleMouseMove }
+                    component = { this }
+                    selections = { selections }
+                />
+            </svg>
             }
             { step !== 'changing' && data && 
-            <foreignObject
-                transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y})` }
-                with = { dimensions.width }
-                height = { dimensions.height }
-                onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
-                onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
+            <div
+                style = {{ 
+                    position: 'relative',
+                    left : `${dimensions.x + display.viz.horizontal_padding}px`,
+                    top: `${dimensions.y + dimensions.top_padding}px`,
+                    width: `${dimensions.useful_width}px`,
+                    height: `${dimensions.useful_height}px`
+                }}
             >
                 <div className = "box" style = {{ width: dimensions.useful_width + 'px' }}>
                     <div className = "content">
@@ -82,9 +91,9 @@ class Images extends React.Component {
                         }
                     </div>
                 </div>
-            </foreignObject>
+            </div>
             }
-        </g>)
+        </div>)
     }
     componentDidMount () {
         this.props.handleTransition(this.props, [])

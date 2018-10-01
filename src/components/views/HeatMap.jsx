@@ -75,7 +75,11 @@ class HeatMap extends React.Component {
     render () {
         const { axisBottom, axisLeft, legend } = this.customState
         const { config, display, dimensions, role, selections, step, zone } = this.props
-        return (<g className = { `HeatMap ${this.customState.elementName} role_${role}` } ref = {(c) => { this.refHeatMap = c }}>
+        return (<svg
+            width = { display.viz[zone + '_width'] }
+            height = { display.screen.height - 10 }
+            className = { `HeatMap ${this.customState.elementName} role_${role}` } ref = {(c) => { this.refHeatMap = c }}
+        >
             { role !== 'target' &&
             <SelectionZone
                 zone = { zone }
@@ -138,7 +142,7 @@ class HeatMap extends React.Component {
                 />
             </g>
             }
-        </g>)
+        </svg>)
     }
     getElementsInZone (zoneDimensions) {
         return this.layout.getElementsInZone({ ...this.props, zoneDimensions })

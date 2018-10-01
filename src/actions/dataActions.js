@@ -478,7 +478,7 @@ export const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => 
 export const loadMultiple = (dispatch) => (dataset, path, indexC, indexP, zone) => {
     let { endpoint, entrypoint, prefixes } = dataset
     let queryMain = makeMultipleQuery(entrypoint, path, indexP, 'main', dataset)
-    console.log(queryMain)
+    // console.log(queryMain)
     return getData(endpoint, queryMain, prefixes)
         .then(data => {
             /* dispatch({
@@ -488,7 +488,7 @@ export const loadMultiple = (dispatch) => (dataset, path, indexC, indexP, zone) 
                 zone,
                 elements: data
             }) */
-            console.log('youpi', data)
+            // console.log('youpi', data)
             return data
         })
 }
