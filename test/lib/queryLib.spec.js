@@ -131,7 +131,7 @@ WHERE {
     it('should make a valid SPARQL query to retrieve additional multiple property', () => {
 
         expect(queryLib.makeMultipleQuery('nobel:LaureateAward', 'nobel:LaureateAward/nobel:year/*', 2, 'main', { graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'], constraints: '' }))
-            .to.equal(`SELECT ?entrypoint ?multiple2 FROM <http://localhost:8890/nobel> FROM <http://localhost:8890/geonames> 
+            .to.equal(`SELECT DISTINCT ?entrypoint ?multiple2 FROM <http://localhost:8890/nobel> FROM <http://localhost:8890/geonames> 
 WHERE {
     
     ?entrypoint rdf:type <nobel:LaureateAward> .
