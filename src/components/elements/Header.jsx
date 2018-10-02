@@ -76,9 +76,7 @@ class Header extends React.Component {
         const { selections } = this.props
         // console.log(e, this, selections)
         if (e === 'enter') {
-            if (this.state.selectedResource !== this.state.displayedResource) {
-                this.displayResource()
-            } else if (selections.length > 0 || this.state.keyword.length > 3) {
+            if (selections.length > 0 || this.state.keyword.length > 3) {
                 this.displaySelection()
             } else if (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) {
                 this.displayConfig()
@@ -197,7 +195,7 @@ class Header extends React.Component {
             }, []))]
 
             // first line - resources
-            let selectResourceEnabled = (this.state.selectedResource !== this.state.displayedResource) ?  {} : { 'disabled' : 'disabled' }
+            let selectResourceEnabled = (this.state.selectedResource !== this.state.displayedResource || dataset.constraints !== '') ?  {} : { 'disabled' : 'disabled' }
             // console.log('PPPPPP', this.state.selectedResource, this.state.displayedResource)
             
             // second line - keyword + pointer
