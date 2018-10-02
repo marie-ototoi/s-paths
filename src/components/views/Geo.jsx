@@ -93,7 +93,7 @@ class Geo extends React.Component {
         // console.log("coucou geo", this.customState.view.scenegraph().root.source.value[0].items[1].items[0])
         // console.log(this.customState.view.scenegraph().root.source.value[0].items[1].items)
         let items = []
-        if (this.customState.view.scenegraph().root.source.value[0].items[1].items[0].opacity) {
+        if (this.customState.view.scenegraph().root.source.value[0] && this.customState.view.scenegraph().root.source.value[0].items[1].items[0].opacity) {
             items = this.customState.view.scenegraph().root.source.value[0].items[1].items.map(el => {
                 return { 
                     zone: {
