@@ -119,9 +119,20 @@ export const getDimensions = (element, viz, offset = { x: 0, y: 0, width: 0, hei
             horizontal_padding: viz.horizontal_padding,
             top_padding: viz.main_top_padding + offset.height
         }
+    case 'mainbrush':
+        return {
+            x: offset.x + viz.main_x + viz.horizontal_padding,
+            y: viz.top_margin + offset.y,
+            width: viz.main_width + offset.width,
+            height: viz.useful_height + viz.bottom_padding + offset.height,
+            useful_width: viz.main_useful_width + offset.width,
+            useful_height: viz.useful_height - viz.main_top_padding + offset.height,
+            horizontal_padding: viz.horizontal_padding,
+            top_padding: viz.main_top_padding + offset.height
+        }
     case 'aside':
         return {
-            x: viz.aside_x + offset.x,
+            x: offset.x + viz.aside_x,
             y: viz.top_margin + offset.y,
             width: viz.aside_width + offset.width,
             height: viz.useful_height + viz.bottom_padding + offset.height,
@@ -129,6 +140,17 @@ export const getDimensions = (element, viz, offset = { x: 0, y: 0, width: 0, hei
             useful_height: viz.useful_height - viz.aside_top_padding + offset.height,
             horizontal_padding: viz.horizontal_padding,
             top_padding: viz.aside_top_padding + offset.height
+        }
+    case 'asidebrush':
+        return {
+            x: offset.x + viz.aside_x + viz.horizontal_padding,
+            y: viz.top_margin + offset.y,
+            width: viz.main_width + offset.width,
+            height: viz.useful_height + viz.bottom_padding + offset.height,
+            useful_width: viz.main_useful_width + offset.width,
+            useful_height: viz.useful_height - viz.main_top_padding + offset.height,
+            horizontal_padding: viz.horizontal_padding,
+            top_padding: viz.main_top_padding + offset.height
         }
     case 'mainLegend':
         return {

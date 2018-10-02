@@ -212,7 +212,7 @@ class App extends React.PureComponent {
                     display.viz.aside_width > 500 &&
                     <BrushLink
                         zone = "aside"
-                        dimensions = { coreDimensionsAside }
+                        dimensions = { getDimensions('asidebrush', display.viz) }
                         elements = { this.state.aside_transition }
                         step = { this.state.main_step }
                     />
@@ -220,7 +220,7 @@ class App extends React.PureComponent {
                 { this.state.main_transition &&
                     <BrushLink
                         zone = "main"
-                        dimensions = { coreDimensionsMain }
+                        dimensions = { getDimensions('mainbrush', display.viz) }
                         elements = { this.state.main_transition }
                         step = { this.state.main_step }
                     />
@@ -254,13 +254,14 @@ class App extends React.PureComponent {
                 
             
             </div>
-            <div style = {{ position: 'absolute', left: display.vizDefPercent.aside_width + '%', width: display.viz.main_width + 'px', height: display.screen.height - 10 + 'px' }}>
+            <div style = {{ position: 'absolute', left: display.viz.aside_width + 'px', width: display.viz.main_width + 'px', height: display.screen.height - 10 + 'px' }}>
                 { mainConfig && 
                     this.state.main_step === 'launch' &&
                     <MainTransitionComponent
                         role = "target"
                         zone = "main"
                         status = { statusMain }
+                        step = { this.state.main_step }
                         dimensions = { coreDimensionsMain }
                         data = { getResults(data, 'main', 'transition') }
                         // coverage = { getResults(data, 'main', 'coverage') }
