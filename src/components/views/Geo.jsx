@@ -3,15 +3,10 @@ import React from 'react'
 import { connect } from 'react-redux'
 import Vega from 'react-vega';
 // components
-import SelectionZone from '../elements/SelectionZone'
 // d3
-
 // libs
 import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements, resetSelection } from '../../actions/selectionActions'
-import { getRelativeRectangle } from '../../lib/scaleLib'
-import { getSelectedMatch } from '../../lib/configLib'
-import { usePrefix } from '../../lib/queryLib'
 import * as dataLib from '../../lib/dataLib'
 import defaultSpec from '../../lib/spec'
 // redux functions
@@ -54,17 +49,21 @@ class Geo extends React.Component {
         }
     }
     handleNewView(args) {
-        // console.log('view created', args.scenegraph(), args.getState())
-        this.customState = {...this.customState, view: args, transitionSent: true}
-        //this.props.handleTransition(this.props, this.getElementsForTransition())
-        window.setTimeout(() => { this.props.handleTransition(this.props, this.getElementsForTransition()) }, 300)
+        this.customState = {...this.customState, view: args}
+        this.customState.intervalTransition = window.setInterval(() => {
+            let elts = this.getElementsForTransition()
+            if (elts.length > 0) {
+                window.clearInterval(this.customState.intervalTransition)
+                this.customState = {...this.customState, transitionSent: true}
+                this.props.handleTransition(this.props, elts)
+            }
+        }, 300)
     }
     handleZoneSelected(...args) {
         // console.log('coucou', ...args)
     }
     render () {
-        const { dimensions, display, role, selections, step, zone } = this.props
-        
+        const { dimensions, display, role, step } = this.props
         return (<div
             className = { `Geo ${this.customState.elementName} role_${role}` } >
             { step !== 'changing' &&
@@ -91,10 +90,10 @@ class Geo extends React.Component {
         </div>)
     }
     getElementsForTransition () {
-        // console.log("coucou geo", this.customState.view.scenegraph().root.source.value)
+        // console.log("coucou geo", this.customState.view.scenegraph().root.source.value[0].items[1].items[0])
         // console.log(this.customState.view.scenegraph().root.source.value[0].items[1].items)
         let items = []
-        if (this.customState.view.scenegraph() && this.customState.view.scenegraph().root.source.value[0]) {
+        if (this.customState.view.scenegraph().root.source.value[0].items[1].items[0].opacity) {
             items = this.customState.view.scenegraph().root.source.value[0].items[1].items.map(el => {
                 return { 
                     zone: {
@@ -344,7 +343,10 @@ class Geo extends React.Component {
     }
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
-        if (this.customState.transitionSent) this.props.handleTransition(this.props, this.getElementsForTransition())
+        if (this.customState.transitionSent) {
+            this.props.handleTransition(this.props, this.getElementsForTransition())
+            this.customState.view.run()
+        }
     }
     componentWillUnmount () {
     }
