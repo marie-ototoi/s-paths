@@ -11,7 +11,7 @@ services:
 # Environment templates
 # -> Describe common environments to run stages
 
-.node: &node
+.node:
   image: node
   tags:
     - node
@@ -24,11 +24,9 @@ services:
     paths:
       - node_modules/
 
-.docker-deploy: &docker-deploy
+.docker-deploy:
   stage: deploy
   image: docker
-  tags:
-    - docker
   before_script:
     - mkdir -pv ~/.docker
     - echo "$TLSCACERT" > ~/.docker/ca.pem
@@ -44,14 +42,14 @@ services:
 #
 
 UT:
-  <<: *node
+  extends: .node
   stage: test
 
 # Build stage
 #
 
 Assets:
-  <<: *node
+  extends: .node
   stage: build
 
 Docker:
@@ -72,10 +70,33 @@ Docker:
 # Deploy stage
 # -> Automate deployment and provide continuous deployment
 
+#Review:
+#  extends: .docker-deploy
+#  tags:
+#    - inria
+#  only:
+#    - branches
+#  except:
+#    - master
+#  environment:
+#    name: review/$CI_COMMIT_REF_NAME
+#    url: https://$CI_ENVIRONMENT_SLUG.s-paths.inria.fr
+#    on_stop: StopReview
+#
+#StopReview:
+#  stage: deploy
+#  variables:
+#    GIT_STRATEGY: none
+#  script:
+#    - echo "Remove review app"
+#  when: manual
+#  environment:
+#    name: review/$CI_COMMIT_REF_NAME
+#    action: stop
+
 Production Nobel:
-  <<: *docker-deploy
+  extends: .docker-deploy
   tags:
-    - docker
     - lri
   variables:
     TLSCACERT: $TLSCACERT_production
@@ -93,9 +114,8 @@ Production Nobel:
     url: http://s-paths.lri.fr
 
 Staging:
-  <<: *docker-deploy
+  extends: .docker-deploy
   tags:
-    - docker
     - inria
   variables:
     TLSCACERT: $TLSCACERT_staging
@@ -105,7 +125,8 @@ Staging:
     DOCKER_TLS_VERIFY: 1
     DOCKER_MACHINE_NAME: default
     DOCKER_HOST: tcp://195.83.213.227:2376
-  when: manual
+  only:
+    - master
   environment:
     name: staging
     url: https://s-paths.inria.fr
