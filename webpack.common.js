@@ -45,7 +45,7 @@ module.exports = {
             inject: false,
             template: require('html-webpack-template'),
             appMountId: 'root',
-            title: 'Semantic Paths - semantic datasets exploratory tool',
+            title: 'S-Paths &middot; Semantic Datasets Exploratory Tool',
             links: [{
                 href: 'https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.min.css',
                 rel: 'stylesheet',

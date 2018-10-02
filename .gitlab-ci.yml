@@ -74,6 +74,9 @@ Docker:
 
 Production Nobel:
   <<: *docker-deploy
+  tags:
+    - docker
+    - lri
   variables:
     TLSCACERT: $TLSCACERT_production
     TLSCERT: $TLSCERT_production
@@ -93,7 +96,7 @@ Staging:
   <<: *docker-deploy
   tags:
     - docker
-    - vpn
+    - inria
   variables:
     TLSCACERT: $TLSCACERT_staging
     TLSCERT: $TLSCERT_staging
