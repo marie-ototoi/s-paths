@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 60 60" xml:space="preserve">
+<style type="text/css">
+	.st1{opacity:0.95;fill:#FFFFFF;}
+	.st2{opacity:0.65;fill:#FFFFFF;}
+	.st3{opacity:0.8;fill:#FFFFFF;}
+	.st4{opacity:0.5;fill:#FFFFFF;}
+</style>
+<g>
+	<rect x="7.9" y="14.1" class="st1" width="25.1" height="14.9"/>
+	<rect x="35.2" y="14.1" class="st4" width="7.2" height="10.5"/>
+	<rect x="44.7" y="14.1" class="st4" width="3.3" height="10.5"/>
+	<rect x="35.2" y="26.8" class="st4" width="12.8" height="2.2"/>
+	<rect x="7.9" y="31.3" class="st3" width="11.9" height="11.1"/>
+	<rect x="21.9" y="39.6" class="st3" width="5.6" height="8.3"/>
+	<rect x="21.9" y="31.3" class="st3" width="5.6" height="6.1"/>
+	<rect x="29.7" y="31.3" class="st2" width="18.3" height="16.7"/>
+	<rect x="7.9" y="44.6" class="st3" width="11.9" height="3.4"/>
+</g>
+</svg>

@@ -100,6 +100,7 @@
 }
 .Header .dropdown img {
     background: #666;
+    border-radius: 3px;
 }
 .Header .dropdown-item {
     padding: 5px 15px 0 15px;
@@ -159,11 +160,11 @@
 }
 .Header .resource-def span.resource-content {
     position: absolute;
-    width: 450px;
 }
 
 .Header .resource-def:hover .resource-content {
     display: inline-block;
+    width: 450px;
 }
 .Header .explain .resource-content {
     padding: 20px 25px;
