@@ -6,7 +6,8 @@ export default {
     "padding": 0,
     "signals": [
         {
-            "name": "endZone", "value": true,
+            "name": "endZone",
+            "init": true,
             "on": [
                 {
                     "events": "mouseup",
@@ -20,7 +21,7 @@ export default {
         },
         {
             "name": "zone",
-            "value": null,
+            "init": null,
             "on": [
                 
                 {

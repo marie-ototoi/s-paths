@@ -73,13 +73,15 @@ class Header extends React.Component {
         }
     }
     handleKeyDown (e) {
-        const { selections } = this.props
+        const { dataset, selections } = this.props
         // console.log(e, this, selections)
         if (e === 'enter') {
             if (selections.length > 0 || this.state.keyword.length > 3) {
                 this.displaySelection()
             } else if (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) {
                 this.displayConfig()
+            } else if (this.state.selectedResource !== this.state.displayedResource || dataset.constraints !== '') {
+                this.displayResource()
             }
         }
     }

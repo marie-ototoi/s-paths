@@ -169,13 +169,13 @@ const defaultState = [
                 }
             ]
         ]
-    },
+    }/*,
     {
         id: 'ListAllProps',
         name: 'all props',
         thumb : '/images/listprop.svg',
         allProperties: true,
-        entrypoint: { min: 1, max: 100, optimal: [1, 40] },
+        entrypoint: { min: 1, max: 20, optimal: [1, 10] },
         constraints: [
             [
                 {
@@ -184,12 +184,12 @@ const defaultState = [
                 }
             ]
         ]
-    },
+    }*/,
     {
         id: 'SingleProp',
         name: 'single prop',
         thumb : '/images/listprop.svg',
-        entrypoint: { max: 200, optimal: [1, 100] },
+        entrypoint: { max: 50, optimal: [1, 30] },
         constraints: [
             [
                 {

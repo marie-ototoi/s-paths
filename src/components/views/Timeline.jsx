@@ -26,6 +26,7 @@ class Timeline extends React.Component {
         this.handleZoneSelected = this.handleZoneSelected.bind(this)
         this.initData = this.initData.bind(this)
         this.prepareData = this.prepareData.bind(this)
+        this.render = this.render.bind(this)
         this.customState = {
             // selectElements: this.selectElements,
             elementName: `refTimelineMap_${props.zone}`,
@@ -102,16 +103,23 @@ class Timeline extends React.Component {
     }
     handleNewView(args) {
         // console.log('view created', args.scenegraph())
-        this.customState = {...this.customState, view: args, transitionSent: true}
-        window.setTimeout(() => { this.props.handleTransition(this.props, this.getElementsForTransition()) }, 300)
-        this.fetchMultiple()
+        this.customState = {...this.customState, view: args}
+        this.customState.intervalTransition = window.setInterval(() => {
+            let elts = this.getElementsForTransition()
+            if (elts.length > 0) {
+                window.clearInterval(this.customState.intervalTransition)
+                this.customState = {...this.customState, transitionSent: true}
+                this.props.handleTransition(this.props, elts)
+                this.fetchMultiple()
+            }
+        }, 300)
     }
     handleZoneSelected(args) {
         // console.log('coucou', args.scenegraph())
     }
     render () {
         const { dimensions, display, role, selections, step, zone } = this.props
-        
+        // console.log('render', role, step)
         return (<div
             className = { `Timeline ${this.customState.elementName} role_${role}` } >
             { step !== 'changing' &&
@@ -138,29 +146,32 @@ class Timeline extends React.Component {
         </div>)
     }
     getElementsForTransition () {
-        // console.log(this.customState.view.scenegraph().root)
-        let items = this.customState.view.scenegraph().root.source.value[0].items[5].items.map(el => {
-            return { 
-                zone: {
-                    x1: el.bounds.x1,
-                    y1: el.bounds.y1,
-                    x2: el.bounds.x2,
-                    y2: el.bounds.y2,
-                    width:  el.bounds.x2 - el.bounds.x1,
-                    height: el.bounds.y2 - el.bounds.y1
-                },
-                selector: `timeline_element_${dataLib.makeId(el.datum.entrypoint)}`,
-                index: el.datum.index,
-                query: {
-                    type: 'uri',
-                    value: el.datum.entrypoint
-                },
-                color: el.stroke,
-                opacity: el.opacity,
-                shape: 'rectangle',
-                rotation: 0
-            }
-        })
+        // console.log(this.customState.view.scenegraph().root.source.value[0].items[5].items[0].opacity)
+        let items = []
+        if(this.customState.view.scenegraph().root.source.value[0].items[5].items[0].opacity) {
+            items = this.customState.view.scenegraph().root.source.value[0].items[5].items.map(el => {
+                return { 
+                    zone: {
+                        x1: el.bounds.x1,
+                        y1: el.bounds.y1,
+                        x2: el.bounds.x2,
+                        y2: el.bounds.y2,
+                        width: Math.abs(el.bounds.x2 - el.bounds.x1),
+                        height: Math.abs(el.bounds.y2 - el.bounds.y1)
+                    },
+                    selector: `timeline_element_${dataLib.makeId(el.datum.entrypoint)}`,
+                    index: el.datum.index,
+                    query: {
+                        type: 'uri',
+                        value: el.datum.entrypoint
+                    },
+                    color: el.stroke,
+                    opacity: el.opacity,
+                    shape: 'rectangle',
+                    rotation: 0
+                }
+            })
+        }
         // console.log(items)
         return items
     }
@@ -179,7 +190,9 @@ class Timeline extends React.Component {
                 this.customState.view.signal('otherZoneSelected', false)
             }
         }
-        return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
+        return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||        
+            (this.props.dimensions.width !== nextProps.dimensions.width) ||
+            (this.props.dimensions.height !== nextProps.dimensions.height) ||
             (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
             (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
             (this.props.step !== nextProps.step)
@@ -261,7 +274,7 @@ class Timeline extends React.Component {
                 "update": {
                     "x": {"value": 0},
                     "y": {"scale": "yscale", "field": "entrypoint"},
-                    "x2": {"expr": "width"},
+                    "x2": {"signal": "width"},
                 }
             }
         },
@@ -302,7 +315,7 @@ class Timeline extends React.Component {
                     "yc": {"scale": "yscale", "field": "entrypoint"},
                     "fill": [
                         {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
-                        {"scale": "color", "field": "prop2"}
+                        {"scale": "color", "field": "entrypoint"}
                     ]
                 }
             }
@@ -313,13 +326,20 @@ class Timeline extends React.Component {
             "from": {"data": "entities"},
             "key": "entrypoint",
             "encode": {
+                "enter": {
+                    "x": {"scale": "xscale", "signal": "datum.first"},
+                    "y": {"scale": "yscale", "field": "entrypoint"},
+                    "x2": {"scale": "xscale", "signal": "datum.last"},
+                    "stroke": {"scale": "color", "field": "entrypoint"}
+                },
                 "update": {
+                    "opacity": {"value": 0.7},
                     "x": {"scale": "xscale", "signal": "datum.first"},
                     "y": {"scale": "yscale", "field": "entrypoint"},
                     "x2": {"scale": "xscale", "signal": "datum.last"},
                     "stroke": [
                         {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
-                        {"scale": "color", "field": "prop2"}
+                        {"scale": "color", "field": "entrypoint"}
                     ],
                     "selected": [
                         {"test": "zoneSelected && inrange(item.y, domainY)", "value": true},
@@ -381,11 +401,11 @@ class Timeline extends React.Component {
                 },
                 {
                     "name": "otherZoneSelected",
-                    "value": selections.some(s => s.zone !== zone)
+                    "init": selections.some(s => s.zone !== zone)
                 },
                 {
                     "name": "zoneSelected",
-                    "value": selections.some(s => s.zone === zone),
+                    "init": selections.some(s => s.zone === zone),
                     "on": [
                         {
                             "events": {"signal": "domainX"},
@@ -404,20 +424,12 @@ class Timeline extends React.Component {
                 },
                 {
                     "name": "domainY",
-                    "on": [ 
+                    "on": [
                         {
                             "events": {"signal": "zone"},
                             "update": "zone ? [zone[0][1],zone[1][1]] : domainY"
                         }
                     ]
-                },
-                {
-                    "name": "horizontalPadding",
-                    "value": display.viz.horizontal_padding
-                },
-                {
-                    "name": "usefulWidth",
-                    "value": dimensions.useful_width
                 }
             ],
             "data": timedata,
@@ -437,7 +449,7 @@ class Timeline extends React.Component {
                 "name": "color",
                 "type": "ordinal",
                 "range": {"scheme": "category10"},
-                "domain": {"data": "entities", "field": "prop2"}
+                "domain": {"data": "entities", "field": "entrypoint"}
             }],
             "axes": [
                 {"orient": "bottom", "scale": "xscale", "format": "%Y", "labelOverlap": "parity"},

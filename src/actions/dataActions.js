@@ -87,7 +87,7 @@ const checkStatements = (statements, selectionInstances, dataset) => {
         })
 }
 
-const checkFirstValidConfigs = (configs, stats, dataset) => {
+const checkFirstValidConfigs = (configs, stats, dataset, previousConfig) => {
     // console.log(configs)
     let propsToCheck = []
     let matchesToCheck = {}
@@ -182,6 +182,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
     return getData(endpoint, countInstancesQuery, prefixes)
         .then(countInstances => {
             // console.log('countInstances', countInstances)
+            const previousConfigMain = getSelectedView(previousConfigs, 'main')
             return new Promise((resolve, reject) => {
                 let selectionInstances = Number(countInstances.results.bindings[0].total.value)
                 // console.log('selectionInstances', selectionInstances)
@@ -194,14 +195,13 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                     // console.log('evaluateSubStats', stats)
                     // for each views, checks which properties ou sets of properties could match and evaluate
                     // console.log('checkFirstValidConfigs', checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset))
-                    resolve(checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset))
+                    resolve(checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset, previousConfigMain))
                 } else {
                     reject('No results')
                 }
             }) 
                 .then(([newConfigs, newStats]) => {
                     // console.log('then ? ',newConfigs, newStats)
-                    const previousConfigMain = getSelectedView(previousConfigs, 'main')
                     const configMain = getSelectedView(newConfigs, 'main')
                     const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
                     const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })

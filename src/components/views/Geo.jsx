@@ -50,17 +50,16 @@ class Geo extends React.Component {
     }
     handleNewView(args) {
         this.customState = {...this.customState, view: args}
-        this.customState.intervalTransition = window.setInterval(() => {
+        window.setTimeout(() => {
             let elts = this.getElementsForTransition()
             if (elts.length > 0) {
-                window.clearInterval(this.customState.intervalTransition)
                 this.customState = {...this.customState, transitionSent: true}
                 this.props.handleTransition(this.props, elts)
             }
-        }, 300)
+        }, 1000)
     }
     handleZoneSelected(...args) {
-        // console.log('coucou', ...args)
+        console.log('coucou', ...args)
     }
     render () {
         const { dimensions, display, role, step } = this.props
@@ -82,6 +81,7 @@ class Geo extends React.Component {
                         spec = { this.customState.spec }
                         onSignalEndZone = { this.handleSelect }
                         onSignalZoneSelected  = { this.handleZoneSelected }
+                        onSignalTooltip  = { this.handleZoneSelected }
                         onNewView = { this.handleNewView }
                     />
                 }
@@ -93,29 +93,34 @@ class Geo extends React.Component {
         // console.log("coucou geo", this.customState.view.scenegraph().root.source.value[0].items[1].items[0])
         // console.log(this.customState.view.scenegraph().root.source.value[0].items[1].items)
         let items = []
+        // console.log("ok", this.props.step, this.props.role)
         if (this.customState.view.scenegraph().root.source.value[0] && this.customState.view.scenegraph().root.source.value[0].items[1].items[0].opacity) {
-            items = this.customState.view.scenegraph().root.source.value[0].items[1].items.map(el => {
-                return { 
-                    zone: {
-                        x1: el.bounds.x1,
-                        y1: el.bounds.y1,
-                        x2: el.bounds.x2,
-                        y2: el.bounds.y2,
-                        width: 5,
-                        height: 5
-                    },
-                    selector: `geo_element_${dataLib.makeId(el.datum.properties.entrypoint)}`,
-                    index: el.datum.properties.index,
-                    query: {
-                        type: 'uri',
-                        value: el.datum.properties.entrypoint
-                    },
-                    color: el.fill,
-                    opacity: el.opacity,
-                    shape: 'rectangle',
-                    rotation: 0
-                }
-            })
+            let firstX = this.customState.view.scenegraph().root.source.value[0].items[1].items[0].bounds.x1
+            let firstX2 = this.customState.view.scenegraph().root.source.value[0].items[1].items[0].bounds.x2
+            if (Math.abs(firstX - firstX2) !== Infinity) {
+                items = this.customState.view.scenegraph().root.source.value[0].items[1].items.map(el => {
+                    return { 
+                        zone: {
+                            x1: el.bounds.x1,
+                            y1: el.bounds.y1,
+                            x2: el.bounds.x2,
+                            y2: el.bounds.y2,
+                            width: 5,
+                            height: 5
+                        },
+                        selector: `geo_element_${dataLib.makeId(el.datum.properties.entrypoint)}`,
+                        index: el.datum.properties.index,
+                        query: {
+                            type: 'uri',
+                            value: el.datum.properties.entrypoint
+                        },
+                        color: el.fill,
+                        opacity: el.opacity,
+                        shape: 'rectangle',
+                        rotation: 0
+                    }
+                })
+            }
         }
         // console.log(items)
         return items
@@ -248,6 +253,14 @@ class Geo extends React.Component {
                             "update": "zone ? [zone[0][1],zone[1][1]] : domainY"
                         }
                     ]
+                },
+                {
+                    "name": "tooltip",
+                    "value": {},
+                    "on": [
+                        {"events": "@singlepoints:mouseover", "update": "datum"},
+                        {"events": "@singlepoints:mouseout",  "update": "{}"}
+                    ]
                 }
             ],
             "data": geodata,
@@ -307,6 +320,36 @@ class Geo extends React.Component {
                     ]
                 },
                 {
+                    "type": "text",
+                    "encode": {
+                        "enter": {
+                            "baseline": {"value": "bottom"},
+                            "fill": {
+                                "value": "#333",
+                                "condition": {"test": "datum.selected == true", "value": "#f00"}
+                            }
+                        },
+                        "update": {
+                            "align": [
+                                {"test": "item.x > width / 2", "value": "right"},
+                                {"value": "left"}
+                            ],
+                            "x": {"scale": "projection", "signal": "tooltip.geometry.properties.long", "offset": 3},
+                            "y": {"scale": "projection", "signal" : "tooltip.geometry.properties.lat", "offset": -1},
+                            "text": {"signal": "tooltip.properties.title"},
+                            "fillOpacity": [
+                                {"test": "datum === tooltip", "value": 0},
+                                {"value": 1}
+                            ]
+                        }
+                    }
+                },
+                ...defaultSpec.marks
+            ]
+        }
+        /* 
+        ,
+                {
                     "type": "symbol",
                     "from": {"data": "entitygroups"},
                     "name": "aggregates",
@@ -326,10 +369,8 @@ class Geo extends React.Component {
                             "fields": ["datum.longg", "datum.latg"]
                         }
                     ]
-                },
-                ...defaultSpec.marks
-            ]
-        }
+                }
+        */
         // console.log(spec)
         // "pointRadius": {"expr": "scale('size', exp(datum.properties.mag))"}
         //
