@@ -14,7 +14,7 @@ class Transition extends React.PureComponent {
         // console.log('ici')
         const { dimensions, display, zone } = this.props
         return (<g className = "Transition"
-            transform = { `translate(${dimensions.x + display.viz.horizontal_padding }, ${dimensions.y + display.viz[zone + '_top_padding']})` }
+            transform = { `translate(${dimensions.x}, ${dimensions.y + display.viz[zone + '_top_padding']})` }
             ref = {(c) => { this[this.customState.elementName] = c }}
         >
         </g>)

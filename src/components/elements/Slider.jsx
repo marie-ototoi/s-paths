@@ -26,7 +26,7 @@ class Slider extends React.Component {
                 className='Slider'
                 value={this.props.display.vizDefPercent.aside_width}
                 min={0}
-                max={50}
+                max={45}
                 step={this.state.step}
                 onChange={this.drag}
                 style = {{

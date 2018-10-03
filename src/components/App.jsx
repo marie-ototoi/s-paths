@@ -193,15 +193,15 @@ class App extends React.PureComponent {
             <svg
                 ref = {(c) => { this['refView'] = c }}
                 width = { display.screen.width }
-                height = { display.screen.height - 10 }
-                style = {{ position: 'absolute' }}
+                height = { display.screen.height + 10 }
+                style = {{ position: 'absolute', top: 0 }}
             >
                 
                 { mainConfig && 
                     this.state.main_step === 'changing' &&
                     <Transition
                         zone = "main"
-                        dimensions = { coreDimensionsMain }
+                        dimensions = { getDimensions('mainbrush', display.viz) }
                         elements = { this.state.main_transition }
                         endTransition = { this.handleEndTransition }
                     />
