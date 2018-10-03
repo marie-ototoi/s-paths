@@ -50,13 +50,7 @@ class Geo extends React.Component {
     }
     handleNewView(args) {
         this.customState = {...this.customState, view: args}
-        window.setTimeout(() => {
-            let elts = this.getElementsForTransition()
-            if (elts.length > 0) {
-                this.customState = {...this.customState, transitionSent: true}
-                this.props.handleTransition(this.props, elts)
-            }
-        }, 1000)
+        this.props.handleTransition(this.props, this.getElementsForTransition())
     }
     handleZoneSelected(...args) {
         console.log('coucou', ...args)
@@ -238,6 +232,7 @@ class Geo extends React.Component {
                 },
                 {
                     "name": "domainX",
+                    "value": "[0,0]",
                     "on": [
                         {
                             "events": {"signal": "zone"},
@@ -247,6 +242,7 @@ class Geo extends React.Component {
                 },
                 {
                     "name": "domainY",
+                    "value": "[0,0]",
                     "on": [ 
                         {
                             "events": {"signal": "zone"},
@@ -384,10 +380,8 @@ class Geo extends React.Component {
     }
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
-        if (this.customState.transitionSent) {
-            this.props.handleTransition(this.props, this.getElementsForTransition())
-            this.customState.view.run()
-        }
+        if (this.customState.view) this.customState.view.run()
+        this.props.handleTransition(this.props, this.getElementsForTransition())
     }
     componentWillUnmount () {
     }

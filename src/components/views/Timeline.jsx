@@ -26,15 +26,16 @@ class Timeline extends React.Component {
         this.handleZoneSelected = this.handleZoneSelected.bind(this)
         this.initData = this.initData.bind(this)
         this.prepareData = this.prepareData.bind(this)
-        this.render = this.render.bind(this)
         this.customState = {
             // selectElements: this.selectElements,
             elementName: `refTimelineMap_${props.zone}`,
             multipleLoaded: [],
             multipleLoading: [],
             data: [],
-            multipleData: {}
+            multipleData: {},
+            shouldRender: false
         }
+        this.state = {}
         this.initData(props)
         this.prepareData(props)
     }
@@ -69,6 +70,7 @@ class Timeline extends React.Component {
             for(let mi = 0; mi <selectedConfig.multiple[0].length; mi++) {
                 let m = selectedConfig.multiple[0][mi]
                 if (! (this.customState.multipleLoaded.includes(mi) || this.customState.multipleLoading.includes(mi))) {
+                    // console.log('fetchMultiple', mi)
                     this.customState.multipleLoading.push(mi)
                     this.props.loadMultiple(dataset, m.path, 0, mi, zone)
                         .then(results => {
@@ -94,7 +96,9 @@ class Timeline extends React.Component {
                             //load next index
                             this.fetchMultiple()
                             this.prepareData(this.props)
+                            this.customState.shouldRender = true
                             this.render()
+                            this.setState({ test: Math.random() })
                         })
                     break;
                 }
@@ -102,24 +106,16 @@ class Timeline extends React.Component {
         }
     }
     handleNewView(args) {
-        // console.log('view created', args.scenegraph())
+        this.fetchMultiple()
         this.customState = {...this.customState, view: args}
-        this.customState.intervalTransition = window.setInterval(() => {
-            let elts = this.getElementsForTransition()
-            if (elts.length > 0) {
-                window.clearInterval(this.customState.intervalTransition)
-                this.customState = {...this.customState, transitionSent: true}
-                this.props.handleTransition(this.props, elts)
-                this.fetchMultiple()
-            }
-        }, 300)
+        this.props.handleTransition(this.props, this.getElementsForTransition())
+        window.setTimeout(() => this.render(), 1000)
     }
     handleZoneSelected(args) {
         // console.log('coucou', args.scenegraph())
     }
     render () {
         const { dimensions, display, role, selections, step, zone } = this.props
-        // console.log('render', role, step)
         return (<div
             className = { `Timeline ${this.customState.elementName} role_${role}` } >
             { step !== 'changing' &&
@@ -176,6 +172,7 @@ class Timeline extends React.Component {
         return items
     }
     shouldComponentUpdate (nextProps, nextState) {
+        // console.log('shouldComponentUpdate', this.customState.shouldRender)
         // if (this.props.step === 'launch' && nextProps.step === 'launch') return false
         if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.prepareData(nextProps)
@@ -195,7 +192,8 @@ class Timeline extends React.Component {
             (this.props.dimensions.height !== nextProps.dimensions.height) ||
             (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
             (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
-            (this.props.step !== nextProps.step)
+            (this.props.step !== nextProps.step) ||
+            (this.customState.shouldRender)
     }
     initData (nextProps) {
         this.customState.multipleData = getTimelineDict(nextProps.data, 'entrypoint')
@@ -401,11 +399,11 @@ class Timeline extends React.Component {
                 },
                 {
                     "name": "otherZoneSelected",
-                    "init": selections.some(s => s.zone !== zone)
+                    "value": selections.some(s => s.zone !== zone)
                 },
                 {
                     "name": "zoneSelected",
-                    "init": selections.some(s => s.zone === zone),
+                    "value": selections.some(s => s.zone === zone),
                     "on": [
                         {
                             "events": {"signal": "domainX"},
@@ -415,6 +413,7 @@ class Timeline extends React.Component {
                 },
                 {
                     "name": "domainX",
+                    "value": "[0,0]",
                     "on": [
                         {
                             "events": {"signal": "zone"},
@@ -424,6 +423,7 @@ class Timeline extends React.Component {
                 },
                 {
                     "name": "domainY",
+                    "value": "[0,0]",
                     "on": [
                         {
                             "events": {"signal": "zone"},
@@ -467,10 +467,10 @@ class Timeline extends React.Component {
     }
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
-        if (this.customState.transitionSent) {
-            this.props.handleTransition(this.props, this.getElementsForTransition())
-            this.customState.view.run()
-        }
+        //console.log('componentDidUpdate')
+        if (this.customState.view) this.customState.view.run()
+        this.props.handleTransition(this.props, this.getElementsForTransition())
+        this.customState.shouldRender = false
     }
     componentWillUnmount () {
     }

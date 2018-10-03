@@ -19,25 +19,24 @@ class TransitionLayout extends AbstractLayout {
             .duration(500)
         const tEnter = d3.transition()
             .duration(250)
-        if (shapes.length > 0) {
-            shapesSelection
-                .enter()
-                .append('rect')
-                .attr('x', d => d.zone.x1)
-                .attr('y', d => d.zone.y1)
-                .attr('width', d => d.zone.width)
-                .attr('height', d => d.zone.height)
-                .attr('fill', d => d.color)
-                .attr('transform', d => `rotate(${d.rotation} ${d.zone.x1} ${d.zone.y1})`)
-                .attr('fill-opacity', d => type === 'target' ? 0 : d.opacity)
-                .transition(tEnter)
-                .attr('fill-opacity', d => d.opacity)
-        }
+
+        shapesSelection
+            .enter()
+            .append('rect')
+            .attr('x', d => d.zone.x1)
+            .attr('y', d => d.zone.y1)
+            .attr('width', d => d.zone.width)
+            .attr('height', d => d.zone.height)
+            .attr('fill', d => d.color)
+            .attr('transform', d => `rotate(${d.rotation} ${d.zone.x1} ${d.zone.y1})`)
+            .attr('fill-opacity', d => type === 'target' ? 0 : d.opacity)
+            .transition(tEnter)
+            .attr('fill-opacity', d => d.opacity)
           
         shapesSelection
             .exit()
             .transition(tRemove)
-            .attr('opacity', 0)
+            .attr('fill-opacity', 0)
             .remove()           
 
         d3.select(this.el).selectAll('rect')
