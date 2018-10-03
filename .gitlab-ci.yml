@@ -127,6 +127,7 @@ Staging:
     DOCKER_HOST: tcp://195.83.213.227:2376
   only:
     - master
+  when: manual
   environment:
     name: staging
     url: https://s-paths.inria.fr
