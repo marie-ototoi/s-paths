@@ -185,11 +185,6 @@ class App extends React.PureComponent {
                     config = { mainConfig }
                 />
             }
-            { (!mainConfig || display.settingsOpen.main) &&
-                <Settings
-                    dimensions = { getDimensions('settings', display.viz) }
-                />
-            }
             <svg
                 ref = {(c) => { this['refView'] = c }}
                 width = { display.screen.width }
@@ -292,7 +287,14 @@ class App extends React.PureComponent {
                 }
             
             </div>
-            <Slider />
+            { mainConfig &&
+                <Slider/>
+            }
+            { (!mainConfig || display.settingsOpen.main) &&
+                <Settings
+                    dimensions = { getDimensions('settings', display.viz) }
+                />
+            }
         </div>)
     }
 
