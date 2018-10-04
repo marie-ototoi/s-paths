@@ -61,7 +61,6 @@ class Header extends React.Component {
             errorSelection: '',
             propsAreLoading: false,
             keyword: '',
-            isNavOpen: false,
             displayedResource,
             selectedResource,
             resourceList,
@@ -84,6 +83,18 @@ class Header extends React.Component {
                 this.displayResource()
             }
         }
+    }
+    getLabel (option) {
+        return (
+            <div style={{
+                alignItems: 'center',
+                display: 'flex',
+                width: '30px',
+                background: '#666'
+            }}>
+                <img src={option.thumb} alt={option.id}/>
+            </div>
+        );
     }
     displayResource () {
         const { dataset, views } = this.props
@@ -208,7 +219,6 @@ class Header extends React.Component {
             let selectionEnabled = (pointerEnabled || keywordEnabled) ?  {} : { 'disabled' : 'disabled' }
 
             // third line - view + props
-            let navClassName = this.state.isNavOpen ? 'dropdown is-active' : 'dropdown'
             let selectedLists = this.state.configsLists[this.state.selectedView]
             const propsOptions = selectedLists.map((selectList) =>
                 selectList.map((elt, value) => ({
@@ -348,56 +358,25 @@ class Header extends React.Component {
                             </div>
                             <div className = "line">
                                 <div className = "field" style = {{ marginLeft: display.viz.horizontal_padding + 'px', width: fieldWidth + 'px' }}>
-                                    <label
-                                        className = "label"
-                                    >Display
+                                    <label className="label">
+                                        Display
                                     </label>
-                                    <div
-                                        className = { navClassName }
-                                    >
-                                        <div
-                                            className="dropdown-trigger"
-                                        >
-                                            <button
-                                                className = "button"
-                                                aria-haspopup = "true"
-                                                aria-controls = "dropdown-menu-nav"
-                                                onClick = { (e) => this.setState({ isNavOpen: !this.state.isNavOpen }) }
-                                            >
-                                                <img src = { config.thumb } height = { 20 } />
-                                                <span className="icon is-small">
-                                                    <i className="fas fa-angle-down" aria-hidden="true"></i>
-                                                </span>
-                                            </button>
-                                        </div>
-                                        <div
-                                            className = "dropdown-menu"
-                                            id="dropdown-menu-nav"
-                                            role="menu"
-                                        >
-                                            <div
-                                                className = "dropdown-content"
-                                            >
-                                                { activeConfigs.map((option, i) => {
-                                                    let classOption = (config.id === option.id) ? 'selected' : ''
-                                                    return <div
-                                                        key = { zone + 'activeNav' + i }
-                                                        className = { classOption }
-                                                    >
-                                                        <a
-                                                            className = "dropdown-item"
-                                                            onClick = { (e) => { this.setState({
-                                                                selectedView: i,
-                                                                selectedProps: getConfigs(getCurrentConfigs(configs, zone, 'active'), zone)[i].constraints.map(c => 0),
-                                                                isNavOpen: false }) }
-                                                            }
-                                                        >
-                                                            <img src = { option.thumb } width = { 30 } /><span>{ option.name }</span>
-                                                        </a>
-                                                    </div>
-                                                }) }
-                                            </div>
-                                        </div>
+                                    <div className="control is-small">
+                                        <ReactSelect
+                                            classNamePrefix="viewSelector"
+                                            getOptionLabel={this.getLabel}
+                                            isSearchable={false}
+                                            options={activeConfigs}
+                                            getOptionValue={(option) => (option['name'])}
+                                            onChange={(selectedOption) => {
+                                                const i = activeConfigs.findIndex((option) => option.id === selectedOption.id)
+                                                this.setState({
+                                                    selectedView: i,
+                                                    selectedProps: getConfigs(getCurrentConfigs(configs, zone, 'active'), zone)[i].constraints.map(c => 0),
+                                                })
+                                            }}
+                                            defaultValue={activeConfigs[0]}
+                                        />
                                     </div>
 
                                     { selectedLists && selectedLists.map((list, index) => {

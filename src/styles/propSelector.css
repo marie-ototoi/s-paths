@@ -31,7 +31,7 @@
 .propSelector__menu {
     width: 500px !important;
 }
-.propSelector__control {
+.propSelector__control, .viewSelector__control {
     font-size: 0.75em;
     min-height: 28px !important;
 }
@@ -44,4 +44,8 @@
 }
 .propSelector__option {
     font-size: 0.75em !important;
+}
+
+.viewSelector__control {
+    width: 80px;
 }

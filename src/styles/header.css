@@ -64,46 +64,12 @@
     font-size: 0.7em;
     padding-left: 45px;
 }
-.Header select, .Header input, .Header .dropdown, .Header .control {
+.Header select, .Header input, .Header .control {
     width: 150px;
 }
 .Header input {
     padding-top: 8px;
     display: inline-block;
-}
-.Header .dropdown {
-    width: 45px;
-    margin-top: -3px;
-}
-.Header .dropdown-content {
-    margin-top: 14px;
-    width: 140px;
-}
-.Header .dropdown-menu {
-    min-width: auto;
-}
-.Header .dropdown-item {
-    display: flex;
-    height: 40px;
-    align-items: center;
-}
-.Header .dropdown-item img {
-    margin-right: 5px;
-}
-.Header .dropdown-trigger {
-    margin-top: 0;
-}
-.Header .dropdown-trigger .button{
-    padding-top: 3px;
-    padding-bottom: 3px;
-    height: auto;
-}
-.Header .dropdown img {
-    background: #666;
-    border-radius: 3px;
-}
-.Header .dropdown-item {
-    padding: 5px 15px 0 15px;
 }
 .Header button, .Header .button{
     margin-top:-14px;
