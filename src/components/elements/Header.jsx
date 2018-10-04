@@ -361,7 +361,7 @@ class Header extends React.Component {
                                     <label className="label">
                                         Display
                                     </label>
-                                    <div className="control is-small">
+                                    <div className="is-small">
                                         <ReactSelect
                                             classNamePrefix="viewSelector"
                                             getOptionLabel={this.getLabel}
