@@ -4,20 +4,26 @@
     margin: 0;    
     padding-top: 5px;
 }
+
 .propSelector p.right {
     text-align: right;
 }
+
 .propSelector p.right span {
     display: inline-block;
 }
+
 .propSelector select {
     font-size: 0.75em;
     outline: none;
     text-align: right;
+    margin-top: 18px;
 }
+
 .propSelector select.right {
     direction: rtl;
 }
+
 .propSelector select option {
     text-align: right;
     direction: ltr;
@@ -31,22 +37,30 @@
 .propSelector__menu {
     width: 500px !important;
 }
+
 .propSelector__control, .viewSelector__control {
     font-size: 0.75em;
     min-height: 28px !important;
 }
+
 .propSelector__value-container {
     padding: 0 8px !important;
+}
+
+.propSelector__value-container input {
+    padding-top: 8px;
 }
 .propSelector__indicator,
 .propSelector__dropdown-indicator {
     padding: 0 !important;
 }
+
 .propSelector__option {
     font-size: 0.75em !important;
 }
 
-.viewSelector__control {
-    width: 80px;
-    margin-right: 10px;
+.propSelector__placeholder,
+.propSelector__single-value {
+    top: 60% !important;
+    margin-left: 0 !important;
 }

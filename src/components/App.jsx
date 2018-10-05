@@ -5,10 +5,9 @@ import { connect } from 'react-redux'
 
 // components
 import BrushLink from './elements/BrushLink'
-import Header from './elements/Header'
+import Header from './Header'
 import History from './elements/History'
 import Settings from './elements/Settings'
-import Slider from './elements/Slider'
 import Transition from './elements/Transition'
 import GeoMap from './views/Geo'
 import HeatMap from './views/HeatMap'
@@ -287,9 +286,6 @@ class App extends React.PureComponent {
                 }
             
             </div>
-            { mainConfig &&
-                <Slider/>
-            }
             { (!mainConfig || display.settingsOpen.main) &&
                 <Settings
                     dimensions = { getDimensions('settings', display.viz) }

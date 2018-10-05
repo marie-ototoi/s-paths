@@ -1,0 +1,7 @@
+.viewSelector__control {
+    width: 80px;
+    margin-right: 10px;
+}
+.viewSelector__value-container input {
+    padding-top: 8px;
+}

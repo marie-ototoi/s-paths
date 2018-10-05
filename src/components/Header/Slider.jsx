@@ -1,7 +1,8 @@
-import PropTypes from 'prop-types'
 import React from 'react'
+import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 import { setDisplay } from '../../actions/displayActions'
+import './Slider.css'
 
 class Slider extends React.Component {
     constructor (props) {
@@ -11,14 +12,20 @@ class Slider extends React.Component {
             step: 5 // TODO: if window size < 1500 ? 50 : 25 (#68)
         }
     }
+
     drag (event) {
         const { display, setDisplay } = this.props
         let asidePercent = event.target.value
         setDisplay({
             screen: display.screen,
-            vizDefPercent: { ...display.vizDefPercent, aside_width: asidePercent, main_width: 100 - asidePercent }
+            vizDefPercent: {
+                ...display.vizDefPercent,
+                aside_width: asidePercent,
+                main_width: 100 - asidePercent
+            }
         })
     }
+
     render () {
         return (
             <input
@@ -29,9 +36,6 @@ class Slider extends React.Component {
                 max={45}
                 step={this.state.step}
                 onChange={this.drag}
-                style = {{
-                    top: (90) + 'px'
-                }}
             />
         )
     }
@@ -42,18 +46,13 @@ class Slider extends React.Component {
     }
 }
 
-function mapStateToProps (state) {
-    return {
+const SliderConnect = connect(
+    (state) => ({
         display: state.display
-    }
-}
-
-function mapDispatchToProps (dispatch) {
-    return {
-        setDisplay: setDisplay(dispatch),
-    }
-}
-
-const SliderConnect = connect(mapStateToProps, mapDispatchToProps)(Slider)
+    }),
+    (dispatch) => ({
+        setDisplay: setDisplay(dispatch)
+    })
+)(Slider)
 
 export default SliderConnect

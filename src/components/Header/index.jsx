@@ -1,0 +1,358 @@
+import PropTypes from 'prop-types'
+import React from 'react'
+import { connect } from 'react-redux'
+import ReactKeymaster from 'react-keymaster'
+import shallowEqual from 'shallowequal'
+
+import { getConfigs, getCurrentConfigs, getPropsLists, getSelectedMatch, getSelectedView } from '../../lib/configLib'
+import { getNbDisplayed } from '../../lib/dataLib'
+import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
+
+import { showSettings } from '../../actions/displayActions'
+import { displayConfig, loadResources, loadSelection, loadStats, selectResource } from '../../actions/dataActions'
+import ViewSelect from './ViewSelect'
+import PropSelect from './PropSelect'
+import ResourceSelect from './ResourceSelect'
+import Slider from './Slider'
+import Explain from './Explain'
+import Line from './Line'
+import './Header.css'
+
+class Header extends React.Component {
+    constructor (props) {
+        super(props)
+        this.displayConfig = this.displayConfig.bind(this)
+        this.displayResource = this.displayResource.bind(this)
+        this.displaySelection = this.displaySelection.bind(this)
+        this.handleKeyDown = this.handleKeyDown.bind(this)
+        this.prepareData = this.prepareData.bind(this)
+        this.state = this.prepareData(props)
+        this.state.showConfig = (new URLSearchParams(window.location.search)).has('admin')
+    }
+    shouldComponentUpdate (nextProps) {
+        if (nextProps.configs.past.length !== this.props.configs.past.length) {
+            this.setState(this.prepareData(nextProps))
+            return false
+        }
+        return true
+    }
+    prepareData (nextProps) {
+        // TODO: remove data duplication
+        let displayedResource = nextProps.dataset.resources.find((resource) =>
+            resource.type === nextProps.dataset.entrypoint
+        )
+
+        let selectedResource = displayedResource
+        let configsLists = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).map(config =>
+            getPropsLists(config, nextProps.zone, nextProps.dataset)
+        )
+        let displayedView = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone)
+            .reduce((acc, cur, i) => (cur.selected ? i : acc), null)
+        let displayedProps = configsLists[displayedView]
+            .map(prop => prop.reduce((acc, cur, i) => (cur.selected ? i : acc), 0))
+        let selectedProps = displayedProps
+        let selectedView = displayedView
+
+        return {
+            resourceIsLoading: false,
+            selectionIsLoading: false,
+            errorSelection: '',
+            propsAreLoading: false,
+            keyword: '',
+            displayedResource,
+            selectedResource,
+            resourceList: nextProps.dataset.resources,
+            configsLists,
+            displayedView,
+            displayedProps,
+            selectedProps,
+            selectedView
+        }
+    }
+    handleKeyDown (event) {
+        const { dataset, selections } = this.props
+        if (event === 'enter') {
+            if (selections.length > 0 || this.state.keyword.length > 3) {
+                this.displaySelection()
+            } else if (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) {
+                this.displayConfig()
+            } else if (this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '') {
+                this.displayResource()
+            }
+        }
+    }
+    displayResource () {
+        const { dataset, views } = this.props
+        this.setState({ resourceIsLoading: true, errorSelection: '' })
+        this.props.selectResource({
+            ...dataset,
+            entrypoint: this.state.selectedResource.type,
+            totalInstances: this.state.selectedResource.total,
+            constraints: ``
+        }, views)
+            .then(() => this.setState({
+                resourceIsLoading: false,
+                displayedResource: this.state.selectedResource
+            }))
+    }
+    displayConfig () {
+        const { config, configs, dataset, zone } = this.props
+        let selectedLists = this.state.configsLists[this.state.selectedView]
+        const propPaths =  this.state.selectedProps && selectedLists ? this.state.selectedProps.map((prop, i) => selectedLists[i][prop].path) : []
+        this.setState({
+            propsAreLoading: true,
+            errorSelection: ''
+        })
+        this.props.displayConfig(this.state.selectedView, propPaths, getConfigs(getCurrentConfigs(configs, zone, 'active'), zone), config, dataset, zone)
+            .then(() => this.setState({
+                propsAreLoading: false,
+                displayedProps: this.state.selectedProps,
+                displayedView: this.state.selectedView
+            }))
+    }
+    displaySelection () {
+        const { config, configs, dataset, selections, views, zone } = this.props
+        let activeConfigs
+        let selectedConfig
+        let constraints
+        let entrypoint = dataset.entrypoint
+        if (selections.some(s => s.zone === 'main')) {
+            activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+            selectedConfig = getSelectedMatch(config, zone)
+            constraints = makeSelectionConstraints(selections, selectedConfig, zone, dataset)
+        } else if (selections.length > 0) {
+            activeConfigs = getCurrentConfigs(configs, 'aside', 'active')
+            // in case the entrypoint has changed
+            entrypoint = activeConfigs.entrypoint
+            const selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'), 'aside')
+
+            constraints = makeSelectionConstraints(selections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats })
+        } else {
+            // keep old constraints
+            constraints = dataset.constraints
+        }
+        if (this.state.keyword.length > 3) {
+            constraints = constraints.concat(makeKeywordConstraints(this.state.keyword, { ...dataset, entrypoint, stats: activeConfigs.stats }))
+        }
+        let newDataset = {
+            ...dataset,
+            entrypoint,
+            constraints,
+            stats: activeConfigs.stats
+        }
+        this.setState({ selectionIsLoading: true, errorSelection: '' })
+        this.props.loadSelection(newDataset, views, activeConfigs, dataset)
+            .then(() => this.setState({
+                selectionIsLoading: false,
+                keyword: ''
+            }))
+            .catch(() => this.setState({
+                selectionIsLoading: false,
+                keyword: '',
+                errorSelection: 'No results matching selection'
+            }))
+    }
+    componentWillUnmount() {
+        this.handleKeyDown = null
+    }
+    render () {
+        if (this.state.configsLists) {
+            const { configs, data, dataset, selections, zone } = this.props
+
+            // general
+            const activeConfigs = getConfigs(getCurrentConfigs(configs, zone, 'active'), zone)
+            let options = [
+                { label: 'entities', total: dataset.stats.totalInstances },
+                { label: 'selected', total: dataset.stats.selectionInstances },
+                { label: 'displayed', total: getNbDisplayed(data, zone, 'active') }
+            ]
+
+            // first line - resources
+            let selectResourceEnabled = (this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '')
+
+            // second line - keyword + pointer
+            let pointerEnabled = selections.length > 0
+            let keywordEnabled = this.state.keyword.length > 3
+            let pointerClass = pointerEnabled ? '' : 'greyed'
+            let andClass = pointerEnabled && keywordEnabled ? '' : 'greyed'
+            let selectionEnabled = (pointerEnabled || keywordEnabled)
+
+            // third line - view + props
+            let selectedLists = this.state.configsLists[this.state.selectedView]
+            let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps))
+            return (
+                <div className="Header">
+                    <ReactKeymaster
+                        keyName="enter"
+                        onKeyDown={this.handleKeyDown}
+                    />
+                    <Line
+                        label={'Class of resources'}
+                        maxData={options[0].total}
+                        counterData={options[0]}
+                        isLoading={this.state.resourceIsLoading}
+                        onSubmit={this.displayResource}
+                        disable={!selectResourceEnabled}
+                        leftChildren={
+                            <div className="logo">
+                                <img
+                                    src="/images/logo.svg"
+                                    alt="S-Path Logo"
+                                    style={{ height: '29px', paddingLeft: '5px' }}
+                                />
+                            </div>
+                        }
+                        rightChildren={
+                            <div>
+                                {this.state.selectedResource.comment &&
+                                    <span className="resource-def">?
+                                        <span
+                                            className="resource-content"
+                                            style={{ paddingTop: '5px', backgroundColor: '#ffffff' }}
+                                        >
+                                            {this.state.selectedResource.comment}
+                                        </span>
+                                    </span>
+                                }
+                                {this.state.showConfig && (
+                                    <span
+                                        className="icon"
+                                        onClick={() => {this.props.showSettings(zone)}}
+                                    >
+                                        <i className="fas fa-cogs"/>
+                                    </span>
+                                )}
+                            </div>
+                        }
+                    >
+                        <ResourceSelect
+                            options={this.state.resourceList}
+                            selectedResource={this.state.selectedResource}
+                            onChange={(selectedResource) => {
+                                this.setState({selectedResource})
+                            }}
+                        />
+                    </Line>
+                    <Line
+                        label={'Selection'}
+                        isLoading={this.state.selectionIsLoading}
+                        onSubmit={this.displaySelection}
+                        disable={!selectionEnabled}
+                        counterData={options[1]}
+                        maxData={options[0].total}
+                        rightChildren={
+                            <span className="error">{this.state.errorSelection}</span>
+                        }
+                    >
+                        <div className="control">
+                            <input
+                                className="input is-small"
+                                type="text"
+                                placeholder="Keyword"
+                                value={this.state.keyword}
+                                onChange={(e) => this.setState({ keyword: e.target.value })}
+                            />
+                        </div>
+                        <div className="pointer-group">
+                            <p>
+                                <span className={`label-like ${andClass}`}>AND</span>
+                                &nbsp;&nbsp;
+                                <span className={`pointer is-size-7 ${pointerClass}`}>
+                                    pointer
+                                    <span className="icon">
+                                        <i className="fas fa-mouse-pointer"/>
+                                    </span>
+                                </span>
+                            </p>
+                        </div>
+                    </Line>
+                    <Line
+                        label={'Display'}
+                        isLoading={this.state.propsAreLoading}
+                        onSubmit={this.displayConfig}
+                        disable={!configEnabled}
+                        counterData={options[2]}
+                        maxData={options[0].total}
+                        leftChildren={<Slider/>}
+                    >
+                        <ViewSelect
+                            onChange={(selectedOption) => {
+                                const selectedView = activeConfigs.findIndex((option) =>
+                                    option.id === selectedOption.id
+                                )
+                                this.setState({
+                                    selectedView,
+                                    selectedProps: getConfigs(getCurrentConfigs(configs, zone, 'active'), zone)[selectedView].constraints.map(() => 0),
+                                })
+                            }}
+                            options={activeConfigs}
+                        />
+
+                        { selectedLists && selectedLists.map((list, index) => (
+                            <div
+                                className="control"
+                                key={`${zone}selectprop${index}`}
+                            >
+                                <PropSelect
+                                    current={this.state.selectedProps[index]}
+                                    onChange={(selectedOption) => {
+                                        const selectedProps = [...this.state.selectedProps]
+                                        selectedProps[index] = selectedLists[index].findIndex((option) =>
+                                            option.path === selectedOption.path
+                                        )
+                                        this.setState({ selectedProps })
+                                    }}
+                                    options={selectedLists[index]}
+                                />
+                            </div>
+                        ))}
+                    </Line>
+                    <Explain
+                        options={options[2]}
+                        zone={zone}
+                    />
+                </div>
+            )
+        } else {
+            return null
+        }
+    }
+
+    static propTypes = {
+        config: PropTypes.object,
+        configs: PropTypes.object,
+        data: PropTypes.object,
+        dataset: PropTypes.object,
+        dimensions: PropTypes.object,
+        selections: PropTypes.array,
+        views: PropTypes.array,
+        zone: PropTypes.string,
+        analyseEndpoint: PropTypes.func,
+        displayConfig: PropTypes.func,
+        loadResources: PropTypes.func,
+        loadSelection: PropTypes.func,
+        loadStats: PropTypes.func,
+        selectResource: PropTypes.func,
+        showSettings: PropTypes.func
+    }
+}
+
+const HeaderConnect = connect(
+    (state) => ({
+        configs: state.configs,
+        data:state.data,
+        dataset: state.dataset,
+        selections: state.selections,
+        views: state.views
+    }),
+    (dispatch) => ({
+        displayConfig: displayConfig(dispatch),
+        loadResources: loadResources(dispatch),
+        loadStats: loadStats(dispatch),
+        loadSelection: loadSelection(dispatch),
+        selectResource: selectResource(dispatch),
+        showSettings: showSettings(dispatch)
+    })
+)(Header)
+
+export default HeaderConnect
