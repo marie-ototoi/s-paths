@@ -217,6 +217,14 @@ class Geo extends React.Component {
             "signals": [
                 ...defaultSpec.signals,
                 {
+                    "name": "tooltip",
+                    "value": {},
+                    "on": [
+                        {"events": "shape:mouseover", "update": "datum"},
+                        {"events": "shape:mouseout",  "update": "{}"}
+                    ]
+                },
+                {
                     "name": "otherZoneSelected",
                     "value": selections.some(s => s.zone !== zone)
                 },
@@ -248,14 +256,6 @@ class Geo extends React.Component {
                             "events": {"signal": "zone"},
                             "update": "zone ? [zone[0][1],zone[1][1]] : domainY"
                         }
-                    ]
-                },
-                {
-                    "name": "tooltip",
-                    "value": {},
-                    "on": [
-                        {"events": "@singlepoints:mouseover", "update": "datum"},
-                        {"events": "@singlepoints:mouseout",  "update": "{}"}
                     ]
                 }
             ],
@@ -317,28 +317,35 @@ class Geo extends React.Component {
                 },
                 {
                     "type": "text",
+                    "name": "names",
                     "encode": {
                         "enter": {
+                            
                             "baseline": {"value": "bottom"},
+                            "fillOpacity": {"value": 0},
                             "fill": {
                                 "value": "#333",
                                 "condition": {"test": "datum.selected == true", "value": "#f00"}
                             }
                         },
                         "update": {
+                            "fillOpacity": {"value": 1},
+                            "text": {"signal": "tooltip.properties.label"},
+                            "longitude": {"signal": "tooltip.properties.long"},
+                            "latitude": {"signal": "tooltip.properties.lat"},
                             "align": [
-                                {"test": "item.x > width / 2", "value": "right"},
+                                {"test": "item.x > (width / 2)", "value": "right"},
                                 {"value": "left"}
-                            ],
-                            "x": {"scale": "projection", "signal": "tooltip.geometry.properties.long", "offset": 3},
-                            "y": {"scale": "projection", "signal" : "tooltip.geometry.properties.lat", "offset": -1},
-                            "text": {"signal": "tooltip.properties.title"},
-                            "fillOpacity": [
-                                {"test": "datum === tooltip", "value": 0},
-                                {"value": 1}
                             ]
                         }
-                    }
+                    },
+                    "transform": [
+                        {
+                            "type": "geopoint",
+                            "projection": "projection",
+                            "fields": ["longitude", "latitude"]
+                        }
+                    ]
                 },
                 ...defaultSpec.marks
             ]
