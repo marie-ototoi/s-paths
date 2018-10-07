@@ -330,8 +330,11 @@ export const prepareGeoData = (data, dataset) => {
                     lat:  Number(place.prop1.value),
                     long:  Number(place.prop2.value),
                     label: place.prop3.value,
+                    labelPipe: place.prop3.value + '|',
                     entrypoint: place.entrypoint.value,
-                    index
+                    entrypointPipe: place.entrypoint.value + '|',
+                    index,
+                    indexPipe: index + '|'
                 },
                 geometry: {
                     type: "Point",

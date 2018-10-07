@@ -23,7 +23,6 @@ export default {
             "name": "zone",
             "init": null,
             "on": [
-                
                 {
                     "events": "[mousedown, mouseup] > mousemove{100}",
                     "update": "zone ? [zone[0], [x(), y()]] : [[0, 0],[0, 0]]"
