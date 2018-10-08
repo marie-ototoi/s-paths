@@ -1,21 +1,39 @@
-.viewSelector__control {
-    width: 90px;
+.ViewSelect__control {
+    font-size: 0.75em;
+    min-height: 28px !important;
+    width: 60px;
     margin-right: 10px;
 }
 
-.viewSelector__value-container input {
+.ViewSelect__value-container input {
     padding-top: 8px;
 }
 
-.viewSelector__value-container span {
+.ViewSelect__value-container span {
     display: none;
 }
 
-.viewSelector__menu {
+.ViewSelect__value-container img,
+.ViewSelect__menu img {
+    width: 20px;
+    background: rgb(102, 102, 102);
+    border-radius: 2px;
+}
+
+.ViewSelect__menu img {
+    width: 30px;
+}
+
+.ViewSelect__menu {
     width: 150px !important;
 }
 
-.viewSelector__menu span {
+.ViewSelect__menu span {
     font-size: 0.8em;
     margin-left: 10px;
+}
+
+.ViewSelect__indicator,
+.ViewSelect__dropdown-indicator {
+    padding: 0 !important;
 }

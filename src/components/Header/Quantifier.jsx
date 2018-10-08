@@ -1,13 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import connect from 'react-redux/es/connect/connect'
+import './Quantifier.css'
 
 class Quantifier extends React.Component {
     render () {
         let percent = this.props.value.total / this.props.max
         if (percent > 1) percent = 1
         return (
-            <div>
+            <div className='Quantifier'>
                 <div style={{ width: `${this.props.display.viz.useful_width / 3}px` }}>
                     <progress
                         className='progress is-small'

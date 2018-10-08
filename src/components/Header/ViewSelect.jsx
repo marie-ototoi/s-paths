@@ -13,12 +13,6 @@ class ViewSelect extends React.Component {
                 <img
                     src={option.thumb}
                     alt={option.id}
-                    style={{
-                        alignItems: 'center',
-                        display: 'flex',
-                        width: '30px',
-                        background: '#666'
-                    }}
                 />
                 <span>{option.id}</span>
             </div>
@@ -28,7 +22,7 @@ class ViewSelect extends React.Component {
     render () {
         return (
             <ReactSelect
-                classNamePrefix={'viewSelector'}
+                classNamePrefix='ViewSelect'
                 isSearchable={false}
                 options={this.props.options}
                 defaultValue={this.props.options[0]}

@@ -15,7 +15,7 @@ class ResourceSelect extends React.Component {
         return (
             <div className='control'>
                 <ReactSelect
-                    classNamePrefix='propSelector'
+                    classNamePrefix='PropSelect'
                     defaultValue={this.props.selectedResource}
                     getOptionValue={(option) => (option['type'])}
                     getOptionLabel={ResourceSelect.getOptionLabel}
