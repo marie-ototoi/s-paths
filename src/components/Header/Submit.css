@@ -1,0 +1,17 @@
+.Submit button,
+.Submit .button {
+    margin-top: -14px;
+    cursor: pointer;
+}
+
+.Submit .button {
+    height: 28px;
+    width: 29px;
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.Submit .icon {
+    padding-left: 15px;
+    position: absolute;
+}

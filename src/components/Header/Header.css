@@ -1,0 +1,114 @@
+.Header {
+    position: absolute;
+    width: 100%;
+    z-index: 10;
+}
+
+.Header .Line {
+    display: flex;
+    align-items: center;
+    background: #f4f4f4;
+    margin: 0 0 5px 0;
+    border-bottom: 1px solid #ababab;
+    box-shadow: 0 3px 3px 0 #ababab;
+}
+
+.Header .logo {
+    display: flex;
+    align-items: center;
+    position: fixed;
+}
+
+.Header .field {
+    display: flex;
+    margin: 0;
+    padding: 0 0 2px 0;
+    align-items: center;
+    min-height: 35px;
+}
+
+.Header .control,
+.Header .dropdown {
+    margin-right: 10px;
+}
+
+.Header .label {
+    text-align: right;
+    padding-right: 10px;
+    text-transform: uppercase;
+    font-size: 0.8em;
+    padding-top: 10px;
+    font-weight: normal;
+    margin: 0;
+}
+
+.Header .label-like {
+    font-size: 0.8em;
+}
+
+.Header .pointer {
+    border: 1px solid #ccc;
+    border-radius: 2px;
+    display: inline-block;
+    padding: 0 0 0 10px; 
+    width: 75px;
+}
+
+.Header .greyed {
+    opacity: 0.5;
+}
+
+.Header .pointer-group {
+    margin-right: 10px;
+}
+
+.Header .error {
+    color: #f00;
+    font-size: 0.7em;
+    padding-left: 45px;
+}
+
+.Header select,
+.Header input,
+.Header .control {
+    width: 150px;
+}
+
+.Header input {
+    display: inline-block;
+}
+
+.Header .resource-def {
+    width: auto;
+    height: auto;
+    padding-left: 5px;
+    font-size: 0.8em;
+}
+
+.Header .resource-def {
+    font-size: 0.7em;
+    height: 20px;
+    padding: 5px 0 0 35px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.Header .resource-content {
+    display: none;
+    width: 450px;
+    margin-top: -8px;
+    padding: 2px 8px 5px 8px;
+    background: #fff;
+    z-index: 100;
+    margin-left: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.Header .resource-def span.resource-content {
+    position: absolute;
+}
+
+.Header .resource-def:hover .resource-content {
+    display: inline-block;
+}
