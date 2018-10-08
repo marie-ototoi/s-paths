@@ -8,16 +8,16 @@ import { connect } from 'react-redux'
 class Line extends React.Component {
     render () {
         return (
-            <div className="Line">
+            <div className='Line'>
                 {this.props.leftChildren}
                 <div
-                    className="field"
+                    className='field'
                     style={{
                         marginLeft: `${this.props.display.viz.horizontal_padding}px`,
                         width: `${this.props.display.viz.useful_width * 2 / 3}px`
                     }}
                 >
-                    <label className="label">
+                    <label className='label'>
                         {this.props.label}
                     </label>
                     {this.props.children}

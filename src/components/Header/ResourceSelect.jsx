@@ -8,14 +8,14 @@ class ResourceSelect extends React.Component {
             <div>
                 {option.label} ({option.total})
             </div>
-        );
+        )
     }
 
     render () {
         return (
-            <div className="control">
+            <div className='control'>
                 <ReactSelect
-                    classNamePrefix="propSelector"
+                    classNamePrefix='propSelector'
                     defaultValue={this.props.selectedResource}
                     getOptionValue={(option) => (option['type'])}
                     getOptionLabel={ResourceSelect.getOptionLabel}

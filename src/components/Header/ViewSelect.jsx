@@ -8,7 +8,7 @@ class ViewSelect extends React.Component {
         return (
             <div style={{
                 alignItems: 'center',
-                display: 'flex',
+                display: 'flex'
             }}>
                 <img
                     src={option.thumb}
@@ -22,7 +22,7 @@ class ViewSelect extends React.Component {
                 />
                 <span>{option.id}</span>
             </div>
-        );
+        )
     }
 
     render () {

@@ -7,11 +7,11 @@ class PropSelect extends React.Component {
     static getOptionLabel (option) {
         return (
             <div>
-                <span className="tag">
+                <span className='tag'>
                     {option.readablePath.map(p => p.label).join(' / * / ')}
                 </span>
             </div>
-        );
+        )
     }
 
     render () {

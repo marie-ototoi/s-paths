@@ -9,7 +9,7 @@ import { getNbDisplayed } from '../../lib/dataLib'
 import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 
 import { showSettings } from '../../actions/displayActions'
-import { displayConfig, loadResources, loadSelection, loadStats, selectResource } from '../../actions/dataActions'
+import { displayConfig, loadSelection, selectResource } from '../../actions/dataActions'
 import ViewSelect from './ViewSelect'
 import PropSelect from './PropSelect'
 import ResourceSelect from './ResourceSelect'
@@ -98,7 +98,7 @@ class Header extends React.Component {
     displayConfig () {
         const { config, configs, dataset, zone } = this.props
         let selectedLists = this.state.configsLists[this.state.selectedView]
-        const propPaths =  this.state.selectedProps && selectedLists ? this.state.selectedProps.map((prop, i) => selectedLists[i][prop].path) : []
+        const propPaths = this.state.selectedProps && selectedLists ? this.state.selectedProps.map((prop, i) => selectedLists[i][prop].path) : []
         this.setState({
             propsAreLoading: true,
             errorSelection: ''
@@ -152,7 +152,7 @@ class Header extends React.Component {
                 errorSelection: 'No results matching selection'
             }))
     }
-    componentWillUnmount() {
+    componentWillUnmount () {
         this.handleKeyDown = null
     }
     render () {
@@ -181,9 +181,9 @@ class Header extends React.Component {
             let selectedLists = this.state.configsLists[this.state.selectedView]
             let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps))
             return (
-                <div className="Header">
+                <div className='Header'>
                     <ReactKeymaster
-                        keyName="enter"
+                        keyName='enter'
                         onKeyDown={this.handleKeyDown}
                     />
                     <Line
@@ -194,10 +194,10 @@ class Header extends React.Component {
                         onSubmit={this.displayResource}
                         disable={!selectResourceEnabled}
                         leftChildren={
-                            <div className="logo">
+                            <div className='logo'>
                                 <img
-                                    src="/images/logo.svg"
-                                    alt="S-Path Logo"
+                                    src='/images/logo.svg'
+                                    alt='S-Path Logo'
                                     style={{ height: '29px', paddingLeft: '5px' }}
                                 />
                             </div>
@@ -205,9 +205,9 @@ class Header extends React.Component {
                         rightChildren={
                             <div>
                                 {this.state.selectedResource.comment &&
-                                    <span className="resource-def">?
+                                    <span className='resource-def'>?
                                         <span
-                                            className="resource-content"
+                                            className='resource-content'
                                             style={{ paddingTop: '5px', backgroundColor: '#ffffff' }}
                                         >
                                             {this.state.selectedResource.comment}
@@ -216,10 +216,10 @@ class Header extends React.Component {
                                 }
                                 {this.state.showConfig && (
                                     <span
-                                        className="icon"
-                                        onClick={() => {this.props.showSettings(zone)}}
+                                        className='icon'
+                                        onClick={() => { this.props.showSettings(zone) }}
                                     >
-                                        <i className="fas fa-cogs"/>
+                                        <i className='fas fa-cogs' />
                                     </span>
                                 )}
                             </div>
@@ -229,7 +229,7 @@ class Header extends React.Component {
                             options={this.state.resourceList}
                             selectedResource={this.state.selectedResource}
                             onChange={(selectedResource) => {
-                                this.setState({selectedResource})
+                                this.setState({ selectedResource })
                             }}
                         />
                     </Line>
@@ -241,26 +241,26 @@ class Header extends React.Component {
                         counterData={options[1]}
                         maxData={options[0].total}
                         rightChildren={
-                            <span className="error">{this.state.errorSelection}</span>
+                            <span className='error'>{this.state.errorSelection}</span>
                         }
                     >
-                        <div className="control">
+                        <div className='control'>
                             <input
-                                className="input is-small"
-                                type="text"
-                                placeholder="Keyword"
+                                className='input is-small'
+                                type='text'
+                                placeholder='Keyword'
                                 value={this.state.keyword}
                                 onChange={(e) => this.setState({ keyword: e.target.value })}
                             />
                         </div>
-                        <div className="pointer-group">
+                        <div className='pointer-group'>
                             <p>
                                 <span className={`label-like ${andClass}`}>AND</span>
                                 &nbsp;&nbsp;
                                 <span className={`pointer is-size-7 ${pointerClass}`}>
                                     pointer
-                                    <span className="icon">
-                                        <i className="fas fa-mouse-pointer"/>
+                                    <span className='icon'>
+                                        <i className='fas fa-mouse-pointer' />
                                     </span>
                                 </span>
                             </p>
@@ -273,7 +273,7 @@ class Header extends React.Component {
                         disable={!configEnabled}
                         counterData={options[2]}
                         maxData={options[0].total}
-                        leftChildren={<Slider/>}
+                        leftChildren={<Slider />}
                     >
                         <ViewSelect
                             onChange={(selectedOption) => {
@@ -282,7 +282,7 @@ class Header extends React.Component {
                                 )
                                 this.setState({
                                     selectedView,
-                                    selectedProps: getConfigs(getCurrentConfigs(configs, zone, 'active'), zone)[selectedView].constraints.map(() => 0),
+                                    selectedProps: getConfigs(getCurrentConfigs(configs, zone, 'active'), zone)[selectedView].constraints.map(() => 0)
                                 })
                             }}
                             options={activeConfigs}
@@ -290,7 +290,7 @@ class Header extends React.Component {
 
                         { selectedLists && selectedLists.map((list, index) => (
                             <div
-                                className="control"
+                                className='control'
                                 key={`${zone}selectprop${index}`}
                             >
                                 <PropSelect
@@ -323,15 +323,11 @@ class Header extends React.Component {
         configs: PropTypes.object,
         data: PropTypes.object,
         dataset: PropTypes.object,
-        dimensions: PropTypes.object,
         selections: PropTypes.array,
         views: PropTypes.array,
         zone: PropTypes.string,
-        analyseEndpoint: PropTypes.func,
         displayConfig: PropTypes.func,
-        loadResources: PropTypes.func,
         loadSelection: PropTypes.func,
-        loadStats: PropTypes.func,
         selectResource: PropTypes.func,
         showSettings: PropTypes.func
     }
@@ -340,15 +336,13 @@ class Header extends React.Component {
 const HeaderConnect = connect(
     (state) => ({
         configs: state.configs,
-        data:state.data,
+        data: state.data,
         dataset: state.dataset,
         selections: state.selections,
         views: state.views
     }),
     (dispatch) => ({
         displayConfig: displayConfig(dispatch),
-        loadResources: loadResources(dispatch),
-        loadStats: loadStats(dispatch),
         loadSelection: loadSelection(dispatch),
         selectResource: selectResource(dispatch),
         showSettings: showSettings(dispatch)

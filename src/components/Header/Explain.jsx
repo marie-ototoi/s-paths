@@ -2,8 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import pluralize from 'pluralize'
 import { connect } from 'react-redux'
-import {getCurrentConfigs, getSelectedMatch, getSelectedView} from '../../lib/configLib'
-import {getGraphsColors} from '../../lib/paletteLib'
+import { getCurrentConfigs, getSelectedMatch, getSelectedView } from '../../lib/configLib'
+import { getGraphsColors } from '../../lib/paletteLib'
 
 import './Explain.css'
 
@@ -32,7 +32,7 @@ class Explain extends React.Component {
 
         return (
             <div
-                className="Explain"
+                className='Explain'
                 style={{
                     marginTop: `${Math.floor((this.props.display.viz.top_margin - 155) / 2)}px`,
                     marginLeft: `${this.props.display.viz.horizontal_padding}px`
@@ -55,9 +55,9 @@ class Explain extends React.Component {
                         {allgraphs.length} {pluralize('graph', allgraphs.length)}
                     </strong>
                 </p>
-                <span className="resource-def">?
+                <span className='resource-def'>?
                     <div
-                        className="resource-content"
+                        className='resource-content'
                         style={{ margin: '-55px 0 0 0' }}
                     >
                         <span>Graphs: </span>
@@ -73,7 +73,7 @@ class Explain extends React.Component {
                         </ul>
                         {selectedProperties.map((prop, pi) => (
                             <div
-                                className="path"
+                                className='path'
                                 key={`path_${zone}_${pi}`}
                             >
                                 Path {(pi + 1)}:
@@ -84,7 +84,7 @@ class Explain extends React.Component {
                                 </span>
                                 {prop.readablePath.map((rp, rpi) => (
                                     <span
-                                        className="triple"
+                                        className='triple'
                                         style={{
                                             borderBottom: `1px solid ${graphs[prop.triplesGraphs[rpi]]}`,
                                             paddingLeft: `${5 + (rpi < 1 ? 0 : 20)}px`,
@@ -95,7 +95,7 @@ class Explain extends React.Component {
                                         key={`path_${zone}_${pi}_triple_${rpi}`}
                                     >
                                         <span
-                                            className="pathlabel"
+                                            className='pathlabel'
                                             title={rp.comment}
                                         >
                                             { rp.label }

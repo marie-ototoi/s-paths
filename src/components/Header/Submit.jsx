@@ -6,19 +6,20 @@ import './Submit.css'
 class Submit extends React.Component {
     render () {
         return (
-            <div className="Submit">
-                {!this.props.isLoading &&
+            <div className='Submit'>
+                {(
+                    !this.props.isLoading &&
                     <button
-                        className="button"
+                        className='button'
                         onClick={this.props.onClick}
                         disabled={this.props.disable}
                     >
-                        <span className="icon">
-                            <i className="fas fa-arrow-down fa-lg"/>
+                        <span className='icon'>
+                            <i className='fas fa-arrow-down fa-lg' />
                         </span>
                     </button>
-                ||
-                    <span className="button is-loading"/>
+                ) ||
+                    <span className='button is-loading' />
                 }
             </div>
         )
