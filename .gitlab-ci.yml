@@ -26,7 +26,7 @@ services:
 
 .docker-deploy:
   stage: deploy
-  image: docker
+  image: docker:stable
   before_script:
     - mkdir -pv ~/.docker
     - echo "$TLSCACERT" > ~/.docker/ca.pem
