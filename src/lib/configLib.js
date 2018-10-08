@@ -113,9 +113,11 @@ export const findAllMatches = (inputList, addList) => {
                 // prevent from having several times the same prop
                 if (m.path === addElt.path) addElt = { path: '' }
             })
+            // console.log([...match, addElt])
             return [...match, addElt]
         })
     }).reduce((a, b) => {
+        // console.log(a.concat(b))
         return a.concat(b)
     }, [])
 }
@@ -166,7 +168,9 @@ export const defineConfigs = (views, stats) => {
                             if (prop.total > 0 &&
                             (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
                             (!constraint.unique.min || (constraint.unique.min && (prop.unique >= constraint.unique.min && stats.selectionInstances >= constraint.unique.min))) &&
-                            (!constraint.unique.max || (constraint.unique.max && prop.unique <= constraint.unique.max))
+                            (!constraint.unique.max || (constraint.unique.max && prop.unique <= constraint.unique.max)) &&
+                            (!constraint.avg || !constraint.avg.min || (constraint.avg.min && prop.avgcharlength >= constraint.avg.min)) &&
+                            (!constraint.avg || !constraint.avg.max || (constraint.avg.max && prop.avgcharlength <= constraint.avg.max))
                             ) {
                                 propSet.push({
                                     ...prop,
@@ -180,28 +184,33 @@ export const defineConfigs = (views, stats) => {
                     return b.score - a.score
                 }))
             })
+            // console.log(view.id, propList)
             if (propList.length === 0 || propList[0].length === 0) return { matches: [] }
             // find all possible combinations
             let matches = propList[0].map(prop => [prop])
             if (propList.length > 1 && propList[1].length > 0) {
                 for (let i = 1; i < propList.length; i++) {
-                    matches = findAllMatches(matches, propList[i])
+                    if(propList[i].length > 0) matches = findAllMatches(matches, propList[i])
                 }
             }
-            // console.log(matches, propList)
+            // console.log(view.id, statsDict, matches, propList)
             // remove combinations where a mandatory prop is missing
             // or where latitude and longitude are not coordinated
-            matches = matches.filter(match => {
-                let missingProp = false
+            matches = matches.map(match => {
+                let optionalProp = view.constraints[view.constraints.length -1][0].optional !== undefined
+                if (!((match.length === view.constraints.length) || (match.length === view.constraints.length -1 && optionalProp))) return undefined
                 let geo = []
-                match.forEach((prop, index) => {
-                    missingProp = ((prop.path === '') && (!view.constraints[index][0].optional))
-                    if (prop.category === 'geo') geo.push(prop.subcategory)
+                match.forEach((m, index) => {
+                    if (m.category === 'geo') geo.push(m.subcategory)
                 })
-                let validgeo = (geo.length === 0 || (geo.length === 1 && geo[0] === 'name') || (geo[0] === 'latitude' && geo[1] === 'longitude'))
+                if (geo.length > 0) {
+                    if (!(geo.length === 0 || (geo[0] === 'latitude' && geo[1] === 'longitude'))) return undefined
+                }
                 let unique = new Set(match.map(m => m.property))
-                return !missingProp && unique.size === match.length && validgeo && match.length === view.constraints.length
-            })
+                if (!(unique.size === match.length)) return undefined
+                return match
+            }).filter(match => match)
+            // console.log(view.id, matches)
             if (matches.length === 0) return { matches }
 
             // if the view is supposed to display each entity
@@ -260,18 +269,16 @@ export const activateDefaultConfigs = (config) => {
     return {
         ...config,
         views: config.views.map((view, vIndex) => {
-            let selected = (vIndex === 0)
-            let selectedMatchIndex
-            if (selected) selectedMatchIndex = 0
+            let selectedView = (vIndex === 0)
             return {
                 ...view,
-                selected,
-                matches: view.matches.map((match, mIndex) => {
+                selected: selectedView,
+                matches: selectedView ? view.matches.map((match, mIndex) => {
                     return {
                         ...match,
-                        selected: selected && selectedMatchIndex === mIndex
+                        selected: mIndex === 0
                     }
-                })
+                }) : view.matches
             }
         })
     }

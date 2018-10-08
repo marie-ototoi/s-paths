@@ -145,7 +145,7 @@ const defaultState = [
         id: 'GeoMap',
         name: 'map',
         thumb : '/images/geomap.svg',
-        entrypoint: { min: 2 },
+        entrypoint: { min: 2, max: 1000 },
         constraints: [
             [
                 {
@@ -167,7 +167,15 @@ const defaultState = [
                     avg: { max: 120, optimal: [30, 70] },
                     unique: {}
                 }
-            ]
+            ]/*,
+            [
+                {
+                    category: 'text',
+                    unique: { min: 2, max: 15, optimal: [3, 10] },
+                    avg: { max: 120, optimal: [30, 70] },
+                    optional: true
+                }
+            ]*/
         ]
     }/*,
     {

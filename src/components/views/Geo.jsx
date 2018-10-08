@@ -45,7 +45,7 @@ class Geo extends React.Component {
                         }
                     }
                 })
-                console.log(selected)
+                // console.log(selected)
                 selectElements(selected, zone, selections)
             } else {
                 resetSelection(zone)
@@ -57,13 +57,16 @@ class Geo extends React.Component {
         this.props.handleTransition(this.props, this.getElementsForTransition())
     }
     handleZoneSelected(...args) {
-        console.log('coucou', ...args)
+        // console.log('coucou', ...args)
     }
     handleTooltip(...args) {
         if (this.props.role !== 'target') {
-            let label = args[1].properties ? args[1].properties.label : ''
-            console.log('coucou', ...args, label, this.customState.view.data('entitygroups'), this.customState.view.scenegraph())
-            this.setState({ label })
+            let label = args[1].label ? args[1].label : ''
+            if(label !== this.state.label) {
+                label = label.slice(1, label.length).replace(/\|/g, ' \n ')
+                // console.log('coucou', ...args, label, this.customState.view.data('entitygroups'), this.customState.view.scenegraph())
+                this.setState({ label })
+            } 
         }
     }
     render () {
@@ -81,7 +84,10 @@ class Geo extends React.Component {
                 }}
                 
             >
-                <p style = {{ position: 'absolute', marginLeft: display.viz.useful_width + 'px' }}>{this.state.label}</p>
+                <p
+                    className = "legend"
+                    style = {{ marginLeft: display.viz.useful_width + 'px', width: (display.viz.horizontal_padding - 20) + 'px' }}
+                >{this.state.label}</p>
                 { this.customState.spec &&
                     <Vega
                         spec = { this.customState.spec }
@@ -155,7 +161,7 @@ class Geo extends React.Component {
                 this.customState.view.signal('otherZoneSelected', false)
             }
         }
-        console.log( this.state.label !== nextState.label,  this.state.label, nextState.label)
+        // console.log( this.state.label !== nextState.label,  this.state.label, nextState.label)
         return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
             (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
             (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
@@ -220,15 +226,16 @@ class Geo extends React.Component {
             ...defaultSpec,
             "width": dimensions.useful_width,
             "height": dimensions.useful_height,
-            "padding": {"right": display.viz.horizontal_padding},
             "signals": [
                 ...defaultSpec.signals,
                 {
                     "name": "tooltip",
                     "value": {},
                     "on": [
-                        {"events": "shape:mouseover", "update": "datum"},
-                        {"events": "shape:mouseout",  "update": "{}"}
+                        {"events": "@aggregatePoints:mouseover", "update": "datum"},
+                        {"events": "@aggregateCount:mouseover", "update": "datum"},
+                        {"events": "@aggregatePoints:mouseout",  "update": "{}"},
+                        {"events": "@aggregateCount:mouseout",  "update": "{}"}
                     ]
                 },
                 {
