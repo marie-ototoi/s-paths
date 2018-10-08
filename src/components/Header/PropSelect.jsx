@@ -18,7 +18,6 @@ class PropSelect extends React.Component {
         return (
             <ReactSelect
                 classNamePrefix='PropSelect'
-                isSearchable={false}
                 defaultValue={this.props.options[this.props.currentValue || 0]}
                 getOptionValue={(option) => (option['path'])}
                 getOptionLabel={PropSelect.getOptionLabel}
