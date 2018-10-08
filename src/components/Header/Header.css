@@ -77,3 +77,38 @@
 .Header input {
     display: inline-block;
 }
+
+.Header .resource-def {
+    width: auto;
+    height: auto;
+    padding-left: 5px;
+    font-size: 0.8em;
+}
+
+.Header .resource-def {
+    font-size: 0.7em;
+    height: 20px;
+    padding: 5px 0 0 35px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.Header .resource-content {
+    display: none;
+    width: 450px;
+    margin-top: -8px;
+    padding: 2px 8px 5px 8px;
+    background: #fff;
+    z-index: 100;
+    margin-left: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+.Header .resource-def span.resource-content {
+    position: absolute;
+}
+
+.Header .resource-def:hover .resource-content {
+    display: inline-block;
+}

@@ -9,10 +9,18 @@ class ViewSelect extends React.Component {
             <div style={{
                 alignItems: 'center',
                 display: 'flex',
-                width: '30px',
-                background: '#666'
             }}>
-                <img src={option.thumb} alt={option.id}/>
+                <img
+                    src={option.thumb}
+                    alt={option.id}
+                    style={{
+                        alignItems: 'center',
+                        display: 'flex',
+                        width: '30px',
+                        background: '#666'
+                    }}
+                />
+                <span>{option.id}</span>
             </div>
         );
     }

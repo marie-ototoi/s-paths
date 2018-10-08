@@ -1,7 +1,21 @@
 .viewSelector__control {
-    width: 80px;
+    width: 90px;
     margin-right: 10px;
 }
+
 .viewSelector__value-container input {
     padding-top: 8px;
+}
+
+.viewSelector__value-container span {
+    display: none;
+}
+
+.viewSelector__menu {
+    width: 150px !important;
+}
+
+.viewSelector__menu span {
+    font-size: 0.8em;
+    margin-left: 10px;
 }
