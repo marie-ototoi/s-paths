@@ -1,0 +1,10 @@
+.propSelector p {
+    font-size: 0.8em;
+    font-weight: bold;
+    margin: 0;
+    padding-top: 5px;
+}
+
+.propSelector p.right {
+    text-align: right;
+}

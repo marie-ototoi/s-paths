@@ -1,5 +1,6 @@
 .Quantifier {
     display: flex;
+    align-items: center;
 }
 
 .Quantifier .text-progress {
