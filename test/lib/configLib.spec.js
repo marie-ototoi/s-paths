@@ -44,47 +44,4 @@ describe('lib/config', () => {
         expect(config.getDeviationCost(3, 160, [5, 10], 0.5)).to.equal(0.5 / (160 - 10))
         expect(config.getDeviationCost(3, 20, [5, 10], 0.5)).to.equal(0.5 / (20 - 10))
     })
-    it('should change selected config for a given zone', () => {
-        let formerConfig = {
-            matches: [
-                {
-                    properties: [
-                        { path: 'nobel:LaureateAward/nobel:category/*' },
-                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
-                        { path: 'nobel:LaureateAward/nobel:share/*' }
-                    ],
-                    selected: false
-                },
-                {
-                    properties: [
-                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
-                        { path: 'nobel:LaureateAward/nobel:category/*' },
-                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' }
-                    ],
-                    selected: true
-                },
-                {
-                    properties: [
-                        { path: 'nobel:LaureateAward/nobel:category/*' },
-                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*' },
-                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' }
-                    ],
-                    selected: false
-                },
-                {
-                    properties: [
-                        { path: 'nobel:LaureateAward/nobel:category/*' },
-                        { path: 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfDeath/*' },
-                        { path: 'nobel:LaureateAward/nobel:share/*' }
-                    ],
-                    selected: false
-                }
-            ]
-        }
-        let newConfig = config.selectProperty(formerConfig, 'main', 1, 'nobel:LaureateAward/nobel:laureate/*/dbpprop:dateOfBirth/*')
-        expect(newConfig.matches[0].selected).to.be.false
-        expect(newConfig.matches[1].selected).to.be.false
-        expect(newConfig.matches[2].selected).to.be.true
-        expect(newConfig.matches[3].selected).to.be.false
-    })
 })
