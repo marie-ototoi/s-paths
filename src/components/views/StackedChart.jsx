@@ -10,7 +10,7 @@ import SelectionZone from '../elements/SelectionZone'
 // d3
 import StackedChartLayout from '../../d3/StackedChartLayout'
 // libs
-import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
+import { getSelectedMatch } from '../../lib/configLib'
 import { getAxis, getLegend, nestData } from '../../lib/dataLib'
 import { getDimensions } from '../../lib/scaleLib'
 // redux functions
@@ -36,7 +36,7 @@ class StackedChart extends React.Component {
             (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
-        const { data, config, dataset, getPropPalette, palettes, zone } = nextProps
+        const { data, config, getPropPalette, palettes, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
         // First prop to be displayed in the bottom axis
@@ -65,7 +65,7 @@ class StackedChart extends React.Component {
         const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         // console.log(colors)
         const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
-        const propsLists = getPropsLists(config, zone, dataset)
+        const propsLists = config.propList
         // console.log(propsLists)
         // Save to reuse in render
         this.customState = {

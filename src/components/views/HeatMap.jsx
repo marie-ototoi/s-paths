@@ -9,7 +9,7 @@ import SelectionZone from '../elements/SelectionZone'
 // d3
 import HeatMapLayout from '../../d3/HeatMapLayout'
 // libs
-import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
+import { getSelectedMatch } from '../../lib/configLib'
 import { getAxis, getLegend, getThresholdsForLegend, nestData } from '../../lib/dataLib'
 import { getQuantitativeColors } from '../../lib/paletteLib'
 import { getDimensions } from '../../lib/scaleLib'
@@ -36,7 +36,7 @@ class HeatMap extends React.Component {
             (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
-        const { config, data, dataset, zone } = nextProps
+        const { config, data, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
         // First prop to be displayed in the bottom axis
@@ -57,8 +57,7 @@ class HeatMap extends React.Component {
         const colors = getQuantitativeColors()
         const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
         const legend = getLegend(thresholds, 'countprop2', colors, 'aggregate')
-        const propsLists = getPropsLists(config, zone, dataset)
-        // console.log(propsLists,  dataset.labels)
+        const propsLists = config.propList
         // Save to reuse in render
         this.customState = {
             ...this.customState,

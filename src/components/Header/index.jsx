@@ -4,7 +4,7 @@ import { connect } from 'react-redux'
 import ReactKeymaster from 'react-keymaster'
 import shallowEqual from 'shallowequal'
 
-import { getConfigs, getCurrentConfigs, getPropsLists, getSelectedMatch, getSelectedView } from '../../lib/configLib'
+import { getConfigs, getCurrentConfigs, getSelectedMatch, getSelectedView } from '../../lib/configLib'
 import { getNbDisplayed } from '../../lib/dataLib'
 import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 
@@ -41,15 +41,19 @@ class Header extends React.Component {
         let displayedResource = nextProps.dataset.resources.find((resource) =>
             resource.type === nextProps.dataset.entrypoint
         )
-
         let selectedResource = displayedResource
-        let configsLists = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).map(config =>
-            getPropsLists(config, nextProps.zone, nextProps.dataset)
-        )
-        let displayedView = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone)
-            .reduce((acc, cur, i) => (cur.selected ? i : acc), null)
-        let displayedProps = configsLists[displayedView]
-            .map(prop => prop.reduce((acc, cur, i) => (cur.selected ? i : acc), 0))
+        let configsLists = nextProps.configs.present.views.map(view => view.propList)
+      
+        let displayedView = nextProps.configs.present.views.reduce((acc, cur, i) => (cur.selected ? i : acc), null)
+        let displayedProps = configsLists[displayedView].map((list, index) => {
+            return list.reduce((acc, cur, propIndex) => {
+                if (nextProps.config.selectedMatch.properties[index] && cur.path === nextProps.config.selectedMatch.properties[index].path) {
+                    acc = propIndex
+                }
+                return acc
+            }, null)
+        })
+        console.log(displayedProps)
         let selectedProps = displayedProps
         let selectedView = displayedView
 
@@ -96,14 +100,15 @@ class Header extends React.Component {
             }))
     }
     displayConfig () {
-        const { config, configs, dataset, zone } = this.props
+        const { config, dataset, zone } = this.props
         let selectedLists = this.state.configsLists[this.state.selectedView]
-        const propPaths = this.state.selectedProps && selectedLists ? this.state.selectedProps.map((prop, i) => selectedLists[i][prop].path) : []
+        //console.log('ici', )
+        let selectedMatch = { properties: this.state.selectedProps.map((prop, i) => selectedLists[i][prop]) }
         this.setState({
             propsAreLoading: true,
             errorSelection: ''
         })
-        this.props.displayConfig(this.state.selectedView, propPaths, getConfigs(getCurrentConfigs(configs, zone, 'active'), zone), config, dataset, zone)
+        this.props.displayConfig(this.state.selectedView, selectedMatch, this.props.configs.present.views, config, dataset, zone)
             .then(() => this.setState({
                 propsAreLoading: false,
                 displayedProps: this.state.selectedProps,

@@ -95,13 +95,18 @@ const checkFirstValidConfigs = (configs, stats, dataset, previousConfig) => {
     let double = []
     let newStats
     for (let i = 0; i < views.length; i++) {
-        views[i].matches[0].properties.forEach(prop => {
-            if (!double.includes(prop.fullPath)) {
-                propsToCheck.push(prop)
-                double.push(prop)
+        views[i].propList.forEach(list => {
+            let max = 3
+            if (list.length < max) max = list.length
+            for(let i = 0; i < max; i ++){
+                let prop = list[i]
+                if (!double.includes(prop.fullPath)) {
+                    propsToCheck.push(prop)
+                    double.push(prop)
+                }
             }
         })
-        matchesToCheck[views[i].id] = views[i].matches[0].properties
+        matchesToCheck[views[i].id] = views[i].selectedMatch.properties
     }
     
     return checkStatements(propsToCheck, stats.selectionInstances, dataset)
@@ -121,52 +126,9 @@ const checkFirstValidConfigs = (configs, stats, dataset, previousConfig) => {
                 })
             }
             let newConfigs = defineConfigs(views, newStats)
-            let mainSelected
-            //for (let i = 0; i < newConfigs.length; i++) {
-            for (let i = 0; i < newConfigs.views.length; i++) {
-                let check = matchesToCheck[newConfigs.views[i].id]
-                if (check) {
-                    for (let j = 0; j < newConfigs.views[i].matches.length; j++) {
-                        let match = newConfigs.views[i].matches[j].properties
-                        let ok = true
-                        match.forEach((p, index) => {
-                            if (check[index].fullPath !== p.fullPath) ok = false
-                        })
-                        if (ok === true) {
-                            if (!mainSelected) {
-                                mainSelected = true
-                                newConfigs.views[i].matches[j].selected = true
-                                for (let k = 0; k < newConfigs.views.length; k++) {
-                                    newConfigs.views[k].selected = (k === i)
-                                }
-                                if (newConfigs.views.length > 1) j++
-                                break
-                            } 
-                        }
-                    }
-                }
-            }
-            if (!mainSelected) {
-                for (let i = 0; i < newConfigs.views.length; i++) {
-                    if (newConfigs.views[i].id === 'ListAllPropss') {
-                        for (let j = 0; j < newConfigs.views[i].matches.length; j++) {
-                            let match = newConfigs.views[i].matches[j].properties
-                            if (match[0].checked) {
-                                if (!mainSelected) {
-                                    mainSelected = true
-                                    newConfigs[0].views[i].matches[j].selected = true
-                                    for (let k = 0; k < newConfigs.views.length; k++) {
-                                        newConfigs.views[k].selected = (k === i)
-                                    }
-                                }
-                                j = newConfigs.views.length
-                                break
-                            }
-                        }
-                    }
-                }
-            }
-            // console.log('la', newConfigs, newStats)
+            
+            
+            console.log('la', newConfigs, newStats)
             return [newConfigs, newStats]
             // if both main and aside send results
             // else start from new config keeping checked config if there is one and call recursive
@@ -358,15 +320,7 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
         return {
             ...config,
             selected: index === viewIndex,
-            matches: config.matches.map(match => {
-                return {
-                    ...match,
-                    selected: index === viewIndex && (config.id === 'ListAllProps' || match.properties.reduce((acc, cur, i) => {
-                        if (cur.path !== props[i]) acc = false
-                        return acc
-                    }, true))
-                }
-            })
+            selectedMatch: props
         }
 
     })

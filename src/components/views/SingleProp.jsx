@@ -5,7 +5,7 @@ import Vega from 'react-vega';
 // components
 // d3
 // libs
-import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
+import { getSelectedMatch } from '../../lib/configLib'
 import { makeId, prepareSinglePropData } from '../../lib/dataLib'
 import { usePrefix } from '../../lib/queryLib'
 import defaultSpec from '../../lib/spec'
@@ -79,15 +79,13 @@ class SingleProp extends React.Component {
         // this.props.handleTransition(this.props, elts)
     }
     prepareData (nextProps) {
-        const { config, data, dataset, dimensions, display, palettes, selections, zone } = nextProps
+        const { config, data, dataset, dimensions, display, selections, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
         const categoryProp1 = selectedConfig.properties[0].category
         // First prop
         //console.log()
         const nestedProp1 = prepareSinglePropData(data, categoryProp1, dataset.prefixes)
-        const propsLists = getPropsLists(config, zone, dataset)
-        const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
         let labelAngle = (selectedConfig.properties[0].avgcharlength * 8 > dimensions.useful_width / nestedProp1.length) ? -45 : 0 
         // console.log('labelAngle', labelAngle, nextProps.role, nextProps.step)
         let labelAlign = labelAngle < 0 ? 'right' : 'center'
@@ -349,7 +347,7 @@ class SingleProp extends React.Component {
         return items
     }
     render () {
-        const { dimensions, display, role, selections, step, zone } = this.props
+        const { dimensions, role, step } = this.props
        
         return (<div
             className = { `ListProp ${this.customState.elementName} role_${role}` } 
