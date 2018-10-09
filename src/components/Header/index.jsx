@@ -53,7 +53,6 @@ class Header extends React.Component {
                 return acc
             }, null)
         })
-        console.log(displayedProps)
         let selectedProps = displayedProps
         let selectedView = displayedView
 

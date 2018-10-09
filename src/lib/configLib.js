@@ -68,43 +68,68 @@ const getCost = (val, min, max, optimal, score) => {
     return score / 2
 }
 const scoreProp = (prop, constraint) => {
+    let rankFactors = {
+        category: 1,
+        definition: 2,
+        level: 2,
+        coverage: 3
+    }
     if (prop.path === '') return null
     // et eventuellement si la prop peut avoir plusieurs valeurs pour une meme instance (specifier dans la vue si c'est souhaite)
-    const maxscore = 1
-    let cost = 0
+    let score = {}
     const { min, max, optimal } = constraint.unique
     switch (prop.category) {
     case 'datetime':
+        score.category = 9
         // repartition
         break
     case 'number':
+        score.category = 6
         break
     case 'geo':
+        score.category = 10
         break
     case 'text':
         // the closer to the optimal range, the better
-        cost = getCost(prop.unique, min, max, optimal, maxscore)
+        score.category = 8
         break
     default:
+        score.category = 3
         //
     }
-    // console.log(cost, prop.level, (cost + prop.level), prop)
-    cost += prop.level * 0.3
-    let score = maxscore - cost
-    // modulates score according to the coverage of the dataset by this prop
-    score *= prop.coverage / 10
-    return (score > 0) ? score : 0
+    score.definition = 10 - getCost(prop.unique, min, max, optimal, 10)
+    score.coverage = prop.coverage / 10
+    score.total = 0
+    score.level = 10 - prop.level
+    let coeff = 0
+    for (let factor in rankFactors) {
+        score.total += score[factor] * rankFactors[factor]
+        coeff += rankFactors[factor]
+    }
+    score.total = score.total / coeff
+    return score.total
 }
-const scoreMatch = (match, entrypointFactor) => {
+const scoreMatch = (match, entrypointFactor, viewWeight) => {
+    let rankFactors = {
+        view: 1,
+        propsNumber: 1,
+        propsAverage: 1
+    }
+    let score = {}
     match = match.filter(p => p.score >= 0)
     // mean of each property's score
-    let score = match.map(p => p.score).reduce((a, b) => a + b, 0) / match.length
-    let coverage = match.map(p => isNaN(p.coverage) ? 50 : p.coverage).reduce((a, b) => a + b, 0) / match.length
-    // bonus for each property represented
-    score += 10 * match.length
-    score *= coverage / 10
-    // domain rules to add values for some properties : TO DO
-    return score // * entrypointFactor
+    score.propsNumber = match.length
+    score.propsAverage = match.map(p => p.score).reduce((a, b) => a + b, 0) / match.length
+    score.view = viewWeight
+    score.total = 0
+    let coeff = 0
+    for (let factor in rankFactors) {
+        score.total += score[factor] * rankFactors[factor]
+        coeff += rankFactors[factor]
+    }
+    score.total = score.total / coeff
+    // console.log(score)
+    return score.total
 }
 export const findAllMatches = (inputList, addList) => {
     return inputList.map(match => {
@@ -208,7 +233,7 @@ export const defineConfigs = (views, stats) => {
                     match.length === view.constraints.length - 1)) {
                 selectedMatch = {
                     properties: match,
-                    scoreMatch: scoreMatch(match, (view.entrypoint !== undefined))
+                    scoreMatch: scoreMatch(match, (view.entrypoint !== undefined), view.weight)
                 }
             }
             return {

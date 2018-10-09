@@ -385,9 +385,7 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
         defList = defList.concat(`BIND (${maxDepth} as ?level) . `)
         defList = defList.concat(`}`)
     } else {
-        let selectedConfig = configLib.getSelectedMatch(configZone)
-        console.log(selectedConfig)
-    
+        let selectedConfig = configLib.getSelectedMatch(configZone)    
         let properties = !configZone.allProperties ? selectedConfig.properties : []
         if (prop1only === true) properties = [properties[0]]
         propList = (configZone.entrypoint === undefined || unique) ? `DISTINCT ` : `DISTINCT ?entrypoint `
