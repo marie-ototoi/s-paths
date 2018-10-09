@@ -8,11 +8,11 @@ class TransitionLayout extends AbstractLayout {
         let shapesSelection = d3.select(this.el).selectAll('rect')
             .data(props.elements.origin, (d) => d.signature)
         const tChange = d3.transition()
-            .duration(750)
+            .duration(2500)
         const tRemove = d3.transition()
-            .duration(750)
+            .duration(2500)
         const tEnter = d3.transition()
-            .duration(750)
+            .duration(2500)
 
         shapesSelection
             .enter()
@@ -61,7 +61,7 @@ class TransitionLayout extends AbstractLayout {
                
 
             
-        window.setTimeout(() => { props.endTransition(props.zone) }, 1000)
+        window.setTimeout(() => { props.endTransition(props.zone) }, 2700)
         // console.log('drawn')
     }
     checkSelection (props) {}

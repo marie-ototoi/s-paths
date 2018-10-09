@@ -386,7 +386,7 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
         defList = defList.concat(`}`)
     } else {
         let selectedConfig = configLib.getSelectedMatch(configZone)
-        // console.log(selectedConfig)
+        console.log(selectedConfig)
     
         let properties = !configZone.allProperties ? selectedConfig.properties : []
         if (prop1only === true) properties = [properties[0]]

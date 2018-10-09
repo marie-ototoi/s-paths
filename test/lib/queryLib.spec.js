@@ -67,15 +67,13 @@ WHERE {
                 [{}],
                 [{}]
             ],
-            matches: [
-                {
-                    properties: [
-                        { path: 'nobel:LaureateAward/nobel:year/*', category: 'text' },
-                        { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
-                    ],
-                    selected: true
-                }
-            ]
+            selectedMatch: {
+                properties: [
+                    { path: 'nobel:LaureateAward/nobel:year/*', category: 'text' },
+                    { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
+                ],
+                selected: true
+            }
         }
         const config2 = {
             ...config1,
@@ -88,14 +86,12 @@ WHERE {
             constraints: [
                 [{}]
             ],
-            matches: [
-                {
-                    properties: [
-                        { path: 'nobel:Laureate/dbpedia-owl:affiliation/*/dbpedia-owl:country/*', category: 'geo', subcategory: 'name' }
-                    ],
-                    selected: true
-                }
-            ]
+            selectedMatch: {
+                properties: [
+                    { path: 'nobel:Laureate/dbpedia-owl:affiliation/*/dbpedia-owl:country/*', category: 'geo', subcategory: 'name' }
+                ],
+                selected: true
+            }
         }
         expect(queryLib.makeQuery('nobel:LaureateAward', config1, 'main', { graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'], constraints: '' }))
             .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) ?prop2 (COUNT(?prop2) as ?countprop2) FROM <http://localhost:8890/nobel> FROM <http://localhost:8890/geonames> 
@@ -265,15 +261,14 @@ WHERE {
                 [{}],
                 [{}]
             ],
-            matches: [
-                {
-                    properties: [
-                        { path: 'nobel:LaureateAward/nobel:year/*' },
-                        { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
-                    ],
-                    selected: true
-                }
-            ]
+            selectedMatch: {
+                properties: [
+                    { path: 'nobel:LaureateAward/nobel:year/*' },
+                    { path: 'nobel:LaureateAward/nobel:laureate/nobel:Laureate/foaf:gender/*' }
+                ],
+                selected: true
+            }
+            
         }
         const options = {
             constraints: 'FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . ',
@@ -285,15 +280,13 @@ WHERE {
                 [{}],
                 [{}]
             ],
-            matches: [
-                {
-                    properties: [
-                        { path: 'nobel:LaureateAward/nobel:university/*' },
-                        { path: 'nobel:LaureateAward/dct:isPartOf/*' }
-                    ],
-                    selected: true
-                }
-            ]
+            selectedMatch: {
+                properties: [
+                    { path: 'nobel:LaureateAward/nobel:university/*' },
+                    { path: 'nobel:LaureateAward/dct:isPartOf/*' }
+                ],
+                selected: true
+            }
         }
         const newOptions = {
             constraints: 'FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . ',

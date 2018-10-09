@@ -1,8 +1,9 @@
 import * as d3 from 'd3'
 
 export const getSelectedMatch = (config) => {
-    let thematch = config.matches.filter(m => m.selected === true)
-    return thematch.length > 0 ? thematch[0] : []
+    return config.selectedMatch
+    // let thematch = config.matches.filter(m => m.selected === true)
+    // return thematch.length > 0 ? thematch[0] : []
 }
 export const getConfigs = (configs, zone) => {
     return configs.views
@@ -184,84 +185,45 @@ export const defineConfigs = (views, stats) => {
                     return b.score - a.score
                 }))
             })
-            // console.log(view.id, propList)
-            if (propList.length === 0 || propList[0].length === 0) return { matches: [] }
-            // find all possible combinations
-            let matches = propList[0].map(prop => [prop])
-            if (propList.length > 1 && propList[1].length > 0) {
-                for (let i = 1; i < propList.length; i++) {
-                    if(propList[i].length > 0) matches = findAllMatches(matches, propList[i])
-                }
-            }
-            // console.log(view.id, statsDict, matches, propList)
-            // remove combinations where a mandatory prop is missing
-            // or where latitude and longitude are not coordinated
-            matches = matches.map(match => {
-                let optionalProp = view.constraints[view.constraints.length -1][0].optional !== undefined
-                if (!((match.length === view.constraints.length) || (match.length === view.constraints.length -1 && optionalProp))) return undefined
-                let geo = []
-                match.forEach((m, index) => {
-                    if (m.category === 'geo') geo.push(m.subcategory)
-                })
-                if (geo.length > 0) {
-                    if (!(geo.length === 0 || (geo[0] === 'latitude' && geo[1] === 'longitude'))) return undefined
-                }
-                let unique = new Set(match.map(m => m.property))
-                if (!(unique.size === match.length)) return undefined
-                return match
-            }).filter(match => match)
-            // console.log(view.id, matches)
-            if (matches.length === 0) return { matches }
-
-            // if the view is supposed to display each entity
-            let entrypointFactor = 1
-            if (view.entrypoint) {
-                const { min, max, optimal } = view.entrypoint
-                if (optimal) {
-                    // will higher each score
-                    entrypointFactor += getCost(stats.selectionInstances, min, max, optimal, 0.3)
-                }
-            }
-            let scoredMatches
-            if ( view.id === 'ListAllProps' ) {
-                scoredMatches = [ {
-                    score: 170,
-                    properties: matches.map(match => match[0])
-                } ]
-            } else {
-                scoredMatches = matches.map(match => {
-                    return {
-                        properties: match,
-                        entrypointFactor,
-                        multiple: view.constraints.map((cs, csi) => {
-                            let xt = []
-                            cs.forEach(c => {
-                                if(c.multiple) {
-                                    xt = statsDict[c.category].filter(stat =>  stat.path !== match[csi].path)
-                                }
-                            })
-                            return xt
-                        }),
-                        score: scoreMatch(match, entrypointFactor) /*,
-                        entrypoint: (view.entrypoint !== undefined) */
-                    }
-                })
-            }
+            
             // console.log(view.id, scoredMatches)
             // sort by score and return
+            let alreadyInMatch = []
+            let match = propList.map(list => {
+                if (list.length > 0) {
+                    let index = 0
+                    while (alreadyInMatch.includes(list[index].path)){
+                        index ++
+                    }
+                    if (list[index]) {
+                        alreadyInMatch.push(list[index].path)
+                        return list[index]
+                    }
+                }
+            }).filter(list => list)
+            
+            let selectedMatch
+            if ((match.length === view.constraints.length) ||
+                (view.constraints[view.constraints.length-1][0].optional !== undefined && 
+                    match.length === view.constraints.length - 1)) {
+                selectedMatch = {
+                    properties: match,
+                    scoreMatch: scoreMatch(match, (view.entrypoint !== undefined))
+                }
+            }
             return {
                 ...view,
-                matches: scoredMatches.sort((a, b) => {
-                    return b.score - a.score
-                })
+                propList,
+                selectedMatch
             }
         }
     })
-        .filter(view => view.matches.length > 0)
+        .filter(view => view.selectedMatch !== undefined)
         .sort((a, b) => {
-            return b.matches[0].score - a.matches[0].score
+            return b.selectedMatch.score - a.selectedMatch.score
         })
     // if (configSetUp.matches) console.log('salut la config', configSetUp.matches.map(p => p.fullPath))
+    // console.log(configSetUp)
     return { views: [...configSetUp] }
 }
 export const activateDefaultConfigs = (config) => {
@@ -269,47 +231,12 @@ export const activateDefaultConfigs = (config) => {
     return {
         ...config,
         views: config.views.map((view, vIndex) => {
-            let selectedView = (vIndex === 0)
             return {
                 ...view,
-                selected: selectedView,
-                matches: selectedView ? view.matches.map((match, mIndex) => {
-                    return {
-                        ...match,
-                        selected: mIndex === 0
-                    }
-                }) : view.matches
+                selected: (vIndex === 0)
             }
         })
     }
-}
-export const getPropsLists = (configs, zone, dataset) => {
-    // const { labels, prefixes } = dataset
-    const maxPropIndex = d3.max(configs.matches.map(m => m.properties.length))
-    return Array.from(Array(maxPropIndex).keys()).map(propIndex => {
-        return configs.matches
-            .filter(config => config.properties[propIndex].path !== '')
-            .map(config => {
-                return {
-                    path: config.properties[propIndex].path,
-                    readablePath: config.properties[propIndex].readablePath,
-                    // readablePath: dataLib.getReadablePathsParts(config.properties[propIndex].path, labels, prefixes),
-                    selected: config.selected
-                }
-            }).reduce((configAcc, config) => {
-                let existsIndex
-                const exists = configAcc.filter((c, i) => {
-                    if (c.path === config.path) existsIndex = i
-                    return c.path === config.path
-                })
-                if (!exists.length > 0) {
-                    configAcc.push(config)
-                } else {
-                    if (config.selected) configAcc[existsIndex].selected = true
-                }
-                return configAcc
-            }, [])
-    })
 }
 export const selectProperty = (config, zone, propIndex, path) => {
     let selectedMatch = getSelectedMatch(config, zone)

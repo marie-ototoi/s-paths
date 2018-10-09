@@ -11,12 +11,12 @@ class PropSelector extends React.PureComponent {
         }
     }
     render () {
-        const { align, dimensions, propList } = this.props
+        const { align, config, dimensions, propIndex, propList } = this.props
         const { x, y, width, height } = dimensions
         const alignClass = (align === 'right') ? 'right' : 'left'
         let selectedPropIndex
         propList.forEach((p, i) => {
-            if (p.selected) selectedPropIndex = i
+            if (p.path === config.selectedMatch.properties[propIndex].path) selectedPropIndex = i
         })
         const selectedProp = propList[selectedPropIndex]
         return (

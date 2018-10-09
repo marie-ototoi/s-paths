@@ -7,7 +7,7 @@ import SelectionZone from '../elements/SelectionZone'
 // d3
 import URIWheelLayout from '../../d3/URIWheelLayout'
 // libs
-import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
+import { getSelectedMatch } from '../../lib/configLib'
 import { deduplicate, nestData } from '../../lib/dataLib'
 // redux functions
 import { getPropPalette } from '../../actions/palettesActions'
@@ -32,7 +32,7 @@ class URIWheel extends React.Component {
             (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
-        const { config, data, dataset, getPropPalette, palettes, zone } = nextProps
+        const { config, data, getPropPalette, palettes, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
         // First prop
@@ -41,7 +41,7 @@ class URIWheel extends React.Component {
             category: 'text'
         }])
 
-        const propsLists = getPropsLists(config, zone, dataset)
+        const propsLists = config.propList
 
         const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
 

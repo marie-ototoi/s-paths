@@ -7,7 +7,7 @@ import SelectionZone from '../elements/SelectionZone'
 // d3
 import TreeMapLayout from '../../d3/TreeMapLayout'
 // libs
-import { getPropsLists, getSelectedMatch } from '../../lib/configLib'
+import { getSelectedMatch } from '../../lib/configLib'
 import { deduplicate, nestData } from '../../lib/dataLib'
 // redux functions
 import { getPropPalette } from '../../actions/palettesActions'
@@ -32,7 +32,7 @@ class TreeMap extends React.Component {
             (this.props.step !== nextProps.step)
     }
     prepareData (nextProps) {
-        const { config, data, dataset, getPropPalette, palettes, zone } = nextProps
+        const { config, data, getPropPalette, palettes, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
 
@@ -43,7 +43,7 @@ class TreeMap extends React.Component {
         }])
 
         const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
-        const propsLists = getPropsLists(config, zone, dataset)
+        const propsLists = config.propList
 
         // Save to reuse in render
         this.customState = {
