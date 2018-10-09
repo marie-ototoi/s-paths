@@ -210,17 +210,20 @@ export const defineConfigs = (views, stats) => {
                     return b.score - a.score
                 }))
             })
-            
+            propList = propList.reduce((acc, cur) => {
+                if (cur.length > 0) acc.push(cur)
+                return acc
+            }, [])
             // console.log(view.id, scoredMatches)
             // sort by score and return
             let alreadyInMatch = []
-            let match = propList.map(list => {
+            let match = propList.map((list, listIndex) => {
                 if (list.length > 0) {
                     let index = 0
-                    while (alreadyInMatch.includes(list[index].path)){
+                    while (alreadyInMatch.includes(list[index].path) && list[index + 1]){
                         index ++
                     }
-                    if (list[index]) {
+                    if (!alreadyInMatch.includes(list[index].path)) {
                         alreadyInMatch.push(list[index].path)
                         return list[index]
                     }

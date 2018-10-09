@@ -126,9 +126,7 @@ const checkFirstValidConfigs = (configs, stats, dataset, previousConfig) => {
                 })
             }
             let newConfigs = defineConfigs(views, newStats)
-            
-            
-            console.log('la', newConfigs, newStats)
+
             return [newConfigs, newStats]
             // if both main and aside send results
             // else start from new config keeping checked config if there is one and call recursive
