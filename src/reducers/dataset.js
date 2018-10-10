@@ -4,7 +4,7 @@ const initialState = {
     endpoint: process.env.ENDPOINT || 'http://s-paths.lri.fr:8890/sparql',
     localEndpoint: process.env.LOCAL_ENDPOINT || 'http://virtuoso:8890/sparql',
     entrypoint: '',
-    graphs: ['http://bnf.ilda.fr'],
+    graphs: ['http://nobel.ilda.fr', 'http://nobeladdon.ilda.fr'],
     resourceGraph: null,
     constraints: '',
     labels: [],
