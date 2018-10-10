@@ -18,10 +18,6 @@ services:
     image: registry.gitlab.inria.fr/mdestand/semantic-paths:latest
     build:
       context: ./
-      args:
-        - http_proxy
-        - https_proxy
-        - no_proxy
     restart: always
     env_file:
       - .env
