@@ -72,7 +72,7 @@ const scoreProp = (prop, constraint) => {
         category: 1,
         definition: 2,
         level: 2,
-        coverage: 3
+        coverage: 8
     }
     if (prop.path === '') return null
     // et eventuellement si la prop peut avoir plusieurs valeurs pour une meme instance (specifier dans la vue si c'est souhaite)

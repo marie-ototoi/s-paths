@@ -317,6 +317,7 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone, datas
     // add constraints for constrained groups of entities (heatmap)
     const setSelection = selections.filter(sel => sel.query.type === 'set' && sel.zone === zone)
     let paths = ''
+    let bind = ''
     const setConstraints = setSelection.map((sel, iS) => {
         return '(' + sel.query.value.map((constraint, iC) => {
             const propName = 'contraint' + constraint.propName
@@ -331,14 +332,22 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone, datas
                 })
             }
             if (constraint.category === 'datetime') {
-    
+                console.log('toot', constraint)
+                let datePropName = 'date' + propName
+                bind += `BIND (xsd:date(?${propName}) as ?${datePropName}) . ` 
                 const conditions = constraint.value.map((r, iR) => {
-                    let theDate = new Date(r, (iR === 0) ? 0 : 11, (iR === 0) ? 1 : 31)
-                    if (String(r).match(/\d{4}/)) {
-                        return `xsd:integer(?${propName}) ${(iR === 0) ? '>=' : '<='} xsd:integer('${theDate.getFullYear()}')`
-                    } else { 
-                        return `xsd:date(?${propName}) ${(iR === 0) ? '>=' : '<='} xsd:date('${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}')`
-                    }                    
+                    // console.log(String(r).match(/(\d{4})$/), String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/), String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/))
+                    let theDate
+                    if (String(r).match(/(\d{4})$/)) {
+                        theDate = new Date(r, (iR === 0) ? 0 : 11, (iR === 0) ? 1 : 31)
+                    } else if (String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/)) {
+                        theDate = new Date(String(r).substr(0, 4), String(r).substr(5, 2), String(r).substr(8, 2))
+                    } else if (String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/)) {
+                        theDate = new Date(String(r).substr(0, 2), String(r).substr(3, 2), String(r).substr(6, 4))
+                    }
+                    // console.log(`?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}'^^xsd:date`)
+                    return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getMonth() + 1}-${theDate.getDate()}'^^xsd:date`
+                                        
                 }).join(' && ')
                 return `(${conditions})`
             } else if (constraint.category === 'text' || constraint.category === 'uri' || (constraint.category === 'geo' && constraint.subcategory === 'name')) {
@@ -347,9 +356,10 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone, datas
         }).join(' && ') + ')'
     }).join(' || ')
     let totalQuery = ''
+
     if (uriRegex !== '') totalQuery += `FILTER regex(?entrypoint, '^${uriRegex}$', 'i') .`
-    if (setConstraints !== '') totalQuery += `${paths} FILTER (${setConstraints}) . `
-    // console.log(totalQuery)
+    if (setConstraints !== '') totalQuery += `${paths} ${bind}FILTER (${setConstraints}) . `
+    console.log(totalQuery)
     return totalQuery
 }
 
