@@ -1,12 +1,20 @@
 FROM node
 
-WORKDIR /usr/src/app
+WORKDIR ./
 
-COPY package*.json ./
+COPY package.json /
+
+# Install app dependencies
 RUN npm install
 
-COPY . .
+COPY . / 
+
+# add `/node_modules/.bin` to $PATH
+ENV PATH /node_modules/.bin:$PATH
+
 
 EXPOSE 80
 
-CMD ["npm", "start"]
+RUN npm run build --production 
+
+CMD npm start
