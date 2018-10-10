@@ -332,7 +332,6 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone, datas
                 })
             }
             if (constraint.category === 'datetime') {
-                console.log('toot', constraint)
                 let datePropName = 'date' + propName
                 bind += `BIND (xsd:date(?${propName}) as ?${datePropName}) . ` 
                 const conditions = constraint.value.map((r, iR) => {
@@ -359,7 +358,7 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone, datas
 
     if (uriRegex !== '') totalQuery += `FILTER regex(?entrypoint, '^${uriRegex}$', 'i') .`
     if (setConstraints !== '') totalQuery += `${paths} ${bind}FILTER (${setConstraints}) . `
-    console.log(totalQuery)
+    // console.log(totalQuery)
     return totalQuery
 }
 
