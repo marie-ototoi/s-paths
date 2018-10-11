@@ -333,14 +333,17 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone, datas
             }
             if (constraint.category === 'datetime') {
                 let datePropName = 'date' + propName
+                if (String(constraint.value[0]).match(/(\d{4})$/)) {
+                    bind += `BIND (xsd:integer(?${propName}) as ?${datePropName}) . `
+                } else {
+                    bind += `BIND (xsd:date(?${propName}) as ?${datePropName}) . `
+                }
                 const conditions = constraint.value.map((r, iR) => {
                     // console.log(String(r).match(/(\d{4})$/), String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/), String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/))
                     let theDate
                     if (String(r).match(/(\d{4})$/)) {
-                        bind += `BIND (xsd:integer(?${propName}) as ?${datePropName}) . `
                         return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${Number(r)}'^^xsd:integer`
                     } else {
-                        bind += `BIND (xsd:date(?${propName}) as ?${datePropName}) . `
                         if (String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/)) {
                             theDate = new Date(String(r).substr(0, 4), String(r).substr(5, 2), String(r).substr(8, 2))
                         } else if (String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/)) {
