@@ -14,7 +14,7 @@ class Line extends React.Component {
                     className='field'
                     style={{
                         marginLeft: `${this.props.display.viz.horizontal_padding}px`,
-                        width: `${this.props.display.viz.useful_width * 2 / 3}px`
+                        width: `${this.props.display.viz.useful_width * 4 / 5}px`
                     }}
                 >
                     <label className='label'>

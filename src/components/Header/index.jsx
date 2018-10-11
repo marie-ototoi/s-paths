@@ -31,11 +31,13 @@ class Header extends React.Component {
     }
     shouldComponentUpdate (nextProps, nextState) {
         if (nextProps.configs.past.length !== this.props.configs.past.length ||
-            JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
+            JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data) ) {
             this.setState(this.prepareData(nextProps))
             return false
         }
-        return JSON.stringify(this.state) !== JSON.stringify(nextState)
+        // return true
+        return JSON.stringify(this.state) !== JSON.stringify(nextState) ||
+        (this.props.selections) !== JSON.stringify(nextProps.selections)
     }
     prepareData (nextProps) {
         // TODO: remove data duplication
@@ -103,7 +105,6 @@ class Header extends React.Component {
     displayConfig () {
         const { config, dataset, zone } = this.props
         let selectedLists = this.state.configsLists[this.state.selectedView]
-        console.log('ici', )
         let selectedMatch = { properties: this.state.selectedProps && selectedLists ? this.state.selectedProps.map((prop, i) => selectedLists[i][prop]) : [] }
         this.setState({
             propsAreLoading: true,
@@ -175,7 +176,7 @@ class Header extends React.Component {
 
             // first line - resources
             let selectResourceEnabled = (this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '')
-
+            // console.log(selections.length)
             // second line - keyword + pointer
             let pointerEnabled = selections.length > 0
             let keywordEnabled = this.state.keyword.length > 3
@@ -193,7 +194,7 @@ class Header extends React.Component {
                         onKeyDown={this.handleKeyDown}
                     />
                     <Line
-                        label={'Class of resources'}
+                        label={'Class of Entities'}
                         maxData={options[0].total}
                         counterData={options[0]}
                         isLoading={this.state.resourceIsLoading}

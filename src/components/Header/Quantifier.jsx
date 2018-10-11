@@ -9,7 +9,7 @@ class Quantifier extends React.Component {
         if (percent > 1) percent = 1
         return (
             <div className='Quantifier'>
-                <div style={{ width: `${this.props.display.viz.useful_width / 3}px` }}>
+                <div style={{ width: `${this.props.display.viz.useful_width / 5}px` }}>
                     <progress
                         className='progress is-small'
                         value={this.props.value.total}
