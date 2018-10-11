@@ -333,20 +333,22 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone, datas
             }
             if (constraint.category === 'datetime') {
                 let datePropName = 'date' + propName
-                bind += `BIND (xsd:date(?${propName}) as ?${datePropName}) . ` 
                 const conditions = constraint.value.map((r, iR) => {
                     // console.log(String(r).match(/(\d{4})$/), String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/), String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/))
                     let theDate
                     if (String(r).match(/(\d{4})$/)) {
-                        theDate = new Date(r, (iR === 0) ? 0 : 11, (iR === 0) ? 1 : 31)
-                    } else if (String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/)) {
-                        theDate = new Date(String(r).substr(0, 4), String(r).substr(5, 2), String(r).substr(8, 2))
-                    } else if (String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/)) {
-                        theDate = new Date(String(r).substr(0, 2), String(r).substr(3, 2), String(r).substr(6, 4))
-                    }
-                    // console.log(`?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}'^^xsd:date`)
-                    return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getMonth() + 1}-${theDate.getDate()}'^^xsd:date`
-                                        
+                        bind += `BIND (xsd:integer(?${propName}) as ?${datePropName}) . `
+                        return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${Number(r)}'^^xsd:integer`
+                    } else {
+                        bind += `BIND (xsd:date(?${propName}) as ?${datePropName}) . `
+                        if (String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/)) {
+                            theDate = new Date(String(r).substr(0, 4), String(r).substr(5, 2), String(r).substr(8, 2))
+                        } else if (String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/)) {
+                            theDate = new Date(String(r).substr(0, 2), String(r).substr(3, 2), String(r).substr(6, 4))
+                        }
+                        // console.log(`?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}'^^xsd:date`)
+                        return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getMonth() + 1}-${theDate.getDate()}'^^xsd:date`
+                    }                    
                 }).join(' && ')
                 return `(${conditions})`
             } else if (constraint.category === 'text' || constraint.category === 'uri' || (constraint.category === 'geo' && constraint.subcategory === 'name')) {
