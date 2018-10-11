@@ -122,10 +122,7 @@ const defaultState = [
                     unique: { min: 5, max: 40, optimal: [10, 30] }
                 },
                 {
-                    category: 'geo',
-                    subcategory: 'name',
-                    hierarchical: true,
-                    avg: { max: 100, optimal: [30, 50] },
+                    category: 'uri',
                     unique: { min: 5, max: 40, optimal: [10, 30] }
                 }
             ]

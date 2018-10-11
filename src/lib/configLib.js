@@ -78,6 +78,8 @@ const scoreProp = (prop, constraint) => {
     // et eventuellement si la prop peut avoir plusieurs valeurs pour une meme instance (specifier dans la vue si c'est souhaite)
     let score = {}
     const { min, max, optimal } = constraint.unique
+    if (prop.coverage < 20) return 0
+    score.coverage = prop.coverage / 10   
     switch (prop.category) {
     case 'datetime':
         score.category = 9
@@ -98,7 +100,6 @@ const scoreProp = (prop, constraint) => {
         //
     }
     score.definition = 10 - getCost(prop.unique, min, max, optimal, 10)
-    score.coverage = prop.coverage / 10
     score.total = 0
     score.level = 10 - prop.level
     let coeff = 0
@@ -208,7 +209,7 @@ export const defineConfigs = (views, stats) => {
                 })
                 propList.push(propSet.sort((a, b) => {
                     return b.score - a.score
-                }))
+                }).filter(p => p.score > 0))
             })
             propList = propList.reduce((acc, cur) => {
                 if (cur.length > 0) acc.push(cur)
