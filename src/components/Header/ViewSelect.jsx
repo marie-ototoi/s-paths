@@ -25,8 +25,8 @@ class ViewSelect extends React.Component {
                 classNamePrefix='ViewSelect'
                 isSearchable={false}
                 options={this.props.options}
-                defaultValue={this.props.options[0]}
-                getOptionValue={(option) => (option['name'])}
+                value={this.props.options[this.props.currentValue]}
+                getOptionValue={(option) => (option['index'])}
                 getOptionLabel={ViewSelect.getOptionLabel}
                 onChange={this.props.onChange}
             />
@@ -35,7 +35,8 @@ class ViewSelect extends React.Component {
 
     static propTypes = {
         options: PropTypes.array.isRequired,
-        onChange: PropTypes.func.isRequired
+        onChange: PropTypes.func.isRequired,
+        currentValue: PropTypes.number
     }
 }
 

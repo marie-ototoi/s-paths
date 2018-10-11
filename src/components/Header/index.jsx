@@ -29,12 +29,13 @@ class Header extends React.Component {
         this.state = this.prepareData(props)
         this.state.showConfig = (new URLSearchParams(window.location.search)).has('admin')
     }
-    shouldComponentUpdate (nextProps) {
-        if (nextProps.configs.past.length !== this.props.configs.past.length) {
+    shouldComponentUpdate (nextProps, nextState) {
+        if (nextProps.configs.past.length !== this.props.configs.past.length ||
+            JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
             this.setState(this.prepareData(nextProps))
             return false
         }
-        return true
+        return JSON.stringify(this.state) !== JSON.stringify(nextState)
     }
     prepareData (nextProps) {
         // TODO: remove data duplication
@@ -42,9 +43,9 @@ class Header extends React.Component {
             resource.type === nextProps.dataset.entrypoint
         )
         let selectedResource = displayedResource
-        let configsLists = nextProps.configs.present.views.map(view => view.propList)
-      
-        let displayedView = nextProps.configs.present.views.reduce((acc, cur, i) => (cur.selected ? i : acc), null)
+        let configsLists = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).map(view => view.propList)
+
+        let displayedView = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).reduce((acc, cur, i) => (cur.selected ? i : acc), null)
         let displayedProps = configsLists[displayedView].map((list, index) => {
             return list.reduce((acc, cur, propIndex) => {
                 if (nextProps.config.selectedMatch.properties[index] && cur.path === nextProps.config.selectedMatch.properties[index].path) {
@@ -53,9 +54,10 @@ class Header extends React.Component {
                 return acc
             }, null)
         })
+        
         let selectedProps = displayedProps
         let selectedView = displayedView
-
+        // console.log(displayedView, selectedView, displayedProps, selectedProps, configsLists)
         return {
             resourceIsLoading: false,
             selectionIsLoading: false,
@@ -101,8 +103,8 @@ class Header extends React.Component {
     displayConfig () {
         const { config, dataset, zone } = this.props
         let selectedLists = this.state.configsLists[this.state.selectedView]
-        //console.log('ici', )
-        let selectedMatch = { properties: this.state.selectedProps.map((prop, i) => selectedLists[i][prop]) }
+        console.log('ici', )
+        let selectedMatch = { properties: this.state.selectedProps && selectedLists ? this.state.selectedProps.map((prop, i) => selectedLists[i][prop]) : [] }
         this.setState({
             propsAreLoading: true,
             errorSelection: ''
@@ -280,16 +282,22 @@ class Header extends React.Component {
                         leftChildren={<Slider />}
                     >
                         <ViewSelect
+                            currentValue={this.state.selectedView}
                             onChange={(selectedOption) => {
-                                const selectedView = activeConfigs.findIndex((option) =>
-                                    option.id === selectedOption.id
-                                )
+                                const selectedView = selectedOption.index
                                 this.setState({
                                     selectedView,
-                                    selectedProps: getConfigs(getCurrentConfigs(configs, zone, 'active'), zone)[selectedView].constraints.map(() => 0)
+                                    selectedProps: this.state.configsLists[selectedView].map((list, index) => {
+                                        return list.reduce((acc, cur, propIndex) => {
+                                            if (cur.path === selectedOption.selectedMatch.properties[index].path) {
+                                                acc = propIndex
+                                            }
+                                            return acc
+                                        }, null)
+                                    })
                                 })
                             }}
-                            options={activeConfigs}
+                            options={activeConfigs.map((option, i) => { return {...option, index: i} })}
                         />
 
                         { selectedLists && selectedLists.map((list, index) => (
@@ -298,15 +306,13 @@ class Header extends React.Component {
                                 key={`${zone}selectprop${index}`}
                             >
                                 <PropSelect
-                                    current={this.state.selectedProps[index]}
+                                    currentValue={this.state.selectedProps[index]}
                                     onChange={(selectedOption) => {
-                                        const selectedProps = [...this.state.selectedProps]
-                                        selectedProps[index] = selectedLists[index].findIndex((option) =>
-                                            option.path === selectedOption.path
-                                        )
+                                        let selectedProps = [...this.state.selectedProps]
+                                        selectedProps[index] = selectedOption.index
                                         this.setState({ selectedProps })
                                     }}
-                                    options={selectedLists[index]}
+                                    options={selectedLists[index].map((option, i) => { return {...option, index: i} })}
                                 />
                             </div>
                         ))}
