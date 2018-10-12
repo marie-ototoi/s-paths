@@ -481,6 +481,8 @@ export const getTransitionElements = (originElements, targetElements, originConf
             let cur = deltaData.filter(dp => dp.entrypoint.value === el.query.value)[0]
             return {
                 ...el,
+                indexOrigin: cur ? cur.indexOrigin : null,
+                indexTarget: cur ? cur.indexTarget : null,
                 signature: cur ? `${zone}_origin${cur.indexOrigin}_target${cur.indexTarget}` : el.query.value
             }
         })
@@ -494,6 +496,8 @@ export const getTransitionElements = (originElements, targetElements, originConf
             let cur = deltaData.filter(dp => dp.entrypoint.value === el.query.value)[0]
             return {
                 ...el,
+                indexOrigin: cur ? cur.indexOrigin : null,
+                indexTarget: cur ? cur.indexTarget : null,
                 signature: cur ? `${zone}_origin${cur.indexOrigin}_target${cur.indexTarget}` : el.query.value
             }
         })

@@ -4,7 +4,7 @@ import AbstractLayout from './AbstractLayout'
 class BrushLinkLayout extends AbstractLayout {
     draw (props) {
         this.drawShapes(props, props.elements.target)
-        // console.log('draw B', props.elements.origin)
+        // console.log('draw B', props.elements.target)
         // console.log('meoui',  props.elements.target)
     }
     drawShapes (props, shapes) {
@@ -14,20 +14,18 @@ class BrushLinkLayout extends AbstractLayout {
                 return (d.signature) ? d.signature : d.query.value
             })
 
-        if (shapes.length > 0) {
-            shapesSelection
-                .enter()
-                .append('rect')
-                .attr('x', d => d.zone.x1)
-                .attr('y', d => d.zone.y1)
-                .attr('width', d => d.zone.width)
-                .attr('height', d => d.zone.height)
-                .attr('fill', d => d.color)
-                .attr('transform', d => `rotate(${d.rotation} ${d.zone.x1} ${d.zone.y1})`)
-                .attr('visibility', 'hidden')
-        }
+        shapesSelection
+            .enter()
+            .append('rect')
+            .attr('x', d => d.zone.x1)
+            .attr('y', d => d.zone.y1)
+            .attr('width', d => d.zone.width)
+            .attr('height', d => d.zone.height)
+            .attr('fill', d => d.color)
+            .attr('transform', d => `rotate(${d.rotation} ${d.zone.x1} ${d.zone.y1})`)
+            .attr('visibility', 'hidden')
+
         shapesSelection.exit()
-            .attr('fill-opacity', 0)
             .remove()
 
         let indexSelections = props.selections.map(sel => sel.index)
@@ -40,7 +38,10 @@ class BrushLinkLayout extends AbstractLayout {
             .attr('height', d => d.zone.height)
             .attr('transform', d => `rotate(${d.rotation} ${d.zone.x1} ${d.zone.y1})`)
             .attr('fill', d => d.color)
-            .attr('visibility', (d, i) => ready && d.indexTarget >= 0 && !thisZone && indexSelections.includes(d.indexOrigin) ? 'visible' : 'hidden')
+            .attr('visibility', (d, i) => {
+                let index = props.zone === 'main' ? d.indexOrigin : d.indexTarget
+                return ready && index >= 0 && !thisZone && indexSelections.includes(index) ? 'visible' : 'hidden'
+            })
             
         // console.log('drawn')
     }
