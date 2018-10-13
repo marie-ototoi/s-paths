@@ -3,7 +3,7 @@ import AbstractLayout from './AbstractLayout'
 
 class BrushLinkLayout extends AbstractLayout {
     draw (props) {
-        this.drawShapes(props, props.elements.target)
+        this.drawShapes(props, props.elements.origin)
         // console.log('draw B', props.elements.target)
         // console.log('meoui',  props.elements.target)
     }
@@ -39,7 +39,8 @@ class BrushLinkLayout extends AbstractLayout {
             .attr('transform', d => `rotate(${d.rotation} ${d.zone.x1} ${d.zone.y1})`)
             .attr('fill', d => d.color)
             .attr('visibility', (d, i) => {
-                let index = props.zone === 'main' ? d.indexOrigin : d.indexTarget
+                let index = props.zone === 'main' ? d.indexTarget : d.indexOrigin
+                // console.log(d.indexTarget, d.indexOrigin)
                 return ready && index >= 0 && !thisZone && indexSelections.includes(index) ? 'visible' : 'hidden'
             })
             

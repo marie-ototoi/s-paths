@@ -29,7 +29,7 @@ class Header extends React.Component {
         this.state = this.prepareData(props)
         this.state.showConfig = (new URLSearchParams(window.location.search)).has('admin')
     }
-    shouldComponentUpdate (nextProps, nextState) {
+    /*shouldComponentUpdate (nextProps, nextState) {
         if (nextProps.configs.past.length !== this.props.configs.past.length ||
             JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data) ) {
             this.setState(this.prepareData(nextProps))
@@ -38,7 +38,7 @@ class Header extends React.Component {
         // return true
         return JSON.stringify(this.state) !== JSON.stringify(nextState) ||
         (this.props.selections) !== JSON.stringify(nextProps.selections)
-    }
+    }*/
     prepareData (nextProps) {
         // TODO: remove data duplication
         let displayedResource = nextProps.dataset.resources.find((resource) =>
@@ -131,7 +131,7 @@ class Header extends React.Component {
             activeConfigs = getCurrentConfigs(configs, 'aside', 'active')
             // in case the entrypoint has changed
             entrypoint = activeConfigs.entrypoint
-            const selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'), 'aside')
+            const selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'))
 
             constraints = makeSelectionConstraints(selections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats })
         } else {

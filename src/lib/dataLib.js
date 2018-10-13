@@ -286,6 +286,8 @@ const splitTransitionElements = (elements, type, zone, deltaData) => {
                 }
                 // else creates the entry
                 if (!exists) {
+                    // c'est ici qu'il faut gérer l'inverse du split
+                    // console.log(cur.indexOrigin, cur.indexTarget)
                     acc.push({
                         shape: element.shape,
                         color: element.color,

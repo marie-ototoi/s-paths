@@ -8,7 +8,7 @@ export const getSelectedMatch = (config) => {
 export const getConfigs = (configs, zone) => {
     return configs.views
 }
-export const getSelectedView = (configs, zone) => {
+export const getSelectedView = (configs) => {
     return configs.views ? configs.views.filter(v => v.selected)[0] : undefined
 }
 export const getViewByName = (views, name) => {

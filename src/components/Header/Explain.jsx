@@ -11,7 +11,7 @@ class Explain extends React.Component {
     render () {
         const { configs, zone } = this.props
 
-        let selectedConfig = getSelectedView(getCurrentConfigs(configs, zone, 'active'), zone)
+        let selectedConfig = getSelectedView(getCurrentConfigs(configs, zone, 'active'))
         let selectedProperties = getSelectedMatch(selectedConfig).properties
 
         let allgraphs = [...new Set(selectedProperties.reduce((acc, cur) => {
