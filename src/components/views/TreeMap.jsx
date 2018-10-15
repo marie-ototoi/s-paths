@@ -26,7 +26,12 @@ class TreeMap extends React.Component {
         let dataChanged = (this.props.data.length !== nextProps.data.length ||
             (this.props.data[0] && nextProps.data[0] && this.props.data[0].prop1.value !== nextProps.data[0].prop1.value))
         let selectionChanged = this.props.selections.length !== nextProps.selections.length
-        let dimensionsChanged = (this.props.dimensions.width !== nextProps.dimensions.width || this.props.dimensions.height !== nextProps.dimensions.height)
+        let dimensionsChanged = this.props.dimensions.width !== nextProps.dimensions.width ||
+            this.props.dimensions.height !== nextProps.dimensions.height || 
+            this.props.display.selectedZone[this.props.zone].x1 !== nextProps.display.selectedZone[this.props.zone].x1 ||
+            this.props.display.selectedZone[this.props.zone].x2 !== nextProps.display.selectedZone[this.props.zone].x2 ||
+            this.props.display.selectedZone[this.props.zone].y1 !== nextProps.display.selectedZone[this.props.zone].y1 ||
+            this.props.display.selectedZone[this.props.zone].y2 !== nextProps.display.selectedZone[this.props.zone].y2
         if (dataChanged) {
             this.prepareData(nextProps)
         }

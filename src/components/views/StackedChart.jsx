@@ -27,13 +27,23 @@ class StackedChart extends React.Component {
         this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
-        if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
+        let dataChanged = (this.props.data.length !== nextProps.data.length ||
+            (this.props.data[0] && nextProps.data[0] && this.props.data[0].prop1.value !== nextProps.data[0].prop1.value))
+        let selectionChanged = this.props.selections.length !== nextProps.selections.length
+        let dimensionsChanged = this.props.dimensions.width !== nextProps.dimensions.width ||
+            this.props.dimensions.height !== nextProps.dimensions.height || 
+            this.props.display.selectedZone[this.props.zone].x1 !== nextProps.display.selectedZone[this.props.zone].x1 ||
+            this.props.display.selectedZone[this.props.zone].x2 !== nextProps.display.selectedZone[this.props.zone].x2 ||
+            this.props.display.selectedZone[this.props.zone].y1 !== nextProps.display.selectedZone[this.props.zone].y1 ||
+            this.props.display.selectedZone[this.props.zone].y2 !== nextProps.display.selectedZone[this.props.zone].y2
+            
+        if (dataChanged) {
             this.prepareData(nextProps)
         }
-        return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
-            (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
-            (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
-            (this.props.step !== nextProps.step)
+        return dataChanged ||
+            selectionChanged ||
+            dimensionsChanged ||
+            this.props.step !== nextProps.step    
     }
     prepareData (nextProps) {
         const { data, config, getPropPalette, palettes, zone } = nextProps
