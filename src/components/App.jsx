@@ -24,9 +24,10 @@ import { areLoaded, getCurrentState, getResults, getTransitionElements } from '.
 import { getSelectedView, getCurrentConfigs } from '../lib/configLib'
 import * as selectionLib from '../lib/selectionLib'
 // redux actions
-import { setDisplay } from '../actions/displayActions'
+import { setDisplay, setModifier } from '../actions/displayActions'
 import { endTransition, loadResources } from '../actions/dataActions'
 import { handleMouseUp } from '../actions/selectionActions'
+import { set } from 'gl-matrix/src/gl-matrix/vec4';
 
 class App extends React.PureComponent {
     constructor (props) {
@@ -34,6 +35,8 @@ class App extends React.PureComponent {
         // resize handled in the app component only: it updates display reducer that triggers rerender if needed
         this.onResize = this.onResize.bind(this)
         // transition state is handled locally in the component, to avoid re-rendering
+        this.handleKeyDown = this.handleKeyDown.bind(this)
+        this.handleKeyUp = this.handleKeyUp.bind(this)
         this.handleMouseMove = this.handleMouseMove.bind(this)
         this.handleTransition = this.handleTransition.bind(this)
         this.handleEndTransition = this.handleEndTransition.bind(this)
@@ -136,6 +139,18 @@ class App extends React.PureComponent {
             this.setState({ [`main_step`]: 'launch', [`aside_step`]: 'launch' })
         }
     }
+    handleKeyDown (event) {
+        // console.log(event.which)
+        if (event.which === 91 || event.which === 17) {
+            this.props.setModifier(true)
+        }
+    }
+    handleKeyUp (event) {
+        // console.log('up', event.which)
+        if (event.which === 91 || event.which === 17) {
+            this.props.setModifier(false)
+        }
+    }
     render () {
         const { configs, data, display, selections } = this.props
         // debug logs
@@ -165,7 +180,6 @@ class App extends React.PureComponent {
         const MainTransitionComponent = mainTransitionConfig ? componentIds[mainTransitionConfig.id] : ''
         const asideConfig = getSelectedView(getCurrentConfigs(configs, 'aside', 'active'))
         const SideComponent = asideConfig ? componentIds[asideConfig.id] : ''
-        const SideTransitionComponent = asideConfig ? componentIds[asideConfig.id] : ''
         const coreDimensionsMain = getDimensions('main', display.viz)
         const coreDimensionsAside = getDimensions('aside', display.viz)
         // console.log(mainConfig, getCurrentConfigs(configs, 'main', 'active'))
@@ -176,6 +190,9 @@ class App extends React.PureComponent {
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
+            onKeyDown = { this.handleKeyDown }
+            onKeyUp = { this.handleKeyUp }
+            tabIndex = { 0 }
         >
             { mainConfig &&
                 <Header
@@ -319,7 +336,9 @@ App.propTypes = {
     handleMouseUp: PropTypes.func,
     loadResources: PropTypes.func,
     select: PropTypes.func,
-    setDisplay: PropTypes.func.isRequired
+    setDisplay: PropTypes.func.isRequired,
+    setModifier: PropTypes.func
+
 }
 
 function mapStateToProps (state) {
@@ -339,6 +358,7 @@ function mapDispatchToProps (dispatch) {
         endTransition: endTransition(dispatch),
         loadResources: loadResources(dispatch),
         setDisplay: setDisplay(dispatch),
+        setModifier: setModifier(dispatch),
         handleMouseUp: handleMouseUp(dispatch)
     }
 }

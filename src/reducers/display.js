@@ -41,6 +41,7 @@ const defaultState = {
         aside_useful_height: initValue,
         aside_top_padding: initValue
     },
+    modifierPressed: false,
     selectedZone: {
         main: {
             x1: null,
@@ -84,6 +85,11 @@ const display = (state = defaultState, action) => {
             ...state,
             settingsOpen: newSettings
         }
+    case types.SET_MODIFIER:
+        return {
+            ...state,
+            modifierPressed: action.modifierPressed
+        }
     case types.START_SELECTED_ZONE:
         newZone = { ...state.selectedZone }
         newZone[action.zone] = {
@@ -95,6 +101,9 @@ const display = (state = defaultState, action) => {
             selectedZone: newZone
         }
     case types.CLEAR_SELECTED_ZONE:
+    case types.ADD_SELECTION:
+    case types.REMOVE_SELECTION:
+    case types.REPLACE_SELECTION:
         newZone = { ...state.selectedZone }
         newZone[action.zone] = {
             x1: null,

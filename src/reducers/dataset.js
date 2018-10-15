@@ -8,7 +8,7 @@ const initialState = {
     resourceGraph: null,
     constraints: '',
     labels: [],
-    maxLevel:6,
+    maxLevel: 6,
     ignoreList: ['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
     resources: [],
     prefixes: {

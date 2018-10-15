@@ -114,6 +114,7 @@ class HeatMapLayout extends AbstractLayout {
             .each(function (d, i) {
                 if (detectRectCollision(relativeZone, d.zone)) selectedElements.push(d.selection)
             })
+        // console.log(selectedElements)
         return selectedElements
     }
 

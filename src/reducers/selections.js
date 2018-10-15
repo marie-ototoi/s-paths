@@ -12,6 +12,7 @@ const defaultState = []
 const selection = (state, action) => {
     switch (action.type) {
     case types.ADD_SELECTION:
+    case types.REPLACE_SELECTION:
         return {
             selector: action.selector,
             index: action.index,
@@ -42,6 +43,10 @@ const selections = (state = defaultState, action) => {
             ...state.filter(sel => sel.zone === action.zone),
             ...elementsAdded
         ]
+    case types.REPLACE_SELECTION:
+        return action.elements.map(el => {
+            return selection(undefined, { ...action, query: el.query, selector: el.selector, count: el.count, index: el.index })
+        })
     case types.REMOVE_SELECTION:
         elements2Remove = action.elements.map(s => s.selector)
         return state.filter(sel => {

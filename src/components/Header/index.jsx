@@ -1,14 +1,13 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-import ReactKeymaster from 'react-keymaster'
 import shallowEqual from 'shallowequal'
 
 import { getConfigs, getCurrentConfigs, getSelectedMatch, getSelectedView } from '../../lib/configLib'
 import { getNbDisplayed } from '../../lib/dataLib'
 import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 
-import { showSettings } from '../../actions/displayActions'
+import { setModifier, showSettings } from '../../actions/displayActions'
 import { displayConfig, loadSelection, selectResource } from '../../actions/dataActions'
 import ViewSelect from './ViewSelect'
 import PropSelect from './PropSelect'
@@ -30,6 +29,8 @@ class Header extends React.Component {
         this.state.showConfig = (new URLSearchParams(window.location.search)).has('admin')
     }
     getSnapshotBeforeUpdate (prevProps, prevState) {
+        // console.log(prevProps)
+        if (prevProps.which) return null
         let configChanged = prevProps.configs.past.length !== this.props.configs.past.length &&
             this.props.configs.present.status !== 'transition'
       
@@ -48,7 +49,6 @@ class Header extends React.Component {
         )
         let selectedResource = displayedResource
         let configsLists = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).map(view => view.propList)
-
         let displayedView = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).reduce((acc, cur, i) => (cur.selected ? i : acc), null)
         let displayedProps = configsLists[displayedView].map((list, index) => {
             return list.reduce((acc, cur, propIndex) => {
@@ -80,7 +80,7 @@ class Header extends React.Component {
     }
     handleKeyDown (event) {
         const { dataset, selections } = this.props
-        if (event === 'enter') {
+        if (event.which === 13) {
             if (selections.length > 0 || this.state.keyword.length > 3) {
                 this.displaySelection()
             } else if (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) {
@@ -89,7 +89,7 @@ class Header extends React.Component {
                 this.displayResource()
             }
         }
-    }
+    }    
     displayResource () {
         const { dataset, views } = this.props
         this.setState({ resourceIsLoading: true, errorSelection: '' })
@@ -190,11 +190,7 @@ class Header extends React.Component {
             let selectedLists = this.state.configsLists[this.state.selectedView]
             let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps))
             return (
-                <div className='Header'>
-                    <ReactKeymaster
-                        keyName='enter'
-                        onKeyDown={this.handleKeyDown}
-                    />
+                <div className='Header' onKeyDown = { this.handleKeyDown } tabIndex = { 0 } >
                     <Line
                         label={'Class of Entities'}
                         maxData={options[0].total}

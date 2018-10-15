@@ -22,11 +22,16 @@ export const handleMouseUp = (dispatch) => (e, zone, display, component, selecti
     d3.select('rect.selection').remove()
     const zoneDimensions = selectionLib.getRectSelection(selectionZone)
     let elementsInZone = component.getElementsInZone(zoneDimensions)
-    if (elementsInZone && elementsInZone.length > 0) selectElements(dispatch)(elementsInZone, zone, selections)
-    dispatch({
-        type: types.CLEAR_SELECTED_ZONE,
-        zone
-    })
+    // console.log(elementsInZone)
+    if (elementsInZone && elementsInZone.length > 0) {
+        selectElements(dispatch)(elementsInZone, zone, selections, display.modifierPressed)
+    } else {
+        dispatch({
+            type: types.CLEAR_SELECTED_ZONE,
+            zone
+        })
+    }
+    
 }
 
 export const resetSelection = (dispatch) => (zone) => {
@@ -36,17 +41,26 @@ export const resetSelection = (dispatch) => (zone) => {
         zone
     })
 }
-export const selectElements = (dispatch) => (elements, zone, selections) => {
-    // console.log(selectionLib.areSelected(elements, zone, selections), elements, zone, selections)
-    if (selectionLib.areSelected(elements, zone, selections)) {
-        return dispatch({
-            type: types.REMOVE_SELECTION,
-            elements,
-            zone
-        })
+export const selectElements = (dispatch) => (elements, zone, selections, modifierPressed) => {
+    // console.log(modifierPressed)
+    if (modifierPressed) {
+        if (selectionLib.areSelected(elements, zone, selections)) {
+            return dispatch({
+                type: types.REMOVE_SELECTION,
+                elements,
+                zone
+            })
+        } else {
+            return dispatch({
+                type: types.ADD_SELECTION,
+                elements,
+                zone
+            })
+        }
     } else {
+        // console.log(elements, selections, modifierPressed)
         return dispatch({
-            type: types.ADD_SELECTION,
+            type: types.REPLACE_SELECTION,
             elements,
             zone
         })

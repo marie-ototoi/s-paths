@@ -109,8 +109,8 @@ class Geo extends React.Component {
         // console.log(this.customState.view.scenegraph().root.source.value[0])
         // if (this.customState.view.scenegraph().root.source.value[0]) console.log(this.customState.view.scenegraph().root.source.value[0].items[1].items[0].opacity)
         if (this.customState.view.scenegraph().root.source.value[0] && this.customState.view.scenegraph().root.source.value[0].items[1].items[0].opacity) {
-            let firstX = this.customState.view.scenegraph().root.source.value[0].items[1].items[0].bounds.x1
-            let firstX2 = this.customState.view.scenegraph().root.source.value[0].items[1].items[0].bounds.x2
+            // let firstX = this.customState.view.scenegraph().root.source.value[0].items[1].items[0].bounds.x1
+            // let firstX2 = this.customState.view.scenegraph().root.source.value[0].items[1].items[0].bounds.x2
             items = this.customState.view.scenegraph().root.source.value[0].items[1].items.map(el => {
                 return { 
                     zone: {

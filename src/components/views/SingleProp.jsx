@@ -365,7 +365,6 @@ class SingleProp extends React.Component {
                     width: `${dimensions.useful_width}px`,
                     height: `${dimensions.useful_height}px`
                 }}
-                
             >
                 { this.customState.spec &&
                     <Vega
