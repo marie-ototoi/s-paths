@@ -29,16 +29,18 @@ class Header extends React.Component {
         this.state = this.prepareData(props)
         this.state.showConfig = (new URLSearchParams(window.location.search)).has('admin')
     }
-    /*shouldComponentUpdate (nextProps, nextState) {
-        if (nextProps.configs.past.length !== this.props.configs.past.length ||
-            JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data) ) {
-            this.setState(this.prepareData(nextProps))
-            return false
+    getSnapshotBeforeUpdate (prevProps, prevState) {
+        let configChanged = prevProps.configs.past.length !== this.props.configs.past.length ||
+            this.state.displayedResource !== prevState.displayedResource ||
+            this.state.displayedView !== prevState.displayedView ||
+            this.state.displayedProps.join() !== prevState.displayedProps.join()
+      
+        if (configChanged) {
+            this.setState(this.prepareData(this.props))
+            // return false
         }
-        // return true
-        return JSON.stringify(this.state) !== JSON.stringify(nextState) ||
-        (this.props.selections) !== JSON.stringify(nextProps.selections)
-    }*/
+        return null            
+    }
     prepareData (nextProps) {
         // TODO: remove data duplication
         let displayedResource = nextProps.dataset.resources.find((resource) =>
