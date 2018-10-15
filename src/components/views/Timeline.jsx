@@ -108,8 +108,7 @@ class Timeline extends React.Component {
     handleNewView(args) {
         this.fetchMultiple()
         this.customState = {...this.customState, view: args}
-        this.props.handleTransition(this.props, this.getElementsForTransition())
-        window.setTimeout(() => this.render(), 1000)
+        window.setTimeout(() => this.props.handleTransition(this.props, this.getElementsForTransition()), 500)
     }
     handleZoneSelected(args) {
         // console.log('coucou', args.scenegraph())

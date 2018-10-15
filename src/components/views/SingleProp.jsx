@@ -80,17 +80,7 @@ class SingleProp extends React.Component {
     }
     handleNewView(args) {
         this.customState = {...this.customState, view: args}
-        //console.log(this.customState.view.data('categories'))
-        // console.log("coucou single prop", this.customState.view.scenegraph().root,  this.customState.view.data('categories') )
-        window.setTimeout(() => {
-            let elts = this.getElementsForTransition()
-            if (elts.length > 0) {
-                this.customState = {...this.customState, transitionSent: true}
-                this.props.handleTransition(this.props, elts)
-            }
-        }, 300)
-        // let elts = this.getElementsForTransition()
-        // this.props.handleTransition(this.props, elts)
+        window.setTimeout(() => this.props.handleTransition(this.props, this.getElementsForTransition()), 500)
     }
     prepareData (nextProps) {
         const { config, data, dataset, dimensions, display, selections, zone } = nextProps
@@ -390,12 +380,9 @@ class SingleProp extends React.Component {
             }
         </div>)
     }
-    componentDidMount () {
-        this.props.handleTransition(this.props, [])
-    }
     componentDidUpdate () {
         // console.log(this.customState.view? this.customState.view.scenegraph(): null)
-        if (this.customState.transitionSent) {
+        if (this.customState.view) {
             this.props.handleTransition(this.props, this.getElementsForTransition())
             this.customState.view.run()
         }
