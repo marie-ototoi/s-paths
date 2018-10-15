@@ -30,13 +30,13 @@ class Header extends React.Component {
         this.state.showConfig = (new URLSearchParams(window.location.search)).has('admin')
     }
     getSnapshotBeforeUpdate (prevProps, prevState) {
-        let configChanged = prevProps.configs.past.length !== this.props.configs.past.length ||
-            this.state.displayedResource !== prevState.displayedResource ||
-            this.state.displayedView !== prevState.displayedView ||
-            this.state.displayedProps.join() !== prevState.displayedProps.join()
+        let configChanged = prevProps.configs.past.length !== this.props.configs.past.length &&
+            this.props.configs.present.status !== 'transition'
       
         if (configChanged) {
-            this.setState(this.prepareData(this.props))
+            let newData = this.prepareData(this.props)
+            // console.log(newData)
+            this.setState(newData)
             // return false
         }
         return null            
@@ -288,21 +288,14 @@ class Header extends React.Component {
                             currentValue={this.state.selectedView}
                             onChange={(selectedOption) => {
                                 const selectedView = selectedOption.index
+                                // console.log(this.state.configsLists[selectedView], selectedOption, selectedOption.selectedMatch.properties)
                                 this.setState({
                                     selectedView,
-                                    selectedProps: this.state.configsLists[selectedView].map((list, index) => {
-                                        return list.reduce((acc, cur, propIndex) => {
-                                            if (cur.path === selectedOption.selectedMatch.properties[index].path) {
-                                                acc = propIndex
-                                            }
-                                            return acc
-                                        }, null)
-                                    })
+                                    selectedProps: this.state.configsLists[selectedView].map((list, index) => 0)
                                 })
                             }}
                             options={activeConfigs.map((option, i) => { return {...option, index: i} })}
                         />
-
                         { selectedLists && selectedLists.map((list, index) => (
                             <div
                                 className='control'
