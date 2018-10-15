@@ -27,15 +27,29 @@ class SingleProp extends React.Component {
         this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
-        if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
+        let dataChanged = (this.props.data.length !== nextProps.data.length ||
+            (this.props.data[0] && nextProps.data[0] && this.props.data[0].prop1.value !== nextProps.data[0].prop1.value))
+        let selectionChanged = this.props.selections.length !== nextProps.selections.length
+        let dimensionsChanged = (this.props.dimensions.width !== nextProps.dimensions.width || this.props.dimensions.height !== nextProps.dimensions.height)
+        if (dataChanged) {
             this.prepareData(nextProps)
         }
-        if (this.props.dimensions.width !== nextProps.dimensions.width) this.customState.view.signal('width', nextProps.dimensions.useful_width).run()
-        if (this.props.dimensions.height !== nextProps.dimensions.height) this.customState.view.signal('height', nextProps.dimensions.useful_height).run()
-        return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
-            (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
-            (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
-            (this.props.step !== nextProps.step)
+        if (dimensionsChanged) {
+            this.customState.view.signal('width', nextProps.dimensions.useful_width).run()
+            this.customState.view.signal('height', nextProps.dimensions.useful_height).run()
+        }
+        if (selectionChanged) {
+            if (nextProps.selections.some(s => s.zone !== nextProps.zone)) {
+                this.customState.view.signal('otherZoneSelected', true)
+                this.customState.view.signal('zoneSelected', false)
+            } else {
+                this.customState.view.signal('otherZoneSelected', false)
+            }
+        }
+        return dataChanged ||
+            selectionChanged ||
+            dimensionsChanged ||
+            this.props.step !== nextProps.step
     }
     handleZoneSelected(...args) {
         // console.log('coucou', args)

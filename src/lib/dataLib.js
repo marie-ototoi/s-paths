@@ -227,6 +227,7 @@ export const getDeltaIndex = (dataPiece, elements, options) => {
     let indexElement
     elements.forEach((el, indexEl) => {
         if (entrypoint) {
+            // console.log('ici ?', el.query && dataPiece.entrypoint && el.query.value === dataPiece.entrypoint.value)
             if (el.query && dataPiece.entrypoint && el.query.value === dataPiece.entrypoint.value) indexElement = indexEl
         } else if (el.query.value && Array.isArray(el.query.value)) {
             // console.log(el)
@@ -257,12 +258,14 @@ export const getDeltaIndex = (dataPiece, elements, options) => {
             if (conditions.filter(c => c === false).length === 0) indexElement = indexEl
         }
     })
+    // console.log(indexElement)
     return indexElement
 }
 
 const splitTransitionElements = (elements, type, zone, deltaData) => {
     let typeA = (type === 'origin') ? 'Origin' : 'Target'
     let typeB = (type === 'origin') ? 'Target' : 'Origin'
+    // console.log(deltaData)
     return elements.reduce((accElements, element, indexElement) => {
         let allDelta = deltaData.filter(dp => dp['index' + typeA] === indexElement)
         if (allDelta.length >= 1) {

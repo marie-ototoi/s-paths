@@ -23,13 +23,17 @@ class TreeMap extends React.Component {
         this.prepareData(props)
     }
     shouldComponentUpdate (nextProps, nextState) {
-        if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
+        let dataChanged = (this.props.data.length !== nextProps.data.length ||
+            (this.props.data[0] && nextProps.data[0] && this.props.data[0].prop1.value !== nextProps.data[0].prop1.value))
+        let selectionChanged = this.props.selections.length !== nextProps.selections.length
+        let dimensionsChanged = (this.props.dimensions.width !== nextProps.dimensions.width || this.props.dimensions.height !== nextProps.dimensions.height)
+        if (dataChanged) {
             this.prepareData(nextProps)
         }
-        return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
-            (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
-            (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
-            (this.props.step !== nextProps.step)
+        return dataChanged ||
+            selectionChanged ||
+            dimensionsChanged ||
+            this.props.step !== nextProps.step
     }
     prepareData (nextProps) {
         const { config, data, getPropPalette, palettes, zone } = nextProps

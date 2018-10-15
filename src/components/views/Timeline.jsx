@@ -172,14 +172,19 @@ class Timeline extends React.Component {
         return items
     }
     shouldComponentUpdate (nextProps, nextState) {
-        // console.log('shouldComponentUpdate', this.customState.shouldRender)
-        // if (this.props.step === 'launch' && nextProps.step === 'launch') return false
-        if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
+
+        let dataChanged = (this.props.data.length !== nextProps.data.length ||
+            (this.props.data[0] && nextProps.data[0] && this.props.data[0].prop1.value !== nextProps.data[0].prop1.value))
+        let selectionChanged = this.props.selections.length !== nextProps.selections.length
+        let dimensionsChanged = (this.props.dimensions.width !== nextProps.dimensions.width || this.props.dimensions.height !== nextProps.dimensions.height)
+        if (dataChanged) {
             this.prepareData(nextProps)
         }
-        if (this.props.dimensions.width !== nextProps.dimensions.width) this.customState.view.signal('width', nextProps.dimensions.useful_width).run()
-        if (this.props.dimensions.height !== nextProps.dimensions.height) this.customState.view.signal('height', nextProps.dimensions.useful_height).run()
-        if (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) {
+        if (dimensionsChanged) {
+            this.customState.view.signal('width', nextProps.dimensions.useful_width).run()
+            this.customState.view.signal('height', nextProps.dimensions.useful_height).run()
+        }        
+        if (selectionChanged) {
             if (nextProps.selections.some(s => s.zone !== nextProps.zone)) {
                 this.customState.view.signal('otherZoneSelected', true)
                 this.customState.view.signal('zoneSelected', false)
@@ -187,13 +192,10 @@ class Timeline extends React.Component {
                 this.customState.view.signal('otherZoneSelected', false)
             }
         }
-        return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||        
-            (this.props.dimensions.width !== nextProps.dimensions.width) ||
-            (this.props.dimensions.height !== nextProps.dimensions.height) ||
-            (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
-            (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
-            (this.props.step !== nextProps.step) ||
-            (this.customState.shouldRender)
+        return dataChanged || selectionChanged || dimensionsChanged ||
+            this.props.step !== nextProps.step ||
+            this.state.label !== nextState.label||
+            this.customState.shouldRender
     }
     initData (nextProps) {
         this.customState.multipleData = getTimelineDict(nextProps.data, 'entrypoint')

@@ -54,7 +54,7 @@ class Geo extends React.Component {
     }
     handleNewView(args) {
         this.customState = {...this.customState, view: args}
-        this.props.handleTransition(this.props, this.getElementsForTransition())
+        window.setTimeout(() => this.props.handleTransition(this.props, this.getElementsForTransition()), 500)
     }
     handleZoneSelected(...args) {
         // console.log('coucou', ...args)
@@ -106,7 +106,8 @@ class Geo extends React.Component {
         // console.log("coucou geo", this.customState.view.scenegraph().root.source.value[0].items[1].items[0])
         // console.log(this.customState.view.scenegraph().root.source.value[0].items[1].items)
         let items = []
-        // console.log("ok", this.props.step, this.props.role)
+        // console.log(this.customState.view.scenegraph().root.source.value[0])
+        // if (this.customState.view.scenegraph().root.source.value[0]) console.log(this.customState.view.scenegraph().root.source.value[0].items[1].items[0].opacity)
         if (this.customState.view.scenegraph().root.source.value[0] && this.customState.view.scenegraph().root.source.value[0].items[1].items[0].opacity) {
             let firstX = this.customState.view.scenegraph().root.source.value[0].items[1].items[0].bounds.x1
             let firstX2 = this.customState.view.scenegraph().root.source.value[0].items[1].items[0].bounds.x2
@@ -138,22 +139,18 @@ class Geo extends React.Component {
     }
 
     shouldComponentUpdate (nextProps, nextState) {
-        // if (this.props.step === 'launch' && nextProps.step === 'launch') return false
-        if (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) {
+        let dataChanged = (this.props.data.length !== nextProps.data.length ||
+            (this.props.data[0] && nextProps.data[0] && this.props.data[0].prop1.value !== nextProps.data[0].prop1.value))
+        let selectionChanged = this.props.selections.length !== nextProps.selections.length
+        let dimensionsChanged = (this.props.dimensions.width !== nextProps.dimensions.width || this.props.dimensions.height !== nextProps.dimensions.height)
+        if (dataChanged) {
             this.prepareData(nextProps)
         }
-        if (this.props.dimensions.width !== nextProps.dimensions.width) this.customState.view.signal('width', nextProps.dimensions.useful_width).run()
-        if (this.props.dimensions.height !== nextProps.dimensions.height) this.customState.view.signal('height', nextProps.dimensions.useful_height).run()
-        
-        // console.log('redraw ?', nextProps.display.viz[this.props.zone + '_useful_width'], nextProps.display.viz[this.props.zone + '_useful_height'])
-        /* if (this.customState.view &&
-            ((this.props.display.viz[this.props.zone + '_useful_width'] !== nextProps.display.viz[this.props.zone + '_useful_width']) ||
-            (this.props.display.viz[this.props.zone + '_height'] !== nextProps.display.viz[this.props.zone + '_useful_height']))) {
-            console.log('redraw ?', nextProps.display.viz[this.props.zone + '_useful_width'], nextProps.display.viz[this.props.zone + '_useful_height'])
-            this.customState.view.width(nextProps.display.viz[this.props.zone + '_useful_width'])
-            this.customState.view.height(nextProps.display.viz[this.props.zone + '_useful_height'])
-        } */
-        if (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) {
+        if (dimensionsChanged) {
+            this.customState.view.signal('width', nextProps.dimensions.useful_width).run()
+            this.customState.view.signal('height', nextProps.dimensions.useful_height).run()
+        }        
+        if (selectionChanged) {
             if (nextProps.selections.some(s => s.zone !== nextProps.zone)) {
                 this.customState.view.signal('otherZoneSelected', true)
                 this.customState.view.signal('zoneSelected', false)
@@ -161,11 +158,8 @@ class Geo extends React.Component {
                 this.customState.view.signal('otherZoneSelected', false)
             }
         }
-        // console.log( this.state.label !== nextState.label,  this.state.label, nextState.label)
-        return (JSON.stringify(this.props.data) !== JSON.stringify(nextProps.data)) ||
-            (JSON.stringify(this.props.selections) !== JSON.stringify(nextProps.selections)) ||
-            (JSON.stringify(this.props.display) !== JSON.stringify(nextProps.display)) ||
-            (this.props.step !== nextProps.step) ||
+        return dataChanged || selectionChanged || dimensionsChanged ||
+            this.props.step !== nextProps.step ||
             this.state.label !== nextState.label
     }
     prepareData (nextProps) {
@@ -423,8 +417,10 @@ class Geo extends React.Component {
     }
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
-        if (this.customState.view) this.customState.view.run()
-        this.props.handleTransition(this.props, this.getElementsForTransition())
+        if (this.customState.view) {
+            this.customState.view.run()
+            this.props.handleTransition(this.props, this.getElementsForTransition())
+        }
     }
     componentWillUnmount () {
     }
