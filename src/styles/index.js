@@ -1,5 +1,4 @@
 import 'normalize.css'
-import 'mapbox-gl/dist/mapbox-gl.css'
 import './axis.css'
 import './geomap.css'
 import './heatmap.css'
