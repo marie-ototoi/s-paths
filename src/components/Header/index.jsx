@@ -291,7 +291,7 @@ class Header extends React.Component {
                                 // console.log(this.state.configsLists[selectedView], selectedOption, selectedOption.selectedMatch.properties)
                                 this.setState({
                                     selectedView,
-                                    selectedProps: this.state.configsLists[selectedView].map((list, index) => 0)
+                                    selectedProps: this.state.configsLists[selectedView].map(() => 0)
                                 })
                             }}
                             options={activeConfigs.map((option, i) => { return {...option, index: i} })}
