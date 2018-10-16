@@ -240,10 +240,20 @@ export const defineConfigs = (views, stats) => {
                     scoreMatch: scoreMatch(match, (view.entrypoint !== undefined), view.weight)
                 }
             }
+            console.log('why ?', selectedMatch)
             return {
                 ...view,
                 propList,
-                selectedMatch
+                selectedMatch,
+                multiple: view.constraints.map((cs, csi) => {
+                    let xt = []
+                    cs.forEach(c => {
+                        if(c.multiple) {
+                            xt = statsDict[c.category]
+                        }
+                    })
+                    return xt
+                })
             }
         }
     })

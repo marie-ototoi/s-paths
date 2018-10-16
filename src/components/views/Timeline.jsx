@@ -4,13 +4,12 @@ import { connect } from 'react-redux'
 import Vega from 'react-vega';
 // components
 // d3
-import * as d3 from 'd3'
 // libs
 import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements, resetSelection } from '../../actions/selectionActions'
 import { loadMultiple } from '../../actions/dataActions'
 
-import { getTimelineDict, getSelectedMatch } from '../../lib/configLib'
+import { getCurrentConfigs, getTimelineDict, getSelectedMatch, getSelectedView } from '../../lib/configLib'
 import { usePrefix } from '../../lib/queryLib'
 import * as dataLib from '../../lib/dataLib'
 import defaultSpec from '../../lib/spec'
@@ -64,9 +63,12 @@ class Timeline extends React.Component {
         }
     }
     fetchMultiple() {
-        const { config, dataset, role, zone } = this.props
-        const selectedConfig = getSelectedMatch(config, zone)
+        const { configs, dataset, role, zone } = this.props
+        // console.log('oua', getSelectedView(getCurrentConfigs(configs, zone, 'active')))
+        const selectedConfig = getSelectedView(getCurrentConfigs(configs, zone))
+        // console.log('bah quoi', selectedConfig, configs)
         if (role !== 'target') {
+            // console.log(selectedConfig.multiple[0].length)
             for(let mi = 0; mi <selectedConfig.multiple[0].length; mi++) {
                 let m = selectedConfig.multiple[0][mi]
                 if (! (this.customState.multipleLoaded.includes(mi) || this.customState.multipleLoading.includes(mi))) {
@@ -87,18 +89,22 @@ class Timeline extends React.Component {
                                 let theProp = results.head.vars[1]
                                 let theIndex = Number(theProp.replace('multiple', ''))
                                 let theDate = new Date(dp[theProp].value).getTime()
+                                let sameDate = this.customState.multipleData[key].events.filter(e => e.date === theDate).length
+                                let offset = (sameDate % 2 === 0) ? -2 * sameDate :  2 * sameDate
                                 this.customState.multipleData[key].events.push({
                                     date: theDate,
+                                    indexEvent: sameDate + 1,
+                                    offset,
+                                    zIndex: 100 - offset, 
                                     label: selectedConfig.multiple[0][theIndex].readablePath.map(p => p.label).join(' / * / ')
                                 })
                             })
                             // console.log('multipleData', this.customState.multipleData)
-                            //load next index
+                            // load next index
                             this.fetchMultiple()
                             this.prepareData(this.props)
                             this.customState.shouldRender = true
                             this.render()
-                            this.setState({ test: Math.random() })
                         })
                     break;
                 }
@@ -107,6 +113,7 @@ class Timeline extends React.Component {
     }
     handleNewView(args) {
         this.fetchMultiple()
+        // console.log('salut')
         this.customState = {...this.customState, view: args}
         window.setTimeout(() => this.props.handleTransition(this.props, this.getElementsForTransition()), 500)
     }
@@ -114,7 +121,7 @@ class Timeline extends React.Component {
         // console.log('coucou', args.scenegraph())
     }
     render () {
-        const { dimensions, display, role, selections, step, zone } = this.props
+        const { dimensions, role, step } = this.props
         return (<div
             className = { `Timeline ${this.customState.elementName} role_${role}` } >
             { step !== 'changing' &&
@@ -210,7 +217,10 @@ class Timeline extends React.Component {
                 name,
                 events: [{
                     date: new Date(dp.prop1).getTime(),
-                    label: selectedConfig.properties[0].readablePath.map(p => p.label).join(' / * / ')
+                    label: selectedConfig.properties[0].readablePath.map(p => p.label).join(' / * / '),
+                    indexEvent: 0,
+                    offset: 0,
+                    zIndex: 100
                 }]
             }
         }
@@ -243,7 +253,7 @@ class Timeline extends React.Component {
                 "selected": false,
                 "index": i
             }
-        })
+        }).sort((a, b) => a.first - b.first)
         
         // console.log(fullData)
         // console.log(this.customState)
@@ -255,7 +265,6 @@ class Timeline extends React.Component {
             "name": "selectedEntities",
             "source": "entities",
             "transform": [{"type": "filter", "expr": "!otherZoneSelected && datum.selected"}]
-
         },
         {
             "name": "events",
@@ -272,7 +281,7 @@ class Timeline extends React.Component {
                 },
                 "update": {
                     "x": {"value": 0},
-                    "y": {"scale": "yscale", "field": "entrypoint"},
+                    "y": {"scale": "yscale", "field": "prop2"},
                     "x2": {"signal": "width"},
                 }
             }
@@ -280,20 +289,23 @@ class Timeline extends React.Component {
         {
             "type": "text",
             "from": {"data": "entities"},
-            "key": "entrypoint",
+            "key": "prop2",
             "encode": {
                 "enter": {
                     "align": {"value": "right"},
                 },
                 "update": {
                     "x": {"value": -3},
-                    "y": {"scale": "yscale", "field": "entrypoint", "offset": 3},
-                    "text": {"field": "name"},
+                    "y": {"scale": "yscale", "field": "prop2", "offset": 3},
+                    "text": {"field": "prop2"},
                     "fill": [
                         {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
                         {"value": "#333"}
                     ],
                     "limit": {"value": display.viz.horizontal_padding}
+                },
+                "hover": {
+                    "text": {"field": "name"},
                 }
             }
         },
@@ -301,21 +313,25 @@ class Timeline extends React.Component {
             "type": "symbol",
             "name": "test",
             "from": {"data": "events"},
-            "key": "date",
             "encode": {
                 "enter": {
                     "size": {"value": 60},
                     "opacity": [
-                        {"value": 0.7}
+                        {"value": 0.8}
                     ]
                 },
                 "update": {
                     "xc": {"scale": "xscale", "field": "date"},
-                    "yc": {"scale": "yscale", "field": "entrypoint"},
+                    "yc": {"scale": "yscale", "field": "prop2", "offset" : "datum.offset"},
+                    "zindex": [
+                        {"test": "datum.offset >= 0", "signal" : "50 - datum.offset"},
+                        {"signal": "100 - datum.offset"}
+                    ],
                     "fill": [
                         {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
-                        {"scale": "color", "field": "entrypoint"}
-                    ]
+                        {"scale": "color", "field": "prop2"}
+                    ],
+                    "stroke":{"value": "#fff"}
                 }
             }
         },
@@ -323,22 +339,22 @@ class Timeline extends React.Component {
             "type": "rule",
             "name": "entitytimelines",
             "from": {"data": "entities"},
-            "key": "entrypoint",
+            "key": "prop2",
             "encode": {
                 "enter": {
                     "x": {"scale": "xscale", "signal": "datum.first"},
-                    "y": {"scale": "yscale", "field": "entrypoint"},
+                    "y": {"scale": "yscale", "field": "prop2"},
                     "x2": {"scale": "xscale", "signal": "datum.last"},
-                    "stroke": {"scale": "color", "field": "entrypoint"}
+                    "stroke": {"scale": "color", "field": "prop2"}
                 },
                 "update": {
                     "opacity": {"value": 0.7},
                     "x": {"scale": "xscale", "signal": "datum.first"},
-                    "y": {"scale": "yscale", "field": "entrypoint"},
+                    "y": {"scale": "yscale", "field": "prop2"},
                     "x2": {"scale": "xscale", "signal": "datum.last"},
                     "stroke": [
                         {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
-                        {"scale": "color", "field": "entrypoint"}
+                        {"scale": "color", "field": "prop2"}
                     ],
                     "selected": [
                         {"test": "zoneSelected && inrange(item.y, domainY)", "value": true},
@@ -366,7 +382,7 @@ class Timeline extends React.Component {
                         {"test": "scale('xscale', tooltip.date) > width / 2", "scale": "xscale", "signal": "tooltip.date", "offset": -3},
                         {"scale": "xscale", "signal": "tooltip.date", "offset": 3}
                     ],
-                    "y": {"scale": "yscale", "signal": "tooltip.entrypoint", "offset": -1},
+                    "y": {"scale": "yscale", "signal": "tooltip.prop2"},
                     "text": {"signal": "tooltip.label"},
                     "fillOpacity": [
                         {"test": "datum === tooltip", "value": 0},
@@ -380,7 +396,7 @@ class Timeline extends React.Component {
             ...defaultSpec,
             "width": dimensions.useful_width,
             "height": dimensions.useful_height,
-            "padding": {"bottom": display.viz.bottom_padding, "left": display.viz.horizontal_padding, "right": display.viz.horizontal_padding, "top": 10},
+            "padding": {"bottom": display.viz.bottom_padding, "left": display.viz.horizontal_padding, "right": display.viz.horizontal_padding, "top": 40},
             "signals": [
                 ...defaultSpec.signals,
                 {
@@ -438,7 +454,7 @@ class Timeline extends React.Component {
                 "name": "yscale",
                 "type": "band",
                 "range": [0, {"signal": "height"}],
-                "domain": {"data": "entities", "field": "entrypoint"}
+                "domain": {"data": "entities", "field": "prop2"}
             },
             {
                 "name": "xscale",
@@ -449,8 +465,8 @@ class Timeline extends React.Component {
             {
                 "name": "color",
                 "type": "ordinal",
-                "range": {"scheme": "category10"},
-                "domain": {"data": "entities", "field": "entrypoint"}
+                "range": {"scheme": "category20"},
+                "domain": {"data": "entities", "field": "prop2"}
             }],
             "axes": [
                 {"orient": "bottom", "scale": "xscale", "format": "%Y", "labelOverlap": "parity"},
@@ -469,16 +485,17 @@ class Timeline extends React.Component {
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
         //console.log('componentDidUpdate')
-        if (this.customState.view) this.customState.view.run()
-        this.props.handleTransition(this.props, this.getElementsForTransition())
-        this.customState.shouldRender = false
-    }
-    componentWillUnmount () {
+        if (this.customState.view) {
+            this.customState.view.run()
+            this.props.handleTransition(this.props, this.getElementsForTransition())
+            this.customState.shouldRender = false
+        }
     }
 }
 
 Timeline.propTypes = {
     config: PropTypes.object,
+    configs: PropTypes.object,
     data: PropTypes.array,
     dataset: PropTypes.object,
     dimensions: PropTypes.object,
@@ -499,6 +516,7 @@ Timeline.propTypes = {
 
 function mapStateToProps (state) {
     return {
+        configs: state.configs,
         dataset: state.dataset,
         display: state.display,
         palettes: state.palettes,

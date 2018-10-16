@@ -1,4 +1,4 @@
-// import * as d3 from 'd3'
+import * as d3 from 'd3'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
@@ -27,7 +27,6 @@ import * as selectionLib from '../lib/selectionLib'
 import { setDisplay, setModifier } from '../actions/displayActions'
 import { endTransition, loadResources } from '../actions/dataActions'
 import { handleMouseUp } from '../actions/selectionActions'
-import { set } from 'gl-matrix/src/gl-matrix/vec4';
 
 class App extends React.PureComponent {
     constructor (props) {
@@ -61,9 +60,9 @@ class App extends React.PureComponent {
         window.addEventListener('resize', throttle(this.onResize, 500))
     }
     handleMouseMove (e, zone) {
-        /* const { display, selections } = this.props
+        const { display, selections } = this.props
         if (display.selectedZone[zone].x1 !== null) {
-            //console.log(this.refmain.getWrappedInstance().getElementsInZone({zoneDimensions:}))
+            // console.log(this.refmain.getWrappedInstance().getElementsInZone({zoneDimensions:}))
             const selectedZone = selectionLib.getRectSelection({
                 ...display.selectedZone[zone],
                 x2: e.pageX,
@@ -87,7 +86,7 @@ class App extends React.PureComponent {
                 .attr('height', selectedZone.y2 - selectedZone.y1)
                 .attr('x', selectedZone.x1)
                 .attr('y', selectedZone.y1)
-        } */
+        }
     }
     handleTransition (props, elements) {
         const { role, status, zone } = props
@@ -140,7 +139,10 @@ class App extends React.PureComponent {
         }
     }
     handleKeyDown (event) {
-        // console.log(event.which)
+        // console.log('down', event.which)
+        if (event.which === 13) {
+            this['refHeader'].getWrappedInstance().handleKeyDown(event)
+        }
         if (event.which === 91 || event.which === 17) {
             this.props.setModifier(true)
         }
@@ -193,9 +195,11 @@ class App extends React.PureComponent {
             onKeyDown = { this.handleKeyDown }
             onKeyUp = { this.handleKeyUp }
             tabIndex = { 0 }
+            autoFocus = { true }
         >
             { mainConfig &&
                 <Header
+                    ref = {(c) => { this['refHeader'] = c }}
                     zone = "main"
                     config = { mainConfig }
                 />
@@ -206,7 +210,6 @@ class App extends React.PureComponent {
                 height = { display.screen.height + 10 }
                 style = {{ position: 'absolute', top: 0 }}
             >
-                
                 { mainConfig && 
                     this.state.main_step === 'changing' &&
                     <Transition

@@ -95,6 +95,7 @@ class HeatMap extends React.Component {
                 dimensions = { dimensions }
                 component = { this }
                 selections = { selections }
+                handleMouseMove = { this.props.handleMouseMove }
             />
             }
             { step !== 'changing' &&

@@ -80,6 +80,7 @@ class Header extends React.Component {
     }
     handleKeyDown (event) {
         const { dataset, selections } = this.props
+        // console.log('eee')
         if (event.which === 13) {
             if (selections.length > 0 || this.state.keyword.length > 3) {
                 this.displaySelection()
@@ -105,8 +106,11 @@ class Header extends React.Component {
             }))
     }
     displayConfig () {
-        const { config, dataset, zone } = this.props
+        const { config, configs, dataset, zone } = this.props
         let selectedLists = this.state.configsLists[this.state.selectedView]
+        
+        let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+        console.log(activeConfigs.selectedMatch)
         let selectedMatch = { properties: this.state.selectedProps && selectedLists ? this.state.selectedProps.map((prop, i) => selectedLists[i][prop]) : [] }
         this.setState({
             propsAreLoading: true,
@@ -161,9 +165,6 @@ class Header extends React.Component {
                 errorSelection: 'No results matching selection'
             }))
     }
-    componentWillUnmount () {
-        this.handleKeyDown = null
-    }
     render () {
         if (this.state.configsLists) {
             const { configs, data, dataset, selections, zone } = this.props
@@ -190,7 +191,7 @@ class Header extends React.Component {
             let selectedLists = this.state.configsLists[this.state.selectedView]
             let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps))
             return (
-                <div className='Header' onKeyDown = { this.handleKeyDown } tabIndex = { 0 } >
+                <div className='Header'>
                     <Line
                         label={'Class of Entities'}
                         maxData={options[0].total}
@@ -348,7 +349,9 @@ const HeaderConnect = connect(
         loadSelection: loadSelection(dispatch),
         selectResource: selectResource(dispatch),
         showSettings: showSettings(dispatch)
-    })
+    }),
+    null,
+    { withRef: true }
 )(Header)
 
 export default HeaderConnect

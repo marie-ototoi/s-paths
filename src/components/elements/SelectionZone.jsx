@@ -15,11 +15,12 @@ class SelectionZone extends React.PureComponent {
             height = { dimensions.height }
             onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, component, selections) } }
+           
             transform = { `translate(${dimensions.x}, ${dimensions.y})` }
         ></rect>)
     }
 }
-
+//  onMouseMove = { (e) => { this.props.handleMouseMove(e, zone) } }
 SelectionZone.propTypes = {
     dimensions: PropTypes.object,
     display: PropTypes.object,
