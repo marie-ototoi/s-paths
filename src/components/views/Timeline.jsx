@@ -39,27 +39,23 @@ class Timeline extends React.Component {
         this.prepareData(props)
     }
     handleSelect(...args) {
-        const { selections, selectElements, zone } = this.props
+        const { display, selections, selectElements, zone } = this.props
         if (args[1]) {
             // console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items)
             let selected = this.customState.view.scenegraph().root.items[0].items[5].items.filter(it =>it.selected)
             // console.log('salut', selected)
-            if (selected.length > 0) {
-                selected = selected.map(el => {
-                    return {
-                        selector: `timeline_element_${dataLib.makeId(el.datum.entrypoint)}`,
-                        index: el.datum.index,
-                        query: {
-                            type: 'uri',
-                            value: el.datum.entrypoint
-                        }
+            selected = selected.map(el => {
+                return {
+                    selector: el.datum.selector,
+                    index: el.datum.index,
+                    query: {
+                        type: 'uri',
+                        value: el.datum.entrypoint
                     }
-                })
-                selectElements(selected, zone, selections)
-            } else {
-                resetSelection(zone)
-                this.customState.view.signal('zoneSelected', false)
-            }
+                }
+            })
+            selectElements(selected, zone, selections, display.modifierPressed)
+          
         }
     }
     fetchMultiple() {
@@ -162,7 +158,7 @@ class Timeline extends React.Component {
                         width: Math.abs(el.bounds.x2 - el.bounds.x1),
                         height: Math.abs(el.bounds.y2 - el.bounds.y1)
                     },
-                    selector: `timeline_element_${dataLib.makeId(el.datum.entrypoint)}`,
+                    selector: el.datum.selector,
                     index: el.datum.index,
                     query: {
                         type: 'uri',
@@ -228,10 +224,9 @@ class Timeline extends React.Component {
         }
     }
     prepareData (nextProps) {
-        console.log('prepare data')
+        // console.log('prepare data')
         const { display, dimensions, selections, zone } = nextProps
         // prepare the data for display
-        let flatSelection = selections.filter(s => s.zone === zone).map(s => s.query.value)
         let fullData = []
         for (let cle in this.customState.multipleData) {
             fullData.push(this.customState.multipleData[cle])
@@ -245,6 +240,7 @@ class Timeline extends React.Component {
                     ...ev,
                     first: first.date,
                     last: last.date,
+                    selector: `timeline_element_${dataLib.makeId(dp.entrypoint)}`,
                     entrypoint: dp.entrypoint,
                     prop2: dp.prop2
                 })
@@ -253,7 +249,7 @@ class Timeline extends React.Component {
                 ...dp,
                 first: first.date,
                 last: last.date,
-                inSelection: flatSelection.includes(dp.entrypoint),
+                selector: `timeline_element_${dataLib.makeId(dp.entrypoint)}`,
                 "selected": false,
                 "index": i
             }
@@ -276,7 +272,7 @@ class Timeline extends React.Component {
         },
         {
             "name": "selections",
-            "values": selections.filter(s => s.zone === zone)
+            "values": selections.filter(s => s.zone === zone).map(s => { return { selector: s.selector } })
         }]
         // console.log(timedata)
         let marks = [{
@@ -307,7 +303,7 @@ class Timeline extends React.Component {
                     "y": {"scale": "yscale", "field": "prop2", "offset": 3},
                     "text": {"field": "prop2"},
                     "fill": [
-                        {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
+                        {"test": "otherZoneSelected || (zoneSelected && !indata('selections', 'selector', datum.selector))", "value": "#ccc"},
                         {"value": "#333"}
                     ],
                     "limit": {"value": display.viz.horizontal_padding}
@@ -336,7 +332,7 @@ class Timeline extends React.Component {
                         {"signal": "100 - datum.offset"}
                     ],
                     "fill": [
-                        {"test": "(otherZoneSelected && datum.inSelection)", "value": "#ccc"},
+                        {"test": "otherZoneSelected || (zoneSelected && !indata('selections', 'selector', datum.selector))", "value": "#ccc"},
                         {"scale": "color", "field": "prop2"}
                     ],
                     "stroke":{"value": "#fff"}
@@ -361,7 +357,7 @@ class Timeline extends React.Component {
                     "y": {"scale": "yscale", "field": "prop2"},
                     "x2": {"scale": "xscale", "signal": "datum.last"},
                     "stroke": [
-                        {"test": "( !indata('selections', 'entrypoint', datum.entrypoint) )", "value": "#ccc"},
+                        {"test": "otherZoneSelected || (zoneSelected && !indata('selections', 'selector', datum.selector))", "value": "#ccc"},
                         {"scale": "color", "field": "prop2"}
                     ],
                     "selected": [
@@ -477,7 +473,7 @@ class Timeline extends React.Component {
             {
                 "name": "color",
                 "type": "ordinal",
-                "range": {"scheme": "category20"},
+                "range": {"scheme": "category10"},
                 "domain": {"data": "entities", "field": "prop2"}
             }],
             "axes": [
@@ -496,7 +492,7 @@ class Timeline extends React.Component {
     }
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
-        //console.log('componentDidUpdate')
+        console.log('componentDidUpdate', this.customState.view.data('selections'), this.props.display.modifierPressed)
         if (this.customState.view) {
             this.customState.view.run()
             this.props.handleTransition(this.props, this.getElementsForTransition())
