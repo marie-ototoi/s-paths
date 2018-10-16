@@ -1,9 +1,26 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import ReactSelect from 'react-select'
+import { Async as ReactSelect } from 'react-select'
 import './PropSelect.css'
 
 class PropSelect extends React.Component {
+    constructor (...args) {
+        super(...args)
+        this.loadOptions = this.loadOptions.bind(this)
+    }
+
+    loadOptions (inputValue) {
+        return new Promise(resolve => {
+            inputValue = inputValue.trim().toLowerCase()
+            if (inputValue) {
+                resolve(this.props.options.filter(i =>
+                    i.path.toLowerCase().includes(inputValue)
+                ).slice(0, 100))
+            }
+            resolve(this.props.options.slice(0, 100))
+        })
+    }
+
     static getOptionLabel (option) {
         return (
             <div>
@@ -18,11 +35,13 @@ class PropSelect extends React.Component {
         return (
             <ReactSelect
                 classNamePrefix='PropSelect'
-                value={this.props.options[this.props.currentValue]}
-                getOptionValue={(option) => option['index']}
+                cacheOptions
+                defaultOptions
+                loadOptions={this.loadOptions}
+                defaultValue={this.props.options[this.props.currentValue]}
+                getOptionValue={(option) => option['path']}
                 getOptionLabel={PropSelect.getOptionLabel}
                 onChange={this.props.onChange}
-                options={this.props.options}
             />
         )
     }

@@ -33,14 +33,14 @@ class Header extends React.Component {
         if (prevProps.which) return null
         let configChanged = prevProps.configs.past.length !== this.props.configs.past.length &&
             this.props.configs.present.status !== 'transition'
-      
+
         if (configChanged) {
             let newData = this.prepareData(this.props)
             // console.log(newData)
             this.setState(newData)
             // return false
         }
-        return null            
+        return null
     }
     prepareData (nextProps) {
         // TODO: remove data duplication
@@ -50,18 +50,12 @@ class Header extends React.Component {
         let selectedResource = displayedResource
         let configsLists = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).map(view => view.propList)
         let displayedView = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).reduce((acc, cur, i) => (cur.selected ? i : acc), null)
-        let displayedProps = configsLists[displayedView].map((list, index) => {
-            return list.reduce((acc, cur, propIndex) => {
-                if (nextProps.config.selectedMatch.properties[index] && cur.path === nextProps.config.selectedMatch.properties[index].path) {
-                    acc = propIndex
-                }
-                return acc
-            }, null)
-        })
-        
+        let displayedProps = configsLists[displayedView]
+            .map(prop => prop.reduce((acc, cur, i) => (cur.selected ? i : acc), 0))
+
         let selectedProps = displayedProps
         let selectedView = displayedView
-        // console.log(displayedView, selectedView, displayedProps, selectedProps, configsLists)
+
         return {
             resourceIsLoading: false,
             selectionIsLoading: false,
@@ -179,7 +173,7 @@ class Header extends React.Component {
 
             // first line - resources
             let selectResourceEnabled = (this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '')
-            // console.log(selections.length)
+
             // second line - keyword + pointer
             let pointerEnabled = selections.length > 0
             let keywordEnabled = this.state.keyword.length > 3
@@ -285,13 +279,12 @@ class Header extends React.Component {
                             currentValue={this.state.selectedView}
                             onChange={(selectedOption) => {
                                 const selectedView = selectedOption.index
-                                // console.log(this.state.configsLists[selectedView], selectedOption, selectedOption.selectedMatch.properties)
                                 this.setState({
                                     selectedView,
-                                    selectedProps: this.state.configsLists[selectedView].map((list, index) => 0)
+                                    selectedProps: this.state.configsLists[selectedView].map(() => 0)
                                 })
                             }}
-                            options={activeConfigs.map((option, i) => { return {...option, index: i} })}
+                            options={activeConfigs.map((option, i) => ({ ...option, index: i }))}
                         />
                         { selectedLists && selectedLists.map((list, index) => (
                             <div
@@ -301,11 +294,13 @@ class Header extends React.Component {
                                 <PropSelect
                                     currentValue={this.state.selectedProps[index]}
                                     onChange={(selectedOption) => {
-                                        let selectedProps = [...this.state.selectedProps]
-                                        selectedProps[index] = selectedOption.index
+                                        const selectedProps = [...this.state.selectedProps]
+                                        selectedProps[index] = selectedLists[index].findIndex((option) =>
+                                            option.path === selectedOption.path
+                                        )
                                         this.setState({ selectedProps })
                                     }}
-                                    options={selectedLists[index].map((option, i) => { return {...option, index: i} })}
+                                    options={selectedLists[index]}
                                 />
                             </div>
                         ))}
