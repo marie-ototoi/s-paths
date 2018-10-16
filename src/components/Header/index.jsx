@@ -50,9 +50,13 @@ class Header extends React.Component {
         let selectedResource = displayedResource
         let configsLists = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).map(view => view.propList)
         let displayedView = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).reduce((acc, cur, i) => (cur.selected ? i : acc), null)
-        let displayedProps = configsLists[displayedView]
-            .map(prop => prop.reduce((acc, cur, i) => (cur.selected ? i : acc), 0))
-
+        let activeConfigs = getCurrentConfigs(nextProps.configs, 'main', 'active')
+        let displayedProps = configsLists[displayedView].map((list, index) => {
+            return list.reduce((acc, cur, propIndex) => {
+                if (activeConfigs.views[displayedView].selectedMatch.properties[index].path === cur.path) acc = propIndex
+                return acc
+            }, 0)
+        })
         let selectedProps = displayedProps
         let selectedView = displayedView
 
@@ -104,12 +108,13 @@ class Header extends React.Component {
         let selectedLists = this.state.configsLists[this.state.selectedView]
         
         let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
-        console.log(activeConfigs.selectedMatch)
+        // console.log(activeConfigs.views[this.state.selectedView].selectedMatch)
         let selectedMatch = { properties: this.state.selectedProps && selectedLists ? this.state.selectedProps.map((prop, i) => selectedLists[i][prop]) : [] }
         this.setState({
             propsAreLoading: true,
             errorSelection: ''
         })
+        // console.log(selectedMatch, this.state.selectedProps, selectedLists)
         this.props.displayConfig(this.state.selectedView, selectedMatch, this.props.configs.present.views, config, dataset, zone)
             .then(() => this.setState({
                 propsAreLoading: false,
@@ -305,6 +310,7 @@ class Header extends React.Component {
                                         selectedProps[index] = selectedLists[index].findIndex((option) =>
                                             option.path === selectedOption.path
                                         )
+                                        console.log(selectedProps[index])
                                         this.setState({ selectedProps })
                                     }}
                                     options={selectedLists[index]}
