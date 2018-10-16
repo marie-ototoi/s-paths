@@ -78,7 +78,7 @@ const scoreProp = (prop, constraint) => {
     // et eventuellement si la prop peut avoir plusieurs valeurs pour une meme instance (specifier dans la vue si c'est souhaite)
     let score = {}
     const { min, max, optimal } = constraint.unique
-    if (prop.coverage < 20) return 0
+    // if (prop.coverage < 10) return 0
     score.coverage = prop.coverage / 10   
     switch (prop.category) {
     case 'datetime':
@@ -240,7 +240,7 @@ export const defineConfigs = (views, stats) => {
                     scoreMatch: scoreMatch(match, (view.entrypoint !== undefined), view.weight)
                 }
             }
-            console.log('why ?', selectedMatch)
+            // console.log('why ?', selectedMatch)
             return {
                 ...view,
                 propList,

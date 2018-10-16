@@ -38,7 +38,7 @@ class PropSelect extends React.Component {
                 cacheOptions
                 defaultOptions
                 loadOptions={this.loadOptions}
-                defaultValue={this.props.options[this.props.currentValue]}
+                value={this.props.options[this.props.currentValue]}
                 getOptionValue={(option) => option['path']}
                 getOptionLabel={PropSelect.getOptionLabel}
                 onChange={this.props.onChange}

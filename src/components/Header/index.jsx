@@ -132,7 +132,6 @@ class Header extends React.Component {
             // in case the entrypoint has changed
             entrypoint = activeConfigs.entrypoint
             const selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'))
-
             constraints = makeSelectionConstraints(selections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats })
         } else {
             // keep old constraints
@@ -161,6 +160,7 @@ class Header extends React.Component {
     }
     render () {
         if (this.state.configsLists) {
+            // console.log(this.state.configsLists)
             const { configs, data, dataset, selections, zone } = this.props
 
             // general
@@ -279,9 +279,16 @@ class Header extends React.Component {
                             currentValue={this.state.selectedView}
                             onChange={(selectedOption) => {
                                 const selectedView = selectedOption.index
+                                let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+                                //console.log(activeConfigs, selectedView)
                                 this.setState({
                                     selectedView,
-                                    selectedProps: this.state.configsLists[selectedView].map(() => 0)
+                                    selectedProps: this.state.configsLists[selectedView].map((list, index) => {
+                                        return list.reduce((acc, cur, propIndex) => {
+                                            if (activeConfigs.views[selectedView].selectedMatch.properties[index].path === cur.path) acc = propIndex
+                                            return acc
+                                        }, 0)
+                                    })
                                 })
                             }}
                             options={activeConfigs.map((option, i) => ({ ...option, index: i }))}

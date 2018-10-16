@@ -122,6 +122,7 @@ class Timeline extends React.Component {
     }
     render () {
         const { dimensions, role, step } = this.props
+        // console.log(this.props.selections, this.customState.view.scenegraph())
         return (<div
             className = { `Timeline ${this.customState.elementName} role_${role}` } >
             { step !== 'changing' &&
@@ -183,7 +184,7 @@ class Timeline extends React.Component {
             (this.props.data[0] && nextProps.data[0] && this.props.data[0].prop1.value !== nextProps.data[0].prop1.value))
         let selectionChanged = this.props.selections.length !== nextProps.selections.length
         let dimensionsChanged = (this.props.dimensions.width !== nextProps.dimensions.width || this.props.dimensions.height !== nextProps.dimensions.height)
-        if (dataChanged) {
+        if (dataChanged || selectionChanged) {
             this.prepareData(nextProps)
         }
         if (dimensionsChanged) {
@@ -198,6 +199,7 @@ class Timeline extends React.Component {
                 this.customState.view.signal('otherZoneSelected', false)
             }
         }
+        if (this.props.display.modifierPressed !== nextProps.display.modifierPressed) this.customState.view.signal('modifierPressed', nextProps.display.modifierPressed)
         return dataChanged || selectionChanged || dimensionsChanged ||
             this.props.step !== nextProps.step ||
             this.state.label !== nextState.label||
@@ -226,9 +228,10 @@ class Timeline extends React.Component {
         }
     }
     prepareData (nextProps) {
+        console.log('prepare data')
         const { display, dimensions, selections, zone } = nextProps
         // prepare the data for display
-       
+        let flatSelection = selections.filter(s => s.zone === zone).map(s => s.query.value)
         let fullData = []
         for (let cle in this.customState.multipleData) {
             fullData.push(this.customState.multipleData[cle])
@@ -250,6 +253,7 @@ class Timeline extends React.Component {
                 ...dp,
                 first: first.date,
                 last: last.date,
+                inSelection: flatSelection.includes(dp.entrypoint),
                 "selected": false,
                 "index": i
             }
@@ -269,6 +273,10 @@ class Timeline extends React.Component {
         {
             "name": "events",
             "values": events
+        },
+        {
+            "name": "selections",
+            "values": selections.filter(s => s.zone === zone)
         }]
         // console.log(timedata)
         let marks = [{
@@ -328,7 +336,7 @@ class Timeline extends React.Component {
                         {"signal": "100 - datum.offset"}
                     ],
                     "fill": [
-                        {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
+                        {"test": "(otherZoneSelected && datum.inSelection)", "value": "#ccc"},
                         {"scale": "color", "field": "prop2"}
                     ],
                     "stroke":{"value": "#fff"}
@@ -353,7 +361,7 @@ class Timeline extends React.Component {
                     "y": {"scale": "yscale", "field": "prop2"},
                     "x2": {"scale": "xscale", "signal": "datum.last"},
                     "stroke": [
-                        {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
+                        {"test": "( !indata('selections', 'entrypoint', datum.entrypoint) )", "value": "#ccc"},
                         {"scale": "color", "field": "prop2"}
                     ],
                     "selected": [
@@ -417,6 +425,10 @@ class Timeline extends React.Component {
                 {
                     "name": "otherZoneSelected",
                     "value": selections.some(s => s.zone !== zone)
+                },
+                {
+                    "name": "modifierPressed",
+                    "value": display.modifierPressed
                 },
                 {
                     "name": "zoneSelected",
