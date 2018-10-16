@@ -285,7 +285,6 @@ class Header extends React.Component {
                             onChange={(selectedOption) => {
                                 const selectedView = selectedOption.index
                                 let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
-                                //console.log(activeConfigs, selectedView)
                                 this.setState({
                                     selectedView,
                                     selectedProps: this.state.configsLists[selectedView].map((list, index) => {
@@ -310,7 +309,6 @@ class Header extends React.Component {
                                         selectedProps[index] = selectedLists[index].findIndex((option) =>
                                             option.path === selectedOption.path
                                         )
-                                        console.log(selectedProps[index])
                                         this.setState({ selectedProps })
                                     }}
                                     options={selectedLists[index]}

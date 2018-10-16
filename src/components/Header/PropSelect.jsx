@@ -36,7 +36,7 @@ class PropSelect extends React.Component {
             <ReactSelect
                 classNamePrefix='PropSelect'
                 cacheOptions
-                defaultOptions
+                defaultOptions={this.props.options.slice(0, 100)}
                 loadOptions={this.loadOptions}
                 value={this.props.options[this.props.currentValue]}
                 getOptionValue={(option) => option['path']}
