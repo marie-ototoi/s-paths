@@ -323,31 +323,33 @@ export const prepareSinglePropData = (data, category, prefixes) => {
         })
 }
 
-export const prepareGeoData = (data, dataset) => {
-    return {
-        type: 'FeatureCollection',
-        features: data.map((place, index) => {
-            return {
-                type: 'Feature', 
-                properties: {
-                    id: makeId(place.entrypoint.value),
-                    title: place.prop3 ? place.prop3.value : place.prop1.value + '/' +  place.prop2.value,
-                    lat:  Number(place.prop1.value),
-                    long:  Number(place.prop2.value),
-                    label: place.prop3.value,
-                    labelPipe: place.prop3.value + '|',
-                    entrypoint: place.entrypoint.value,
-                    entrypointPipe: place.entrypoint.value + '|',
-                    index,
-                    indexPipe: index + '|'
-                },
-                geometry: {
-                    type: "Point",
-                    coordinates: [Number(place.prop2.value), Number(place.prop1.value), 0] 
-                }
+export const prepareGeoData = (data, dataset, selections, zone) => {
+    let flatSelections = selections.filter(s => s.zone === zone).map(s => s.selector)
+    // console.log(flatSelections)
+    return data.map((place, index) => {
+        let id = makeId(place.entrypoint.value)
+        let selector = `geo_element_${id}`
+        // console.log(id, flatSelections.includes(selector))
+        return {
+            type: 'Feature', 
+            properties: {
+                id,
+                title: place.prop3 ? place.prop3.value : place.prop1.value + '/' +  place.prop2.value,
+                lat:  Number(place.prop1.value),
+                long:  Number(place.prop2.value),
+                label: place.prop3.value,
+                cat: place.prop4 ? place.prop4.value : undefined,
+                entrypoint: place.entrypoint.value,
+                selector,
+                singleselected: flatSelections.includes(selector) ? 1 : 0,
+                index
+            },
+            geometry: {
+                type: "Point",
+                coordinates: [Number(place.prop2.value), Number(place.prop1.value), 0] 
             }
-        })
-    }
+        }
+    })
 }
 
 export const prepareVegaTimelineData = (data, dataset) => {

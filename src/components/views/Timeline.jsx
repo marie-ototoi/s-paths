@@ -41,7 +41,7 @@ class Timeline extends React.Component {
     handleSelect(...args) {
         const { display, selections, selectElements, zone } = this.props
         if (args[1]) {
-            // console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items)
+            //console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items)
             let selected = this.customState.view.scenegraph().root.items[0].items[5].items.filter(it =>it.selected)
             // console.log('salut', selected)
             selected = selected.map(el => {

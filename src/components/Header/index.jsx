@@ -51,8 +51,11 @@ class Header extends React.Component {
         let configsLists = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).map(view => view.propList)
         let displayedView = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).reduce((acc, cur, i) => (cur.selected ? i : acc), null)
         let activeConfigs = getCurrentConfigs(nextProps.configs, 'main', 'active')
+        // console.log(configsLists, displayedView, activeConfigs.views[displayedView])
         let displayedProps = configsLists[displayedView].map((list, index) => {
+            // console.log(list, index)
             return list.reduce((acc, cur, propIndex) => {
+                // console.log(index)
                 if (activeConfigs.views[displayedView].selectedMatch.properties[index].path === cur.path) acc = propIndex
                 return acc
             }, 0)
@@ -105,6 +108,7 @@ class Header extends React.Component {
     }
     displayConfig () {
         const { config, configs, dataset, zone } = this.props
+        
         let selectedLists = this.state.configsLists[this.state.selectedView]
         
         let activeConfigs = getCurrentConfigs(configs, 'main', 'active')

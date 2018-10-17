@@ -18,6 +18,7 @@ class Geo extends React.Component {
         this.handleSelect = this.handleSelect.bind(this)
         this.handleNewView = this.handleNewView.bind(this)
         this.handleTooltip = this.handleTooltip.bind(this)
+        this.updateSelections = this.updateSelections.bind(this)
         this.handleZoneSelected = this.handleZoneSelected.bind(this)
         this.customState = {
             // selectElements: this.selectElements,
@@ -28,24 +29,32 @@ class Geo extends React.Component {
         }
         this.prepareData(props)
     }
+
     handleSelect(...args) {
         const { selections, selectElements, zone } = this.props
         if (args[1]) {
-            // console.log('yes we can', args, this.customState.view.scenegraph().root.source.value[0].items[1].items)
-            let selected = this.customState.view.scenegraph().root.source.value[0].items[1].items.filter(it =>it.selected)
-            // console.log('salut', selected)
+            let selected = this.customState.view.scenegraph().root.source.value[0].items[2].items.filter(it =>it.selected)
+            // console.log(this.customState.view.scenegraph().root.source.value[0].items[2].items.filter(it =>it.selected))
             if (selected.length > 0) {
+                selected = selected.reduce((acc, cur) => {
+                    let findSinglePoints =  this.customState.view.scenegraph().root.source.value[0].items[1].items.filter((it) => {
+                        return cur.datum.latg === it.datum.latg && cur.datum.longg === it.datum.longg
+                    }).map(el => { return { ...el, id: cur.datum.id } })
+                    acc.push(...findSinglePoints)
+                    return acc
+                }, [])
                 selected = selected.map(el => {
                     return {
-                        selector: `geo_element_${dataLib.makeId(el.datum.properties.entrypoint)}`,
+                        selector: el.datum.properties.selector,
                         index: el.datum.properties.index,
                         query: {
                             type: 'uri',
                             value: el.datum.properties.entrypoint
-                        }
+                        },
+                        zone,
+                        other: el.id
                     }
                 })
-                // console.log(selected)
                 selectElements(selected, zone, selections)
             } else {
                 resetSelection(zone)
@@ -60,13 +69,18 @@ class Geo extends React.Component {
         // console.log('coucou', ...args)
     }
     handleTooltip(...args) {
-        if (this.props.role !== 'target') {
-            let label = args[1].label ? args[1].label : ''
-            if(label !== this.state.label) {
-                label = label.slice(1, label.length).replace(/\|/g, ' \n ')
-                // console.log('coucou', ...args, label, this.customState.view.data('entitygroups'), this.customState.view.scenegraph())
-                this.setState({ label })
-            } 
+        
+        let el = args[1]
+        let id = el.longg !== undefined ? `${el.longg}${el.latg}` : undefined
+        if (this.props.role !== 'target' && 
+            id !== undefined && id !== this.state.hover &&
+            this.customState.view.scenegraph().root.source.value[0]) {
+            // console.log(this.customState.view.scenegraph().root.source.value[0].items[1].items, el.latg,)
+            let findSinglePoints =  this.customState.view.scenegraph().root.source.value[0].items[1].items.filter((it) => {
+                return el.latg === it.datum.latg && el.longg === it.datum.longg
+            })
+            let label = findSinglePoints.map(p => p.datum.properties.label).join(", ")
+            this.setState({ hover: id, label }) 
         }
     }
     render () {
@@ -121,7 +135,7 @@ class Geo extends React.Component {
                         width: 5,
                         height: 5
                     },
-                    selector: `geo_element_${dataLib.makeId(el.datum.properties.entrypoint)}`,
+                    selector:el.datum.properties.selector,
                     index: el.datum.properties.index,
                     query: {
                         type: 'uri',
@@ -137,13 +151,26 @@ class Geo extends React.Component {
         // console.log(items)
         return items
     }
-
+    updateSelections (nextProps) {
+        let { selections, zone } = nextProps
+        // console.log("FOIS FOIS")
+        if (this.customState.view) {
+            // this.customState.view.remove('entities', this.customState.view.data('entities'))
+            this.customState.view.remove('selections', function(d) { return true }).run();
+            this.customState.view.insert('selections',  selections.filter(s => s.zone === zone).map(s => { return { selector: s.selector, id: s.other } })).run()
+        }
+    }
     shouldComponentUpdate (nextProps, nextState) {
         let dataChanged = (this.props.data.length !== nextProps.data.length ||
             (this.props.data[0] && nextProps.data[0] && this.props.data[0].prop1.value !== nextProps.data[0].prop1.value))
         let selectionChanged = this.props.selections.length !== nextProps.selections.length
         let dimensionsChanged = (this.props.dimensions.width !== nextProps.dimensions.width || this.props.dimensions.height !== nextProps.dimensions.height)
+        if (selectionChanged && !dataChanged) {
+            // console.log('HAS CHANGED')
+            this.updateSelections(nextProps)
+        }
         if (dataChanged) {
+            if(this.customState.view) this.customState.view.finalize() 
             this.prepareData(nextProps)
         }
         if (dimensionsChanged) {
@@ -163,20 +190,14 @@ class Geo extends React.Component {
             this.state.label !== nextState.label
     }
     prepareData (nextProps) {
-        const { config, data, dataset, display, dimensions, getPropPalette, palettes, role, selections, zone } = nextProps
+        const { data, dataset, dimensions, selections, zone } = nextProps
         // prepare the data for display
-        // const selectedConfig = getSelectedMatch(config, zone)
-        // First prop
-        // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
-        // console.log(data, role)
-        // const selectedConfig = getSelectedMatch(config, zone)
-        // const pathProp1 = selectedConfig.properties[0].path
-        // const colors = getPropPalette(palettes, pathProp1, 1)
-
-        // console.log(defaultSpec)
         const geodata = [{
             "name": "entities",
-            "values": dataLib.prepareGeoData(data, dataset),
+            "values": {
+                type: 'FeatureCollection',
+                features: dataLib.prepareGeoData(data, dataset, selections, zone)
+            },
             "format": {
                 "type": "json",
                 "property": "features"
@@ -194,6 +215,22 @@ class Geo extends React.Component {
             ]
         },
         {
+            "name": "newentities",
+            "source": "entities",
+            "transform": [
+                {
+                    "type": "formula",
+                    "as": "latg",
+                    "expr": "round(datum.properties.lat / scale('precision', scaleZoom)) * scale('precision', scaleZoom)"
+                },
+                {
+                    "type": "formula",
+                    "as": "longg",
+                    "expr": "round(datum.properties.long / scale('precision', scaleZoom)) * scale('precision', scaleZoom)"
+                }
+            ]
+        },
+        {
             "name": "entitygroups",
             "source": "entities",
             "transform": [
@@ -206,15 +243,23 @@ class Geo extends React.Component {
                     "type": "formula",
                     "as": "longg",
                     "expr": "round(datum.properties.long / scale('precision', scaleZoom)) * scale('precision', scaleZoom)"
-                },  
+                },
                 {
                     "type": "aggregate",
                     "groupby": ["longg", "latg"],
-                    "fields": ["properties.long", "properties.lat", "longg", "properties.labelPipe", "properties.entrypointPipe"],
-                    "ops": ["median", "median", "count", "sum", "sum"],
-                    "as": ["medianlong", "medianlat", "count", "label", "entrypoint"]
+                    "fields": ["properties.long", "properties.lat", "longg", "properties.singleselected"],
+                    "ops": ["median", "median", "count", "sum"],
+                    "as": ["medianlong", "medianlat", "countsingle", "singleselected"]
+                },
+                {
+                    "type": "identifier",
+                    "as": "id"
                 }
             ]
+        },
+        {
+            "name": "selections",
+            "values": selections.filter(s => s.zone === zone).map(s => { return { selector: s.selector, id: s.other } })
         }]
         const spec = {
             ...defaultSpec,
@@ -281,7 +326,7 @@ class Geo extends React.Component {
                         "events": {"signal": "scaleZoom"},
                         "update": "scale('precision', scaleZoom)"
                     }]
-                }
+                },
             ],
             "data": geodata,
             "scales": [
@@ -296,6 +341,19 @@ class Geo extends React.Component {
                     "type": "linear",
                     "domain": [150, 1500],
                     "range": [15, 1]
+                },
+                {
+                    "name": "color",
+                    "type": "linear",
+                    "range": {"scheme": "yelloworangered"},
+                    "domain": {"data": "entitygroups", "field": "countsingle"}
+                },
+                {
+                    "name": "textcolor",
+                    "type": "linear",
+                    "reverse": true,
+                    "range": {"scheme": "greys"},
+                    "domain": {"data": "entitygroups", "field": "countsingle"}
                 }
             ],
             "projections": [
@@ -323,18 +381,11 @@ class Geo extends React.Component {
                 {
                     "type": "shape",
                     "name": "singlepoints",
-                    "from": {"data": "entities"},
+                    "from": {"data": "newentities"},
                     "encode": {
                         "update": {
-                            "opacity": {"value": 0.25},
-                            "fill": [
-                                {"test": "(otherZoneSelected || (zoneSelected && (!inrange(item.bounds.x1, domainX) || !inrange(item.bounds.y1, domainY))))", "value": "#666"},
-                                {"value": "blue"}
-                            ],
-                            "selected": [
-                                {"test": "(zoneSelected && (!inrange(item.bounds.x1, domainX) || !inrange(item.bounds.y1, domainY)))", "value": false},
-                                {"value": true}
-                            ]
+                            "opacity": {"value": 0.01},
+                            "fill":  {"value": "blue"}
                         }
                     },
                     "transform": [
@@ -351,16 +402,16 @@ class Geo extends React.Component {
                     "name": "aggregatePoints",
                     "encode": {
                         "update": {
-                            "opacity": {"value": 0.5},
+                            "opacity": {"value": 0.85},
                             "fill": [
-                                {"test": "(otherZoneSelected || (zoneSelected && (!inrange(item.bounds.x1, domainX) || !inrange(item.bounds.y1, domainY))))", "value": "#666"},
-                                {"value": "red"}
+                                {"test": "otherZoneSelected || (zoneSelected && !indata('selections', 'id', datum.id))", "value": "#666"},
+                                {"scale": "color", "field": "countsingle"}
                             ],
-                            "size": {"signal": "160 + datum.count * 30"},
+                            "size": {"signal": "160 + datum.countsingle * 30"},
                             "medianlong2": {"field": "medianlong"},
                             "medianlat2": {"field": "medianlat"},
                             "selected": [
-                                {"test": "(zoneSelected && (!inrange(item.bounds.x1, domainX) || !inrange(item.bounds.y1, domainY)))", "value": false},
+                                {"test": "otherZoneSelected || (zoneSelected && (!inrange(item.bounds.x1, domainX) || !inrange(item.bounds.y1, domainY)))", "value": false},
                                 {"value": true}
                             ]
                         }
@@ -377,13 +428,14 @@ class Geo extends React.Component {
                     "type": "text",
                     "from": {"data": "entitygroups"},
                     "name": "aggregateCount",
+
                     "encode": {
                         "update": {
-                            "fill": {"value": "#ffffff"},
+                            "fill": {"value": "#fff"},
                             "align": {"value": "center"},
                             "baseline": {"value": "middle"},
                             "text": [
-                                {"test": "datum.count > 1", "field": "count"},
+                                {"test": "datum.countsingle > 1", "field": "countsingle"},
                                 {"value": ""}
                             ],
                             "medianlong2": {"field": "medianlong"},
@@ -418,11 +470,11 @@ class Geo extends React.Component {
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
         if (this.customState.view) {
+            // if(this.customState.view.scenegraph().source.value) console.log('componentDidUpdate', this.customState.view.scenegraph().source.value[0].items[2].items, this.props.display.modifierPressed, this.props.selections)
             this.customState.view.run()
+            //console.log(this.props.selections, this.customState.view.scenegraph().root.items[0].items[2].items)
             this.props.handleTransition(this.props, this.getElementsForTransition())
         }
-    }
-    componentWillUnmount () {
     }
 }
 

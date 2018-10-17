@@ -170,7 +170,7 @@ const defaultState = [
                     avg: { max: 120, optimal: [30, 70] },
                     unique: {}
                 }
-            ],
+            ]/*,
             [
                 {
                     category: 'text',
@@ -178,7 +178,7 @@ const defaultState = [
                     avg: { max: 120, optimal: [30, 70] },
                     optional: true
                 }
-            ]
+            ]*/
         ]
     }/*,
     {
