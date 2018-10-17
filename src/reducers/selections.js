@@ -19,7 +19,7 @@ const selection = (state, action) => {
             zone: action.zone,
             query: action.query,
             count: action.count || 0,
-            other: action.other || undefined
+            other: action.other
         }
     default:
         return state

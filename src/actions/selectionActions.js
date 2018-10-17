@@ -58,7 +58,7 @@ export const selectElements = (dispatch) => (elements, zone, selections, modifie
             })
         }
     } else {
-        // console.log(elements, selections, modifierPressed)
+        console.log(elements, selections, modifierPressed)
         return dispatch({
             type: types.REPLACE_SELECTION,
             elements,

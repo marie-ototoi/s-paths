@@ -2,6 +2,8 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 import Vega from 'react-vega';
+import * as vega from 'vega-lib';
+
 // components
 // d3
 // libs
@@ -31,10 +33,10 @@ class Geo extends React.Component {
     }
 
     handleSelect(...args) {
-        const { selections, selectElements, zone } = this.props
+        const { display, selections, selectElements, zone } = this.props
         if (args[1]) {
             let selected = this.customState.view.scenegraph().root.source.value[0].items[2].items.filter(it =>it.selected)
-            // console.log(this.customState.view.scenegraph().root.source.value[0].items[2].items.filter(it =>it.selected))
+            console.log(this.customState.view.scenegraph().root.source.value[0].items[2].items.filter(it =>it.selected))
             if (selected.length > 0) {
                 selected = selected.reduce((acc, cur) => {
                     let findSinglePoints =  this.customState.view.scenegraph().root.source.value[0].items[1].items.filter((it) => {
@@ -55,10 +57,8 @@ class Geo extends React.Component {
                         other: el.id
                     }
                 })
-                selectElements(selected, zone, selections)
-            } else {
-                resetSelection(zone)
             }
+            selectElements(selected, zone, selections, display.modifierPressed)
         }
     }
     handleNewView(args) {
@@ -156,8 +156,9 @@ class Geo extends React.Component {
         // console.log("FOIS FOIS")
         if (this.customState.view) {
             // this.customState.view.remove('entities', this.customState.view.data('entities'))
-            this.customState.view.remove('selections', function(d) { return true }).run();
-            this.customState.view.insert('selections',  selections.filter(s => s.zone === zone).map(s => { return { selector: s.selector, id: s.other } })).run()
+            let changeset = vega.changeset().remove(() => true).insert(selections.filter(s => s.zone === zone).map(s => { return { selector: s.selector, id: s.other } }));
+            // For some reason source_0 is the default dataset name
+            this.customState.view.change('selections', changeset).run()
         }
     }
     shouldComponentUpdate (nextProps, nextState) {
@@ -361,6 +362,7 @@ class Geo extends React.Component {
                     "name": "projection",
                     "type": "mercator",
                     "scale": {"signal": "scaleZoom"},
+                    "center": [0, 0],
                     "translate": [{"signal": "width / 2"}, {"signal": "height / 2"}]
                 }
             ],
@@ -472,7 +474,7 @@ class Geo extends React.Component {
         if (this.customState.view) {
             // if(this.customState.view.scenegraph().source.value) console.log('componentDidUpdate', this.customState.view.scenegraph().source.value[0].items[2].items, this.props.display.modifierPressed, this.props.selections)
             this.customState.view.run()
-            //console.log(this.props.selections, this.customState.view.scenegraph().root.items[0].items[2].items)
+            console.log(this.props.selections, this.customState.view._runtime)
             this.props.handleTransition(this.props, this.getElementsForTransition())
         }
     }
