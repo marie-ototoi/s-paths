@@ -7,3 +7,6 @@
     padding-left: 10px;
     display: inline-block;
 }
+.Quantifier progress {
+    opacity: 0.6;
+}

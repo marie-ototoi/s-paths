@@ -23,12 +23,13 @@ import TreeMap from './views/TreeMap'
 import URIWheel from './views/URIWheel'
 // libs
 import { getDimensions, getScreen, throttle } from '../lib/scaleLib'
+import { makeSelectionConstraints } from '../lib/queryLib'
 import { areLoaded, getCurrentState, getResults, getTransitionElements } from '../lib/dataLib'
-import { getSelectedView, getCurrentConfigs } from '../lib/configLib'
+import { getSelectedMatch, getSelectedView, getCurrentConfigs } from '../lib/configLib'
 import * as selectionLib from '../lib/selectionLib'
 // redux actions
 import { setDisplay, setModifier } from '../actions/displayActions'
-import { endTransition, loadResources } from '../actions/dataActions'
+import { endTransition, loadDetail, loadResources } from '../actions/dataActions'
 import { handleMouseUp } from '../actions/selectionActions'
 
 class App extends React.PureComponent {
@@ -143,11 +144,28 @@ class App extends React.PureComponent {
     }
     handleKeyDown (event) {
         // console.log('down', event.which)
+        let { dataset, configs, selections } = this.props
+        console.log('eee', event.which, event.key, event.metaKey, event)
         if (event.which === 13) {
             this['refHeader'].getWrappedInstance().handleKeyDown(event)
         }
-        if (event.which === 91 || event.which === 17) {
+        if (event.which === 16) {
             this.props.setModifier(true)
+        }
+        if (event.which === 73 && (event.metaKey || event.ctrlKey)) {
+            let zone = (selections.some(s => s.zone === 'main')) ? 'main' : 'aside'
+            let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+            let config = getSelectedView(activeConfigs)
+            if (config.entrypoint && selections.length > 0 && selections.length < 40) {
+                let selectedConfig = getSelectedMatch(config, zone)
+                console.log(activeConfigs, config, selectedConfig)
+                let constraints
+                let entrypoint = dataset.entrypoint
+                
+                constraints = makeSelectionConstraints(selections, selectedConfig, zone, { ...dataset, entrypoint, stats: activeConfigs.stats })
+                // let { constraints, zone } = this['refHeader'].getWrappedInstance().getDetailSelection(event)
+                this.props.loadDetail({ ...dataset, entrypoint, stats: activeConfigs.stats, constraints }, activeConfigs, zone)
+            }
         }
     }
     handleKeyUp (event) {
@@ -324,9 +342,10 @@ class App extends React.PureComponent {
                     zone = "main"
                 />
             }
-            { (display.detailsOpen) &&
+            { (display.details.length > 0) &&
                 <Details
                     dimensions = { getDimensions('details', display.viz, { x: 10, y: -30, width: -10, height: 0 }) }
+                    elements = { display.details }
                 />
             }
         </div>)
@@ -356,11 +375,11 @@ App.propTypes = {
     endTransition: PropTypes.func.isRequired,
     handleTransition: PropTypes.func,
     handleMouseUp: PropTypes.func,
+    loadDetail: PropTypes.func,
     loadResources: PropTypes.func,
     select: PropTypes.func,
     setDisplay: PropTypes.func.isRequired,
     setModifier: PropTypes.func
-
 }
 
 function mapStateToProps (state) {
@@ -378,6 +397,7 @@ function mapStateToProps (state) {
 function mapDispatchToProps (dispatch) {
     return {
         endTransition: endTransition(dispatch),
+        loadDetail: loadDetail(dispatch),
         loadResources: loadResources(dispatch),
         setDisplay: setDisplay(dispatch),
         setModifier: setModifier(dispatch),

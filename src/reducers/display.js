@@ -63,7 +63,7 @@ const defaultState = {
     settingsOpen: false,
     statsOpen: false,
     graphsOpen: false,
-    detailsOpen: false
+    details: []
 }
 
 const display = (state = defaultState, action) => {
@@ -95,7 +95,7 @@ const display = (state = defaultState, action) => {
     case types.SHOW_DETAILS:
         return {
             ...state,
-            detailsOpen: !state.detailsOpen
+            details: action.details
         }
     case types.SET_MODIFIER:
         return {

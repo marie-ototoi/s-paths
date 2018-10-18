@@ -82,7 +82,7 @@ class Header extends React.Component {
     }
     handleKeyDown (event) {
         const { dataset, selections } = this.props
-        // console.log('eee')
+        console.log('eee', event.which, event)
         if (event.which === 13) {
             if (selections.length > 0 || this.state.keyword.length > 3) {
                 this.displaySelection()
@@ -141,7 +141,7 @@ class Header extends React.Component {
             activeConfigs = getCurrentConfigs(configs, 'aside', 'active')
             // in case the entrypoint has changed
             entrypoint = activeConfigs.entrypoint
-            const selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'))
+            selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'))
             constraints = makeSelectionConstraints(selections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats })
         } else {
             // keep old constraints

@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import types from '../constants/ActionTypes'
 import { activateDefaultConfigs, defineConfigs, getSelectedView, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
-import { getData, makePropQuery, makeQuery, makeMultipleQuery, makeTransitionQuery } from '../lib/queryLib'
+import { getData, makeDetailQuery, makePropQuery, makeQuery, makeMultipleQuery, makeTransitionQuery } from '../lib/queryLib'
 
 export const endTransition = (dispatch) => (zone) => {
     return dispatch({
@@ -445,32 +445,18 @@ export const loadMultiple = (dispatch) => (dataset, path, indexC, indexP, zone) 
         })
 }
 
-
 export const loadDetail = (dispatch) => (dataset, configs, zone) => {
     // console.log('load Detail ', dataset.constraints)
     // would like to use async await rather than imbricated promise but compilation fails
-    let { endpoint, entrypoint, maxLevel, prefixes } = dataset
+    let { endpoint, entrypoint, prefixes } = dataset
     const configMain = getSelectedView(configs, 'main')
-    let queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: 1 } )
-    getData(endpoint, queryMain, prefixes)
+    let queryMain = makeDetailQuery(entrypoint, configMain, 'main', dataset )
+    console.log(queryMain)
+    return getData(endpoint, queryMain, prefixes)
         .then(data => {
             dispatch({
-                type: types.SET_DETAIL,
-                level: 1,
-                zone,
-                elements: data
+                type: types.SHOW_DETAILS,
+                details: data.results.bindings
             })
-            for (let i = 1; i < maxLevel; i ++) {
-                queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: i } )
-                getData(endpoint, queryMain, prefixes)
-                    .then(newdata => {
-                        dispatch({
-                            type: types.SET_DETAIL,
-                            level: i,
-                            zone,
-                            elements: newdata
-                        })
-                    })
-            }
-        })   
+        })
 }

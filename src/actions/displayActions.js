@@ -33,13 +33,14 @@ export const showSettings = (dispatch) => () => {
 
 export const showGraphs = (dispatch) => () => {
     dispatch({
-        type: types.SHOW_GRAPHS
+        type: types.SHOW_GRAPHS        
     })
 }
 
-export const showDetails = (dispatch) => () => {
+export const closeDetails = (dispatch) => () => {
     dispatch({
-        type: types.SHOW_DETAILS
+        type: types.SHOW_DETAILS,
+        details: []
     })
 }
 

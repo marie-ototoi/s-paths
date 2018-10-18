@@ -3,7 +3,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 import { analyseResources, loadStats } from '../../actions/dataActions'
-import { showDetails } from '../../actions/displayActions'
+import { closeDetails } from '../../actions/displayActions'
 
 class Details extends React.PureComponent {
     constructor (props) {
@@ -18,7 +18,8 @@ class Details extends React.PureComponent {
             style = {
                 {
                     width,
-                    height,
+                    minHeight: height,
+                    zIndex:13,
                     position: 'absolute',
                     left: x + 'px',
                     top: y + 'px'
@@ -28,12 +29,14 @@ class Details extends React.PureComponent {
             <div className = "content">
                 <span
                     className='icon closebox'
-                    onClick={() => { this.props.showDetails() }}
+                    onClick={() => { this.props.closeDetails() }}
                 >
                     <i className='fas fa-window-close' />
                 </span>
                 You requested detailed informations about the instance of the displayed paths for the following entities:
-
+                {
+                    JSON.stringify(this.props.elements)
+                }
             </div>
         </div>)
     }
@@ -43,11 +46,12 @@ Details.propTypes = {
     dataset: PropTypes.object,
     dimensions: PropTypes.object,
     display: PropTypes.object,
+    elements: PropTypes.array,
     views: PropTypes.array,
     zone: PropTypes.string,
     analyseResources: PropTypes.func,
     loadStats: PropTypes.func,
-    showDetails: PropTypes.func,
+    closeDetails: PropTypes.func,
 }
 
 function mapStateToProps (state) {
@@ -64,7 +68,7 @@ function mapDispatchToProps (dispatch) {
     return {
         analyseResources: analyseResources(dispatch),
         loadStats: loadStats(dispatch),
-        showDetails: showDetails(dispatch)
+        closeDetails: closeDetails(dispatch)
     }
 }
 

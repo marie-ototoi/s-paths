@@ -108,7 +108,6 @@ export const FSL2SPARQL = (FSLpath, options) => {
             if (j !== 1) query = query.concat(` && `)
         }
         query = query.concat(`) . `)
-        
     }
     let queryHierarchical = ''
     if (hierarchical) {
@@ -124,7 +123,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
 }
 
 export const getData = (endpoint, query, prefixes) => {
-    console.log(query)
+    // console.log(query)
     const client = new SparqlClient(endpoint, {
         requestDefaults: {
             headers: {
@@ -368,7 +367,7 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone, datas
 }
 
 export const makeDetailQuery = (entrypoint, configZone, zone, options) => {
-    /*const { graphs, constraints, resourceGraph } = options
+    const { graphs, constraints, resourceGraph } = options
     // console.log(configZone)
     let defList = ``
     let groupList = `GROUP BY `
@@ -376,9 +375,18 @@ export const makeDetailQuery = (entrypoint, configZone, zone, options) => {
     let orderList = `ORDER BY `
     // let graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
     let graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
-  
     let selectedConfig = configLib.getSelectedMatch(configZone)    
-
+    
+    selectedConfig.properties.forEach((prop, index) => {
+        let pathParts = prop.path.split('/')
+        console.log(pathParts)
+        if(pathParts.length > 3) {
+            for (let i = 1; i < pathParts.length - 2; i += 2) {
+                let level = Math.ceil(i / 2)
+                propList = propList.concat(`?prop${(index+1)}inter${level} `)
+            }
+        }
+    })
     selectedConfig.properties.forEach((prop, index) => {
         index += 1
         propList = propList.concat(`?prop${index} `)
@@ -398,7 +406,7 @@ export const makeDetailQuery = (entrypoint, configZone, zone, options) => {
 WHERE {
 ${constraints}
 ${defList}
-} ${groupList} ${orderList}`*/
+} ${groupList} ${orderList}`
 }
 
 // to do : take constraints into account
