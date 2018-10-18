@@ -148,6 +148,7 @@ class Header extends React.Component {
             constraints = dataset.constraints
         }
         if (this.state.keyword.length > 3) {
+            if(!activeConfigs) activeConfigs = getCurrentConfigs(configs, 'main', 'active')
             constraints = constraints.concat(makeKeywordConstraints(this.state.keyword, { ...dataset, entrypoint, stats: activeConfigs.stats }))
         }
         let newDataset = {
