@@ -79,16 +79,17 @@ const getAllStats = async (options) => {
         allLabels.forEach(lab => {
             labelsDic[lab.uri] = { label: lab.label, comment: lab.comment }
         })
-        console.log(labelsDic)
+        // console.log(labelsDic)
         return {
             statements: paths.statements
-                .map(stat => { return { ...stat, readablePath: getReadablePathsParts(stat.path, stat.fullPath, labelsDic, paths.options.prefixes ) } })
+                .map(stat => { return { ...stat, readablePath: getReadablePathsParts(stat.path, labelsDic, paths.options.prefixes ) } })
                 .sort((a, b) => a.level - b.level),
             totalInstances,
             selectionInstances,
             options: {
                 ...paths.options,
-                labels: allLabels
+                labels: allLabels,
+                labelsDic
             }
         }
     }
