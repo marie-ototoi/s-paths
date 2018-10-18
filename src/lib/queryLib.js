@@ -124,7 +124,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
 }
 
 export const getData = (endpoint, query, prefixes) => {
-    // console.log(query)
+    console.log(query)
     const client = new SparqlClient(endpoint, {
         requestDefaults: {
             headers: {
@@ -299,14 +299,14 @@ export const makeKeywordConstraints = (keyword, options) => {
     for (let i = 2; i <= maxLevel; i++) {
         def = def.concat(`
         ${start} ?level${i} ?value${i} . `)
-        filter = filter.concat(`regex(?value${i}, '${keyword}', 'i')`)
+        filter = filter.concat(`(isLiteral(?value${i}) && regex(?value${i}, '${keyword}', 'i'))`)
         if (i < maxLevel)  filter = filter.concat(` || `)
         start = `?value${i}`
     }
     let constraint = `?entrypoint ?level1 ?value1 . 
     OPTIONAL {${def}
     }
-    FILTER (regex(?value1, '${keyword}', 'i') || ${filter}) . `
+    FILTER ((isLiteral(?value1) && regex(?value1, '${keyword}', 'i')) || ${filter}) . `
     return constraint
 }
 
@@ -365,6 +365,40 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone, datas
     if (setConstraints !== '') totalQuery += `${paths} ${bind}FILTER (${setConstraints}) . `
     // console.log(totalQuery)
     return totalQuery
+}
+
+export const makeDetailQuery = (entrypoint, configZone, zone, options) => {
+    /*const { graphs, constraints, resourceGraph } = options
+    // console.log(configZone)
+    let defList = ``
+    let groupList = `GROUP BY `
+    let propList = `DISTINCT ?entrypoint `
+    let orderList = `ORDER BY `
+    // let graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+    let graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+  
+    let selectedConfig = configLib.getSelectedMatch(configZone)    
+
+    selectedConfig.properties.forEach((prop, index) => {
+        index += 1
+        propList = propList.concat(`?prop${index} `)
+        orderList = orderList.concat(`?prop${index} `)
+        groupList = groupList.concat(`?prop${index} `)
+        defList = defList.concat(FSL2SPARQL(prop.path, {
+            propName: `prop${index}`,
+            entrypointName: 'entrypoint',
+            entrypointType: (index === 1),
+            optional: false,
+            resourceGraph,
+            graphs,
+            hierarchical: false
+        }))
+    })
+    return `SELECT ${propList}${graph}
+WHERE {
+${constraints}
+${defList}
+} ${groupList} ${orderList}`*/
 }
 
 // to do : take constraints into account

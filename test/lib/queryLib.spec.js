@@ -59,7 +59,7 @@ WHERE {
         ?value1 ?level2 ?value2 . 
         ?value2 ?level3 ?value3 . 
     }
-    FILTER (regex(?value1, 'einstein', 'i') || regex(?value2, 'einstein', 'i') || regex(?value3, 'einstein', 'i')) . `)
+    FILTER ((isLiteral(?value1) && regex(?value1, 'einstein', 'i')) || (isLiteral(?value2) && regex(?value2, 'einstein', 'i')) || (isLiteral(?value3) && regex(?value3, 'einstein', 'i'))) . `)
     })
     it('should make a valid SPARQL query to retrieve data for a specific config', () => {
         const config1 = {
