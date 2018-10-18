@@ -328,6 +328,58 @@ class Geo extends React.Component {
                         "update": "scale('precision', scaleZoom)"
                     }]
                 },
+                {
+                    "name": "angles",
+                    "value": [0, 0],
+                    "on": [{
+                        "events": "mousedow[event.shiftKey]",
+                        "update": "[rotateX, centerY]"
+                    }]
+                },
+                {
+                    "name": "cloned",
+                    "value": null,
+                    "on": [{
+                        "events": "mousedown[event.shiftKey]",
+                        "update": "copy('projection')"
+                    }]
+                },
+                {
+                    "name": "start",
+                    "value": null,
+                    "on": [{
+                        "events": "mousedown[event.shiftKey]",
+                        "update": "invert(cloned, xy())"
+                    }]
+                },
+                {
+                    "name": "drag", "value": null,
+                    "on": [{
+                        "events": "[mousedown[event.shiftKey], window:mouseup] > window:mousemove",
+                        "update": "invert(cloned, xy())"
+                    }]
+                },
+                {
+                    "name": "delta", "value": null,
+                    "on": [{
+                        "events": {"signal": "drag"},
+                        "update": "[drag[0] - start[0], start[1] - drag[1]]"
+                    }]
+                },
+                {
+                    "name": "rotateX", "value": 0,
+                    "on": [{
+                        "events": {"signal": "delta"},
+                        "update": "angles[0] + delta[0]"
+                    }]
+                },
+                {
+                    "name": "centerY", "value": 0,
+                    "on": [{
+                        "events": {"signal": "delta"},
+                        "update": "clamp(angles[1] + delta[1], -60, 60)"
+                    }]
+                }
             ],
             "data": geodata,
             "scales": [
@@ -474,7 +526,7 @@ class Geo extends React.Component {
         if (this.customState.view) {
             // if(this.customState.view.scenegraph().source.value) console.log('componentDidUpdate', this.customState.view.scenegraph().source.value[0].items[2].items, this.props.display.modifierPressed, this.props.selections)
             this.customState.view.run()
-            console.log(this.props.selections, this.customState.view._runtime)
+            // console.log(this.props.selections, this.customState.view._runtime)
             this.props.handleTransition(this.props, this.getElementsForTransition())
         }
     }

@@ -3,9 +3,9 @@ import React from 'react'
 import { connect } from 'react-redux'
 
 import { analyseResources, loadStats } from '../../actions/dataActions'
-import { showSettings } from '../../actions/displayActions'
+import { showDetails } from '../../actions/displayActions'
 
-class Settings extends React.PureComponent {
+class Details extends React.PureComponent {
     constructor (props) {
         super(props)
         this.state = {}
@@ -14,12 +14,11 @@ class Settings extends React.PureComponent {
         const { dataset, dimensions, zone } = this.props
         const { x, y, width, height } = dimensions
         return (<div
-            className = "Settings box"
+            className = "Details box"
             style = {
                 {
                     width,
-                    minHeight: height,
-                    zIndex: 11,
+                    height,
                     position: 'absolute',
                     left: x + 'px',
                     top: y + 'px'
@@ -29,7 +28,7 @@ class Settings extends React.PureComponent {
             <div className = "content">
                 <span
                     className='icon closebox'
-                    onClick={() => { this.props.showSettings() }}
+                    onClick={() => { this.props.showDetails() }}
                 >
                     <i className='fas fa-window-close' />
                 </span>
@@ -46,18 +45,40 @@ class Settings extends React.PureComponent {
                     </div>
                 </div>
 
-
+                { dataset.resources.lenght === 0 &&
                 <button
                     onClick = { e => {
                         //console.log(this.props.dataset)
+                        this.props.analyseResources({ ...this.props.dataset, forceUpdate: true }, [])
                     } }
-                >Save</button>         
+                >
+                    Get Resources
+                </button>
+                }
+                <table className = "table is-bordered">
+                    <tbody>
+                        { dataset.resources.map((resource, ri) => {
+                            return (<tr key = { `resource_${zone}_${ri}` }>
+                                <td>{ resource.type }</td>
+                                <td><a onClick = { e => {
+                                    this.props.loadStats({
+                                        ...dataset,
+                                        analyse: true,
+                                        entrypoint: resource.type,
+                                        totalInstances: resource.total,
+                                        selectionInstances: resource.total
+                                    })
+                                } }>analyze stats</a></td>
+                            </tr>)
+                        }) }
+                    </tbody>
+                </table>                   
             </div>
         </div>)
     }
 }
 
-Settings.propTypes = {
+Details.propTypes = {
     dataset: PropTypes.object,
     dimensions: PropTypes.object,
     display: PropTypes.object,
@@ -65,7 +86,7 @@ Settings.propTypes = {
     zone: PropTypes.string,
     analyseResources: PropTypes.func,
     loadStats: PropTypes.func,
-    showSettings: PropTypes.func
+    showDetails: PropTypes.func,
 }
 
 function mapStateToProps (state) {
@@ -82,10 +103,10 @@ function mapDispatchToProps (dispatch) {
     return {
         analyseResources: analyseResources(dispatch),
         loadStats: loadStats(dispatch),
-        showSettings: showSettings(dispatch)
+        showDetails: showDetails(dispatch)
     }
 }
 
-const SettingsConnect = connect(mapStateToProps, mapDispatchToProps)(Settings)
+const DetailsConnect = connect(mapStateToProps, mapDispatchToProps)(Details)
 
-export default SettingsConnect
+export default DetailsConnect

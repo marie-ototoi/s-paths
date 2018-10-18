@@ -125,7 +125,7 @@ const checkFirstValidConfigs = (configs, stats, dataset, previousConfig) => {
                     }
                 })
             }
-            let newConfigs = defineConfigs(views, newStats)
+            let newConfigs = defineConfigs(views, newStats, dataset)
 
             return [newConfigs, newStats]
             // if both main and aside send results
@@ -146,7 +146,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
             return new Promise((resolve, reject) => {
                 let selectionInstances = Number(countInstances.results.bindings[0].total.value)
                 // console.log('selectionInstances', selectionInstances)
-                let configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }))
+                let configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
                 // console.log('alors ?', configs)
                 if (selectionInstances === 1) {
                     resolve([configs, { ...stats, selectionInstances }])
@@ -232,7 +232,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
                     prefixes = stats.options.prefixes
                     // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
                     // for each views, checks which properties ou sets of properties could match and evaluate
-                    let configs = activateDefaultConfigs(defineConfigs(views, stats))
+                    let configs = activateDefaultConfigs(defineConfigs(views, stats, dataset))
                     //
                     const configMain = getSelectedView(configs, 'main')
                     if (configMain) {
@@ -280,7 +280,7 @@ export const selectResource = (dispatch) => (dataset, views) => {
             prefixes = stats.options.prefixes
             // console.log('ok on a bien reçu les stats', stats, defineConfigs(views, stats))
             // for each views, checks which properties ou sets of properties could match and evaluate
-            let configs = activateDefaultConfigs(defineConfigs(views, stats))
+            let configs = activateDefaultConfigs(defineConfigs(views, stats, dataset))
             const configMain = getSelectedView(configs, 'main')
             const queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
             const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })

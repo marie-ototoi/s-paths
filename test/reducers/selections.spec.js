@@ -45,6 +45,7 @@ describe('reducers/selections', () => {
                         type: 'uri',
                         value: 'http://unique.com'
                     },
+                    other: undefined,
                     index: 2,
                     zone: 'main'
                 }
@@ -57,12 +58,14 @@ describe('reducers/selections', () => {
                         type: 'uri',
                         value: 'http://unique.com'
                     },
+                    other: undefined,
                     index: 1,
                     zone: 'main'
                 },
                 {
                     selector: '#topic',
                     count: 0,
+                    other: undefined,
                     query: {
                         type: 'uri',
                         value: 'http://unique.com'

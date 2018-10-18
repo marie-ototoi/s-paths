@@ -5,9 +5,12 @@ import { connect } from 'react-redux'
 
 // components
 import BrushLink from './elements/BrushLink'
+import Details from './elements/Details'
 import Header from './Header'
+import Graphs from './elements/Graphs'
 import History from './elements/History'
 import Settings from './elements/Settings'
+import Stats from './elements/Stats'
 import Transition from './elements/Transition'
 import GeoMap from './views/Geo'
 import HeatMap from './views/HeatMap'
@@ -305,8 +308,24 @@ class App extends React.PureComponent {
                 }
             
             </div>
-            { (!mainConfig || display.settingsOpen.main) &&
+            { (!mainConfig || display.statsOpen) &&
+                <Stats
+                    dimensions = { getDimensions('settings', display.viz) }
+                />
+            }
+            { (display.settingsOpen) &&
                 <Settings
+                    dimensions = { getDimensions('graphs', display.viz, { x: -10, y: 10, width: 0, height: 0 }) }
+                />
+            }
+            { display.graphsOpen &&
+                <Graphs
+                    dimensions = { getDimensions('graphs', display.viz, { x: -10, y: 10, width: 0, height: 0 }) }
+                    zone = "main"
+                />
+            }
+            { (display.detailsOpen) &&
+                <Details
                     dimensions = { getDimensions('settings', display.viz) }
                 />
             }

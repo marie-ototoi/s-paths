@@ -60,16 +60,15 @@ const defaultState = {
         main: false,
         aside: false
     },
-    settingsOpen: {
-        main: false,
-        aside: false
-    }
+    settingsOpen: false,
+    statsOpen: false,
+    graphsOpen: false,
+    detailsOpen: false
 }
 
 const display = (state = defaultState, action) => {
     // console.log(action, state)
     let newZone
-    let newSettings
     switch (action.type) {
     case types.SET_DISPLAY:
         return {
@@ -79,11 +78,24 @@ const display = (state = defaultState, action) => {
             vizDefPercent: action.vizDefPercent || state.vizDefPercent,
         }
     case types.SHOW_SETTINGS:
-        newSettings = state.settingsOpen
-        newSettings[action.zone] = !newSettings[action.zone]
         return {
             ...state,
-            settingsOpen: newSettings
+            settingsOpen: !state.settingsOpen
+        }
+    case types.SHOW_STATS:
+        return {
+            ...state,
+            statsOpen: !state.statsOpen
+        }
+    case types.SHOW_GRAPHS:
+        return {
+            ...state,
+            graphsOpen: !state.graphsOpen
+        }
+    case types.SHOW_DETAILS:
+        return {
+            ...state,
+            detailsOpen: !state.detailsOpen
         }
     case types.SET_MODIFIER:
         return {

@@ -101,6 +101,13 @@ export const getDimensions = (element, viz, offset = { x: 0, y: 0, width: 0, hei
             width: viz.useful_width + offset.width,
             height: viz.useful_height + offset.height
         }
+    case 'graphs':
+        return {
+            x: viz.width - (viz.horizontal_padding * 2) + offset.x,
+            y: offset.y,
+            width: (viz.horizontal_padding * 2) + offset.width,
+            height: viz.top_margin + offset.height
+        }
     case 'core':
         return {
             x: viz.horizontal_padding + offset.x,

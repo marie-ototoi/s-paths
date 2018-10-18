@@ -32,6 +32,7 @@ class Line extends React.Component {
                     value={this.props.counterData}
                     max={this.props.maxData}
                 />
+                {this.props.end}
             </div>
         )
     }
@@ -39,6 +40,7 @@ class Line extends React.Component {
     static propTypes = {
         leftChildren: PropTypes.object,
         rightChildren: PropTypes.object,
+        end: PropTypes.object,
         label: PropTypes.string.isRequired,
         children: PropTypes.any.isRequired,
         isLoading: PropTypes.bool.isRequired,

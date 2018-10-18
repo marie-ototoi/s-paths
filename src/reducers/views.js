@@ -6,7 +6,7 @@ const defaultState = [
         name: 'stacked chart',
         thumb : '/images/stackedchart.svg',
         entrypoint: { min: 2, max: 1000, optimal: [4, 200] },
-        weight: 7,
+        weight: 0.7,
         constraints: [
             [
                 {
@@ -49,9 +49,9 @@ const defaultState = [
     },
     {
         id: 'HeatMap',
-        name: 'heatmap',
+        name: 'density plot',
         thumb : '/images/heatmap.svg',
-        weight: 5,
+        weight: 0.5,
         constraints: [
             [
                 {
@@ -85,7 +85,7 @@ const defaultState = [
         id: 'Timeline',
         name: 'timeline',
         thumb : '/images/timeline.svg',
-        weight: 8,
+        weight: 0.8,
         entrypoint: { min: 2, max: 30, optimal: [10, 20] },
         constraints: [
             [
@@ -112,7 +112,7 @@ const defaultState = [
         id: 'TreeMap',
         name: 'treemap',
         thumb : '/images/treemap.svg',
-        weight: 5,
+        weight : 0.5,
         constraints: [
             [
                 {
@@ -132,7 +132,7 @@ const defaultState = [
         id: 'URIWheel',
         name: 'URI wheel',
         thumb : '/images/uriwheel.svg',
-        weight: 4,
+        weight: 0.4,
         constraints: [
             [
                 {
@@ -148,7 +148,7 @@ const defaultState = [
         name: 'map',
         thumb : '/images/geomap.svg',
         entrypoint: { min: 2, max: 1000 },
-        weight: 10,
+        weight: 1,
         constraints: [
             [
                 {
@@ -198,10 +198,10 @@ const defaultState = [
     }*/,
     {
         id: 'SingleProp',
-        name: 'single prop',
+        name: 'breakdown by values',
         thumb : '/images/listprop.svg',
         entrypoint: { max: 50, optimal: [1, 30] },
-        weight: 7,
+        weight: 0.7,
         constraints: [
             [
                 {
@@ -216,7 +216,7 @@ const defaultState = [
         name: 'images',
         thumb : '/images/images.svg',
         entrypoint: { min: 2, max: 500 },
-        weight: 8,
+        weight: 0.8,
         constraints: [
             [
                 {

@@ -1,48 +1,6 @@
-.Explain .resource-def {
-    width: auto;
-    height: auto;
+.Header .Explain .resource-def {
     padding-left: 5px;
-    font-size: 0.8em;
 }
-
-.Explain .resource-content {
-    font-size: 1.2em;
-    max-height: 400px;
-    max-width: 500px;
-    overflow-y: scroll;
-    padding: 20px 25px;
-    position: absolute;
-    font-weight: normal;
-}
-
-.Explain .resource-def {
-    font-size: 0.7em;
-    height: 20px;
-    padding: 5px 0 0 35px;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-.Explain .resource-content {
-    display: none;
-    margin-top: -8px;
-    padding: 2px 8px 5px 8px;
-    background: #fff;
-    z-index: 100;
-    margin-left: 5px;
-    border: 1px solid #ccc;
-    border-radius: 3px;
-}
-
-.Explain .resource-def span.resource-content {
-    position: absolute;
-}
-
-.Explain .resource-def:hover .resource-content {
-    display: inline-block;
-    width: 450px;
-}
-
 .Explain p {
     font-size: 0.8em;
     color: #a5a5a5;

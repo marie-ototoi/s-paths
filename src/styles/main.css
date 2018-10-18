@@ -18,3 +18,7 @@ body {
 svg {
     user-select: none;
 }
+.closebox {
+    float: right;
+    cursor: pointer;
+}

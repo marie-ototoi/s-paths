@@ -4,6 +4,7 @@ import pluralize from 'pluralize'
 import { connect } from 'react-redux'
 import { getCurrentConfigs, getSelectedMatch, getSelectedView } from '../../lib/configLib'
 import { getGraphsColors } from '../../lib/paletteLib'
+import { showGraphs } from '../../actions/displayActions'
 
 import './Explain.css'
 
@@ -55,58 +56,7 @@ class Explain extends React.Component {
                         {allgraphs.length} {pluralize('graph', allgraphs.length)}
                     </strong>
                 </p>
-                <span className='resource-def'>?
-                    <div
-                        className='resource-content'
-                        style={{ margin: '-55px 0 0 0' }}
-                    >
-                        <span>Graphs: </span>
-                        <ul>
-                            {allgraphs.map((graph, gi) => (
-                                <li
-                                    style={{ color: graphs[graph] }}
-                                    key={`graph_${zone}_${gi}`}
-                                >
-                                    {graph}
-                                </li>
-                            ))}
-                        </ul>
-                        {selectedProperties.map((prop, pi) => (
-                            <div
-                                className='path'
-                                key={`path_${zone}_${pi}`}
-                            >
-                                Path {(pi + 1)}:
-                                <span
-                                    style={{ borderBottom: `1px solid ${graphs[prop.triplesGraphs[0]]}` }}
-                                >
-                                    {displayedResource.label} /
-                                </span>
-                                {prop.readablePath.map((rp, rpi) => (
-                                    <span
-                                        className='triple'
-                                        style={{
-                                            borderBottom: `1px solid ${graphs[prop.triplesGraphs[rpi]]}`,
-                                            paddingLeft: `${5 + (rpi < 1 ? 0 : 20)}px`,
-                                            paddingBottom: `${(rpi % 2 === 0 ? 0 : 1) * 3}px`,
-                                            position: 'relative',
-                                            left: `-${5 + (rpi * 20)}px`
-                                        }}
-                                        key={`path_${zone}_${pi}_triple_${rpi}`}
-                                    >
-                                        <span
-                                            className='pathlabel'
-                                            title={rp.comment}
-                                        >
-                                            { rp.label }
-                                        </span>
-                                        / * /
-                                    </span>
-                                ))}
-                            </div>
-                        ))}
-                    </div>
-                </span>
+                <span className='resource-def' onClick={(e) => this.props.showGraphs() }>?</span>
             </div>
         )
     }
@@ -116,7 +66,8 @@ class Explain extends React.Component {
         dataset: PropTypes.object,
         display: PropTypes.object,
         zone: PropTypes.string,
-        options: PropTypes.object.isRequired
+        options: PropTypes.object.isRequired,
+        showGraphs: PropTypes.func
     }
 }
 
@@ -125,6 +76,9 @@ const ExplainConnect = connect(
         configs: state.configs,
         dataset: state.dataset,
         display: state.display
+    }),
+    (dispatch) => ({
+        showGraphs: showGraphs(dispatch)
     })
 )(Explain)
 

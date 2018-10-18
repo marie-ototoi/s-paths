@@ -11,6 +11,17 @@ const initialState = {
     maxLevel: 6,
     ignoreList: ['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
     resources: [],
+    rankPropFactors: {
+        category: 1,
+        definition: 2,
+        level: 2,
+        coverage: 8
+    },
+    rankMatchFactors: {
+        view: 1,
+        propsNumber: 1,
+        propsAverage: 1
+    },
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',
         d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',

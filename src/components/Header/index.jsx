@@ -7,7 +7,7 @@ import { getConfigs, getCurrentConfigs, getSelectedMatch, getSelectedView } from
 import { getNbDisplayed } from '../../lib/dataLib'
 import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 
-import { setModifier, showSettings } from '../../actions/displayActions'
+import { showSettings, showStats } from '../../actions/displayActions'
 import { displayConfig, loadSelection, selectResource } from '../../actions/dataActions'
 import ViewSelect from './ViewSelect'
 import PropSelect from './PropSelect'
@@ -16,6 +16,7 @@ import Slider from './Slider'
 import Explain from './Explain'
 import Line from './Line'
 import './Header.css'
+import display from '../../reducers/display';
 
 class Header extends React.Component {
     constructor (props) {
@@ -196,7 +197,7 @@ class Header extends React.Component {
             return (
                 <div className='Header'>
                     <Line
-                        label={'Class of Entities'}
+                        label={'Type of entities'}
                         maxData={options[0].total}
                         counterData={options[0]}
                         isLoading={this.state.resourceIsLoading}
@@ -223,15 +224,26 @@ class Header extends React.Component {
                                         </span>
                                     </span>
                                 }
+                                
+                            </div>
+                        }
+                        end={
+                            <span>
                                 {this.state.showConfig && (
                                     <span
                                         className='icon'
-                                        onClick={() => { this.props.showSettings(zone) }}
+                                        onClick={() => { this.props.showStats() }}
                                     >
-                                        <i className='fas fa-cogs' />
+                                        <i className='fas fa-wrench' />
                                     </span>
-                                )}
-                            </div>
+                                )}                                
+                                <span
+                                    className='icon'
+                                    onClick={() => { this.props.showSettings() }}
+                                >
+                                    <i className='fas fa-cogs' />
+                                </span>
+                            </span>
                         }
                     >
                         <ResourceSelect
@@ -342,7 +354,8 @@ class Header extends React.Component {
         displayConfig: PropTypes.func,
         loadSelection: PropTypes.func,
         selectResource: PropTypes.func,
-        showSettings: PropTypes.func
+        showSettings: PropTypes.func,
+        showStats: PropTypes.func
     }
 }
 
@@ -358,7 +371,8 @@ const HeaderConnect = connect(
         displayConfig: displayConfig(dispatch),
         loadSelection: loadSelection(dispatch),
         selectResource: selectResource(dispatch),
-        showSettings: showSettings(dispatch)
+        showSettings: showSettings(dispatch),
+        showStats: showStats(dispatch)
     }),
     null,
     { withRef: true }

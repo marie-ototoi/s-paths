@@ -47,9 +47,6 @@ export const underRange = (val, range) => {
 export const overRange = (val, range) => {
     return (val > range[1])
 }
-export const isMatchValid = (match, config) => {
-    
-}
 export const getDeviationCost = (min, max, optimal, score) => {
     if (!optimal || (!min && !max)) return 0
     const gapMin = (min) ? optimal[0] - min : null
@@ -67,59 +64,59 @@ const getCost = (val, min, max, optimal, score) => {
     }
     return score / 2
 }
-const scoreProp = (prop, constraint) => {
-    let rankFactors = {
+const scoreProp = (prop, constraint, rankFactors) => {
+    /* rankFactors = {
         category: 1,
         definition: 2,
         level: 2,
         coverage: 8
-    }
+    } */
     if (prop.path === '') return null
     // et eventuellement si la prop peut avoir plusieurs valeurs pour une meme instance (specifier dans la vue si c'est souhaite)
     let score = {}
     const { min, max, optimal } = constraint.unique
     // if (prop.coverage < 10) return 0
-    score.coverage = prop.coverage / 10   
+    score.coverage = prop.coverage / 100   
     switch (prop.category) {
     case 'datetime':
-        score.category = 9
+        score.category = 0.9
         // repartition
         break
     case 'number':
-        score.category = 6
+        score.category = 0.6
         break
     case 'geo':
-        score.category = 10
+        score.category = 1
         break
     case 'text':
         // the closer to the optimal range, the better
-        score.category = 8
+        score.category = 0.8
         break
     default:
-        score.category = 3
+        score.category = 0.3
         //
     }
-    score.definition = 10 - getCost(prop.unique, min, max, optimal, 10)
+    score.definition = 1 - getCost(prop.unique, min, max, optimal, 1)
     score.total = 0
-    score.level = 10 - prop.level
+    score.level = 1 - prop.level
     let coeff = 0
     for (let factor in rankFactors) {
         score.total += score[factor] * rankFactors[factor]
         coeff += rankFactors[factor]
     }
-    score.total = score.total / coeff
+    score.total = Math.round(score.total / coeff * 100) / 100
     return score.total
 }
-const scoreMatch = (match, entrypointFactor, viewWeight) => {
-    let rankFactors = {
+const scoreMatch = (match, viewWeight, rankFactors) => {
+    /* rankFactors = {
         view: 1,
         propsNumber: 1,
         propsAverage: 1
-    }
+    } */
     let score = {}
     match = match.filter(p => p.score >= 0)
     // mean of each property's score
-    score.propsNumber = match.length
+    score.propsNumber = match.length/5
     score.propsAverage = match.map(p => p.score).reduce((a, b) => a + b, 0) / match.length
     score.view = viewWeight
     score.total = 0
@@ -128,7 +125,7 @@ const scoreMatch = (match, entrypointFactor, viewWeight) => {
         score.total += score[factor] * rankFactors[factor]
         coeff += rankFactors[factor]
     }
-    score.total = score.total / coeff
+    score.total = Math.round(score.total / coeff * 100) / 100
     // console.log(score)
     return score.total
 }
@@ -170,8 +167,9 @@ export const getTimelineDict = (data, propName) => {
     })
     return dict
 }
-export const defineConfigs = (views, stats) => {
+export const defineConfigs = (views, stats, dataset) => {
     let statsDict = getDictStats(stats)
+    let { rankPropFactors, rankMatchFactors } = dataset
     const configSetUp = views.map(view => {
         let propList = []
         if (view.entrypoint) {
@@ -201,7 +199,7 @@ export const defineConfigs = (views, stats) => {
                             ) {
                                 propSet.push({
                                     ...prop,
-                                    score: scoreProp(prop, constraint)
+                                    score: scoreProp(prop, constraint, rankPropFactors)
                                 })
                             }
                         })
@@ -237,7 +235,7 @@ export const defineConfigs = (views, stats) => {
                     match.length === view.constraints.length - 1)) {
                 selectedMatch = {
                     properties: match,
-                    scoreMatch: scoreMatch(match, (view.entrypoint !== undefined), view.weight)
+                    scoreMatch: scoreMatch(match, view.weight, rankMatchFactors)
                 }
             }
             // console.log('why ?', selectedMatch)

@@ -25,9 +25,26 @@ export const setModifier = (dispatch) => (on) => {
     })
 }
 
-export const showSettings = (dispatch) => (zone) => {
+export const showSettings = (dispatch) => () => {
     dispatch({
-        type: types.SHOW_SETTINGS,
-        zone
+        type: types.SHOW_SETTINGS
+    })
+}
+
+export const showGraphs = (dispatch) => () => {
+    dispatch({
+        type: types.SHOW_GRAPHS
+    })
+}
+
+export const showDetails = (dispatch) => () => {
+    dispatch({
+        type: types.SHOW_DETAILS
+    })
+}
+
+export const showStats = (dispatch) => () => {
+    dispatch({
+        type: types.SHOW_STATS
     })
 }
