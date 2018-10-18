@@ -94,7 +94,7 @@ export const scaleY = (yPoint, stage) => {
 
 export const getDimensions = (element, viz, offset = { x: 0, y: 0, width: 0, height: 0 }) => {
     switch (element) {
-    case 'settings':
+    case 'stats':
         return {
             x: viz.horizontal_padding + offset.x,
             y: viz.top_margin + offset.y,
@@ -103,11 +103,26 @@ export const getDimensions = (element, viz, offset = { x: 0, y: 0, width: 0, hei
         }
     case 'graphs':
         return {
-            x: viz.width - (viz.horizontal_padding * 2) + offset.x,
-            y: offset.y,
-            width: (viz.horizontal_padding * 2) + offset.width,
+            x: (viz.width / 2) + offset.x,
+            y: viz.top_margin + offset.y,
+            width: (viz.width / 2) + offset.width,
             height: viz.top_margin + offset.height
         }
+    case 'details':
+        return {
+            x: offset.x,
+            y: viz.top_margin + offset.y,
+            width: (viz.width / 2) + offset.width,
+            height: viz.top_margin + offset.height
+        }
+    case 'settings':
+        return {
+            x: (viz.width / 2) + offset.x,
+            y: offset.y,
+            width: (viz.width / 2) + offset.width,
+            height: viz.top_margin + offset.height
+        }
+    
     case 'core':
         return {
             x: viz.horizontal_padding + offset.x,

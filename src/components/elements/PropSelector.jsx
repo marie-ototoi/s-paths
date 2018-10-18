@@ -28,10 +28,10 @@ class PropSelector extends React.PureComponent {
             >
                 <p
                     className = { alignClass }
-                >/ 
+                >
                     { selectedProp && selectedProp.readablePath.map((part, index) => {
                         return <span key = { `${this.state.elementName}_path_${index}` }>
-                            &nbsp;<span title = { part.comment }>{part.label} </span>  { (index < selectedProp.readablePath.length - 1) ? ' / * / ' : ' /' }
+                            &nbsp;<span title = { part.comment }>{part.label} </span>  { (index < selectedProp.readablePath.length - 1) ? ' / ' : '' }
                         </span>
                     }) }
                 </p>

@@ -310,23 +310,23 @@ class App extends React.PureComponent {
             </div>
             { (!mainConfig || display.statsOpen) &&
                 <Stats
-                    dimensions = { getDimensions('settings', display.viz) }
+                    dimensions = { getDimensions('stats', display.viz) }
                 />
             }
             { (display.settingsOpen) &&
                 <Settings
-                    dimensions = { getDimensions('graphs', display.viz, { x: -10, y: 10, width: 0, height: 0 }) }
+                    dimensions = { getDimensions('settings', display.viz, { x: 0, y: 10, width: -10, height: 0 }) }
                 />
             }
             { display.graphsOpen &&
                 <Graphs
-                    dimensions = { getDimensions('graphs', display.viz, { x: -10, y: 10, width: 0, height: 0 }) }
+                    dimensions = { getDimensions('graphs', display.viz, { x: 0, y: -30, width: -10, height: 0 }) }
                     zone = "main"
                 />
             }
             { (display.detailsOpen) &&
                 <Details
-                    dimensions = { getDimensions('settings', display.viz) }
+                    dimensions = { getDimensions('details', display.viz, { x: 10, y: -30, width: -10, height: 0 }) }
                 />
             }
         </div>)

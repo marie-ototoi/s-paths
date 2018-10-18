@@ -12,9 +12,9 @@ class ViewSelect extends React.Component {
             }}>
                 <img
                     src={option.thumb}
-                    alt={option.id}
+                    alt={option.name}
                 />
-                <span>{option.id}</span>
+                <span>{option.name}</span>
             </div>
         )
     }

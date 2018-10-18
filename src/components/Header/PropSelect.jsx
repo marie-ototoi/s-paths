@@ -25,7 +25,7 @@ class PropSelect extends React.Component {
         return (
             <div>
                 <span className='tag'>
-                    {option.readablePath.map(p => p.label).join(' / * / ')}
+                    {option.readablePath.map(p => p.label).join(' / ')}
                 </span>
             </div>
         )

@@ -32,47 +32,8 @@ class Details extends React.PureComponent {
                 >
                     <i className='fas fa-window-close' />
                 </span>
-                <div className = "field">
-                    <label className = "label"></label>
-                    <div className ="control">
-                        
-                    </div>
-                </div>
-                <div className = "field">
-                    <label className = "label"></label>
-                    <div className ="control">
-                        
-                    </div>
-                </div>
+                You requested detailed informations about the instance of the displayed paths for the following entities:
 
-                { dataset.resources.lenght === 0 &&
-                <button
-                    onClick = { e => {
-                        //console.log(this.props.dataset)
-                        this.props.analyseResources({ ...this.props.dataset, forceUpdate: true }, [])
-                    } }
-                >
-                    Get Resources
-                </button>
-                }
-                <table className = "table is-bordered">
-                    <tbody>
-                        { dataset.resources.map((resource, ri) => {
-                            return (<tr key = { `resource_${zone}_${ri}` }>
-                                <td>{ resource.type }</td>
-                                <td><a onClick = { e => {
-                                    this.props.loadStats({
-                                        ...dataset,
-                                        analyse: true,
-                                        entrypoint: resource.type,
-                                        totalInstances: resource.total,
-                                        selectionInstances: resource.total
-                                    })
-                                } }>analyze stats</a></td>
-                            </tr>)
-                        }) }
-                    </tbody>
-                </table>                   
             </div>
         </div>)
     }

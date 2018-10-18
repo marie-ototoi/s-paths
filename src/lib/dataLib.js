@@ -1,6 +1,6 @@
 import * as d3 from 'd3'
 import shallowEqual from 'shallowequal'
-import { convertPath, getSplitUri, usePrefix } from './queryLib'
+import { convertPath, getSplitUri, usePrefix, useFullUri } from './queryLib'
 
 export const areLoaded = (data, zone, status) => {
     data = getCurrentData(data, zone, status)
@@ -182,18 +182,20 @@ export const getLegend = (nestedProps, propName, colors, category) => {
     }
 }
 
-export const getReadablePathsParts = (path, fullPath, labelsDic, prefixes) => {
+export const getReadablePathsParts = (path, labelsDic, prefixes) => {
     const parts = path.split('/')
+
     // if (!labels) return parts.map(part => { return { label: part } })
-    return parts
+    let rp = parts
         .filter((part, index) => index !== 0 && part !== '*')
-        .map(part => {
-            let prop = labelsDic[fullPath]
+        .map((part, index) => {
+            let prop = labelsDic[useFullUri(part, prefixes)]
             return {
                 label: (prop) ? prop.label : part,
                 comment: (prop) ? prop.comment : undefined
             }
         })
+    return rp
 }
 
 export const splitRectangle = (zone, parts) => {
