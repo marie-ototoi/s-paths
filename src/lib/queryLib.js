@@ -123,7 +123,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
 }
 
 export const getData = (endpoint, query, prefixes) => {
-    // console.log(query)
+    console.log(query)
     const client = new SparqlClient(endpoint, {
         requestDefaults: {
             headers: {
@@ -411,7 +411,7 @@ ${defList}
 
 // to do : take constraints into account
 export const makeQuery = (entrypoint, configZone, zone, options) => {
-    const { graphs, constraints, maxDepth, prop1only, resourceGraph, unique } = options
+    let { graphs, constraints, maxDepth, maxLevel, prop1only, resourceGraph, singleURI, unique } = options
     // console.log(configZone)
     let defList = ``
     let groupList = unique ?  `` : `GROUP BY `
@@ -420,26 +420,25 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
     // let graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
     let graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     if (maxDepth) {
-        propList = `DISTINCT ?entrypoint ?path1 ?prop1 ?level `
-        if (!unique) groupList = groupList.concat(`?prop1 `)
-        defList = `?entrypoint rdf:type <${entrypoint}> .
-        OPTIONAL { ?entrypoint ?path1 ?prop1 .
-        FILTER (?prop1 != ?entrypoint) .`
-        for (let i = 1; i < maxDepth; i ++ ) {
+        //FILTER regex(?entrypoint, '^http://data.nobelprize.org/resource/laureateaward/22$$', 'i') .
+        propList = `DISTINCT ?entrypoint ?path1 ?prop1 `
+        defList = `<${singleURI}> ?path1 ?prop1 .
+        OPTIONAL { `
+        for (let i = 1; i < maxLevel; i ++ ) {
             defList = defList.concat(`?prop${i} ?path${(i + 1)} ?prop${(i + 1)} . `)        
-            defList = defList.concat(`FILTER (`)
+            defList = defList.concat(`FILTER (?path${(i + 1)} != <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> && `)
             for (let j = i; j >= 1; j--) {
                 defList = defList.concat(`?prop${(i + 1)} != ?prop${j}`)
                 if (j !== 1) defList = defList.concat(` && `)
             }
             defList = defList.concat(`) . `)
             propList = propList.concat(`?path${(i + 1)} ?prop${(i + 1)} `)
-            if (!unique) groupList = groupList.concat(`?path${(i + 1)} ?prop${(i + 1)} `)
-            
+            groupList = groupList.concat(`?path${(i + 1)} ?prop${(i + 1)} `)
+            orderList = orderList.concat(`?path${(i + 1)} ?prop${(i + 1)} `)  
         }
-        orderList = orderList.concat(`?prop${maxDepth} `)
-        defList = defList.concat(`BIND (${maxDepth} as ?level) . `)
-        defList = defList.concat(`}`)
+        constraints = ''
+        defList = defList.concat(`} .
+        BIND (<${singleURI}> as ?entrypoint)`)
     } else {
         let selectedConfig = configLib.getSelectedMatch(configZone)    
         let properties = !configZone.allProperties ? selectedConfig.properties : []
@@ -477,11 +476,11 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
             }))
         })
     }
-    /* let request = `SELECT DISTINCT ${propList}${graph}
+    console.log(`SELECT DISTINCT ${propList}${graph}
     WHERE {
     ${constraints}
     ${defList}
-    } ${groupList} ${orderList}` */
+    } ${groupList} ${orderList}`)
     return `SELECT ${propList}${graph}
 WHERE {
 ${constraints}

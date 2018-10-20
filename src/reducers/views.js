@@ -52,6 +52,7 @@ const defaultState = [
         name: 'density plot',
         thumb : '/images/heatmap.svg',
         weight: 0.5,
+        entrypoint: { min: 2 },
         constraints: [
             [
                 {
@@ -113,6 +114,7 @@ const defaultState = [
         name: 'treemap',
         thumb : '/images/treemap.svg',
         weight : 0.5,
+        entrypoint: { min: 2 },
         constraints: [
             [
                 {
@@ -132,6 +134,7 @@ const defaultState = [
         id: 'URIWheel',
         name: 'URI wheel',
         thumb : '/images/uriwheel.svg',
+        entrypoint: { min: 2 },
         weight: 0.4,
         constraints: [
             [
@@ -180,22 +183,23 @@ const defaultState = [
                 }
             ]*/
         ]
-    }/*,
+    },
     {
         id: 'ListAllProps',
         name: 'all props',
         thumb : '/images/listprop.svg',
         allProperties: true,
-        entrypoint: { min: 1, max: 20, optimal: [1, 10] },
+        entrypoint: { min: 1, max: 1, optimal: [1, 10] },
         constraints: [
             [
                 {
                     category: '*',
-                    unique: {}
+                    unique: {},
+                    multiple: true
                 }
             ]
         ]
-    }*/,
+    },
     {
         id: 'SingleProp',
         name: 'breakdown by values',

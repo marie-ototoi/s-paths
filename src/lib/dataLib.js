@@ -134,6 +134,61 @@ export const getResults = (data, zone, status) => {
     return (data[statementsType] && data[statementsType].results) ? data[statementsType].results.bindings : []
 }
 
+export const prepareSingleData = (data, dataset) => {
+    let { maxLevel } = dataset
+    
+    let tree = [{
+        id: 1,
+        name: data[0].entrypoint.value
+    }]
+    let check = {}
+    let counters = { c0: 1 }
+    let counter = 2
+    let leaves = data.reduce((acc, cur) => {
+        let name = cur.prop1.value
+        let path = cur.path1.value
+        let currentCheck = name+path
+        if (!check[currentCheck]) {
+            check[currentCheck] = true
+            counters.c1 = counter
+            // console.log('id', counter, 'parent', counters.c0)
+            acc.push({
+                id: counter,
+                name: cur.prop1.value,
+                path: cur.path1.value,
+                parent: counters.c0
+            })
+            counter ++ 
+        }
+        if (maxLevel > 1) {
+            for (let i = 2; i <= maxLevel; i ++) {
+                // console.log('dd')
+                if(cur['prop'+  i]) {
+                    // console.log('ok rentre la')
+                    path = cur['path'+  i].value
+                    name = cur['prop'+ i].value
+                    currentCheck += path + '' + name
+                    // console.log('bon')
+                    if (!check[currentCheck]) {
+                        // console.log('id+', counter, 'parent', counters['c' + (i - 1)])
+                        check[currentCheck] = true
+                        counters['c' + i] = counter
+                        acc.push({
+                            id: counter,
+                            name,
+                            path,
+                            parent: counters['c' + (i - 1)]
+                        })
+                        counter ++
+                    }
+                }
+            }
+        }
+        return acc
+    }, [])
+    tree.push(...leaves)
+    return tree
+}
 export const getNbDisplayed = (data, zone, status) => {
     data = getCurrentData(data, zone, status)
     if (status === 'delta') {

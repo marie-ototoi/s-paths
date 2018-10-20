@@ -143,13 +143,20 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
         .then(countInstances => {
             // console.log('countInstances', countInstances)
             const previousConfigMain = getSelectedView(previousConfigs, 'main')
+            let singleURI
             return new Promise((resolve, reject) => {
                 let selectionInstances = Number(countInstances.results.bindings[0].total.value)
                 // console.log('selectionInstances', selectionInstances)
                 let configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
                 // console.log('alors ?', configs)
                 if (selectionInstances === 1) {
-                    resolve([configs, { ...stats, selectionInstances }])
+                    let singleURIQuery =  `SELECT ?entrypoint ${graph} WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
+                    getData(endpoint, singleURIQuery, prefixes)
+                        .then(res => {
+                            singleURI = res.results.bindings[0].entrypoint.value
+                            resolve([configs, { ...stats, selectionInstances }])
+                        })
+                    
                 } else if (selectionInstances > 1) {
                     stats = evaluateSubStats({ ...stats, selectionInstances })
                     // console.log('evaluateSubStats', stats)
@@ -163,7 +170,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                 .then(([newConfigs, newStats]) => {
                     // console.log('then ? ',newConfigs, newStats)
                     const configMain = getSelectedView(newConfigs, 'main')
-                    const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
+                    const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, singleURI, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
                     const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
                     let queryTransitionMain = makeTransitionQuery(configMain, dataset, previousConfigMain, previousOptions, 'main')
                     // console.log(queryMain)

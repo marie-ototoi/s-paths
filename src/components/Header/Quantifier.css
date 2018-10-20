@@ -8,5 +8,14 @@
     display: inline-block;
 }
 .Quantifier progress {
-    opacity: 0.6;
+    
+}
+.Quantifier progress::-webkit-progress-bar {
+    
+}
+.Quantifier progress::-webkit-progress-value {
+    background-color:#888;
+} 
+.Quantifier progress::-moz-progress-bar-value {
+    background-color:#888;
 }

@@ -176,12 +176,16 @@ export const defineConfigs = (views, stats, dataset) => {
             if (view.entrypoint.min > stats.selectionInstances || view.entrypoint.max < stats.selectionInstances) return { matches: [] }
         }
         if (stats.selectionInstances === 1) {
-            return {
-                ...view,
-                matches: view.id === 'ListAllProps' ? stats.statements.sort((a, b) => {
-                    return b.score - a.score
-                }) : []
-            }
+            let propSet = stats.statements.map(prop => {
+                return {
+                    ...prop,
+                    score: scoreProp(prop, view.constraints[0][0], rankPropFactors)
+                }
+            }).sort((a, b) => {
+                return b.score - a.score
+            })
+            // console.log('OKKKKK', propSet)
+            propList.push(propSet)
         } else {
             // make a list of all possible properties for each constrained prop zone
             view.constraints.forEach(constraintSet => {
@@ -213,47 +217,47 @@ export const defineConfigs = (views, stats, dataset) => {
                 if (cur.length > 0) acc.push(cur)
                 return acc
             }, [])
-            // console.log(view.id, scoredMatches)
-            // sort by score and return
-            let alreadyInMatch = []
-            let match = propList.map((list, listIndex) => {
-                if (list.length > 0) {
-                    let index = 0
-                    while (alreadyInMatch.includes(list[index].path) && list[index + 1]){
-                        index ++
-                    }
-                    if (!alreadyInMatch.includes(list[index].path)) {
-                        alreadyInMatch.push(list[index].path)
-                        return list[index]
-                    }
+        }
+        // console.log(view.id, scoredMatches)
+        // sort by score and return
+        let alreadyInMatch = []
+        let match = propList.map((list, listIndex) => {
+            if (list.length > 0) {
+                let index = 0
+                while (alreadyInMatch.includes(list[index].path) && list[index + 1]){
+                    index ++
                 }
-            }).filter(list => list)
-            
-            let selectedMatch
-            if ((match.length === view.constraints.length) ||
-                (view.constraints[view.constraints.length-1][0].optional !== undefined && 
-                    match.length === view.constraints.length - 1)) {
-                selectedMatch = {
-                    properties: match,
-                    scoreMatch: scoreMatch(match, view.weight, rankMatchFactors)
+                if (!alreadyInMatch.includes(list[index].path)) {
+                    alreadyInMatch.push(list[index].path)
+                    return list[index]
                 }
             }
-            // console.log('why ?', selectedMatch)
-            return {
-                ...view,
-                propList,
-                selectedMatch,
-                multiple: view.constraints.map((cs, csi) => {
-                    let xt = []
-                    cs.forEach(c => {
-                        if(c.multiple) {
-                            xt = statsDict[c.category]
-                        }
-                    })
-                    return xt
-                })
+        }).filter(list => list)
+        
+        let selectedMatch
+        if ((match.length === view.constraints.length) ||
+            (view.constraints[view.constraints.length-1][0].optional !== undefined && 
+                match.length === view.constraints.length - 1)) {
+            selectedMatch = {
+                properties: match,
+                scoreMatch: scoreMatch(match, view.weight, rankMatchFactors)
             }
         }
+        return {
+            ...view,
+            propList,
+            selectedMatch,
+            multiple: view.constraints.map((cs, csi) => {
+                let xt = []
+                cs.forEach(c => {
+                    if(c.multiple) {
+                        xt = statsDict[c.category]
+                    }
+                })
+                return xt
+            })
+        }
+        
     })
         .filter(view => view.selectedMatch !== undefined)
         .sort((a, b) => {

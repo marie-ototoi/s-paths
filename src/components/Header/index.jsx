@@ -163,10 +163,10 @@ class Header extends React.Component {
                 selectionIsLoading: false,
                 keyword: ''
             }))
-            .catch(() => this.setState({
+            .catch((e) => this.setState({
                 selectionIsLoading: false,
                 keyword: '',
-                errorSelection: 'No results matching selection'
+                errorSelection: 'No results matching selection' + e
             }))
     }
     render () {

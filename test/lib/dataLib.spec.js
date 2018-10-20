@@ -237,4 +237,56 @@ describe('lib/data', () => {
         expect(origin10).to.equal(7)
         // expect(target10).to.equal(2)
     })
+
+    it('should prepare data for Radial Tree', () => {
+        let originalData = [
+            {
+                "entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/awardfile/2023"},
+                "path1":{"type":"uri","value":"http://www.w3.org/2000/01/rdf-schema#label"},
+                "prop1":[
+                    {"value":"Other Prize Comité international de la Croix Rouge (International Committee of the Red Cross) ","count":2},
+                    {"value":"Other Prize Marie Curie, née Sklodowska","count":2}
+                ],
+                "level":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"},
+                "path":"nobel_t:AwardFile/rdfs:label/*/",
+                "readablePath":[{"label":"rdfs:label"},{"label":""}],
+                "fullPath":"<http://data.nobelprize.org/terms/AwardFile>/<http://www.w3.org/2000/01/rdf-schema#label>/*/"
+            },
+            {
+                "entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/awardfile/2024"},
+                "path1":{"type":"uri","value":"http://www.w3.org/2000/01/rdf-schema#label"},
+                "prop1":{"type":"literal","value":"Other Prize Comité international de la Croix Rouge (International Committee of the Red Cross) "},
+                "level":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}
+            },
+            {
+                "entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/awardfile/2015"},
+                "path1":{"type":"uri","value":"http://www.w3.org/2000/01/rdf-schema#label"},
+                "prop1":{"type":"literal","value":"Other Prize Marie Curie, née Sklodowska"},
+                "level":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}
+            },
+            {
+                "entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/awardfile/2015"},
+                "path1":{"type":"uri","value":"http://data.nobelprize.org/terms/category"},
+                "prop1":[
+                    {"value":"http://data.nobelprize.org/resource/category/Chemistry","count":1},
+                    {"value":"http://data.nobelprize.org/resource/category/Peace","count":3}
+                ],
+                "level":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"},
+                "path":"nobel_t:AwardFile/nobel_t:category/*/",
+                "readablePath":[{"label":"nobel_t:category"},{"label":""}],
+                "fullPath":"<http://data.nobelprize.org/terms/AwardFile>/<http://data.nobelprize.org/terms/category>/*/"},
+                {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/awardfile/2024"},"path1":{"type":"uri","value":"http://data.nobelprize.org/terms/category"},"prop1":{"type":"uri","value":"http://data.nobelprize.org/resource/category/Peace"},"level":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}},{"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/awardfile/2023"},"path1":{"type":"uri","value":"http://data.nobelprize.org/terms/category"},"prop1":{"type":"uri","value":"http://data.nobelprize.org/resource/category/Peace"},"level":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}},
+        ]
+        expect(data.prepareSingleData(originalData, {})).deep.equal([
+            {
+                id: 1,
+                name: 'http://data.nobelprize.org/resource/awardfile/2023, http://data.nobelprize.org/resource/awardfile/2024',
+            },
+            {
+                id: 2,
+                name: '',
+                parent: 1
+            }
+        ])
+    })
 })
