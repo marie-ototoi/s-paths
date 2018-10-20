@@ -240,52 +240,40 @@ describe('lib/data', () => {
 
     it('should prepare data for Radial Tree', () => {
         let originalData = [
-            {
-                "entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/awardfile/2023"},
-                "path1":{"type":"uri","value":"http://www.w3.org/2000/01/rdf-schema#label"},
-                "prop1":[
-                    {"value":"Other Prize Comité international de la Croix Rouge (International Committee of the Red Cross) ","count":2},
-                    {"value":"Other Prize Marie Curie, née Sklodowska","count":2}
-                ],
-                "level":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"},
-                "path":"nobel_t:AwardFile/rdfs:label/*/",
-                "readablePath":[{"label":"rdfs:label"},{"label":""}],
-                "fullPath":"<http://data.nobelprize.org/terms/AwardFile>/<http://www.w3.org/2000/01/rdf-schema#label>/*/"
-            },
-            {
-                "entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/awardfile/2024"},
-                "path1":{"type":"uri","value":"http://www.w3.org/2000/01/rdf-schema#label"},
-                "prop1":{"type":"literal","value":"Other Prize Comité international de la Croix Rouge (International Committee of the Red Cross) "},
-                "level":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}
-            },
-            {
-                "entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/awardfile/2015"},
-                "path1":{"type":"uri","value":"http://www.w3.org/2000/01/rdf-schema#label"},
-                "prop1":{"type":"literal","value":"Other Prize Marie Curie, née Sklodowska"},
-                "level":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}
-            },
-            {
-                "entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/awardfile/2015"},
-                "path1":{"type":"uri","value":"http://data.nobelprize.org/terms/category"},
-                "prop1":[
-                    {"value":"http://data.nobelprize.org/resource/category/Chemistry","count":1},
-                    {"value":"http://data.nobelprize.org/resource/category/Peace","count":3}
-                ],
-                "level":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"},
-                "path":"nobel_t:AwardFile/nobel_t:category/*/",
-                "readablePath":[{"label":"nobel_t:category"},{"label":""}],
-                "fullPath":"<http://data.nobelprize.org/terms/AwardFile>/<http://data.nobelprize.org/terms/category>/*/"},
-                {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/awardfile/2024"},"path1":{"type":"uri","value":"http://data.nobelprize.org/terms/category"},"prop1":{"type":"uri","value":"http://data.nobelprize.org/resource/category/Peace"},"level":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}},{"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/awardfile/2023"},"path1":{"type":"uri","value":"http://data.nobelprize.org/terms/category"},"prop1":{"type":"uri","value":"http://data.nobelprize.org/resource/category/Peace"},"level":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/nobelprize/Physics/1910"},"path1":{"type":"uri","value":"http://data.nobelprize.org/terms/year"},"prop1":{"type":"typed-literal","datatype":"http://www.w3.org/2001/XMLSchema#integer","value":"1910"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/nobelprize/Physics/1910"},"path1":{"type":"uri","value":"http://data.nobelprize.org/terms/category"},"prop1":{"type":"uri","value":"http://data.nobelprize.org/resource/category/Physics"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/nobelprize/Physics/1910"},"path1":{"type":"uri","value":"http://data.nobelprize.org/terms/prizeFile"},"prop1":{"type":"uri","value":"http://data.nobelprize.org/resource/prizefile/10"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/nobelprize/Physics/1910"},"path1":{"type":"uri","value":"http://data.nobelprize.org/terms/laureate"},"prop1":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/15"},"path2":{"type":"uri","value":"http://data.nobelprize.org/terms/laureateAward"},"prop2":{"type":"uri","value":"http://data.nobelprize.org/resource/laureateaward/14"},"path3":{"type":"uri","value":"http://data.nobelprize.org/terms/university"},"prop3":{"type":"uri","value":"http://data.nobelprize.org/resource/university/Amsterdam_University"},"path4":{"type":"uri","value":"http://dbpedia.org/ontology/city"},"prop4":{"type":"uri","value":"http://data.nobelprize.org/resource/city/Amsterdam"},"path5":{"type":"uri","value":"http://www.w3.org/2002/07/owl#sameAs"},"prop5":{"type":"uri","value":"http://dbpedia.org/resource/Amsterdam"},"path6":{"type":"uri","value":"http://dbpedia.org/property/latd"},"prop6":{"type":"literal","value":"52"}},
+            {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/nobelprize/Physics/1910"},"path1":{"type":"uri","value":"http://data.nobelprize.org/terms/laureate"},"prop1":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/15"},"path2":{"type":"uri","value":"http://data.nobelprize.org/terms/laureateAward"},"prop2":{"type":"uri","value":"http://data.nobelprize.org/resource/laureateaward/14"},"path3":{"type":"uri","value":"http://data.nobelprize.org/terms/university"},"prop3":{"type":"uri","value":"http://data.nobelprize.org/resource/university/Amsterdam_University"},"path4":{"type":"uri","value":"http://dbpedia.org/ontology/city"},"prop4":{"type":"uri","value":"http://data.nobelprize.org/resource/city/Amsterdam"},"path5":{"type":"uri","value":"http://www.w3.org/2002/07/owl#sameAs"},"prop5":{"type":"uri","value":"http://dbpedia.org/resource/Amsterdam"},"path6":{"type":"uri","value":"http://dbpedia.org/property/longd"},"prop6":{"type":"literal","value":"4"}},
         ]
         expect(data.prepareSingleData(originalData, {})).deep.equal([
             {
                 id: 1,
-                name: 'http://data.nobelprize.org/resource/awardfile/2023, http://data.nobelprize.org/resource/awardfile/2024',
+                name: 'http://data.nobelprize.org/resource/nobelprize/Physics/1910',
             },
             {
                 id: 2,
-                name: '',
-                parent: 1
+                name: '1910',
+                parent: 1,
+                path: 'http://data.nobelprize.org/terms/year'
+            },
+            {
+                id: 3,
+                name: 'http://data.nobelprize.org/resource/category/Physics',
+                parent: 1,
+                path: 'http://data.nobelprize.org/terms/category'
+            },
+            {
+                id: 4,
+                name: 'http://data.nobelprize.org/resource/prizefile/10',
+                parent: 1,
+                path: 'http://data.nobelprize.org/terms/prizeFile'
+            },
+            {
+                id: 5,
+                name: 'http://data.nobelprize.org/resource/laureate/15',
+                parent: 1,
+                path: 'http://data.nobelprize.org/terms/laureate'
             }
         ])
     })
