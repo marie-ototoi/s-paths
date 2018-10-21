@@ -31,7 +31,7 @@ class ListAllProps extends React.Component {
         //
     }
     handleNewView(args) {
-        // console.log(args._runtime, args.scenegraph('test'))
+        console.log(args._runtime, args.scenegraph('test'))
         this.customState = {...this.customState, view: args}
         window.setTimeout(() => this.props.handleTransition(this.props, this.getElementsForTransition()), 500)
     }
@@ -44,8 +44,9 @@ class ListAllProps extends React.Component {
     prepareData (nextProps) {
         const { data, dataset, display, dimensions, selections, zone } = nextProps
         // prepare the data for display
-        // console.log(data)
+        console.log(data)
         // Save to reuse in render
+        console.log(prepareSingleData(data, dataset))
         //prepareSingleData(data, dataset)
         const datatree = [{
             "name": "tree",
@@ -182,7 +183,11 @@ class ListAllProps extends React.Component {
                     "value": [],
                     "on": [
                         {"events": "@nodes:mouseover", "update": "datum.parents"},
-                        {"events": "@nodes:mouseout",  "update": "[]"}
+                        {"events": "@rectnodes:mouseover", "update": "datum.parents"},
+                        {"events": "@textnodes:mouseover", "update": "datum.parents"},
+                        {"events": "@nodes:mouseout",  "update": "[]"},
+                        {"events": "@rectnodes:mouseout",  "update": "[]"},
+                        {"events": "@textnodes:mouseout",  "update": "[]"}
                     ]
                 }
             ],
@@ -215,18 +220,6 @@ class ListAllProps extends React.Component {
                     }
                 },
                 {
-                    "type": "text",
-                    "from": {"data": "links"},
-                    "name": "edgestext",
-                    "encode": {
-                        "update": {
-                            "x": {"signal": "originX"},
-                            "y": {"signal": "originY"},
-                            "text": {"value": 10}
-                        }
-                    }
-                },
-                {
                     "type": "symbol",
                     "from": {"data": "tree"},
                     "name": "nodes",
@@ -242,7 +235,31 @@ class ListAllProps extends React.Component {
                         }
                     }
                 },
-                
+                {
+                    "type": "rect",
+                    "from": {"data": "tree"},
+                    "name": "rectnodes",
+                    "encode": {
+                        "enter": {                            
+                            "width": {"field": "charlength", "mult": 5.1},
+                            "height": {"value": 15},
+                            "fill": {"value": "#fff"}
+                        },
+                        "update": {
+                            "x": {"field": "x", "offset": 6},
+                            "yc": {"field": "y"},
+                            "fillOpacity": [
+                                {"test": "datum.id != 0 && length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},
+                                {"test": "datum.id == 0", "value": 0},
+                                {"value": 0.1}
+                            ],
+                            "zindex": [
+                                {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},
+                                {"value": 0}
+                            ]
+                        }
+                    }
+                },
                 {
                     "type": "text",
                     "from": {"data": "tree"},
@@ -261,8 +278,58 @@ class ListAllProps extends React.Component {
                             "opacity": {"signal": "labels ? 1 : 0"},
                             "fill": [
                                 {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": "#333"},
-                                {"test": "(datum.children == 0 || datum.id == 1)", "value": "#666"},
+                                {"test": "length(parents) == 0 && (datum.children == 0 || datum.id == 1)", "value": "#666"},
                                 {"value": "#ccc"}
+                            ],
+                            "zindex": [
+                                {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},
+                                {"value": 0}
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "rect",
+                    "from": {"data": "links"},
+                    "name": "rectedges",
+                    "encode": {
+                        "update": {
+                            "x2": {"signal": "datum.target.x - 6"},
+                            "yc": {"signal": "datum.target.y"},
+                            "width": {"signal": "datum.target.pathcharlength * 5.1"},
+                            "height": {"value": 15},
+                            "fill": {"value": "#fff"},
+                            "fillOpacity": [
+                                {"test": "length(parents) > 0 && indexof(parents, datum.source.id) >= 0 && indexof(parents, datum.target.id) >= 0", "value": 1},
+                                {"test": "datum.id == 0", "value": 0},
+                                {"value": 0.1}
+                            ],
+                            "zindex": [
+                                {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},
+                                {"value": 0}
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "text",
+                    "from": {"data": "links"},
+                    "name": "edgestext",
+                    "encode": {
+                        "update": {
+                            "x2": {"signal": "datum.target.x - 6"},
+                            "y": {"signal": "datum.target.y"},
+                            "text": {"signal": "datum.target.path"},
+                            "align": {"value": "right"},
+                            "fill": {"value": "#4b18a1"},
+                            "baseline": {"value": "middle"},
+                            "fillOpacity": [
+                                {"test": "length(parents) > 0 && indexof(parents, datum.source.id) >= 0 && indexof(parents, datum.target.id)  >= 0", "value": 1},
+                                {"value": 0}
+                            ],
+                            "zindex": [
+                                {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},
+                                {"value": 0}
                             ]
                         }
                     }
@@ -270,7 +337,7 @@ class ListAllProps extends React.Component {
                 ...defaultSpec.marks
             ]
         }
-        // console.log(spec)
+        console.log(spec)
         // "pointRadius": {"expr": "scale('size', exp(datum.properties.mag))"}
         //
         // Save to reuse in render
@@ -338,7 +405,7 @@ class ListAllProps extends React.Component {
             this.props.step !== nextProps.step 
     }
     getElementsForTransition () {
-        let { dimensions } = this.props
+        let { data, dimensions, zone } = this.props
         let { width, height } = dimensions
         return [{ 
             zone: {
@@ -349,13 +416,13 @@ class ListAllProps extends React.Component {
                 width: 10,
                 height: 10
             },
-            selector:'URI',
+            selector:'singleURI_' + zone,
             index: 0,
             query: {
                 type: 'uri',
-                value: 'URI'
+                value: data[0].entrypoint.value
             },
-            color: '#f00',
+            color: '#4b18a1',
             opacity: 1,
             shape: 'rectangle',
             rotation: 0

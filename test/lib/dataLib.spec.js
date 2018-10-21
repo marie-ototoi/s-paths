@@ -262,6 +262,7 @@ describe('lib/data', () => {
                 charlength: 4,
                 maxDepth: 6,
                 parents: [1, 2],
+                pathcharlength: 37,
                 shortname: '1910'
             },
             {
@@ -272,7 +273,8 @@ describe('lib/data', () => {
                 charlength: 52,
                 maxDepth: 6,
                 parents: [1, 3],
-                shortname: 'http://data.nobelprize.org/resource/category/Physics'
+                shortname: 'http://data.nobelprize.org/resource/category/Physics',
+                pathcharlength: 41
             },
             {
                 id: 4,
@@ -282,7 +284,8 @@ describe('lib/data', () => {
                 charlength: 48,
                 maxDepth: 6,
                 parents: [1, 4],
-                shortname: 'http://data.nobelprize.org/resource/prizefile/10'
+                shortname: 'http://data.nobelprize.org/resource/prizefile/10',
+                pathcharlength: 42
             },
             {
                 id: 5,
@@ -292,7 +295,8 @@ describe('lib/data', () => {
                 charlength: 47,
                 maxDepth: 6,
                 parents: [1, 5],
-                shortname: 'http://data.nobelprize.org/resource/laureate/15'
+                shortname: 'http://data.nobelprize.org/resource/laureate/15',
+                pathcharlength: 41
             },
             {
                 id: 6,
@@ -302,7 +306,8 @@ describe('lib/data', () => {
                 maxDepth: 6,
                 parents: [1, 5, 6],
                 path: 'http://data.nobelprize.org/terms/laureateAward',
-                shortname: 'http://data.nobelprize.org/resource/laureateaward/14'
+                shortname: 'http://data.nobelprize.org/resource/laureateaward/14',
+                pathcharlength: 46
             },
             {
                 id: 7,
@@ -312,7 +317,8 @@ describe('lib/data', () => {
                 charlength: 67,
                 maxDepth: 6,
                 parents: [1, 5, 6, 7],
-                shortname: 'http://data.nobelprize.org/resource/university/Amsterdam_University'
+                shortname: 'http://data.nobelprize.org/resource/university/Amsterdam_University',
+                pathcharlength: 43
             },
             {
                 id: 8,
@@ -322,7 +328,8 @@ describe('lib/data', () => {
                 charlength: 50,
                 maxDepth: 6,
                 parents: [1, 5, 6, 7, 8],
-                shortname: 'http://data.nobelprize.org/resource/city/Amsterdam'
+                shortname: 'http://data.nobelprize.org/resource/city/Amsterdam',
+                pathcharlength: 32
             },
             {
                 id: 9,
@@ -332,7 +339,8 @@ describe('lib/data', () => {
                 charlength: 37,
                 maxDepth: 6,
                 parents: [1, 5, 6, 7, 8, 9],
-                shortname: 'http://dbpedia.org/resource/Amsterdam'
+                shortname: 'http://dbpedia.org/resource/Amsterdam',
+                pathcharlength: 36
             },
             {
                 id: 10,
@@ -342,7 +350,8 @@ describe('lib/data', () => {
                 charlength: 2,
                 maxDepth: 6,
                 parents: [1, 5, 6, 7, 8, 9, 10],
-                shortname: '52'
+                shortname: '52',
+                pathcharlength: 32
             },
             {
                 id: 11,
@@ -352,7 +361,8 @@ describe('lib/data', () => {
                 charlength: 1,
                 maxDepth: 6,
                 parents: [1, 5, 6, 7, 8, 9, 11],
-                shortname: '4'
+                shortname: '4',
+                pathcharlength: 33
             }
         ])
     })

@@ -137,6 +137,7 @@ export const getResults = (data, zone, status) => {
 export const prepareSingleData = (data, dataset) => {
     let { maxLevel, prefixes } = dataset
     let shortname = usePrefix(data[0].entrypoint.value, prefixes)
+    let shortpath
     let tree = [{
         id: 1,
         name: data[0].entrypoint.value,
@@ -149,8 +150,8 @@ export const prepareSingleData = (data, dataset) => {
     let counter = 2
     let maxDepth = 1
     let leaves = data.reduce((acc, cur, pathindex) => {
+        let currentCheck = ''
         for (let i = 1; i <= maxLevel; i ++) {
-            let currentCheck = ''
             // console.log('dd')
             if(cur['prop'+  i]) {
                 if (i > maxDepth) maxDepth = i
@@ -168,12 +169,14 @@ export const prepareSingleData = (data, dataset) => {
                         parents.push(counters['c' + j])
                     }
                     shortname = usePrefix(name, prefixes)
+                    shortpath = usePrefix(path, prefixes)
                     acc.push({
                         id: counter,
                         name,
                         charlength: shortname.length,
                         shortname,
-                        path,
+                        pathcharlength: shortpath.length,
+                        path: shortpath,
                         parent: counters['c' + (i - 1)],
                         parents
                     })
