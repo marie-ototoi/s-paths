@@ -31,7 +31,7 @@ class ListAllProps extends React.Component {
         //
     }
     handleNewView(args) {
-        console.log(args._runtime)
+        // console.log(args._runtime, args.scenegraph('test'))
         this.customState = {...this.customState, view: args}
         window.setTimeout(() => this.props.handleTransition(this.props, this.getElementsForTransition()), 500)
     }
@@ -42,9 +42,9 @@ class ListAllProps extends React.Component {
         //
     }
     prepareData (nextProps) {
-        const { data, dataset, dimensions, selections, zone } = nextProps
+        const { data, dataset, display, dimensions, selections, zone } = nextProps
         // prepare the data for display
-        console.log(data)
+        // console.log(data)
         // Save to reuse in render
         //prepareSingleData(data, dataset)
         const datatree = [{
@@ -74,17 +74,23 @@ class ListAllProps extends React.Component {
                 },
                 {
                     "type": "formula",
-                    "expr": "inrange(datum.angle, [90, 270])",
-                    "as":   "leftside"
+                    "expr": "if(datum.children == 0 && datum.depth == 1 && datum.maxDepth > 1, datum.radians + (-0.05 * datum.id), datum.radians)",
+                    "as":   "newradians"
                 },
                 {
                     "type": "formula",
-                    "expr": "originX + datum.radius * cos(datum.radians)",
+                    "expr": "if(datum.children == 0 && datum.depth == 1 && datum.maxDepth > 1, datum.radius + (2 * datum.id), datum.radius)",
+                    "as":   "newradius"
+                },
+                {
+                    "type": "formula",
+                    "expr": "originX + datum.newradius * cos(datum.newradians)",
                     "as":   "x"
                 },
+                
                 {
                     "type": "formula",
-                    "expr": "originY + datum.radius * sin(datum.radians)",
+                    "expr": "originY + datum.newradius * sin(datum.newradians)",
                     "as":   "y"
                 }
             ]
@@ -97,8 +103,8 @@ class ListAllProps extends React.Component {
                 {
                     "type": "linkpath",
                     "shape": {"signal": "links"}, "orient": "radial",
-                    "sourceX": "source.radians", "sourceY": "source.radius",
-                    "targetX": "target.radians", "targetY": "target.radius"
+                    "sourceX": "source.newradians", "sourceY": "source.newradius",
+                    "targetX": "target.newradians", "targetY": "target.newradius"
                 }
             ]
         },
@@ -110,6 +116,7 @@ class ListAllProps extends React.Component {
             ...defaultSpec,
             "width": dimensions.useful_width,
             "height": dimensions.useful_height,
+            "padding": {"bottom": display.viz.bottom_padding, "left": display.viz.horizontal_padding, "right": display.viz.horizontal_padding, "top": dimensions.top_padding},
             "signals": [
                 ...defaultSpec.signals,
                 {
@@ -147,16 +154,20 @@ class ListAllProps extends React.Component {
                     ]
                 },
                 {
-                    "name": "labels", "value": true,
+                    "name": "labels", "value": true
                 },
                 {
-                    "name": "radius", "update": "700" ,
+                    "name": "test",
+                    "update": "[1, 2, 3]" 
+                },
+                {
+                    "name": "radius", "update": "width - 10" ,
                 },
                 {
                     "name": "extent", "value": 30,
                 },
                 {
-                    "name": "rotate", "value": 75,
+                    "name": "rotate", "value": 78,
                 },
                 {
                     "name": "layout", "value": "tidy",
@@ -164,8 +175,16 @@ class ListAllProps extends React.Component {
                 {
                     "name": "links", "value": "diagonal",
                 },
-                { "name": "originX", "value": 10 },
-                { "name": "originY", "update": "height / 2" }
+                { "name": "originX", "value": 5 },
+                { "name": "originY", "update": "height / 2" },
+                {
+                    "name": "parents",
+                    "value": [],
+                    "on": [
+                        {"events": "@nodes:mouseover", "update": "datum.parents"},
+                        {"events": "@nodes:mouseout",  "update": "[]"}
+                    ]
+                }
             ],
             "data": datatree,
             "scales": [
@@ -182,18 +201,35 @@ class ListAllProps extends React.Component {
                 {
                     "type": "path",
                     "from": {"data": "links"},
+                    "name": "edges",
                     "encode": {
                         "update": {
                             "x": {"signal": "originX"},
                             "y": {"signal": "originY"},
                             "path": {"field": "path"},
-                            "stroke": {"value": "#ccc"}
+                            "stroke": [
+                                {"test": "length(parents) > 0 && indexof(parents, datum.source.id) >= 0 && indexof(parents, datum.target.id)  >= 0", "value": "#666"},
+                                {"value": "#ddd"}
+                            ]
+                        }
+                    }
+                },
+                {
+                    "type": "text",
+                    "from": {"data": "links"},
+                    "name": "edgestext",
+                    "encode": {
+                        "update": {
+                            "x": {"signal": "originX"},
+                            "y": {"signal": "originY"},
+                            "text": {"value": 10}
                         }
                     }
                 },
                 {
                     "type": "symbol",
                     "from": {"data": "tree"},
+                    "name": "nodes",
                     "encode": {
                         "enter": {
                             "size": {"value": 100},
@@ -201,33 +237,40 @@ class ListAllProps extends React.Component {
                         },
                         "update": {
                             "x": {"field": "x"},
-                            "y": {"field": "y", "offset" : {"expr": "if(item.x > 20 && item.x < 200, 10, -10)"}},
+                            "y": {"field": "y"},
                             "fill": {"scale": "color", "field": "depth"}
                         }
                     }
                 },
+                
                 {
                     "type": "text",
                     "from": {"data": "tree"},
+                    "name": "textnodes",
                     "encode": {
-                        "enter": {
-                            "text": {"field": "name"},
-                            "fontSize": {"value": 9},
+                        "enter": {                            
+                            "fontSize": {"value": 10},
                             "baseline": {"value": "middle"}
                         },
                         "update": {
+                            "text": {"field": "shortname"},
                             "x": {"field": "x"},
                             "y": {"field": "y"},
-                            "dx": {"signal": "(datum.leftside ? -1 : 1) * 6"},
-                            "align": {"signal": "datum.leftside ? 'right' : 'left'"},
-                            "opacity": {"signal": "labels ? 1 : 0"}
+                            "dx": {"signal": "(datum.id == 1 ? -1 : 1) * 6"},
+                            "align": {"signal": "datum.id == 1 ? 'right' : 'left'"},
+                            "opacity": {"signal": "labels ? 1 : 0"},
+                            "fill": [
+                                {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": "#333"},
+                                {"test": "(datum.children == 0 || datum.id == 1)", "value": "#666"},
+                                {"value": "#ccc"}
+                            ]
                         }
                     }
                 },
                 ...defaultSpec.marks
             ]
         }
-        console.log(spec)
+        // console.log(spec)
         // "pointRadius": {"expr": "scale('size', exp(datum.properties.mag))"}
         //
         // Save to reuse in render
@@ -240,13 +283,13 @@ class ListAllProps extends React.Component {
     render () {
         const { dimensions, display, role, step } = this.props
         return (<div
-            className = { `Geo ${this.customState.elementName} role_${role}` } >
+            className = { `ListPtops ${this.customState.elementName} role_${role}` } >
             { step !== 'changing' &&
             <div
                 style = {{ 
                     position: 'relative',
-                    left : `${dimensions.x + display.viz.horizontal_padding}px`,
-                    top: `${dimensions.y + dimensions.top_padding}px`,
+                    left : `${dimensions.x}px`,
+                    top: `${dimensions.y}px`,
                     width: `${dimensions.useful_width}px`,
                     height: `${dimensions.useful_height}px`
                 }}

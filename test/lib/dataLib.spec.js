@@ -246,34 +246,113 @@ describe('lib/data', () => {
             {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/nobelprize/Physics/1910"},"path1":{"type":"uri","value":"http://data.nobelprize.org/terms/laureate"},"prop1":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/15"},"path2":{"type":"uri","value":"http://data.nobelprize.org/terms/laureateAward"},"prop2":{"type":"uri","value":"http://data.nobelprize.org/resource/laureateaward/14"},"path3":{"type":"uri","value":"http://data.nobelprize.org/terms/university"},"prop3":{"type":"uri","value":"http://data.nobelprize.org/resource/university/Amsterdam_University"},"path4":{"type":"uri","value":"http://dbpedia.org/ontology/city"},"prop4":{"type":"uri","value":"http://data.nobelprize.org/resource/city/Amsterdam"},"path5":{"type":"uri","value":"http://www.w3.org/2002/07/owl#sameAs"},"prop5":{"type":"uri","value":"http://dbpedia.org/resource/Amsterdam"},"path6":{"type":"uri","value":"http://dbpedia.org/property/latd"},"prop6":{"type":"literal","value":"52"}},
             {"entrypoint":{"type":"uri","value":"http://data.nobelprize.org/resource/nobelprize/Physics/1910"},"path1":{"type":"uri","value":"http://data.nobelprize.org/terms/laureate"},"prop1":{"type":"uri","value":"http://data.nobelprize.org/resource/laureate/15"},"path2":{"type":"uri","value":"http://data.nobelprize.org/terms/laureateAward"},"prop2":{"type":"uri","value":"http://data.nobelprize.org/resource/laureateaward/14"},"path3":{"type":"uri","value":"http://data.nobelprize.org/terms/university"},"prop3":{"type":"uri","value":"http://data.nobelprize.org/resource/university/Amsterdam_University"},"path4":{"type":"uri","value":"http://dbpedia.org/ontology/city"},"prop4":{"type":"uri","value":"http://data.nobelprize.org/resource/city/Amsterdam"},"path5":{"type":"uri","value":"http://www.w3.org/2002/07/owl#sameAs"},"prop5":{"type":"uri","value":"http://dbpedia.org/resource/Amsterdam"},"path6":{"type":"uri","value":"http://dbpedia.org/property/longd"},"prop6":{"type":"literal","value":"4"}},
         ]
-        expect(data.prepareSingleData(originalData, {})).deep.equal([
+        expect(data.prepareSingleData(originalData, { maxLevel: 6 })).deep.equal([
             {
                 id: 1,
                 name: 'http://data.nobelprize.org/resource/nobelprize/Physics/1910',
+                charlength: 59,
+                parents: [],
+                shortname: 'http://data.nobelprize.org/resource/nobelprize/Physics/1910'
             },
             {
                 id: 2,
                 name: '1910',
                 parent: 1,
-                path: 'http://data.nobelprize.org/terms/year'
+                path: 'http://data.nobelprize.org/terms/year',
+                charlength: 4,
+                maxDepth: 6,
+                parents: [1, 2],
+                shortname: '1910'
             },
             {
                 id: 3,
                 name: 'http://data.nobelprize.org/resource/category/Physics',
                 parent: 1,
-                path: 'http://data.nobelprize.org/terms/category'
+                path: 'http://data.nobelprize.org/terms/category',
+                charlength: 52,
+                maxDepth: 6,
+                parents: [1, 3],
+                shortname: 'http://data.nobelprize.org/resource/category/Physics'
             },
             {
                 id: 4,
                 name: 'http://data.nobelprize.org/resource/prizefile/10',
                 parent: 1,
-                path: 'http://data.nobelprize.org/terms/prizeFile'
+                path: 'http://data.nobelprize.org/terms/prizeFile',
+                charlength: 48,
+                maxDepth: 6,
+                parents: [1, 4],
+                shortname: 'http://data.nobelprize.org/resource/prizefile/10'
             },
             {
                 id: 5,
                 name: 'http://data.nobelprize.org/resource/laureate/15',
                 parent: 1,
-                path: 'http://data.nobelprize.org/terms/laureate'
+                path: 'http://data.nobelprize.org/terms/laureate',
+                charlength: 47,
+                maxDepth: 6,
+                parents: [1, 5],
+                shortname: 'http://data.nobelprize.org/resource/laureate/15'
+            },
+            {
+                id: 6,
+                name: 'http://data.nobelprize.org/resource/laureateaward/14',
+                charlength: 52,
+                parent: 5,
+                maxDepth: 6,
+                parents: [1, 5, 6],
+                path: 'http://data.nobelprize.org/terms/laureateAward',
+                shortname: 'http://data.nobelprize.org/resource/laureateaward/14'
+            },
+            {
+                id: 7,
+                name: 'http://data.nobelprize.org/resource/university/Amsterdam_University',
+                parent: 6,
+                path: 'http://data.nobelprize.org/terms/university',
+                charlength: 67,
+                maxDepth: 6,
+                parents: [1, 5, 6, 7],
+                shortname: 'http://data.nobelprize.org/resource/university/Amsterdam_University'
+            },
+            {
+                id: 8,
+                name: 'http://data.nobelprize.org/resource/city/Amsterdam',
+                parent: 7,
+                path: 'http://dbpedia.org/ontology/city',
+                charlength: 50,
+                maxDepth: 6,
+                parents: [1, 5, 6, 7, 8],
+                shortname: 'http://data.nobelprize.org/resource/city/Amsterdam'
+            },
+            {
+                id: 9,
+                name: 'http://dbpedia.org/resource/Amsterdam',
+                parent: 8,
+                path: 'http://www.w3.org/2002/07/owl#sameAs',
+                charlength: 37,
+                maxDepth: 6,
+                parents: [1, 5, 6, 7, 8, 9],
+                shortname: 'http://dbpedia.org/resource/Amsterdam'
+            },
+            {
+                id: 10,
+                name: '52',
+                parent: 9,
+                path: 'http://dbpedia.org/property/latd',
+                charlength: 2,
+                maxDepth: 6,
+                parents: [1, 5, 6, 7, 8, 9, 10],
+                shortname: '52'
+            },
+            {
+                id: 11,
+                name: '4',
+                parent: 9,
+                path: 'http://dbpedia.org/property/longd',
+                charlength: 1,
+                maxDepth: 6,
+                parents: [1, 5, 6, 7, 8, 9, 11],
+                shortname: '4'
             }
         ])
     })
