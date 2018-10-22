@@ -14,7 +14,7 @@ class Settings extends React.PureComponent {
     render () {
         const { dataset, dimensions, zone } = this.props
         const { x, y, width, height } = dimensions
-        let { rankPropFactors, rankMatchFactors } = dataset
+        let { rankPropFactors, rankMatchFactors, graphs } = dataset
         return (<div
             className = "Settings box"
             style = {
@@ -35,7 +35,7 @@ class Settings extends React.PureComponent {
                 >
                     <i className='fas fa-window-close' />
                 </span>
-                <h2>Prop level</h2>
+                <h2>Prop level ranking factors</h2>
                 {
                     Object.keys(rankPropFactors).map((key) => 
                         <div className = "field" key = { `fact${key}` }>
@@ -51,7 +51,7 @@ class Settings extends React.PureComponent {
                         </div>
                     )
                 }
-                <h2>Match level</h2>
+                <h2>Match level ranking factors</h2>
                 {
                     Object.keys(rankMatchFactors).map((key) => 
                         <div className = "field" key = { `fact${key}` }>

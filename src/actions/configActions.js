@@ -8,3 +8,11 @@ export const saveFactor = (dispatch) => (group, name, value) => {
         value
     })
 }
+
+export const saveGraphs = (dispatch) => (graphs) => {
+    console.log(graphs)
+    dispatch({
+        type: types.SAVE_GRAPHS,
+        graphs
+    })
+}

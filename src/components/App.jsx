@@ -156,7 +156,7 @@ class App extends React.PureComponent {
             let zone = (selections.some(s => s.zone === 'main')) ? 'main' : 'aside'
             let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
             let config = getSelectedView(activeConfigs)
-            if (config.entrypoint && selections.length > 0 && selections.length < 40) {
+            if (selections.length > 0) {
                 let selectedConfig = getSelectedMatch(config, zone)
                 console.log(activeConfigs, config, selectedConfig)
                 let constraints

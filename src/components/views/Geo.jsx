@@ -183,7 +183,7 @@ class Geo extends React.Component {
             this.customState.view.signal('modifier', nextProps.display.modifierPressed).run()
         }     
         if (selectionChanged) {
-            console.log(nextProps.selections.some(s => s.zone !== nextProps.zone), nextProps.selections.length)
+            // console.log(nextProps.selections.some(s => s.zone !== nextProps.zone), nextProps.selections.length)
             if (nextProps.selections.some(s => s.zone !== nextProps.zone)) {
                 this.customState.view.signal('otherZoneSelected', true)
                 this.customState.view.signal('zoneSelected', false)

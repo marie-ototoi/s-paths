@@ -103,6 +103,12 @@ const dataset = (state = initialState, action) => {
         newState = { ...state } 
         newState[action.group][action.name] = action.value
         return newState
+    case types.SAVE_GRAPHS:
+        console.log('changed', action.graphs)
+        return {
+            ...state,
+            graphs: action.graphs
+        } 
     case types.SET_DATA:
         return {
             ...state

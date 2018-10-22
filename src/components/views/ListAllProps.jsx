@@ -249,8 +249,8 @@ class ListAllProps extends React.Component {
                             "x": {"field": "x", "offset": 6},
                             "yc": {"field": "y"},
                             "fillOpacity": [
-                                {"test": "datum.id != 0 && length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},
-                                {"test": "datum.id == 0", "value": 0},
+                                {"test": "datum.id != 1 && length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},
+                                {"test": "datum.id == 1", "value": 0},
                                 {"value": 0.1}
                             ],
                             "zindex": [
@@ -275,14 +275,17 @@ class ListAllProps extends React.Component {
                             "y": {"field": "y"},
                             "dx": {"signal": "(datum.id == 1 ? -1 : 1) * 6"},
                             "align": {"signal": "datum.id == 1 ? 'right' : 'left'"},
-                            "opacity": {"signal": "labels ? 1 : 0"},
+                            "opacity": [
+                                {"test": "(length(parents) > 0 && indexof(parents, datum.id) >= 0) || datum.children == 0", "value": 1},
+                                {"value": 0}
+                            ],
                             "fill": [
                                 {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": "#333"},
-                                {"test": "length(parents) == 0 && (datum.children == 0 || datum.id == 1)", "value": "#666"},
+                                {"test": "datum.id == 1", "value": "#666"},
                                 {"value": "#ccc"}
                             ],
                             "zindex": [
-                                {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},
+                                {"test": "(length(parents) > 0 && indexof(parents, datum.id) >= 0)", "value": 1},
                                 {"value": 0}
                             ]
                         }
@@ -296,12 +299,11 @@ class ListAllProps extends React.Component {
                         "update": {
                             "x2": {"signal": "datum.target.x - 6"},
                             "yc": {"signal": "datum.target.y"},
-                            "width": {"signal": "datum.target.pathcharlength * 5.1"},
+                            "width": {"signal": "datum.target.pathcharlength * 5.2"},
                             "height": {"value": 15},
                             "fill": {"value": "#fff"},
                             "fillOpacity": [
                                 {"test": "length(parents) > 0 && indexof(parents, datum.source.id) >= 0 && indexof(parents, datum.target.id) >= 0", "value": 1},
-                                {"test": "datum.id == 0", "value": 0},
                                 {"value": 0.1}
                             ],
                             "zindex": [
@@ -321,11 +323,14 @@ class ListAllProps extends React.Component {
                             "y": {"signal": "datum.target.y"},
                             "text": {"signal": "datum.target.path"},
                             "align": {"value": "right"},
-                            "fill": {"value": "#4b18a1"},
+                            "fill": [
+                                {"test": "length(parents) > 0  && indexof(parents, datum.source.id) >= 0 && indexof(parents, datum.target.id) >= 0", "value": "#333"},
+                                {"test": "datum.id == 1", "value": "#666"},
+                                {"value": "#ccc"}
+                            ],
                             "baseline": {"value": "middle"},
                             "fillOpacity": [
-                                {"test": "length(parents) > 0 && indexof(parents, datum.source.id) >= 0 && indexof(parents, datum.target.id)  >= 0", "value": 1},
-                                {"value": 0}
+                                {"value": 1}
                             ],
                             "zindex": [
                                 {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},

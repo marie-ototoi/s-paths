@@ -4,11 +4,12 @@ import { connect } from 'react-redux'
 
 import { analyseResources, loadStats } from '../../actions/dataActions'
 import { showStats } from '../../actions/displayActions'
+import { saveGraphs } from '../../actions/configActions'
 
 class Stats extends React.PureComponent {
     constructor (props) {
         super(props)
-        this.state = {}
+        this.state = { graphs: props.dataset.graphs.join(', ') }
     }
     render () {
         const { dataset, dimensions, zone } = this.props
@@ -32,6 +33,24 @@ class Stats extends React.PureComponent {
                 >
                     <i className='fas fa-window-close' />
                 </span>
+                <h2>Graphs</h2>
+                <div className = "field">
+                    <label className = "label">Graphs
+                        <input
+                            value={this.state.graphs}
+                            onChange={e => this.setState({ graphs: e.target.value })}
+                        />
+                    </label>
+                </div>
+                <button
+                    onClick = { e => {
+                        //console.log(this.props.dataset)
+                        let graphs = this.state.graphs.split(",").map(g => g.trim())
+                        this.props.saveGraphs(graphs)
+                    } }
+                >
+                    Save graphs
+                </button>
                 { dataset.resources.lenght === 0 &&
                 <button
                     onClick = { e => {
@@ -73,6 +92,7 @@ Stats.propTypes = {
     zone: PropTypes.string,
     analyseResources: PropTypes.func,
     loadStats: PropTypes.func,
+    saveGraphs: PropTypes.func,
     showStats: PropTypes.func
 }
 
@@ -90,7 +110,8 @@ function mapDispatchToProps (dispatch) {
     return {
         analyseResources: analyseResources(dispatch),
         loadStats: loadStats(dispatch),
-        showStats: showStats(dispatch)
+        showStats: showStats(dispatch),
+        saveGraphs: saveGraphs(dispatch)
     }
 }
 

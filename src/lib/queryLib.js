@@ -406,7 +406,7 @@ export const makeDetailQuery = (entrypoint, configZone, zone, options) => {
 WHERE {
 ${constraints}
 ${defList}
-} ${groupList} ${orderList}`
+} ${groupList} ${orderList} LIMIT 10`
 }
 
 // to do : take constraints into account
