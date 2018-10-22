@@ -1,7 +1,10 @@
 import types from '../constants/ActionTypes'
 
-export const saveFactors = (dispatch) => () => {
+export const saveFactor = (dispatch) => (group, name, value) => {
     dispatch({
-        type: types.SAVE_RANKFACTORS
+        type: types.SAVE_RANKFACTOR,
+        group,
+        name,
+        value
     })
 }

@@ -4,6 +4,7 @@ import { connect } from 'react-redux'
 
 import { analyseResources, loadStats } from '../../actions/dataActions'
 import { showSettings } from '../../actions/displayActions'
+import { saveFactor } from '../../actions/configActions'
 
 class Settings extends React.PureComponent {
     constructor (props) {
@@ -13,6 +14,7 @@ class Settings extends React.PureComponent {
     render () {
         const { dataset, dimensions, zone } = this.props
         const { x, y, width, height } = dimensions
+        let { rankPropFactors, rankMatchFactors } = dataset
         return (<div
             className = "Settings box"
             style = {
@@ -33,25 +35,37 @@ class Settings extends React.PureComponent {
                 >
                     <i className='fas fa-window-close' />
                 </span>
-                <div className = "field">
-                    <label className = "label"></label>
-                    <div className ="control">
+                {
+                    Object.keys(rankPropFactors).map((key) => 
+                        <div className = "field" key = { `fact${key}` }>
+                            <label className = "label">{ key }
+                                <input value={rankPropFactors[key]}
+                                    name ={key}
+                                    onChange = {(e) => {
+                                        saveFactor('rankPropFactors', key, e.target.value)
+                                        console.log(e, key, e.target.value)
+                                    }}
+                                />
+                            </label>
+                        </div>
+                    )
+                }
+                {
+                    Object.keys(rankMatchFactors).map((key) => 
+                        <div className = "field" key = { `fact${key}` }>
+                            <label className = "label">{ key }
+                                <input value={rankMatchFactors[key]}
+                                    name ={key}
+                                    onChange = {(e) => {
+                                        this.props.saveFactor('rankMatchFactors', key, e.target.value)
+                                        console.log(e, key, e.target.value)
+                                    }}
+                                />
+                            </label>
+                        </div>
+                    )
+                }
                         
-                    </div>
-                </div>
-                <div className = "field">
-                    <label className = "label"></label>
-                    <div className ="control">
-                        
-                    </div>
-                </div>
-
-
-                <button
-                    onClick = { e => {
-                        //console.log(this.props.dataset)
-                    } }
-                >Save</button>         
             </div>
         </div>)
     }
@@ -65,7 +79,8 @@ Settings.propTypes = {
     zone: PropTypes.string,
     analyseResources: PropTypes.func,
     loadStats: PropTypes.func,
-    showSettings: PropTypes.func
+    showSettings: PropTypes.func,
+    saveFactor: PropTypes.func
 }
 
 function mapStateToProps (state) {
@@ -82,6 +97,7 @@ function mapDispatchToProps (dispatch) {
     return {
         analyseResources: analyseResources(dispatch),
         loadStats: loadStats(dispatch),
+        saveFactor: saveFactor(dispatch),
         showSettings: showSettings(dispatch)
     }
 }

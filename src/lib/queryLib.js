@@ -123,7 +123,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
 }
 
 export const getData = (endpoint, query, prefixes) => {
-    console.log(query)
+    //console.log(query)
     const client = new SparqlClient(endpoint, {
         requestDefaults: {
             headers: {

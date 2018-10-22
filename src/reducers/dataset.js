@@ -18,9 +18,9 @@ const initialState = {
         coverage: 8
     },
     rankMatchFactors: {
-        view: 1,
+        view: 4,
         propsNumber: 1,
-        propsAverage: 1
+        propsAverage: 3
     },
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',
@@ -71,6 +71,7 @@ const initialState = {
 }
 
 const dataset = (state = initialState, action) => {
+    let newState
     switch (action.type) {
     case types.INIT:
         return {
@@ -98,6 +99,10 @@ const dataset = (state = initialState, action) => {
             constraints: action.constraints || state.constraints,
             resourceGraph: action.resourceGraph || state.resourceGraph
         }
+    case types.SAVE_RANKFACTOR:
+        newState = { ...state } 
+        newState[action.group][action.name] = action.value
+        return newState
     case types.SET_DATA:
         return {
             ...state
