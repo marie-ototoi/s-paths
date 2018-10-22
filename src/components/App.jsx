@@ -170,7 +170,7 @@ class App extends React.PureComponent {
     }
     handleKeyUp (event) {
         // console.log('up', event.which)
-        if (event.which === 91 || event.which === 17) {
+        if (event.which === 16) {
             this.props.setModifier(false)
         }
     }

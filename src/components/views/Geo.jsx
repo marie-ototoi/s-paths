@@ -62,11 +62,12 @@ class Geo extends React.Component {
         }
     }
     handleNewView(args) {
+        console.log(args._runtime, args.scenegraph('start'))
         this.customState = {...this.customState, view: args}
         window.setTimeout(() => this.props.handleTransition(this.props, this.getElementsForTransition()), 500)
     }
     handleZoneSelected(...args) {
-        // console.log('coucou', ...args)
+        console.log('coucou', ...args)
     }
     handleTooltip(...args) {
         
@@ -86,7 +87,7 @@ class Geo extends React.Component {
     render () {
         const { dimensions, display, role, step } = this.props
         return (<div
-            className = { `Geo ${this.customState.elementName} role_${role}` } >
+            className = { `Geo ${this.customState.elementName} role_${role}` } tabIndex = "1">
             { step !== 'changing' &&
             <div
                 style = {{ 
@@ -104,6 +105,7 @@ class Geo extends React.Component {
                 >{this.state.label}</p>
                 { this.customState.spec &&
                     <Vega
+                        onKeyDown = { (e) => console.log('salut', e) }
                         spec = { this.customState.spec }
                         onSignalEndZone = { this.handleSelect }
                         onSignalZoneSelected  = { this.handleZoneSelected }

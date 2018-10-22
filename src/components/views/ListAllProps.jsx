@@ -31,7 +31,7 @@ class ListAllProps extends React.Component {
         //
     }
     handleNewView(args) {
-        console.log(args._runtime, args.scenegraph('test'))
+        // console.log(args._runtime, args.scenegraph('test'))
         this.customState = {...this.customState, view: args}
         window.setTimeout(() => this.props.handleTransition(this.props, this.getElementsForTransition()), 500)
     }
@@ -44,9 +44,9 @@ class ListAllProps extends React.Component {
     prepareData (nextProps) {
         const { data, dataset, display, dimensions, selections, zone } = nextProps
         // prepare the data for display
-        console.log(data)
+        // console.log(data)
         // Save to reuse in render
-        console.log(prepareSingleData(data, dataset))
+        // console.log(prepareSingleData(data, dataset))
         //prepareSingleData(data, dataset)
         const datatree = [{
             "name": "tree",
@@ -337,7 +337,7 @@ class ListAllProps extends React.Component {
                 ...defaultSpec.marks
             ]
         }
-        console.log(spec)
+        // console.log(spec)
         // "pointRadius": {"expr": "scale('size', exp(datum.properties.mag))"}
         //
         // Save to reuse in render

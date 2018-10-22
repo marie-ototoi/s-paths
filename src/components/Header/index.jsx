@@ -43,6 +43,12 @@ class Header extends React.Component {
         }
         return null
     }
+    componentDidMount () {
+        this.refHeader.focus()
+    }
+    componentDidUpdate () {
+        this.refHeader.focus()
+    }
     prepareData (nextProps) {
         // TODO: remove data duplication
         let displayedResource = nextProps.dataset.resources.find((resource) =>
@@ -196,7 +202,7 @@ class Header extends React.Component {
             let selectedLists = this.state.configsLists[this.state.selectedView]
             let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps))
             return (
-                <div className='Header'>
+                <div className='Header' ref = {(c) => { this.refHeader = c }} tabIndex = {1}>
                     <Line
                         label={'Type of entities'}
                         maxData={options[0].total}
@@ -233,14 +239,14 @@ class Header extends React.Component {
                                 {this.state.showConfig && (
                                     <span
                                         className='icon'
-                                        onClick={() => { this.props.showStats() }}
+                                        onClick={(e) => { this.props.showStats() }}
                                     >
                                         <i className='fas fa-wrench' />
                                     </span>
                                 )}                                
                                 <span
                                     className='icon'
-                                    onClick={() => { this.props.showSettings() }}
+                                    onClick={(e) => { this.props.showSettings() }}
                                 >
                                     <i className='fas fa-cogs' />
                                 </span>
