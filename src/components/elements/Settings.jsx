@@ -35,6 +35,7 @@ class Settings extends React.PureComponent {
                 >
                     <i className='fas fa-window-close' />
                 </span>
+                <h2>Prop level</h2>
                 {
                     Object.keys(rankPropFactors).map((key) => 
                         <div className = "field" key = { `fact${key}` }>
@@ -50,6 +51,7 @@ class Settings extends React.PureComponent {
                         </div>
                     )
                 }
+                <h2>Match level</h2>
                 {
                     Object.keys(rankMatchFactors).map((key) => 
                         <div className = "field" key = { `fact${key}` }>
