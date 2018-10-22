@@ -145,7 +145,7 @@ class App extends React.PureComponent {
     handleKeyDown (event) {
         // console.log('down', event.which)
         let { dataset, configs, selections } = this.props
-        console.log('eee', event.which, event.key, event.metaKey, event)
+        // console.log('eee', event.which, event.key, event.metaKey, event)
         if (event.which === 13) {
             this['refHeader'].getWrappedInstance().handleKeyDown(event)
         }

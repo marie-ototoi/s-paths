@@ -88,7 +88,7 @@ class Header extends React.Component {
     }
     handleKeyDown (event) {
         const { dataset, selections } = this.props
-        console.log('eee', event.which, event)
+        // console.log('eee', event.which, event)
         if (event.which === 13) {
             if (selections.length > 0 || this.state.keyword.length > 3) {
                 this.displaySelection()

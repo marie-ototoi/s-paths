@@ -15,6 +15,7 @@ import { deduplicate } from '../../lib/dataLib'
 class Images extends React.Component {
     constructor (props) {
         super(props)
+        this.getElementsForTransition = this.getElementsForTransition.bind(this)
         this.selectEnsemble = this.selectEnsemble.bind(this)
         this.customState = {
             elementName: `refListProp_${props.zone}`
@@ -104,11 +105,36 @@ class Images extends React.Component {
             }
         </div>)
     }
+    getElementsForTransition () {
+        const { zone } = this.props
+        return this.customState.uniqueData.map((el, index) => {
+            return { 
+                zone: {
+                    x1: 0,
+                    y1: 0,
+                    x2: 10,
+                    y2: 10,
+                    width: 10,
+                    height: 10
+                },
+                selector:`img_${zone}_${index}`,
+                index: index,
+                query: {
+                    type: 'uri',
+                    value: el.entrypoint.value
+                },
+                color: "#666",
+                opacity: el.opacity,
+                shape: 'rectangle',
+                rotation: 0
+            }
+        })
+    }
     componentDidMount () {
-        this.props.handleTransition(this.props, [])
+        this.props.handleTransition(this.props, this.getElementsForTransition())
     }
     componentDidUpdate () {
-        this.props.handleTransition(this.props, [])
+        this.props.handleTransition(this.props, this.getElementsForTransition())
     }
 }
 
