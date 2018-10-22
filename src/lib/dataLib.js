@@ -135,6 +135,7 @@ export const getResults = (data, zone, status) => {
 }
 
 export const prepareSingleData = (data, dataset) => {
+    console.log(data)
     let { maxLevel, prefixes } = dataset
     let shortname = usePrefix(data[0].entrypoint.value, prefixes)
     let shortpath

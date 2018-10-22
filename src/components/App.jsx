@@ -149,8 +149,8 @@ class App extends React.PureComponent {
         if (event.which === 13) {
             this['refHeader'].getWrappedInstance().handleKeyDown(event)
         }
-        if (event.which === 16) {
-            this.props.setModifier(true)
+        if (event.which === 16 || event.which === 32) {
+            this.props.setModifier(event.which)
         }
         if (event.which === 73 && (event.metaKey || event.ctrlKey)) {
             let zone = (selections.some(s => s.zone === 'main')) ? 'main' : 'aside'
@@ -170,8 +170,8 @@ class App extends React.PureComponent {
     }
     handleKeyUp (event) {
         // console.log('up', event.which)
-        if (event.which === 16) {
-            this.props.setModifier(false)
+        if (event.which === 16 || event.which === 32) {
+            this.props.setModifier(null)
         }
     }
     render () {

@@ -123,7 +123,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
 }
 
 export const getData = (endpoint, query, prefixes) => {
-    //console.log(query)
+    // console.log(query)
     const client = new SparqlClient(endpoint, {
         requestDefaults: {
             headers: {
@@ -476,11 +476,11 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
             }))
         })
     }
-    console.log(`SELECT DISTINCT ${propList}${graph}
+    /*console.log(`SELECT DISTINCT ${propList}${graph}
     WHERE {
     ${constraints}
     ${defList}
-    } ${groupList} ${orderList}`)
+    } ${groupList} ${orderList}`)*/
     return `SELECT ${propList}${graph}
 WHERE {
 ${constraints}

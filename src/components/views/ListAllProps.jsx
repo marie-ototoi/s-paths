@@ -182,12 +182,12 @@ class ListAllProps extends React.Component {
                     "name": "parents",
                     "value": [],
                     "on": [
-                        {"events": "@nodes:mouseover", "update": "datum.parents"},
-                        {"events": "@rectnodes:mouseover", "update": "datum.parents"},
-                        {"events": "@textnodes:mouseover", "update": "datum.parents"},
-                        {"events": "@nodes:mouseout",  "update": "[]"},
-                        {"events": "@rectnodes:mouseout",  "update": "[]"},
-                        {"events": "@textnodes:mouseout",  "update": "[]"}
+                        {"events": "@nodes:mouseover{200}", "update": "datum.parents"},
+                        {"events": "@rectnodes:mouseover{200}", "update": "datum.parents"},
+                        {"events": "@textnodes:mouseover{200}", "update": "datum.parents"},
+                        {"events": "@nodes:mouseout{200}",  "update": "[]"},
+                        {"events": "@rectnodes:mouseout{200}",  "update": "[]"},
+                        {"events": "@textnodes:mouseout{200}",  "update": "[]"}
                     ]
                 }
             ],

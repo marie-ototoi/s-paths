@@ -36,6 +36,10 @@ export default {
                     "update": "null"
                 }
             ]
+        },
+        {
+            "name": "modifier",
+            "value": false
         }
     ],
     "data": [],
@@ -55,7 +59,7 @@ export default {
                     "x2": {"signal": "zone ? zone[1][0] : 0"},
                     "y": {"signal": "zone ? zone[0][1] : 0"},
                     "y2": {"signal": "zone ? zone[1][1] : 0"},
-                    "fillOpacity": {"signal": "zone ? 0.2 : 0"}
+                    "fillOpacity": {"signal": "zone && !modifier ? 0.2 : 0"}
                 }
             }
         },
@@ -68,7 +72,7 @@ export default {
                     "fill": {"value": "#666"}
                 },
                 "update": {
-                    "fillOpacity": {"signal": "zone ? 1 : 0"},
+                    "fillOpacity": {"signal": "zone && !modifier ? 1 : 0"},
                     "x": {"signal": "zone ? zone[0][0] : 0"},
                     "y": {"signal": "zone ? zone[0][1] : 0"},
                     "y2": {"signal": "zone ? zone[1][1] : 0"},
@@ -85,7 +89,7 @@ export default {
                     "fill": {"value": "#666"}
                 },
                 "update": {
-                    "fillOpacity": {"signal": "zone ? 1 : 0"},
+                    "fillOpacity": {"signal": "zone && !modifier ? 1 : 0"},
                     "x": {"signal": "zone ? zone[1][0] : 0"},
                     "y": {"signal": "zone ? zone[0][1] : 0"},
                     "y2": {"signal": "zone ? zone[1][1] : 0"},
@@ -102,7 +106,7 @@ export default {
                     "fill": {"value": "#666"}
                 },
                 "update": {
-                    "fillOpacity": {"signal": "zone ? 1 : 0"},
+                    "fillOpacity": {"signal": "zone && !modifier ? 1 : 0"},
                     "x": {"signal": "zone ? zone[0][0] : 0"},
                     "x2": {"signal": "zone ? zone[1][0] : 0"},
                     "y": {"signal": "zone ? zone[0][1] : 0"},
@@ -119,7 +123,7 @@ export default {
                     "fill": {"value": "#666"}
                 },
                 "update": {
-                    "fillOpacity": {"signal": "zone ? 1 : 0"},
+                    "fillOpacity": {"signal": "zone && !modifier ? 1 : 0"},
                     "x": {"signal": "zone ? zone[0][0] : 0"},
                     "x2": {"signal": "zone ? zone[1][0] : 0"},
                     "y": {"signal": "zone ? zone[1][1] : 0"},

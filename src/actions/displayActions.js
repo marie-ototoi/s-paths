@@ -18,10 +18,10 @@ export const hideDetail = (dispatch) => (zone) => {
     })
 }
 
-export const setModifier = (dispatch) => (on) => {
+export const setModifier = (dispatch) => (modifier) => {
     dispatch({
         type: types.SET_MODIFIER,
-        modifierPressed: on
+        modifierPressed: modifier
     })
 }
 

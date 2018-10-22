@@ -9,6 +9,7 @@ export const getConfigs = (configs, zone) => {
     return configs.views
 }
 export const getSelectedView = (configs) => {
+    // console.log('OOOOO', configs)
     return configs.views ? configs.views.filter(v => v.selected)[0] : undefined
 }
 export const getViewByName = (views, name) => {
@@ -173,19 +174,23 @@ export const defineConfigs = (views, stats, dataset) => {
     const configSetUp = views.map(view => {
         let propList = []
         if (view.entrypoint) {
-            if (view.entrypoint.min > stats.selectionInstances || view.entrypoint.max < stats.selectionInstances) return { matches: [] }
+            if (view.entrypoint.min > stats.selectionInstances || view.entrypoint.max < stats.selectionInstances) return { selectedMatch: undefined }
         }
         if (stats.selectionInstances === 1) {
-            let propSet = stats.statements.map(prop => {
-                return {
-                    ...prop,
-                    score: scoreProp(prop, view.constraints[0][0], rankPropFactors)
-                }
-            }).sort((a, b) => {
-                return b.score - a.score
-            })
-            // console.log('OKKKKK', propSet)
-            propList.push(propSet)
+            if (view.id === 'ListAllProps') {
+                let propSet = stats.statements.map(prop => {
+                    return {
+                        ...prop,
+                        score: scoreProp(prop, view.constraints[0][0], rankPropFactors)
+                    }
+                }).sort((a, b) => {
+                    return b.score - a.score
+                })
+                // console.log('OKKKKK', propSet)
+                propList.push(propSet)
+            } else {
+                return { selectedMatch: undefined }
+            }
         } else {
             // make a list of all possible properties for each constrained prop zone
             view.constraints.forEach(constraintSet => {

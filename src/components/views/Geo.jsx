@@ -36,7 +36,7 @@ class Geo extends React.Component {
         const { display, selections, selectElements, zone } = this.props
         if (args[1]) {
             let selected = this.customState.view.scenegraph().root.source.value[0].items[2].items.filter(it =>it.selected)
-            console.log(this.customState.view.scenegraph().root.source.value[0].items[2].items.filter(it =>it.selected))
+            // console.log(this.customState.view.scenegraph().root.source.value[0].items[2].items.filter(it =>it.selected))
             if (selected.length > 0) {
                 selected = selected.reduce((acc, cur) => {
                     let findSinglePoints =  this.customState.view.scenegraph().root.source.value[0].items[1].items.filter((it) => {
@@ -62,12 +62,12 @@ class Geo extends React.Component {
         }
     }
     handleNewView(args) {
-        console.log(args._runtime, args.scenegraph('start'))
+        // console.log(args._runtime, args.scenegraph('start'))
         this.customState = {...this.customState, view: args}
         window.setTimeout(() => this.props.handleTransition(this.props, this.getElementsForTransition()), 500)
     }
     handleZoneSelected(...args) {
-        console.log('coucou', ...args)
+        // console.log('coucou', ...args)
     }
     handleTooltip(...args) {
         
@@ -105,7 +105,6 @@ class Geo extends React.Component {
                 >{this.state.label}</p>
                 { this.customState.spec &&
                     <Vega
-                        onKeyDown = { (e) => console.log('salut', e) }
                         spec = { this.customState.spec }
                         onSignalEndZone = { this.handleSelect }
                         onSignalZoneSelected  = { this.handleZoneSelected }
@@ -179,12 +178,17 @@ class Geo extends React.Component {
         if (dimensionsChanged) {
             this.customState.view.signal('width', nextProps.dimensions.useful_width).run()
             this.customState.view.signal('height', nextProps.dimensions.useful_height).run()
-        }        
+        }   
+        if (nextProps.display.modifierPressed !== this.props.display.modifierPressed) {
+            this.customState.view.signal('modifier', nextProps.display.modifierPressed).run()
+        }     
         if (selectionChanged) {
+            console.log(nextProps.selections.some(s => s.zone !== nextProps.zone), nextProps.selections.length)
             if (nextProps.selections.some(s => s.zone !== nextProps.zone)) {
                 this.customState.view.signal('otherZoneSelected', true)
                 this.customState.view.signal('zoneSelected', false)
             } else {
+                if (nextProps.selections.length > 0) this.customState.view.signal('zoneSelected', true)
                 this.customState.view.signal('otherZoneSelected', false)
             }
         }
@@ -282,15 +286,15 @@ class Geo extends React.Component {
                 },
                 {
                     "name": "otherZoneSelected",
-                    "value": selections.some(s => s.zone !== zone)
+                    "value": false
                 },
                 {
                     "name": "zoneSelected",
-                    "value": selections.some(s => s.zone === zone),
+                    "value": false,
                     "on": [
                         {
                             "events": {"signal": "domainX"},
-                            "update": "domainX ? true : false"
+                            "update": "domainX && domainY ? true : false"
                         }
                     ]
                 },
@@ -300,7 +304,7 @@ class Geo extends React.Component {
                     "on": [
                         {
                             "events": {"signal": "zone"},
-                            "update": "zone ? [zone[0][0],zone[1][0]] : domainX"
+                            "update": "modifier !== 32 && zone ? [zone[0][0],zone[1][0]] : domainX"
                         }
                     ]
                 },
@@ -310,7 +314,7 @@ class Geo extends React.Component {
                     "on": [ 
                         {
                             "events": {"signal": "zone"},
-                            "update": "zone ? [zone[0][1],zone[1][1]] : domainY"
+                            "update": "modifier !== 32 && zone ? [zone[0][1],zone[1][1]] : domainY"
                         }
                     ]
                 },
@@ -334,7 +338,7 @@ class Geo extends React.Component {
                     "name": "angles",
                     "value": [0, 0],
                     "on": [{
-                        "events": "mousedow[event.shiftKey]",
+                        "events": "mousedown",
                         "update": "[rotateX, centerY]"
                     }]
                 },
@@ -342,22 +346,30 @@ class Geo extends React.Component {
                     "name": "cloned",
                     "value": null,
                     "on": [{
-                        "events": "mousedown[event.shiftKey]",
-                        "update": "copy('projection')"
+                        "events": {"signal": "modifier"},
+                        "update": "modifier === 32 ? copy('projection') : null"
+                    },
+                    {
+                        "events": "mousedown",
+                        "update": "modifier === 32 ? copy('projection') : null"
                     }]
                 },
                 {
                     "name": "start",
                     "value": null,
                     "on": [{
-                        "events": "mousedown[event.shiftKey]",
-                        "update": "invert(cloned, xy())"
+                        "events": {"signal": "modifier"},
+                        "update": "modifier === 32 ? invert(cloned, xy()) : null"
+                    },
+                    {
+                        "events": "mousedown",
+                        "update": "modifier === 32 ? invert(cloned, xy()) : null"
                     }]
                 },
                 {
                     "name": "drag", "value": null,
                     "on": [{
-                        "events": "[mousedown[event.shiftKey], window:mouseup] > window:mousemove",
+                        "events": "[mousedown, window:mouseup] > window:mousemove{100}",
                         "update": "invert(cloned, xy())"
                     }]
                 },
@@ -416,8 +428,9 @@ class Geo extends React.Component {
                     "name": "projection",
                     "type": "mercator",
                     "scale": {"signal": "scaleZoom"},
-                    "center": [0, 0],
-                    "translate": [{"signal": "width / 2"}, {"signal": "height / 2"}]
+                    "translate": [{"signal": "width / 2"}, {"signal": "height / 2"}],
+                    "rotate": [{"signal": "rotateX"}, 0, 0],
+                    "center": [0, {"signal": "centerY"}]
                 }
             ],
             "marks": [
@@ -467,8 +480,8 @@ class Geo extends React.Component {
                             "medianlong2": {"field": "medianlong"},
                             "medianlat2": {"field": "medianlat"},
                             "selected": [
-                                {"test": "otherZoneSelected || (zoneSelected && (!inrange(item.bounds.x1, domainX) || !inrange(item.bounds.y1, domainY)))", "value": false},
-                                {"value": true}
+                                {"test": "(zoneSelected && (inrange(item.bounds.x1, domainX) && inrange(item.bounds.y1, domainY)))", "value": true},
+                                {"value": false}
                             ]
                         }
                     },
