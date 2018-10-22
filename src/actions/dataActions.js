@@ -125,8 +125,7 @@ const checkFirstValidConfigs = (configs, stats, dataset, previousConfig) => {
                     }
                 })
             }
-            let newConfigs = defineConfigs(views, newStats, dataset)
-
+            let newConfigs = activateDefaultConfigs(defineConfigs(views, newStats, dataset))
             return [newConfigs, newStats]
             // if both main and aside send results
             // else start from new config keeping checked config if there is one and call recursive
@@ -168,8 +167,9 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                 }
             }) 
                 .then(([newConfigs, newStats]) => {
-                    // console.log('then ? ',newConfigs, newStats)
+                    
                     const configMain = getSelectedView(newConfigs, 'main')
+                    console.log('then ? ',newConfigs, newConfigs.views, configMain, newStats)
                     const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, singleURI, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
                     const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
                     let queryTransitionMain = makeTransitionQuery(configMain, dataset, previousConfigMain, previousOptions, 'main')
