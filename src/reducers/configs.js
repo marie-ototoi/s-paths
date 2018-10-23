@@ -15,7 +15,7 @@ const configs = (state = initialConfig, action) => {
         status = (state.views[0]) ? 'transition' : 'active'
         return {
             ...state,
-            views: action.mainConfig,
+            views: action.mainConfig || state.views,
             status,
             entrypoint: action.entrypoint,
             stats: action.stats

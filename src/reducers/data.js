@@ -17,6 +17,7 @@ const data = (state = initialState, action) => {
     case types.SET_CONFIGS:
     case types.SET_STATS:
     case types.SET_RESOURCES:
+        if (!state.statements) return state
         // if data are already set, make a transition
         status = (state.statements.results) ? 'transition' : 'active'
         // console.log('ok on a recu les data', action.status, action)

@@ -175,7 +175,7 @@ class App extends React.PureComponent {
         }
     }
     render () {
-        const { configs, data, display, selections } = this.props
+        const { configs, data, dataset, display, selections } = this.props
         // debug logs
         // console.log('display', display)
         // console.log('views', this.props.views)
@@ -196,7 +196,7 @@ class App extends React.PureComponent {
         }
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')
-        const mainConfig = getSelectedView(getCurrentConfigs(configs, 'main', 'active'))
+        let mainConfig = (dataset.resources.length === 0) ? undefined : getSelectedView(getCurrentConfigs(configs, 'main', 'active'))
         // console.log(getCurrentConfigs(configs, 'transition'))
         const mainTransitionConfig = getSelectedView(getCurrentConfigs(configs, 'main', 'transition'))
         const MainComponent = mainConfig ? componentIds[mainConfig.id] : ''

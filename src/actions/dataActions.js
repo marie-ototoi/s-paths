@@ -226,54 +226,69 @@ export const getGraphs = (dispatch) => (dataset) => {
         })
 }
 
+
 export const loadResources = (dispatch) => (dataset, views) => {
-    let { endpoint, prefixes } = dataset
+    let { endpoint, graphs, prefixes } = dataset
+    console.log('load resources', graphs)
     let totalInstances
-    getResources(dataset)
+    return getResources(dataset)
         .then(resources => {
-            dataset.entrypoint = resources[0].type
-            dataset.totalInstances = resources[0].total
-            
-            getStats({ ...dataset, stats: [], resources })
-                .then(stats => {
-                    prefixes = stats.options.prefixes
-                    // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
-                    // for each views, checks which properties ou sets of properties could match and evaluate
-                    let configs = activateDefaultConfigs(defineConfigs(views, stats, dataset))
-                    //
-                    const configMain = getSelectedView(configs, 'main')
-                    if (configMain) {
-                        const queryMain = makeQuery(dataset.entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
-                        
-                        const queryMainUnique = makeQuery(dataset.entrypoint, configMain, 'main', { ...dataset, unique: true })
+            if(resources.length > 0) { 
+                dataset.entrypoint = resources[0].type
+                dataset.totalInstances = resources[0].total
+                
+                return getStats({ ...dataset, stats: [], resources })
+                    .then(stats => {
+                        prefixes = stats.options.prefixes
+                        // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
+                        // for each views, checks which properties ou sets of properties could match and evaluate
+                        let configs = activateDefaultConfigs(defineConfigs(views, stats, dataset))
                         //
-                        Promise.all([
-                            getData(endpoint, queryMain, prefixes),
-                            getData(endpoint, queryMainUnique, prefixes)
-                        ])
-                            .then(([dataMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
-                                dispatch({
-                                    type: types.SET_RESOURCES,
-                                    resources,
-                                    stats,
-                                    entrypoint: dataset.entrypoint,
-                                    totalInstances,
-                                    prefixes: stats.options.prefixes,
-                                    labels: stats.options.labels,
-                                    constraints: '',
-                                    mainConfig: configs.views,
-                                    main: { ...dataMain },
-                                    mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                        const configMain = getSelectedView(configs, 'main')
+                        if (configMain) {
+                            const queryMain = makeQuery(dataset.entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
+                            
+                            const queryMainUnique = makeQuery(dataset.entrypoint, configMain, 'main', { ...dataset, unique: true })
+                            //
+                            return Promise.all([
+                                getData(endpoint, queryMain, prefixes),
+                                getData(endpoint, queryMainUnique, prefixes)
+                            ])
+                                .then(([dataMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
+                                    dispatch({
+                                        type: types.SET_RESOURCES,
+                                        resources,
+                                        stats,
+                                        entrypoint: dataset.entrypoint,
+                                        graphs: dataset.graphs,
+                                        totalInstances,
+                                        prefixes: stats.options.prefixes,
+                                        labels: stats.options.labels,
+                                        constraints: '',
+                                        mainConfig: configs.views,
+                                        main: { ...dataMain },
+                                        mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                                    })
+                                    return resources
                                 })
+                        } else {
+                            dispatch({
+                                type: types.SET_RESOURCES,
+                                resources,
+                                graphs: dataset.graphs
                             })
-                    } else {
-                        dispatch({
-                            type: types.SET_RESOURCES,
-                            resources
-                        })
-                    } 
+                            return resources
+                        } 
+                    })
+            } else {
+                console.log('no resources found')
+                dispatch({
+                    type: types.SET_RESOURCES,
+                    resources,
+                    graphs: dataset.graphs
                 })
-    
+                return resources
+            }    
         })
         .catch(error => {
             console.error('Error getting data', error)

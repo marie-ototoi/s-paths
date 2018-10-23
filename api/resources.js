@@ -24,30 +24,9 @@ router.post('/', (req, res) => {
 
 const getResources = async (options) => {
     // add default options when not set
-    let { graphs, endpoint, localEndpoint, toAnalyse } = options
-    if (Array.isArray(toAnalyse) && toAnalyse.length > 0) {
-        for(let i = 0; i < toAnalyse.length; i ++) {
-            queryLib.getData(localEndpoint, `DROP SILENT GRAPH <${toAnalyse[i]}>`, {})
-            console.log(`DROP SILENT GRAPH <${toAnalyse[i]}>`)
-            await new Promise((resolve, reject) => setTimeout(resolve, 100))
-            queryLib.getData(localEndpoint, `CREATE GRAPH <${toAnalyse[i]}>`, {})
-            console.log(`CREATE GRAPH <${toAnalyse[i]}>`)
-            await new Promise((resolve, reject) => setTimeout(resolve, 100))
-            for(let j = 1; j < options.maxLevel; j ++) {
-                let query = queryLib.makeSubGraphQuery({
-                    ...options,
-                    entrypoint: toAnalyse[i]
-                }, j)
-                console.log(query)
-                queryLib.getData(localEndpoint, query, {})
-                await new Promise((resolve, reject) => setTimeout(resolve, 2000))
-            }
-            resourceModel.updateOne({ endpoint, graphs: { $all: graphs }, type: toAnalyse[i] }, { subgraph: true }, { upsert: true }).exec()
-            await new Promise((resolve, reject) => setTimeout(resolve, 5000))
-        }
-    }
+    let { graphs, endpoint, localEndpoint } = options
 
-    let resources = await resourceModel.find({ endpoint: endpoint, graphs: { $all: graphs } }).sort('-total').exec()
+    let resources = await resourceModel.find({ endpoint: endpoint, graphs: { $all: graphs, $size: graphs.length } }).sort('-total').exec()
     console.log('GET RESOURCES', endpoint, graphs, resources)
     if (resources.length > 0) {
         resources = resources.map(resource => resource._doc)

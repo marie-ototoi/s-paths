@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { analyseResources, loadStats } from '../../actions/dataActions'
+import { analyseResources, loadResources, loadStats } from '../../actions/dataActions'
 import { showStats } from '../../actions/displayActions'
 import { saveGraphs } from '../../actions/configActions'
 
@@ -14,6 +14,7 @@ class Stats extends React.PureComponent {
     render () {
         const { dataset, dimensions, zone } = this.props
         const { x, y, width, height } = dimensions
+        console.log(dataset)
         return (<div
             className = "Stats box"
             style = {
@@ -46,16 +47,16 @@ class Stats extends React.PureComponent {
                     onClick = { e => {
                         //console.log(this.props.dataset)
                         let graphs = this.state.graphs.split(",").map(g => g.trim())
-                        this.props.saveGraphs(graphs)
+                        this.props.loadResources({...dataset, graphs}, this.props.views)
                     } }
                 >
                     Save graphs
                 </button>
-                { dataset.resources.lenght === 0 &&
+                { dataset.resources.length === 0 &&
                 <button
                     onClick = { e => {
                         //console.log(this.props.dataset)
-                        this.props.analyseResources({ ...this.props.dataset, forceUpdate: true }, [])
+                        this.props.analyseResources({ ...this.props.dataset, forceUpdate: true })
                     } }
                 >
                     Get Resources
@@ -93,7 +94,8 @@ Stats.propTypes = {
     analyseResources: PropTypes.func,
     loadStats: PropTypes.func,
     saveGraphs: PropTypes.func,
-    showStats: PropTypes.func
+    showStats: PropTypes.func,
+    loadResources: PropTypes.func
 }
 
 function mapStateToProps (state) {
@@ -110,6 +112,7 @@ function mapDispatchToProps (dispatch) {
     return {
         analyseResources: analyseResources(dispatch),
         loadStats: loadStats(dispatch),
+        loadResources: loadResources(dispatch),
         showStats: showStats(dispatch),
         saveGraphs: saveGraphs(dispatch)
     }

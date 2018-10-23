@@ -41,7 +41,7 @@ const defaultState = {
         aside_useful_height: initValue,
         aside_top_padding: initValue
     },
-    modifierPressed: false,
+    modifierPressed: null,
     selectedZone: {
         main: {
             x1: null,

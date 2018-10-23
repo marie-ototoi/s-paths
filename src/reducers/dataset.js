@@ -97,14 +97,14 @@ const dataset = (state = initialState, action) => {
             entrypoint: action.entrypoint,
             prefixes: action.prefixes || state.prefixes,
             constraints: action.constraints || state.constraints,
-            resourceGraph: action.resourceGraph || state.resourceGraph
+            resourceGraph: action.resourceGraph || state.resourceGraph,
+            graphs: action.graphs
         }
     case types.SAVE_RANKFACTOR:
         newState = { ...state } 
         newState[action.group][action.name] = action.value
         return newState
     case types.SAVE_GRAPHS:
-        console.log('changed', action.graphs)
         return {
             ...state,
             graphs: action.graphs
