@@ -222,6 +222,7 @@ class App extends React.PureComponent {
                     ref = {(c) => { this['refHeader'] = c }}
                     zone = "main"
                     config = { mainConfig }
+                    step = { this.state.main_step }
                 />
             }
             <svg

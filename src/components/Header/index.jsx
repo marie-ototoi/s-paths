@@ -116,12 +116,10 @@ class Header extends React.Component {
     }
     displayConfig () {
         const { config, configs, dataset, zone } = this.props
-        
         let selectedLists = this.state.configsLists[this.state.selectedView]
-        
         let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
-        // console.log(activeConfigs.views[this.state.selectedView].selectedMatch)
-        let selectedMatch = { properties: this.state.selectedProps && selectedLists ? this.state.selectedProps.map((prop, i) => selectedLists[i][prop]) : [] }
+        // console.log()
+        let selectedMatch = activeConfigs.views[this.state.selectedView].selectedMatch
         this.setState({
             propsAreLoading: true,
             errorSelection: ''
@@ -173,14 +171,14 @@ class Header extends React.Component {
             .catch((e) => this.setState({
                 selectionIsLoading: false,
                 keyword: '',
-                errorSelection: 'No results matching selection' + e
+                errorSelection: 'Unable to display results: ' + e
             }))
     }
     render () {
         if (this.state.configsLists) {
             // console.log(this.state.configsLists)
             const { configs, data, dataset, selections, zone } = this.props
-
+            console.log(this.props.step)
             // general
             const activeConfigs = getConfigs(getCurrentConfigs(configs, zone, 'active'), zone)
             let options = [
@@ -263,7 +261,7 @@ class Header extends React.Component {
                         />
                     </Line>
                     <Line
-                        label={'Selection'}
+                        label={'Filter'}
                         isLoading={this.state.selectionIsLoading}
                         onSubmit={this.displaySelection}
                         disable={!selectionEnabled}
@@ -284,10 +282,8 @@ class Header extends React.Component {
                         </div>
                         <div className='pointer-group'>
                             <p>
-                                <span className={`label-like ${andClass}`}>AND</span>
-                                &nbsp;&nbsp;
                                 <span className={`pointer is-size-7 ${pointerClass}`}>
-                                    pointer
+                                    selection
                                     <span className='icon'>
                                         <i className='fas fa-mouse-pointer' />
                                     </span>
@@ -313,6 +309,7 @@ class Header extends React.Component {
                                     selectedView,
                                     selectedProps: this.state.configsLists[selectedView].map((list, index) => {
                                         return list.reduce((acc, cur, propIndex) => {
+                                            console.log(selectedView, activeConfigs.views, cur.path, this.state.configsLists, activeConfigs.views[selectedView].selectedMatch, index)
                                             if (activeConfigs.views[selectedView].selectedMatch.properties[index].path === cur.path) acc = propIndex
                                             return acc
                                         }, 0)
@@ -359,6 +356,7 @@ class Header extends React.Component {
         selections: PropTypes.array,
         views: PropTypes.array,
         zone: PropTypes.string,
+        step: PropTypes.string,
         displayConfig: PropTypes.func,
         loadSelection: PropTypes.func,
         selectResource: PropTypes.func,
