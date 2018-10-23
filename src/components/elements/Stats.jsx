@@ -14,7 +14,7 @@ class Stats extends React.PureComponent {
     render () {
         const { dataset, dimensions, zone } = this.props
         const { x, y, width, height } = dimensions
-        console.log(dataset)
+        // console.log(dataset)
         return (<div
             className = "Stats box"
             style = {
