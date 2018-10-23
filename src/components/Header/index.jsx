@@ -258,6 +258,12 @@ class Header extends React.Component {
                             onChange={(selectedResource) => {
                                 this.setState({ selectedResource })
                             }}
+                            isDisabled={
+                                this.props.step !== 'active' || 
+                                this.state.selectionIsLoading ||
+                                this.state.propsAreLoading ||
+                                this.state.resourceIsLoading 
+                            }
                         />
                     </Line>
                     <Line
@@ -316,6 +322,12 @@ class Header extends React.Component {
                                     })
                                 })
                             }}
+                            isDisabled={
+                                this.props.step !== 'active'|| 
+                                this.state.selectionIsLoading ||
+                                this.state.propsAreLoading ||
+                                this.state.resourceIsLoading 
+                            }
                             options={activeConfigs.map((option, i) => ({ ...option, index: i }))}
                         />
                         { selectedLists && selectedLists.map((list, index) => (
@@ -333,6 +345,12 @@ class Header extends React.Component {
                                         this.setState({ selectedProps })
                                     }}
                                     options={selectedLists[index]}
+                                    isDisabled={
+                                        this.props.step !== 'active'|| 
+                                        this.state.selectionIsLoading ||
+                                        this.state.propsAreLoading ||
+                                        this.state.resourceIsLoading 
+                                    }
                                 />
                             </div>
                         ))}

@@ -42,12 +42,14 @@ class PropSelect extends React.Component {
                 getOptionValue={(option) => option['path']}
                 getOptionLabel={PropSelect.getOptionLabel}
                 onChange={this.props.onChange}
+                isDisabled={this.props.isDisabled}
             />
         )
     }
 
     static propTypes = {
         options: PropTypes.array.isRequired,
+        isDisabled: PropTypes.bool,
         onChange: PropTypes.func.isRequired,
         currentValue: PropTypes.number
     }

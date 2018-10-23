@@ -22,6 +22,7 @@ class ResourceSelect extends React.Component {
                     getOptionLabel={ResourceSelect.getOptionLabel}
                     onChange={this.props.onChange}
                     options={this.props.options}
+                    isDisabled={this.props.isDisabled}
                 />
             </div>
         )
@@ -35,6 +36,7 @@ class ResourceSelect extends React.Component {
             })
         ),
         selectedResource: PropTypes.object,
+        isDisabled: PropTypes.bool,
         onChange: PropTypes.func
     }
 }
