@@ -231,7 +231,7 @@ export const getGraphs = (dispatch) => (dataset) => {
 
 export const loadResources = (dispatch) => (dataset, views) => {
     let { endpoint, graphs, prefixes } = dataset
-    console.log('load resources', graphs)
+    // console.log('load resources', graphs)
     let totalInstances
     return getResources(dataset)
         .then(resources => {
