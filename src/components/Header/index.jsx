@@ -41,13 +41,15 @@ class Header extends React.Component {
             this.setState(newData)
             // return false
         }
+        if (prevState.keyword === this.state.keyword && 
+            prevState.selectedResource === this.state.selectedResource) this.refHeader.focus()
         return null
     }
     componentDidMount () {
         this.refHeader.focus()
     }
     componentDidUpdate () {
-        this.refHeader.focus()
+        
     }
     prepareData (nextProps) {
         // TODO: remove data duplication
@@ -69,7 +71,6 @@ class Header extends React.Component {
         })
         let selectedProps = displayedProps
         let selectedView = displayedView
-
         return {
             resourceIsLoading: false,
             selectionIsLoading: false,

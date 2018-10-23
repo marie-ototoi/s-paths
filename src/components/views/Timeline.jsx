@@ -424,17 +424,11 @@ class Timeline extends React.Component {
                 },
                 {
                     "name": "modifierPressed",
-                    "value": display.modifierPressed
+                    "value": false
                 },
                 {
                     "name": "zoneSelected",
-                    "value": selections.some(s => s.zone === zone),
-                    "on": [
-                        {
-                            "events": {"signal": "domainX"},
-                            "update": "domainX && (abs(domainX[0] - domainX[1]) > 2 && abs(domainY[0] - domainY[1]) > 2) ? true : false"
-                        }
-                    ]
+                    "value": false
                 },
                 {
                     "name": "domainX",

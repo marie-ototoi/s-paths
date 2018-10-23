@@ -296,7 +296,7 @@ class Geo extends React.Component {
                             "events": {"signal": "domainX"},
                             "update": "domainX && domainY ? true : false"
                         }
-                    ]
+                    ]                
                 },
                 {
                     "name": "domainX",

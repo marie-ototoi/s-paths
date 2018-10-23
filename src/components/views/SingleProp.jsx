@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 import Vega from 'react-vega';
+import * as vega from 'vega-lib';
 // components
 // d3
 // libs
@@ -11,7 +12,7 @@ import { usePrefix } from '../../lib/queryLib'
 import defaultSpec from '../../lib/spec'
 // redux functions
 import { getPropPalette } from '../../actions/palettesActions'
-import { handleMouseDown, handleMouseUp, selectElements, resetSelection } from '../../actions/selectionActions'
+import { selectElements } from '../../actions/selectionActions'
 
 class SingleProp extends React.Component {
     constructor (props) {
@@ -19,6 +20,7 @@ class SingleProp extends React.Component {
         this.getElementsForTransition = this.getElementsForTransition.bind(this)
         this.handleSelect = this.handleSelect.bind(this)
         this.handleZoneSelected = this.handleZoneSelected.bind(this)
+        this.updateSelections = this.updateSelections.bind(this)
         this.handleNewView = this.handleNewView.bind(this)
         this.prepareData = this.prepareData.bind(this)
         this.customState = {
@@ -33,6 +35,10 @@ class SingleProp extends React.Component {
         let dimensionsChanged = (this.props.dimensions.width !== nextProps.dimensions.width || this.props.dimensions.height !== nextProps.dimensions.height)
         if (dataChanged) {
             this.prepareData(nextProps)
+        }
+        if (selectionChanged && !dataChanged) {
+            console.log('HAS CHANGED')
+            this.updateSelections(nextProps)
         }
         if (dimensionsChanged) {
             this.customState.view.signal('width', nextProps.dimensions.useful_width).run()
@@ -55,21 +61,33 @@ class SingleProp extends React.Component {
     handleZoneSelected(...args) {
         // console.log('coucou', args)
     }
+    updateSelections (nextProps) {
+        let { selections, zone } = nextProps
+        console.log("FOIS FOIS")
+        if (this.customState.view) {
+            // this.customState.view.remove('entities', this.customState.view.data('entities'))
+            let changeset = vega.changeset().remove(() => true).insert(selections.filter(s => s.zone === zone).map(s => { return { selector: s.selector, entrypoint: s.other } }));
+            // For some reason source_0 is the default dataset name
+            this.customState.view.change('selections', changeset).run()
+        }
+    }
     handleSelect(...args) {
+        console.log('yes we can')
         const { selections, selectElements, zone } = this.props
         if (args[1]) {
-            // console.log('yes we can', args, this.customState.view.scenegraph().root.source.value[0].items[1].items)
+            console.log('yes we can', args, this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected))
             let selected = this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected)
-            console.log('salut', this.customState.view.scenegraph().root.source.value[0].items[6].filter(it =>it.selected))
+            //console.log('salut', this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected))
             if (selected.length > 0) {
                 selected = selected.map(el => {
                     return {
-                        selector: `single_element_${makeId(el.datum.properties.entrypoint)}`,
+                        selector: `single_prop_${makeId(el.datum.entrypoint)}`,
                         index: el.datum.index,
                         query: {
                             type: 'uri',
-                            value: el.datum.properties.entrypoint
-                        }
+                            value: el.datum.entrypoint
+                        },
+                        other: el.datum.entrypoint
                     }
                 })
             }
@@ -111,6 +129,10 @@ class SingleProp extends React.Component {
                 "type": "aggregate",
                 "groupby": ["prop1"]
             }]   
+        },
+        {
+            "name": "selections",
+            "values": selections.filter(s => s.zone === zone).map(s => { return { selector: s.selector, entrypoint: s.other } })
         }]
         const spec = {
             ...defaultSpec,
@@ -128,14 +150,14 @@ class SingleProp extends React.Component {
                     "value": false,
                     "on": [
                         {
-                            "events": {"signal": "domainX"},
+                            "events": {"signal": "domainY"},
                             "update": "domainX && domainY ? true : false"
                         }
-                    ]
+                    ]    
                 },
                 {
                     "name": "domainX",
-                    "value": [],
+                    "value": "[0,0]",
                     "on": [
                         {
                             "events": {"signal": "zone"},
@@ -145,7 +167,7 @@ class SingleProp extends React.Component {
                 },
                 {
                     "name": "domainY",
-                    "value": [],
+                    "value": "[0,0]",
                     "on": [ 
                         {
                             "events": {"signal": "zone"},
@@ -258,7 +280,7 @@ class SingleProp extends React.Component {
                                 {"signal": "cellheight"}
                             ],
                             "fill": [
-                                {"test": "(otherZoneSelected || zoneSelected && !inrange(item.y, domainY))", "value": "#ccc"},
+                                {"test": "otherZoneSelected || (zoneSelected && !indata('selections', 'entrypoint', datum.entrypoint))", "value": "#ccc"},
                                 {"scale": "color", "field": "prop1"}
                             ]
                         }
@@ -284,6 +306,7 @@ class SingleProp extends React.Component {
                     "type": "text",
                     "from": {"data": "entities"},
                     "key": "entrypoint",
+                    "name": "entitytext",
                     "encode": {
                         "enter": {
                             "align": {"value": "right"},
@@ -293,7 +316,7 @@ class SingleProp extends React.Component {
                             "y": {"scale": "yscale", "field": "entrypoint", "offset": {"signal": "cellheight / 2"}},
                             "text": {"field": "name"},
                             "fill": [
-                                {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
+                                {"test": "otherZoneSelected || (zoneSelected && !indata('selections', 'entrypoint', datum.entrypoint))", "value": "#ccc"},
                                 {"value": "#333"}
                             ],
                             "selected": [
@@ -366,7 +389,6 @@ class SingleProp extends React.Component {
                     <Vega
                         spec = { this.customState.spec }
                         onSignalEndZone = { this.handleSelect }
-                        onSignalDebug = { this.handleZoneSelected }
                         onSignalZoneSelected  = { this.handleZoneSelected }
                         onNewView = { this.handleNewView }
                     />
@@ -376,7 +398,7 @@ class SingleProp extends React.Component {
         </div>)
     }
     componentDidUpdate () {
-        // console.log(this.customState.view? this.customState.view.scenegraph(): null)
+        console.log(this.props.selections)
         if (this.customState.view) {
             this.props.handleTransition(this.props, this.getElementsForTransition())
             this.customState.view.run()
@@ -394,10 +416,6 @@ SingleProp.propTypes = {
     role: PropTypes.string,
     step: PropTypes.string,
     zone: PropTypes.string,
-    handleKeyDown: PropTypes.func,
-    handleMouseDown: PropTypes.func,
-    handleMouseMove: PropTypes.func,
-    handleMouseUp: PropTypes.func,
     handleTransition: PropTypes.func,
     selectElements: PropTypes.func
 }
@@ -415,8 +433,6 @@ function mapStateToProps (state) {
 function mapDispatchToProps (dispatch) {
     return {
         getPropPalette: getPropPalette(dispatch),
-        handleMouseDown: handleMouseDown(dispatch),
-        handleMouseUp: handleMouseUp(dispatch),
         selectElements: selectElements(dispatch)
     }
 }

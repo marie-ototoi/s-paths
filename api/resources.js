@@ -1,5 +1,6 @@
 import express from 'express'
 import resourceModel from '../models/resource'
+import pathModel from '../models/path'
 import { getLabels } from '../src/lib/labelLib'
 import * as queryLib from '../src/lib/queryLib'
 import * as dataLib from '../src/lib/dataLib'
@@ -45,13 +46,23 @@ const getResources = async (options) => {
     }))
     let dico = dataLib.getDict(labels.map(label => { return { key: label.uri } }))
     
-    return resources.map(resource => {
-        return {
+    let pathsNumbers = []
+    for (let i= 0; i < resources.length; i ++){
+        let pathsNumber = await pathModel.countDocuments({ endpoint: endpoint, entrypoint: resources[i].type, graphs: { $all: graphs, $size: graphs.length } }).exec()
+        pathsNumbers[i] = pathsNumber
+    }
+    // console.log('agg', resources, pathsNumbers, resources.length, pathsNumbers.length)
+    let newresources = resources.map((resource, i) => {
+        let newresource = {
             ...resource,
-            label: labels[dico[resource.type]].label || resource.type,
-            comment: labels[dico[resource.type]].comment || null
+            label: dico[resource.type]? labels[dico[resource.type]].label : resource.type,
+            comment: dico[resource.type] ? labels[dico[resource.type]].comment : null,
+            pathsNumber: pathsNumbers[i] || 0
         }
-    })
+        //console.log(newresource)
+        return newresource
+    }).sort((a, b) => b.pathsNumber - a.pathsNumber)
+    return newresources
 }
 
 export default router
