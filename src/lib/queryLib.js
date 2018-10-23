@@ -291,7 +291,7 @@ export const hasMoreSpecificPath = (path, level, pathList) => {
 }
 
 export const makeKeywordConstraints = (keyword, options) => {
-    let { maxLevel } = options
+    let maxLevel = 3
     let start = `?value1`
     let def = ``
     let filter = ``
