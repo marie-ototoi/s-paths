@@ -492,7 +492,7 @@ class Timeline extends React.Component {
     }
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
-        console.log('componentDidUpdate', this.customState.view.data('selections'), this.props.display.modifierPressed)
+        // console.log('componentDidUpdate', this.customState.view.data('selections'), this.props.display.modifierPressed)
         if (this.customState.view) {
             this.customState.view.run()
             this.props.handleTransition(this.props, this.getElementsForTransition())

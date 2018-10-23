@@ -1,5 +1,6 @@
 import 'normalize.css'
 import './axis.css'
+import './details.css'
 import './geomap.css'
 import './graphs.css'
 import './heatmap.css'

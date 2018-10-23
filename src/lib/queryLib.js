@@ -379,7 +379,6 @@ export const makeDetailQuery = (entrypoint, configZone, zone, options) => {
     
     selectedConfig.properties.forEach((prop, index) => {
         let pathParts = prop.path.split('/')
-        console.log(pathParts)
         if(pathParts.length > 3) {
             for (let i = 1; i < pathParts.length - 2; i += 2) {
                 let level = Math.ceil(i / 2)

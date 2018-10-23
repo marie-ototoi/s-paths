@@ -119,11 +119,11 @@ const defaultState = [
                     category: 'text',
                     hierarchical: true,
                     avg: { max: 70, optimal: [10, 40] },
-                    unique: { min: 5, max: 40, optimal: [10, 30] }
+                    unique: { min: 2, max: 60, optimal: [10, 30] }
                 },
                 {
                     category: 'uri',
-                    unique: { min: 5, max: 40, optimal: [10, 30] }
+                    unique: { min: 2, max: 60, optimal: [10, 30] }
                 }
             ]
         ]
@@ -139,7 +139,7 @@ const defaultState = [
                 {
                     category: 'uri',
                     avg: { max: 120, optimal: [30, 70] },
-                    unique: { min: 5, max: 150, optimal: [50, 100] }
+                    unique: { min: 2, max: 150, optimal: [50, 100] }
                 }
             ]
         ]

@@ -51,13 +51,15 @@ const getResources = (options) => {
 const evaluateSubStats = (stats) => {
     let { selectionInstances, totalInstances, statements } = stats
     let ratio = selectionInstances / totalInstances
+    
     return {
         ...stats,
         statements: statements.map(statement => {
+            // console.log(statement.unique, statement.total, statement)
             return {
                 ...statement,
-                total: Math.floor(statement.total * ratio),
-                unique: Math.floor(statement.unique * ratio)
+                total: Math.ceil(statement.total * ratio),
+                unique: (statement.unique * ratio < 2) ? 2 : Math.ceil(statement.unique * ratio)
             }
         })
     }
@@ -169,7 +171,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                 .then(([newConfigs, newStats]) => {
                     
                     const configMain = getSelectedView(newConfigs, 'main')
-                    // console.log('then ? ',newConfigs, newConfigs.views, configMain, newStats)
+                    //console.log('then ? ',newConfigs, newConfigs.views, configMain, newStats)
                     const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, singleURI, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
                     const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
                     let queryTransitionMain = makeTransitionQuery(configMain, dataset, previousConfigMain, previousOptions, 'main')
@@ -473,7 +475,7 @@ export const loadDetail = (dispatch) => (dataset, configs, zone) => {
     let { endpoint, entrypoint, prefixes } = dataset
     const configMain = getSelectedView(configs, 'main')
     let queryMain = makeDetailQuery(entrypoint, configMain, 'main', dataset )
-    console.log(queryMain)
+    // console.log(queryMain)
     return getData(endpoint, queryMain, prefixes)
         .then(data => {
             dispatch({

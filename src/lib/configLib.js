@@ -199,17 +199,26 @@ export const defineConfigs = (views, stats, dataset) => {
                     if(statsDict[constraint.category]) {
                         statsDict[constraint.category].forEach(prop => {                
                             // generic conditions
+                            // console.log(prop.total, prop.path)
+                            // console.log(constraint.unique, prop.unique, (!constraint.unique.min || (constraint.unique.min && prop.unique >= constraint.unique.min)), (!constraint.unique.max || (constraint.unique.max && prop.unique <= constraint.unique.max)))
+                            // console.log(constraint.avg,
+                            //    prop.avgcharlength,
+                            //    !constraint.avg || !constraint.avg.min ||(constraint.avg.min && prop.avgcharlength >= constraint.avg.min), 
+                            //    !constraint.avg ||!constraint.avg.max || (constraint.avg.max && prop.avgcharlength <= constraint.avg.max))
+                            // console.log(constraint.subcategory, prop.subcategory, !constraint.subcategory)
                             if (prop.total > 0 &&
                             (!constraint.subcategory || constraint.subcategory === prop.subcategory) &&
-                            (!constraint.unique.min || (constraint.unique.min && (prop.unique >= constraint.unique.min && stats.selectionInstances >= constraint.unique.min))) &&
+                            (!constraint.unique.min || (constraint.unique.min && prop.unique >= constraint.unique.min)) &&
                             (!constraint.unique.max || (constraint.unique.max && prop.unique <= constraint.unique.max)) &&
                             (!constraint.avg || !constraint.avg.min || (constraint.avg.min && prop.avgcharlength >= constraint.avg.min)) &&
                             (!constraint.avg || !constraint.avg.max || (constraint.avg.max && prop.avgcharlength <= constraint.avg.max))
                             ) {
+                                // console.log('PASSE ?')
                                 propSet.push({
                                     ...prop,
                                     score: scoreProp(prop, constraint, rankPropFactors)
                                 })
+                                
                             }
                         })
                     }
@@ -218,12 +227,13 @@ export const defineConfigs = (views, stats, dataset) => {
                     return b.score - a.score
                 }).filter(p => p.score > 0))
             })
+            // console.log(view.id,propList)
             propList = propList.reduce((acc, cur) => {
                 if (cur.length > 0) acc.push(cur)
                 return acc
             }, [])
         }
-        // console.log(view.id, scoredMatches)
+        // console.log(view.id, propList)
         // sort by score and return
         let alreadyInMatch = []
         let match = propList.map((list, listIndex) => {
@@ -238,7 +248,7 @@ export const defineConfigs = (views, stats, dataset) => {
                 }
             }
         }).filter(list => list)
-        
+        // console.log(view.id, match)
         let selectedMatch
         if ((match.length === view.constraints.length) ||
             (view.constraints[view.constraints.length-1][0].optional !== undefined && 

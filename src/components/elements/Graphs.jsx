@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 import { getCurrentConfigs, getSelectedMatch, getSelectedView } from '../../lib/configLib'
+import { usePrefix } from '../../lib/queryLib'
 import { getGraphsColors } from '../../lib/paletteLib'
 import { showGraphs } from '../../actions/displayActions'
 
@@ -12,7 +13,7 @@ class Graphs extends React.PureComponent {
     }
     render () {
         
-        const { configs, dimensions, zone } = this.props
+        const { configs, dataset, dimensions, zone } = this.props
         const { x, y, width, height } = dimensions
 
         let selectedConfig = getSelectedView(getCurrentConfigs(configs, zone, 'active'))
@@ -33,6 +34,7 @@ class Graphs extends React.PureComponent {
         let displayedResource = this.props.dataset.resources.find((resource) =>
             resource.type === this.props.dataset.entrypoint
         )
+
         return (<div
             className = "Graphs box"
             style = {
@@ -53,7 +55,7 @@ class Graphs extends React.PureComponent {
                 >
                     <i className='fas fa-window-close' />
                 </span>
-
+                
                 <strong>Traversed graphs: </strong>
                 <ul className="graphList">
                     {allgraphs.map((graph, gi) => (
@@ -65,6 +67,7 @@ class Graphs extends React.PureComponent {
                         </li>
                     ))}
                 </ul>
+                <div><strong>Patterns of the paths displayed in the current visualization</strong></div>
                 {selectedProperties.map((prop, pi) => (
                     <div
                         className='path'
@@ -91,8 +94,11 @@ class Graphs extends React.PureComponent {
                                 <span
                                     className='pathlabel'
                                     title={rp.comment}
+                                    style={{
+                                        color: `#999`
+                                    }}
                                 >
-                                    { rp.label }
+                                    { usePrefix(rp.label, dataset.prefixes) }
                                 </span>
                                 &nbsp;/ * / 
                             </span>

@@ -158,7 +158,6 @@ class App extends React.PureComponent {
             let config = getSelectedView(activeConfigs)
             if (selections.length > 0) {
                 let selectedConfig = getSelectedMatch(config, zone)
-                console.log(activeConfigs, config, selectedConfig)
                 let constraints
                 let entrypoint = dataset.entrypoint
                 
@@ -338,14 +337,15 @@ class App extends React.PureComponent {
             }
             { display.graphsOpen &&
                 <Graphs
-                    dimensions = { getDimensions('graphs', display.viz, { x: 0, y: -30, width: -10, height: 0 }) }
+                    dimensions = { getDimensions('graphs', display.viz, { x: 5, y: -30, width: -15, height: 0 }) }
                     zone = "main"
                 />
             }
             { (display.details.length > 0) &&
                 <Details
-                    dimensions = { getDimensions('details', display.viz, { x: 10, y: -30, width: -10, height: 0 }) }
+                    dimensions = { getDimensions('details', display.viz, { x: 10, y: -30, width: -15, height: 0 }) }
                     elements = { display.details }
+                    zone = "main"
                 />
             }
         </div>)

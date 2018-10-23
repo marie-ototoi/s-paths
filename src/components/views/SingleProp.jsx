@@ -43,6 +43,7 @@ class SingleProp extends React.Component {
                 this.customState.view.signal('otherZoneSelected', true)
                 this.customState.view.signal('zoneSelected', false)
             } else {
+                if (nextProps.selections.length > 0) this.customState.view.signal('zoneSelected', true)
                 this.customState.view.signal('otherZoneSelected', false)
             }
         }
@@ -58,8 +59,8 @@ class SingleProp extends React.Component {
         const { selections, selectElements, zone } = this.props
         if (args[1]) {
             // console.log('yes we can', args, this.customState.view.scenegraph().root.source.value[0].items[1].items)
-            let selected = this.customState.view.scenegraph().root.source.value[0].items[4].items.filter(it =>it.selected)
-            // console.log('salut', selected)
+            let selected = this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected)
+            console.log('salut', this.customState.view.scenegraph().root.source.value[0].items[6].filter(it =>it.selected))
             if (selected.length > 0) {
                 selected = selected.map(el => {
                     return {
@@ -71,11 +72,9 @@ class SingleProp extends React.Component {
                         }
                     }
                 })
-                // console.log(selected)
-                selectElements(selected, zone, selections)
-            } else {
-                resetSelection(zone)
             }
+            console.log('salut', this.customState.view._runtime, selected)
+            selectElements(selected, zone, selections)
         }
     }
     handleNewView(args) {
@@ -122,20 +121,21 @@ class SingleProp extends React.Component {
                 ...defaultSpec.signals,
                 {
                     "name": "otherZoneSelected",
-                    "init": selections.some(s => s.zone !== zone)
+                    "value": false
                 },
                 {
                     "name": "zoneSelected",
-                    "init": selections.some(s => s.zone === zone),
+                    "value": false,
                     "on": [
                         {
                             "events": {"signal": "domainX"},
-                            "update": "domainX && (abs(domainX[0] - domainX[1]) > 2 && abs(domainY[0] - domainY[1]) > 2) ? true : false"
+                            "update": "domainX && domainY ? true : false"
                         }
                     ]
                 },
                 {
                     "name": "domainX",
+                    "value": [],
                     "on": [
                         {
                             "events": {"signal": "zone"},
@@ -145,6 +145,7 @@ class SingleProp extends React.Component {
                 },
                 {
                     "name": "domainY",
+                    "value": [],
                     "on": [ 
                         {
                             "events": {"signal": "zone"},
@@ -159,15 +160,6 @@ class SingleProp extends React.Component {
                 {
                     "name": "cellheight",
                     "update": "(height / length(data('entities')))"
-                },
-                {
-                    "name": "debug",
-                    "on": [ 
-                        {
-                            "events": {"signal": "zone"},
-                            "update": "cellwidth > 30"
-                        }
-                    ] 
                 }
             ],
             "data": singledata,
@@ -303,6 +295,10 @@ class SingleProp extends React.Component {
                             "fill": [
                                 {"test": "(otherZoneSelected || (zoneSelected && !inrange(item.y, domainY)))", "value": "#ccc"},
                                 {"value": "#333"}
+                            ],
+                            "selected": [
+                                {"test": "zoneSelected && inrange(item.y, domainY)", "value": true},
+                                {"value": false}
                             ],
                             "limit": {"value": display.viz.horizontal_padding}
                         }
