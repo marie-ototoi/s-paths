@@ -7,7 +7,7 @@
     min-height: 28px !important;
 }
 
-.PropSelect__control--is-focused .PropSelect__value-container .tag {
+.PropSelect__control--is-focused .PropSelect__single-value {
     opacity: 0.5;
 }
 
