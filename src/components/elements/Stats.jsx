@@ -67,6 +67,7 @@ class Stats extends React.PureComponent {
                         { dataset.resources.map((resource, ri) => {
                             return (<tr key = { `resource_${zone}_${ri}` }>
                                 <td>{ resource.type }</td>
+                                <td>{ resource.pathsNumber }</td>
                                 <td><a onClick = { e => {
                                     this.props.loadStats({
                                         ...dataset,

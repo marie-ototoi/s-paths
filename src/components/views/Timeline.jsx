@@ -210,7 +210,7 @@ class Timeline extends React.Component {
                 this.customState.view.signal('zoneSelected', false)
             } else {
                 // console.log("alors ?", nextProps.selections.length)
-                if (nextProps.selections.length > 0) this.customState.view.signal('zoneSelected', true)
+                this.customState.view.signal('zoneSelected', (nextProps.selections.length > 0))
                 this.customState.view.signal('otherZoneSelected', false)
             }
         }
