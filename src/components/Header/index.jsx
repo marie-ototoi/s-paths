@@ -79,7 +79,7 @@ class Header extends React.Component {
             keyword: '',
             displayedResource,
             selectedResource,
-            resourceList: nextProps.dataset.resources,
+            resourceList: nextProps.dataset.resources.filter(res => res.pathsNumber > 0),
             configsLists,
             displayedView,
             displayedProps,
