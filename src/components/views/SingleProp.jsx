@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-import Vega from 'react-vega';
-import * as vega from 'vega-lib';
+import Vega from 'react-vega'
+import * as vega from 'vega-lib'
 // components
 // d3
 // libs
@@ -37,7 +37,7 @@ class SingleProp extends React.Component {
             this.prepareData(nextProps)
         }
         if (selectionChanged && !dataChanged) {
-            console.log('HAS CHANGED')
+            // console.log('HAS CHANGED')
             this.updateSelections(nextProps)
         }
         if (dimensionsChanged) {
@@ -72,10 +72,10 @@ class SingleProp extends React.Component {
         }
     }
     handleSelect(...args) {
-        console.log('yes we can')
-        const { selections, selectElements, zone } = this.props
+        // console.log('yes we can')
+        const { display, selections, selectElements, zone } = this.props
         if (args[1]) {
-            console.log('yes we can', args, this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected))
+            // console.log('yes we can', args, this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected))
             let selected = this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected)
             //console.log('salut', this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected))
             if (selected.length > 0) {
@@ -91,8 +91,8 @@ class SingleProp extends React.Component {
                     }
                 })
             }
-            console.log('salut', this.customState.view._runtime, selected)
-            selectElements(selected, zone, selections)
+            // console.log('salut', this.customState.view._runtime, selected)
+            selectElements(selected, zone, selections, display.modifierPressed)
         }
     }
     handleNewView(args) {

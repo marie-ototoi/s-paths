@@ -117,14 +117,14 @@ class Header extends React.Component {
     displayConfig () {
         const { config, configs, dataset, zone } = this.props
         let selectedLists = this.state.configsLists[this.state.selectedView]
-        let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
-        // console.log()
-        let selectedMatch = activeConfigs.views[this.state.selectedView].selectedMatch
+        // let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+        // console.log(this.state.selectedView, this.state.selectedProps)
+        let selectedMatch = { properties: this.state.selectedProps && selectedLists ? this.state.selectedProps.map((prop, i) => selectedLists[i][prop]) : [] }
         this.setState({
             propsAreLoading: true,
             errorSelection: ''
         })
-        // console.log(selectedMatch, this.state.selectedProps, selectedLists)
+        // console.log(selectedMatch)
         this.props.displayConfig(this.state.selectedView, selectedMatch, this.props.configs.present.views, config, dataset, zone)
             .then(() => this.setState({
                 propsAreLoading: false,
@@ -178,7 +178,7 @@ class Header extends React.Component {
         if (this.state.configsLists) {
             // console.log(this.state.configsLists)
             const { configs, data, dataset, selections, zone } = this.props
-            console.log(this.props.step)
+            // console.log(this.props.step)
             // general
             const activeConfigs = getConfigs(getCurrentConfigs(configs, zone, 'active'), zone)
             let options = [
@@ -313,13 +313,7 @@ class Header extends React.Component {
                                 let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
                                 this.setState({
                                     selectedView,
-                                    selectedProps: this.state.configsLists[selectedView].map((list, index) => {
-                                        return list.reduce((acc, cur, propIndex) => {
-                                            console.log(selectedView, activeConfigs.views, cur.path, this.state.configsLists, activeConfigs.views[selectedView].selectedMatch, index)
-                                            if (activeConfigs.views[selectedView].selectedMatch.properties[index].path === cur.path) acc = propIndex
-                                            return acc
-                                        }, 0)
-                                    })
+                                    selectedProps: this.state.configsLists[selectedView].map((list) => 0)
                                 })
                             }}
                             isDisabled={
@@ -342,6 +336,7 @@ class Header extends React.Component {
                                         selectedProps[index] = selectedLists[index].findIndex((option) =>
                                             option.path === selectedOption.path
                                         )
+                              
                                         this.setState({ selectedProps })
                                     }}
                                     options={selectedLists[index]}
@@ -349,16 +344,19 @@ class Header extends React.Component {
                                         this.props.step !== 'active'|| 
                                         this.state.selectionIsLoading ||
                                         this.state.propsAreLoading ||
-                                        this.state.resourceIsLoading 
+                                        this.state.resourceIsLoading ||
+                                        (activeConfigs[this.state.displayedView].constraints[index] && activeConfigs[this.state.displayedView].constraints[index][0].multiple !== undefined)
                                     }
                                 />
                             </div>
                         ))}
                     </Line>
-                    <Explain
-                        options={options[2]}
-                        zone={zone}
-                    />
+                    {this.props.step === 'active' &&
+                        <Explain
+                            options={options[2]}
+                            zone={zone}
+                        />
+                    }
                 </div>
             )
         } else {

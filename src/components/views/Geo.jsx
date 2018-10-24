@@ -1,8 +1,8 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-import Vega from 'react-vega';
-import * as vega from 'vega-lib';
+import Vega from 'react-vega'
+import * as vega from 'vega-lib'
 
 // components
 // d3
