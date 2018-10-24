@@ -178,7 +178,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                     // console.log(queryMain)
                     return Promise.all([
                         getData(endpoint, queryMain, prefixes),
-                        dataset.entrypoint === previousConfigs.entrypoint ? getData(endpoint, queryTransitionMain, prefixes) : [],
+                        dataset.entrypoint === previousConfigs.entrypoint && !dataset.transitionOff ? getData(endpoint, queryTransitionMain, prefixes) : [],
                         getData(endpoint, queryMainUnique, prefixes)
                     ])
                         .then(([dataMain, dataDeltaMain, uniqueMain]) => { // , coverageMain, coverageAside
