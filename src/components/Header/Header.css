@@ -46,20 +46,8 @@
     font-size: 0.8em;
 }
 
-.Header .pointer {
-    border: 1px solid #ccc;
-    border-radius: 2px;
-    display: inline-block;
-    padding: 0 0 0 10px; 
-    width: 85px;
-}
-
 .Header .greyed {
     opacity: 0.5;
-}
-
-.Header .pointer-group {
-    margin-right: 10px;
 }
 
 .Header .error {
@@ -78,6 +66,9 @@
     display: inline-block;
 }
 
+.Header .resource-control {
+    width: 80px;
+}
 .Header .resource-def {
     width: auto;
     height: auto;

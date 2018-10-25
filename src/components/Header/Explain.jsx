@@ -35,9 +35,9 @@ class Explain extends React.Component {
             <div
                 className='Explain'
                 style={{
-                    marginTop: `${Math.floor((this.props.display.viz.top_margin - 155) / 2)}px`,
                     marginLeft: `${this.props.display.viz.horizontal_padding}px`
-                }}>
+                }}
+            >
                 <p>
                     You are visualizing
                     <strong>

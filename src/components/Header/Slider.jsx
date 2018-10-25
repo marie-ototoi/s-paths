@@ -9,13 +9,15 @@ class Slider extends React.Component {
         super(props)
         this.drag = this.drag.bind(this)
         this.state = {
-            step: 5 // TODO: if window size < 1500 ? 50 : 25 (#68)
+            step: 5, // TODO: if window size < 1500 ? 50 : 25 (#68),
+            value: this.props.display.vizDefPercent.aside_width
         }
     }
 
     drag (event) {
         const { display, setDisplay } = this.props
         let asidePercent = event.target.value
+        this.setState({value: event.target.value})
         setDisplay({
             screen: display.screen,
             vizDefPercent: {
@@ -31,11 +33,11 @@ class Slider extends React.Component {
             <input
                 type='range'
                 className='Slider'
-                value={this.props.display.vizDefPercent.aside_width}
+                value={this.state.value}
                 min={0}
                 max={45}
                 step={this.state.step}
-                onChange={this.drag}
+                onChange = {this.drag}
             />
         )
     }

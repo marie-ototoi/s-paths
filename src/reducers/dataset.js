@@ -82,7 +82,7 @@ const dataset = (state = initialState, action) => {
         return {
             ...state,
             labels: action.labels || state.labels,
-            constraints: action.constraints || state.constraints,
+            constraints: action.constraints,
             stats: action.stats || state.stats,
             prefixes: action.prefixes || state.prefixes,
             entrypoint: action.entrypoint || state.entrypoint,
@@ -96,7 +96,7 @@ const dataset = (state = initialState, action) => {
             labels: action.labels || state.labels,
             entrypoint: action.entrypoint,
             prefixes: action.prefixes || state.prefixes,
-            constraints: action.constraints || state.constraints,
+            constraints: action.constraints,
             resourceGraph: action.resourceGraph || state.resourceGraph,
             graphs: action.graphs
         }

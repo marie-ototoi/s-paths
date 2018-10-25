@@ -9,12 +9,14 @@ import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/quer
 
 import { showSettings, showStats } from '../../actions/displayActions'
 import { displayConfig, loadSelection, selectResource } from '../../actions/dataActions'
+import Submit from './Submit'
+import Quantifier from './Quantifier'
 import ViewSelect from './ViewSelect'
 import PropSelect from './PropSelect'
 import ResourceSelect from './ResourceSelect'
-import Slider from './Slider'
 import Explain from './Explain'
-import Line from './Line'
+import Slider from './Slider'
+import Selection from './Selection'
 import './Header.css'
 import display from '../../reducers/display';
 
@@ -22,6 +24,7 @@ class Header extends React.Component {
     constructor (props) {
         super(props)
         this.displayConfig = this.displayConfig.bind(this)
+        this.displayKeyword = this.displayKeyword.bind(this)
         this.displayResource = this.displayResource.bind(this)
         this.displaySelection = this.displaySelection.bind(this)
         this.handleKeyDown = this.handleKeyDown.bind(this)
@@ -42,7 +45,7 @@ class Header extends React.Component {
             // return false
         }
         if (prevState.keyword === this.state.keyword && 
-            prevState.selectedResource === this.state.selectedResource) this.refHeader.focus()
+            prevProps.display.vizDefPercent.main_width === this.props.display.vizDefPercent.main_width) this.refHeader.focus() 
         return null
     }
     componentDidMount () {
@@ -50,6 +53,21 @@ class Header extends React.Component {
     }
     componentDidUpdate () {
         
+    }
+    shouldComponentUpdate (nextProps, nextState) {
+        let selectionChanged = this.props.selections.length !== nextProps.selections.length
+        let dimensionsChanged = (this.props.display.viz.main_useful_height !== nextProps.display.viz.main_useful_height || 
+            this.props.display.viz.main_width !== nextProps.display.viz.main_width)
+
+        return selectionChanged || dimensionsChanged ||
+            this.state.selectedResource !== nextState.selectedResource || 
+            this.state.displayedResource !== nextState.displayedResource || 
+            this.state.displayedView !== nextState.displayedView || 
+            this.state.selectedResource !== nextState.selectedResource ||
+            this.state.keyword !== nextState.keyword ||
+            this.props.dataset.constraints !== nextProps.dataset.constraints ||
+            JSON.stringify(this.state) !== JSON.stringify(nextState) ||
+            this.props.step !== nextProps.step
     }
     prepareData (nextProps) {
         // TODO: remove data duplication
@@ -74,6 +92,7 @@ class Header extends React.Component {
         return {
             resourceIsLoading: false,
             selectionIsLoading: false,
+            keywordIsLoading: false,
             errorSelection: '',
             propsAreLoading: false,
             keyword: '',
@@ -91,11 +110,13 @@ class Header extends React.Component {
         const { dataset, selections } = this.props
         // console.log('eee', event.which, event)
         if (event.which === 13) {
-            if (selections.length > 0 || this.state.keyword.length > 3) {
+            if (selections.length > 0) {
                 this.displaySelection()
             } else if (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) {
                 this.displayConfig()
-            } else if (this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '') {
+            } else if (this.state.keyword.length > 3) {
+                this.displayKeyword()
+            }else if (this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '') {
                 this.displayResource()
             }
         }
@@ -114,8 +135,36 @@ class Header extends React.Component {
                 displayedResource: this.state.selectedResource
             }))
     }
+    displayKeyword () {
+        const { configs, dataset, views } = this.props
+        let activeConfigs
+        let constraints = dataset.constraints
+        let entrypoint = dataset.entrypoint
+        if (this.state.keyword.length > 3) {
+            if(!activeConfigs) activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+            constraints = constraints.concat(makeKeywordConstraints(this.state.keyword, { ...dataset, entrypoint, stats: activeConfigs.stats }))
+        }
+        let newDataset = {
+            ...dataset,
+            entrypoint,
+            constraints,
+            stats: activeConfigs.stats
+        }
+        // console.log(newDataset)
+        this.setState({ keywordIsLoading: true, errorSelection: '' })
+        this.props.loadSelection(newDataset, views, activeConfigs, dataset)
+            .then(() => this.setState({
+                keywordIsLoading: false,
+                keyword: ''
+            }))
+            .catch((e) => this.setState({
+                keywordIsLoading: false,
+                keyword: '',
+                errorSelection: 'Unable to display results: ' + e
+            }))
+    }
     displayConfig () {
-        const { config, configs, dataset, zone } = this.props
+        const { config, dataset, zone } = this.props
         let selectedLists = this.state.configsLists[this.state.selectedView]
         // let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
         // console.log(this.state.selectedView, this.state.selectedProps)
@@ -148,14 +197,7 @@ class Header extends React.Component {
             entrypoint = activeConfigs.entrypoint
             selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'))
             constraints = makeSelectionConstraints(selections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats })
-        } else {
-            // keep old constraints
-            constraints = dataset.constraints
-        }
-        if (this.state.keyword.length > 3) {
-            if(!activeConfigs) activeConfigs = getCurrentConfigs(configs, 'main', 'active')
-            constraints = constraints.concat(makeKeywordConstraints(this.state.keyword, { ...dataset, entrypoint, stats: activeConfigs.stats }))
-        }
+        } 
         let newDataset = {
             ...dataset,
             entrypoint,
@@ -187,39 +229,54 @@ class Header extends React.Component {
                 { label: 'displayed', total: getNbDisplayed(data, zone, 'active') }
             ]
 
+            // selection button
+            let selectionEnabled = selections.length > 0
+            let pointerClass = selectionEnabled ? '' : 'greyed'
+
             // first line - resources
-            let selectResourceEnabled = (this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '')
-
-            // second line - keyword + pointer
-            let pointerEnabled = selections.length > 0
             let keywordEnabled = this.state.keyword.length > 3
-            let pointerClass = pointerEnabled ? '' : 'greyed'
-            let andClass = pointerEnabled && keywordEnabled ? '' : 'greyed'
-            let selectionEnabled = (pointerEnabled || keywordEnabled)
-
-            // third line - view + props
+            let selectResourceEnabled = (this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '')
+            // console.log(this.state.selectedResource.type, this.state.displayedResource.type, dataset.constraints)
+            // second line - view + props
             let selectedLists = this.state.configsLists[this.state.selectedView]
             let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps))
             return (
                 <div className='Header' ref = {(c) => { this.refHeader = c }} tabIndex = {1}>
-                    <Line
-                        label={'Type of entities'}
-                        maxData={options[0].total}
-                        counterData={options[0]}
-                        isLoading={this.state.resourceIsLoading}
-                        onSubmit={this.displayResource}
-                        disable={!selectResourceEnabled}
-                        leftChildren={
-                            <div className='logo'>
-                                <img
-                                    src='/images/logo.svg'
-                                    alt='S-Path Logo'
-                                    style={{ height: '29px', paddingLeft: '5px' }}
-                                />
-                            </div>
-                        }
-                        rightChildren={
-                            <div>
+                    <div className="Line">
+                        <div className='logo'>
+                            <img
+                                src='/images/logo.svg'
+                                alt='S-Path Logo'
+                                style={{ height: '29px' }}
+                            />
+                        </div>
+                        <div
+                            className='field'
+                            style={{
+                                marginLeft: `${this.props.display.viz.horizontal_padding}px`,
+                                width: `${this.props.display.viz.useful_width * 4 / 5}px`
+                            }}
+                        >
+                            <label className='label'>TYPE OF ENTITIES</label>
+                            <ResourceSelect
+                                options={this.state.resourceList}
+                                selectedResource={this.state.selectedResource}
+                                onChange={(selectedResource) => {
+                                    this.setState({ selectedResource })
+                                }}
+                                isDisabled={
+                                    this.props.step !== 'active' || 
+                                    this.state.selectionIsLoading ||
+                                    this.state.propsAreLoading ||
+                                    this.state.resourceIsLoading 
+                                }
+                            />
+                            <Submit
+                                isLoading={this.state.resourceIsLoading}
+                                onClick={this.displayResource}
+                                disable={!selectResourceEnabled}
+                            />
+                            <div className='resource-control'>
                                 {this.state.selectedResource.comment &&
                                     <span className='resource-def'>?
                                         <span
@@ -232,131 +289,126 @@ class Header extends React.Component {
                                 }
                                 
                             </div>
-                        }
-                        end={
-                            <span>
-                                {this.state.showConfig && (
-                                    <span
-                                        className='icon'
-                                        onClick={(e) => { this.props.showStats() }}
-                                    >
-                                        <i className='fas fa-wrench' />
-                                    </span>
-                                )}                                
-                                <span
-                                    className='icon'
-                                    onClick={(e) => { this.props.showSettings() }}
-                                >
-                                    <i className='fas fa-cogs' />
-                                </span>
-                            </span>
-                        }
-                    >
-                        <ResourceSelect
-                            options={this.state.resourceList}
-                            selectedResource={this.state.selectedResource}
-                            onChange={(selectedResource) => {
-                                this.setState({ selectedResource })
-                            }}
-                            isDisabled={
-                                this.props.step !== 'active' || 
-                                this.state.selectionIsLoading ||
-                                this.state.propsAreLoading ||
-                                this.state.resourceIsLoading 
-                            }
-                        />
-                    </Line>
-                    <Line
-                        label={'Filter'}
-                        isLoading={this.state.selectionIsLoading}
-                        onSubmit={this.displaySelection}
-                        disable={!selectionEnabled}
-                        counterData={options[1]}
-                        maxData={options[0].total}
-                        rightChildren={
-                            <span className='error'>{this.state.errorSelection}</span>
-                        }
-                    >
-                        <div className='control'>
-                            <input
-                                className='input is-small'
-                                type='text'
-                                placeholder='Keyword'
-                                value={this.state.keyword}
-                                onChange={(e) => this.setState({ keyword: e.target.value })}
-                            />
-                        </div>
-                        <div className='pointer-group'>
-                            <p>
-                                <span className={`pointer is-size-7 ${pointerClass}`}>
-                                    selection
-                                    <span className='icon'>
-                                        <i className='fas fa-mouse-pointer' />
-                                    </span>
-                                </span>
-                            </p>
-                        </div>
-                    </Line>
-                    <Line
-                        label={'Display'}
-                        isLoading={this.state.propsAreLoading}
-                        onSubmit={this.displayConfig}
-                        disable={!configEnabled}
-                        counterData={options[2]}
-                        maxData={options[0].total}
-                        leftChildren={<Slider />}
-                    >
-                        <ViewSelect
-                            currentValue={this.state.selectedView}
-                            onChange={(selectedOption) => {
-                                const selectedView = selectedOption.index
-                                let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
-                                this.setState({
-                                    selectedView,
-                                    selectedProps: this.state.configsLists[selectedView].map((list) => 0)
-                                })
-                            }}
-                            isDisabled={
-                                this.props.step !== 'active'|| 
-                                this.state.selectionIsLoading ||
-                                this.state.propsAreLoading ||
-                                this.state.resourceIsLoading 
-                            }
-                            options={activeConfigs.map((option, i) => ({ ...option, index: i }))}
-                        />
-                        { selectedLists && selectedLists.map((list, index) => (
-                            <div
-                                className='control'
-                                key={`${zone}selectprop${index}`}
-                            >
-                                <PropSelect
-                                    currentValue={this.state.selectedProps[index]}
-                                    onChange={(selectedOption) => {
-                                        const selectedProps = [...this.state.selectedProps]
-                                        selectedProps[index] = selectedLists[index].findIndex((option) =>
-                                            option.path === selectedOption.path
-                                        )
-                              
-                                        this.setState({ selectedProps })
-                                    }}
-                                    options={selectedLists[index]}
-                                    isDisabled={
-                                        this.props.step !== 'active'|| 
-                                        this.state.selectionIsLoading ||
-                                        this.state.propsAreLoading ||
-                                        this.state.resourceIsLoading ||
-                                        (activeConfigs[this.state.displayedView].constraints[index] && activeConfigs[this.state.displayedView].constraints[index][0].multiple !== undefined)
-                                    }
+                            <label className='label'>FILTER</label>
+                            <div className='control'>
+                                <input
+                                    className='input is-small'
+                                    type='text'
+                                    placeholder='Keyword'
+                                    value={this.state.keyword}
+                                    onChange={(e) => this.setState({ keyword: e.target.value })}
+                                    style={{ paddingTop: '10px' }}
                                 />
                             </div>
-                        ))}
-                    </Line>
+                            
+                            <Submit
+                                isLoading={this.state.keywordIsLoading}
+                                onClick={this.displayKeyword}
+                                disable={!keywordEnabled}
+                            />
+                       
+                        </div>
+                        <Quantifier
+                            value={options[1]}
+                            max={options[0].total}
+                        />
+                        <span>
+                            {this.state.showConfig && (
+                                <span
+                                    className='icon'
+                                    onClick={(e) => { this.props.showStats() }}
+                                >
+                                    <i className='fas fa-wrench' />
+                                </span>
+                            )}                                
+                            <span
+                                className='icon'
+                                onClick={(e) => { this.props.showSettings() }}
+                            >
+                                <i className='fas fa-cogs' />
+                            </span>
+                        </span>
+                    </div>
+                    
+                    <div className="Line">
+                        <Slider />
+                        <div
+                            className='field'
+                            style={{
+                                marginLeft: `${this.props.display.viz.horizontal_padding}px`,
+                                width: `${this.props.display.viz.useful_width * 4 / 5}px`
+                            }}
+                        >
+                            <label className='label'>DISPLAY</label>
+                            <ViewSelect
+                                currentValue={this.state.selectedView}
+                                onChange={(selectedOption) => {
+                                    const selectedView = selectedOption.index
+                                    let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+                                    this.setState({
+                                        selectedView,
+                                        selectedProps: this.state.configsLists[selectedView].map((list) => 0)
+                                    })
+                                }}
+                                isDisabled={
+                                    this.props.step !== 'active'|| 
+                                    this.state.selectionIsLoading ||
+                                    this.state.propsAreLoading ||
+                                    this.state.resourceIsLoading ||
+                                    this.state.keywordIsLoading 
+                                }
+                                options={activeConfigs.map((option, i) => ({ ...option, index: i }))}
+                            />
+                            { selectedLists && selectedLists.map((list, index) => (
+                                <div
+                                    className='control'
+                                    key={`${zone}selectprop${index}`}
+                                >
+                                    <PropSelect
+                                        currentValue={this.state.selectedProps[index]}
+                                        onChange={(selectedOption) => {
+                                            const selectedProps = [...this.state.selectedProps]
+                                            selectedProps[index] = selectedLists[index].findIndex((option) =>
+                                                option.path === selectedOption.path
+                                            )
+                                
+                                            this.setState({ selectedProps })
+                                        }}
+                                        options={selectedLists[index]}
+                                        isDisabled={
+                                            this.props.step !== 'active'|| 
+                                            this.state.selectionIsLoading ||
+                                            this.state.propsAreLoading ||
+                                            this.state.resourceIsLoading ||
+                                            this.state.keywordIsLoading ||
+                                            (activeConfigs[this.state.displayedView].constraints[index] && activeConfigs[this.state.displayedView].constraints[index][0].multiple !== undefined)
+                                        }
+                                    />
+                                </div>
+                            ))}
+                            <Submit
+                                isLoading={this.state.propsAreLoading}
+                                onClick={this.displayConfig}
+                                disable={!configEnabled}
+                            />
+                        </div>
+                        <Quantifier
+                            value={options[2]}
+                            max={options[0].total}
+                        />
+                    </div>
+                    
                     {this.props.step === 'active' &&
                         <Explain
                             options={options[2]}
                             zone={zone}
                         />
                     }
+                    <Selection
+                        isLoading={this.state.selectionIsLoading}
+                        disable={!selectionEnabled}
+                        onClick={this.displaySelection}
+                    />
                 </div>
             )
         } else {
@@ -369,6 +421,7 @@ class Header extends React.Component {
         configs: PropTypes.object,
         data: PropTypes.object,
         dataset: PropTypes.object,
+        display: PropTypes.object,
         selections: PropTypes.array,
         views: PropTypes.array,
         zone: PropTypes.string,
@@ -386,6 +439,7 @@ const HeaderConnect = connect(
         configs: state.configs,
         data: state.data,
         dataset: state.dataset,
+        display: state.display,
         selections: state.selections,
         views: state.views
     }),

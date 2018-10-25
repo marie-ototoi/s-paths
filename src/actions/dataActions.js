@@ -314,7 +314,6 @@ export const selectResource = (dispatch) => (dataset, views) => {
                 getData(endpoint, queryMainUnique, prefixes)
             ])
                 .then(([dataMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
-                    // console.log('ok on a bien reçu les promesses')
                     dispatch({
                         type: types.SET_STATS,
                         stats,

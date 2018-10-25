@@ -1,3 +1,4 @@
+import * as d3 from 'd3'
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
@@ -65,6 +66,11 @@ class HeatMap extends React.Component {
         const axisLeft = getAxis(nestedProp2, 'prop2', categoryProp2)
 
         const colors = getQuantitativeColors()
+        // console.log(d3.scaleOrdinal(d3.schemeCategory10)('toto'), d3.scaleOrdinal(d3.schemeCategory10)('tata'))
+        //let test = d3.scaleOrdinal(d3.schemeCategory10)
+        //console.log(test('toto'), test('tata'))
+        //test = d3.scaleOrdinal(d3.interpolateOrRd) 
+        //console.log(test('toto'), test('tata'))
         const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
         const legend = getLegend(thresholds, 'countprop2', colors, 'aggregate')
         const propsLists = config.propList

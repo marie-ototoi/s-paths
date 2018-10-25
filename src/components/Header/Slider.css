@@ -1,6 +1,6 @@
 .Slider {
-    float: left;
     position: absolute;
     margin-left: 10px;
+    z-index: 20;
     width: 100px !important;
 }

@@ -1,0 +1,12 @@
+.Selection {
+    cursor: pointer;
+    position: fixed;
+    font-size: 0.8em;
+    z-index: 20;
+    right: 20px;
+    bottom: 15px;
+}
+
+.Selection .icon {
+    padding-left: 10px;
+}
