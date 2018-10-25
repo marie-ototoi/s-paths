@@ -13,7 +13,7 @@ const initialState = {
     resources: [],
     rankPropFactors: {
         category: 1,
-        definition: 2,
+        definition: 4,
         level: 2,
         coverage: 8
     },

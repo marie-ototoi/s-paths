@@ -3,6 +3,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import Vega from 'react-vega'
 import * as vega from 'vega-lib'
+import * as d3 from 'd3'
 
 // components
 // d3
@@ -80,7 +81,7 @@ class Geo extends React.Component {
             let findSinglePoints =  this.customState.view.scenegraph().root.source.value[0].items[1].items.filter((it) => {
                 return el.latg === it.datum.latg && el.longg === it.datum.longg
             })
-            let label = findSinglePoints.map(p => p.datum.properties.label).join(", ")
+            let label = d3.nest().key(p => p.datum.properties.label).entries(findSinglePoints)
             this.setState({ hover: id, label }) 
         }
     }
@@ -102,7 +103,7 @@ class Geo extends React.Component {
                 <p
                     className = "legend"
                     style = {{ marginLeft: display.viz.useful_width + 'px', width: (display.viz.horizontal_padding - 20) + 'px' }}
-                >{this.state.label}</p>
+                >{ this.state.label && this.state.label.map(agg => (<span key={`acc${agg.key}`}>{agg.key} <span style={{color: '#999'}}>({agg.values.length})</span><br /></span>)) }</p>
                 { this.customState.spec &&
                     <Vega
                         spec = { this.customState.spec }

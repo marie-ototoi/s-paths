@@ -38,7 +38,7 @@ class Header extends React.Component {
         let configChanged = prevProps.configs.past.length !== this.props.configs.past.length &&
             this.props.configs.present.status !== 'transition'
 
-        if (configChanged) {
+        if (configChanged || this.props.step !== prevProps.step) {
             let newData = this.prepareData(this.props)
             // console.log(newData)
             this.setState(newData)
@@ -58,8 +58,10 @@ class Header extends React.Component {
         let selectionChanged = this.props.selections.length !== nextProps.selections.length
         let dimensionsChanged = (this.props.display.viz.main_useful_height !== nextProps.display.viz.main_useful_height || 
             this.props.display.viz.main_width !== nextProps.display.viz.main_width)
+        let configChanged = nextProps.configs.past.length !== this.props.configs.past.length &&
+            this.props.configs.present.status !== 'transition'
 
-        return selectionChanged || dimensionsChanged ||
+        return configChanged || selectionChanged || dimensionsChanged ||
             this.state.selectedResource !== nextState.selectedResource || 
             this.state.displayedResource !== nextState.displayedResource || 
             this.state.displayedView !== nextState.displayedView || 
@@ -75,6 +77,7 @@ class Header extends React.Component {
             resource.type === nextProps.dataset.entrypoint
         )
         let selectedResource = displayedResource
+        //console.log(getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone))
         let configsLists = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).map(view => view.propList)
         let displayedView = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).reduce((acc, cur, i) => (cur.selected ? i : acc), null)
         let activeConfigs = getCurrentConfigs(nextProps.configs, 'main', 'active')

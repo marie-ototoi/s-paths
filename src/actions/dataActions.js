@@ -324,7 +324,7 @@ export const selectResource = (dispatch) => (dataset, views) => {
                         constraints,
                         mainConfig: configs.views,
                         main: { ...dataMain },
-                        mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                        mainDisplayed: configMain.id === 'ListAllProps' ? 1 : Number(uniqueMainPromise.results.bindings[0].displayed.value)
                     })
                 })
                 
@@ -365,7 +365,7 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
             action[zone] = newData
             action[zone + 'Config'] = updatedConfigs
             action[zone + 'Delta'] = newDelta
-            action[zone + 'Displayed'] = updatedConfig.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(newUnique.results.bindings[0].displayed.value)
+            action[zone + 'Displayed'] = updatedConfig.id === 'ListAllProps' ? 1 : Number(newUnique.results.bindings[0].displayed.value)
             dispatch(action)
         })
         .catch(error => {
