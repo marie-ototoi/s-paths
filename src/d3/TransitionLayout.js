@@ -59,8 +59,8 @@ class TransitionLayout extends AbstractLayout {
                
 
             
-        window.setTimeout(() => { props.endTransition(props.zone) }, 2000)
-        // console.log('drawn')
+        window.setTimeout(() => { props.endTransition(props.zone); console.log('timeout') }, 1200)
+        //console.log('drawn')
     }
     checkSelection (props) {}
 }

@@ -43,6 +43,8 @@ export const getThresholdsForLegend = (nestedProps, propName, category, nbOfRang
 export const getThresholds = (minValue, maxValue, nbOfRanges) => {
     //console.log(minValue, maxValue)
     let diff = maxValue - minValue
+    if (diff === 1) nbOfRanges = 1
+    if (diff <= nbOfRanges) nbOfRanges = diff / 2
     let part = Math.ceil(diff / nbOfRanges)
     let ranges = Array.from(Array(nbOfRanges).keys())
     // return [diff, part, roundUnit, roundStart, start, roundPartStr, roundPart]

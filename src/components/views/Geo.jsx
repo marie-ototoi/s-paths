@@ -76,7 +76,8 @@ class Geo extends React.Component {
         let id = el.longg !== undefined ? `${el.longg}${el.latg}` : undefined
         if (this.props.role !== 'target' && 
             id !== undefined && id !== this.state.hover &&
-            this.customState.view.scenegraph().root.source.value[0]) {
+            this.customState.view.scenegraph().root.source.value[0] &&
+            this.props.display.modifierPressed !== 16) {
             // console.log(this.customState.view.scenegraph().root.source.value[0].items[1].items, el.latg,)
             let findSinglePoints =  this.customState.view.scenegraph().root.source.value[0].items[1].items.filter((it) => {
                 return el.latg === it.datum.latg && el.longg === it.datum.longg

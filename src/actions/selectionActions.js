@@ -43,7 +43,7 @@ export const resetSelection = (dispatch) => (zone) => {
 }
 export const selectElements = (dispatch) => (elements, zone, selections, modifierPressed) => {
     // console.log(modifierPressed)
-    if (modifierPressed === 16) {
+    if (modifierPressed === 16 || selections.length === 1) {
         if (selectionLib.areSelected(elements, zone, selections)) {
             return dispatch({
                 type: types.REMOVE_SELECTION,

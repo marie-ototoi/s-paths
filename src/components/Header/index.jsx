@@ -33,44 +33,27 @@ class Header extends React.Component {
         this.state.showConfig = (new URLSearchParams(window.location.search)).has('admin')
     }
     getSnapshotBeforeUpdate (prevProps, prevState) {
-        // console.log(prevProps)
-        if (prevProps.which) return null
-        let configChanged = prevProps.configs.past.length !== this.props.configs.past.length &&
-            this.props.configs.present.status !== 'transition'
-
-        if (configChanged || this.props.step !== prevProps.step) {
-            let newData = this.prepareData(this.props)
-            //console.log(newData)
-            this.setState(newData)
-            // return false
-        }
-        if (prevState.keyword === this.state.keyword && 
-            prevProps.display.vizDefPercent.main_width === this.props.display.vizDefPercent.main_width) this.refHeader.focus() 
+        //console.log('SNAPSHOT', prevProps.which, this.props.step) 
+        if (prevProps.step !== this.props.step) this.refHeader.focus() 
         return null
     }
     componentDidMount () {
         this.refHeader.focus()
     }
     componentDidUpdate () {
-        
+        //console.log('dd', this.props.step)
     }
     shouldComponentUpdate (nextProps, nextState) {
-        let selectionChanged = this.props.selections.length !== nextProps.selections.length
-        let dimensionsChanged = (this.props.display.viz.main_useful_height !== nextProps.display.viz.main_useful_height || 
-            this.props.display.viz.main_width !== nextProps.display.viz.main_width)
         let configChanged = nextProps.configs.past.length !== this.props.configs.past.length &&
             this.props.configs.present.status !== 'transition'
 
-        return configChanged || selectionChanged || dimensionsChanged ||
-            this.state.selectedResource !== nextState.selectedResource || 
-            this.state.displayedResource !== nextState.displayedResource || 
-            this.state.displayedView !== nextState.displayedView || 
-            this.state.selectedResource !== nextState.selectedResource ||
-            this.state.keyword !== nextState.keyword ||
-            this.props.dataset.constraints !== nextProps.dataset.constraints ||
-            JSON.stringify(this.state.selectedProps) !== JSON.stringify(nextState.selectedProps) ||
-            JSON.stringify(this.state.displayedProps) !== JSON.stringify(nextState.displayedProps) ||
-            this.props.step !== nextProps.step
+        if (configChanged || this.props.step !== nextProps.step) {
+            let newData = this.prepareData(this.props)
+            
+            this.setState(newData)
+            return false
+        }
+        return true
     }
     prepareData (nextProps) {
         // TODO: remove data duplication
@@ -168,6 +151,7 @@ class Header extends React.Component {
             }))
     }
     displayConfig () {
+        console.log('DISPLAY CONFIG 1')
         const { config, dataset, zone } = this.props
         let selectedLists = this.state.configsLists[this.state.selectedView]
         // let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
@@ -177,15 +161,20 @@ class Header extends React.Component {
             propsAreLoading: true,
             errorSelection: ''
         })
-        // console.log(selectedMatch)
+        // console.log(
+        console.log('DISPLAY CONFIG 2', selectedMatch)
         this.props.displayConfig(this.state.selectedView, selectedMatch, this.props.configs.present.views, config, dataset, zone)
-            .then(() => this.setState({
-                propsAreLoading: false,
-                displayedProps: this.state.selectedProps,
-                displayedView: this.state.selectedView
-            }))
+            .then(() => {
+                console.log('DISPLAY CONFIG 3') 
+                this.setState({
+                    propsAreLoading: false,
+                    displayedProps: this.state.selectedProps,
+                    displayedView: this.state.selectedView
+                })
+            })
     }
     displaySelection () {
+        console.log('DISPLAY SELECTION')
         const { config, configs, dataset, selections, views, zone } = this.props
         let activeConfigs
         let selectedConfig
@@ -209,11 +198,16 @@ class Header extends React.Component {
             stats: activeConfigs.stats
         }
         this.setState({ selectionIsLoading: true, errorSelection: '' })
+        console.log('DISPLAY SELECTION 2')
         this.props.loadSelection(newDataset, views, activeConfigs, dataset)
-            .then(() => this.setState({
-                selectionIsLoading: false,
-                keyword: ''
-            }))
+            .then(() => {
+                console.log('DISPLAY SELECTION 3')
+                // this.forceUpdate()
+                this.setState({
+                    selectionIsLoading: false,
+                    keyword: ''
+                })
+            })
             .catch((e) => this.setState({
                 selectionIsLoading: false,
                 keyword: '',
