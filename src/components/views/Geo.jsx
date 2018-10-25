@@ -196,7 +196,7 @@ class Geo extends React.Component {
         }
         return dataChanged || selectionChanged || dimensionsChanged ||
             this.props.step !== nextProps.step ||
-            this.state.label !== nextState.label
+            (this.props.display.modifierPressed !== 32 && this.state.label !== nextState.label)
     }
     prepareData (nextProps) {
         const { data, dataset, dimensions, selections, zone } = nextProps

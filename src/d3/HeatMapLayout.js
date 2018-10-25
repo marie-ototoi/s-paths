@@ -175,9 +175,9 @@ class HeatMapLayout extends AbstractLayout {
             .attr('width', d => unitWidth - 1)
             .attr('y', 0)
             .attr('height', d => unitHeight - 1)
-        console.log('UPDATE ?')
+        //console.log('UPDATE ?')
         props.handleTransition(props, this.getElementsForTransition(props))
-        console.log('UPDATE !')
+        //console.log('UPDATE !')
     }
 }
 

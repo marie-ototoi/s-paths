@@ -32,14 +32,6 @@ class Header extends React.Component {
         this.state = this.prepareData(props)
         this.state.showConfig = (new URLSearchParams(window.location.search)).has('admin')
     }
-    getSnapshotBeforeUpdate (prevProps, prevState) {
-        //console.log('SNAPSHOT', prevProps.which, this.props.step) 
-        if (prevProps.step !== this.props.step) this.refHeader.focus() 
-        return null
-    }
-    componentDidMount () {
-        this.refHeader.focus()
-    }
     componentDidUpdate () {
         //console.log('dd', this.props.step)
     }
@@ -151,7 +143,7 @@ class Header extends React.Component {
             }))
     }
     displayConfig () {
-        console.log('DISPLAY CONFIG 1')
+        // console.log('DISPLAY CONFIG 1')
         const { config, dataset, zone } = this.props
         let selectedLists = this.state.configsLists[this.state.selectedView]
         // let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
@@ -162,10 +154,10 @@ class Header extends React.Component {
             errorSelection: ''
         })
         // console.log(
-        console.log('DISPLAY CONFIG 2', selectedMatch)
+        // console.log('DISPLAY CONFIG 2', selectedMatch)
         this.props.displayConfig(this.state.selectedView, selectedMatch, this.props.configs.present.views, config, dataset, zone)
             .then(() => {
-                console.log('DISPLAY CONFIG 3') 
+                // console.log('DISPLAY CONFIG 3') 
                 this.setState({
                     propsAreLoading: false,
                     displayedProps: this.state.selectedProps,
@@ -174,7 +166,7 @@ class Header extends React.Component {
             })
     }
     displaySelection () {
-        console.log('DISPLAY SELECTION')
+        // console.log('DISPLAY SELECTION')
         const { config, configs, dataset, selections, views, zone } = this.props
         let activeConfigs
         let selectedConfig
@@ -198,10 +190,10 @@ class Header extends React.Component {
             stats: activeConfigs.stats
         }
         this.setState({ selectionIsLoading: true, errorSelection: '' })
-        console.log('DISPLAY SELECTION 2')
+        // console.log('DISPLAY SELECTION 2')
         this.props.loadSelection(newDataset, views, activeConfigs, dataset)
             .then(() => {
-                console.log('DISPLAY SELECTION 3')
+                // console.log('DISPLAY SELECTION 3')
                 // this.forceUpdate()
                 this.setState({
                     selectionIsLoading: false,

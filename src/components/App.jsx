@@ -43,6 +43,7 @@ class App extends React.PureComponent {
         this.handleMouseMove = this.handleMouseMove.bind(this)
         this.handleTransition = this.handleTransition.bind(this)
         this.handleEndTransition = this.handleEndTransition.bind(this)
+        
         this.state = {
             main_step: 'active',
             aside_step: 'active',
@@ -62,6 +63,8 @@ class App extends React.PureComponent {
         // this is where it all starts
         this.props.loadResources(dataset, views)
         window.addEventListener('resize', throttle(this.onResize, 500))
+        document.addEventListener('keydown', this.handleKeyDown)
+        document.addEventListener('keyup', this.handleKeyUp)
     }
     handleMouseMove (e, zone) {
         const { display, selections } = this.props
@@ -131,7 +134,7 @@ class App extends React.PureComponent {
     }
     handleEndTransition (zone) {
         const { display, data, configs } = this.props
-        // console.log('3 - transition ended', zone)        
+        //console.log('3 - transition ended', zone)        
         this.setState({ [`${zone}_step`]: 'done', [`${zone}_target`]: [] })
         if (!this.props.configs.future.length > 0) this.props.endTransition(zone)
     }
@@ -143,16 +146,16 @@ class App extends React.PureComponent {
         }
     }
     handleKeyDown (event) {
-        // console.log('down', event.which)
+        //console.log('down', event)
         let { dataset, configs, selections } = this.props
         // console.log('eee', event.which, event.key, event.metaKey, event)
-        if (event.which === 13) {
+        if (event.keyCode === 13) {
             this['refHeader'].getWrappedInstance().handleKeyDown(event)
         }
-        if (event.which === 16 || event.which === 32) {
+        if (event.keyCode === 32 || event.keyCode === 16) {
             this.props.setModifier(event.which)
         }
-        if (event.which === 73 && (event.metaKey || event.ctrlKey)) {
+        if (event.keyCode === 73 && (event.metaKey || event.ctrlKey)) {
             let zone = (selections.some(s => s.zone === 'main')) ? 'main' : 'aside'
             let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
             let config = getSelectedView(activeConfigs)
@@ -212,8 +215,6 @@ class App extends React.PureComponent {
         return (<div
             className = "view"
             style = {{ width: display.screen.width + 'px' }}
-            onKeyDown = { this.handleKeyDown }
-            onKeyUp = { this.handleKeyUp }
             tabIndex = { 0 }
             autoFocus = { true }
         >
@@ -223,6 +224,7 @@ class App extends React.PureComponent {
                     zone = "main"
                     config = { mainConfig }
                     step = { this.state.main_step }
+                    elements = { this.state.main_transition }
                 />
             }
             <svg

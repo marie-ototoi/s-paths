@@ -139,17 +139,17 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
     let { constraints, endpoint, entrypoint, prefixes, graphs, resourceGraph, stats } = dataset
     let graph =  resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     let countInstancesQuery = `SELECT (COUNT(DISTINCT ?entrypoint) as ?total) ${graph} WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
-    console.log(countInstancesQuery)
+    // console.log(countInstancesQuery)
     return getData(endpoint, countInstancesQuery, prefixes)
         .then(countInstances => {
-            console.log('countInstances', countInstances)
+            // console.log('countInstances', countInstances)
             const previousConfigMain = getSelectedView(previousConfigs, 'main')
             let singleURI
             return new Promise((resolve, reject) => {
                 let selectionInstances = Number(countInstances.results.bindings[0].total.value)
-                console.log('selectionInstances', selectionInstances)
+                // console.log('selectionInstances', selectionInstances)
                 let configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
-                console.log('alors ?', configs)
+                // console.log('alors ?', configs)
                 if (selectionInstances === 1) {
                     let singleURIQuery =  `SELECT ?entrypoint ${graph} WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
                     getData(endpoint, singleURIQuery, prefixes)
@@ -160,7 +160,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                     
                 } else if (selectionInstances > 1) {
                     stats = evaluateSubStats({ ...stats, selectionInstances })
-                    console.log('evaluateSubStats', stats)
+                    // console.log('evaluateSubStats', stats)
                     // for each views, checks which properties ou sets of properties could match and evaluate
                     // console.log('checkFirstValidConfigs', checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset))
                     resolve(checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset, previousConfigMain))
@@ -171,7 +171,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                 .then(([newConfigs, newStats]) => {
                     
                     const configMain = getSelectedView(newConfigs, 'main')
-                    console.log('then ? ',newConfigs, newConfigs.views, configMain, newStats)
+                    // console.log('then ? ',newConfigs, newConfigs.views, configMain, newStats)
                     const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, singleURI, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
                     const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
                     let queryTransitionMain = makeTransitionQuery(configMain, dataset, previousConfigMain, previousOptions, 'main')
@@ -182,7 +182,7 @@ export const loadSelection = (dispatch) => (dataset, views, previousConfigs, pre
                         getData(endpoint, queryMainUnique, prefixes)
                     ])
                         .then(([dataMain, dataDeltaMain, uniqueMain]) => { // , coverageMain, coverageAside
-                            console.log('DELTA', dataDeltaMain, newConfigs.entrypoint, previousConfigs.entrypoint)
+                            // console.log('DELTA', dataDeltaMain, newConfigs.entrypoint, previousConfigs.entrypoint)
                             dispatch({
                                 type: types.SET_CONFIGS,
                                 constraints,
