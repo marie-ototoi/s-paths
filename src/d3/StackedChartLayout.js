@@ -50,11 +50,10 @@ class StackedChartLayout extends AbstractLayout {
             })
             .attr('id', d => d.selection.selector) // only needed to better understand html source code
             .classed('selected', d => d.selected)
-            .attr('fill', d => d.color)
-            .attr('opacity', d => {
-                d.opacity = (selections.length > 0 && ((selections.some(s => s.zone === zone) && d.selected !== true) || !selections.some(s => s.zone === zone))) ? display.faded[zone] : 1
-                return d.opacity
+            .attr('fill', d => {
+                return (selections.length > 0 && ((selections.some(s => s.zone === zone) && d.selected !== true) || !selections.some(s => s.zone === zone))) ? '#ddd' : d.color
             })
+            .attr('opacity', 1)
     }
     getElements (propName, value, propCategory) {
         const isArray = Array.isArray(value)

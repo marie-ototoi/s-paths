@@ -40,7 +40,7 @@ class Header extends React.Component {
 
         if (configChanged || this.props.step !== prevProps.step) {
             let newData = this.prepareData(this.props)
-            // console.log(newData)
+            //console.log(newData)
             this.setState(newData)
             // return false
         }
@@ -68,7 +68,8 @@ class Header extends React.Component {
             this.state.selectedResource !== nextState.selectedResource ||
             this.state.keyword !== nextState.keyword ||
             this.props.dataset.constraints !== nextProps.dataset.constraints ||
-            JSON.stringify(this.state) !== JSON.stringify(nextState) ||
+            JSON.stringify(this.state.selectedProps) !== JSON.stringify(nextState.selectedProps) ||
+            JSON.stringify(this.state.displayedProps) !== JSON.stringify(nextState.displayedProps) ||
             this.props.step !== nextProps.step
     }
     prepareData (nextProps) {

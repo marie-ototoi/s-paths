@@ -254,7 +254,7 @@ export const getDimensions = (element, viz, offset = { x: 0, y: 0, width: 0, hei
     case 'mainLegendLegend':
         return {
             x: viz.main_x + viz.horizontal_padding + viz.main_useful_width + offset.x,
-            y: (viz.useful_height * 3 / 4) + viz.top_margin + offset.y,
+            y: viz.useful_height + viz.top_margin + offset.y,
             width: viz.horizontal_padding + offset.width,
             height: 20 + offset.height
         }

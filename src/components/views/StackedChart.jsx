@@ -70,10 +70,19 @@ class StackedChart extends React.Component {
         const axisBottom = getAxis(nestedProp1, 'prop1', categoryProp1)
         // Second prop to be displayed in the legend
         const nestedProp2 = d3.nest().key(legend => legend.prop2.value).entries(data).sort((a, b) => { return b.key.localeCompare(a.key) })
-        const pathProp2 = selectedConfig.properties[1].path
+        // const pathProp2 = selectedConfig.properties[1].path
         const categoryProp2 = selectedConfig.properties[1].category
-        const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
+        //const colors = getPropPalette(palettes, pathProp2, nestedProp2.length)
         // console.log(colors)
+        let interpolate = d3.scaleOrdinal().domain([...nestedProp2.map(prop => prop.key), 'fake', 'fake', 'fake','fake']).range(nestedProp2.map((val, i) => {
+            return d3.interpolateBlues(i / (nestedProp2.length - 1) + 0.4)
+        }))
+        //
+        // let avoidpale = [interpolate("trop pale"), interpolate("trop pales"), interpolate("trop trop pale")]
+        // console.log(interpolate('toto'), interpolate('titi'))
+        let colors = nestedProp2.map(line => {
+            return interpolate(line.key)
+        })
         const legend = getLegend(nestedProp2, 'prop2', colors, categoryProp2)
         const propsLists = config.propList
         // console.log(propsLists)
@@ -91,7 +100,7 @@ class StackedChart extends React.Component {
     selectEnsemble (prop, value, category) {
         const elements = this.layout.getElements(prop, value, category)
         const { selectElements, zone, selections } = this.props
-        selectElements(elements, zone, selections)
+        selectElements(elements, zone, selections, 16)
     }
     render () {
         const { axisBottom, legend } = this.customState
@@ -124,7 +133,7 @@ class StackedChart extends React.Component {
                 <Legend
                     type = "plain"
                     zone = { zone }
-                    offset = { { x: 10, y: 0, width: -20, height: 0 } }
+                    offset = { { x: 0, y: 0, width: 0, height: 0 } }
                     legend = { legend }
                     selectElements = { this.selectEnsemble }
                 />
@@ -151,7 +160,8 @@ class StackedChart extends React.Component {
                     key = { zone + '_propselector_22' }
                     propList = { this.customState.propsLists[1] }
                     config = { config }
-                    dimensions = { getDimensions(zone + 'LegendLegend', display.viz, { x: 0, y: 0, width: -35, height: 0 }) }
+                    align = "right"
+                    dimensions = { getDimensions(zone + 'LegendLegend', display.viz, { x: 0, y: 0, width: -13, height: 0 }) }
                     propIndex = { 1 }
                     zone = { zone }
                 />

@@ -31,8 +31,11 @@ class LegendLayout extends AbstractLayout {
             .attr('height', (d, i) => 10)
             .attr('y', (d, i) => props.dimensions.height - total + Math.ceil(i * 13))
             .attr('fill', d => d.color)
+            .attr('x', props.dimensions.width - 30)
+            .attr('opacity', 1)
         d3.select(this.el).selectAll('g.legenditem').select('text')
-            .attr('x', 20)
+            .attr('text-anchor', 'end')
+            .attr('x', props.dimensions.width - 42)
             .attr('y', (d, i) => props.dimensions.height - total + Math.ceil(i * 13) + 9)
             .text(d => d.label)
     }

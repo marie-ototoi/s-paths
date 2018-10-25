@@ -65,13 +65,17 @@ class HeatMap extends React.Component {
         }])
         const axisLeft = getAxis(nestedProp2, 'prop2', categoryProp2)
 
-        const colors = getQuantitativeColors()
+        //const colors = getQuantitativeColors()
         // console.log(d3.scaleOrdinal(d3.schemeCategory10)('toto'), d3.scaleOrdinal(d3.schemeCategory10)('tata'))
-        //let test = d3.scaleOrdinal(d3.schemeCategory10)
-        //console.log(test('toto'), test('tata'))
-        //test = d3.scaleOrdinal(d3.interpolateOrRd) 
-        //console.log(test('toto'), test('tata'))
-        const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, colors.length)
+
+        const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, 7)
+        //console.log(thresholds)
+        let thedomain = [thresholds[0].key[0], thresholds[thresholds.length-1].key[1]]
+        // console.log('av', thedomain)
+        thedomain[0] = thedomain[0] - Math.floor(thedomain[0] * 0.2)
+        // console.log('ap', thedomain)
+        let interpolate = d3.scaleSequential().domain(thedomain).interpolator(d3.interpolateYlOrRd);
+        let colors = thresholds.map(line => interpolate(line.key[1]))
         const legend = getLegend(thresholds, 'countprop2', colors, 'aggregate')
         const propsLists = config.propList
         // Save to reuse in render
@@ -118,7 +122,7 @@ class HeatMap extends React.Component {
                 <Legend
                     type = "plain"
                     zone = { zone }
-                    offset = { { x: 10, y: 0, width:0, height: 0 } }
+                    offset = { { x: 0, y: 0, width:0, height: 0 } }
                     legend = { legend }
                     selectElements = { this.selectEnsemble }
                 />
@@ -166,7 +170,7 @@ class HeatMap extends React.Component {
     selectEnsemble (prop, value, category) {
         const elements = this.layout.getElements(prop, value, category)
         const { selectElements, zone, selections } = this.props
-        selectElements(elements, zone, selections)
+        selectElements(elements, zone, selections, 16)
     }
     componentDidMount () {
         this.layout = new HeatMapLayout(this[this.customState.elementName], { ...this.props, ...this.customState })

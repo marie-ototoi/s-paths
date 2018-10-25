@@ -41,30 +41,12 @@ export const getThresholdsForLegend = (nestedProps, propName, category, nbOfRang
 }
 
 export const getThresholds = (minValue, maxValue, nbOfRanges) => {
+    //console.log(minValue, maxValue)
     let diff = maxValue - minValue
-    let part = Math.ceil(diff / nbOfRanges)
-    // console.log()
-    // console.log('minValue', minValue, 'maxValue', maxValue, 'diff', diff, 'part', part, 'roundStart', roundStart, 'diff', diff)
-    const roundUnit = Math.ceil(Number('1e' + (String(part).length - 2)))
-    let roundPart = Math.ceil(part / roundUnit)
-    let roundPartStr = String(roundPart)
-    if (Number(roundPartStr.substr(roundPartStr.length - 1, 1)) <= 5) {
-        roundPart = Number(roundPartStr.substr(0, roundPartStr.length - 1) + '5')
-    } else {
-        roundPart = Number(roundPartStr.substr(0, roundPartStr.length - 1) + '0') + 10
-    }
-    roundPart *= roundUnit
-    let roundStart
-    let index = nbOfRanges
-    do {
-        roundStart = roundPart * index
-        index--
-    }
-    while (roundStart > minValue)
-    // console.log('roundPart', roundPart, 'roundUnit', roundUnit)
+    let part = Math.floor(diff / nbOfRanges)
     let ranges = Array.from(Array(nbOfRanges).keys())
     // return [diff, part, roundUnit, roundStart, start, roundPartStr, roundPart]
-    return ranges.map((r) => [roundStart + r * roundPart + 1, (roundStart + (r + 1) * roundPart)]).filter(v => v[0] <= maxValue)
+    return ranges.map((r) => [minValue + part * r, minValue + part * (r + 1)])
 }
 
 // const groupAggregateData

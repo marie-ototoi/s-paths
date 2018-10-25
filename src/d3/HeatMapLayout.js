@@ -34,7 +34,7 @@ class HeatMapLayout extends AbstractLayout {
         d3.select(this.el)
             .selectAll('g.xUnits g.yUnits')
             .each((d, i) => {
-                // console.log(d.range)
+                // console.log(d.countprop2)
                 let filteredLegend = legend.info.filter(p => {
                     return (p.key[0] <= Number(d.countprop2) && p.key[1] >= Number(d.countprop2)) ||
                         (d.countprop2.value && p.key[0] <= Number(d.countprop2.value) && p.key[1] >= Number(d.countprop2.value))
@@ -64,12 +64,12 @@ class HeatMapLayout extends AbstractLayout {
             })
             .attr('id', d => d.selection.selector) // only needed to better understand html source code
             .classed('selected', d => d.selected)
-            .attr('fill', d => d.color)
-            .attr('opacity', d => {
+            .attr('fill', d => {
                 return selections.length > 0 && 
                     ((thisZone && d.selected !== true) ||
-                    (!thisZone && selections.length > 0)) ? display.faded[zone] : 1
+                    (!thisZone && selections.length > 0)) ? '#ddd' : d.color
             })
+            .attr('opacity', 1)
     }
 
     getElements (propName, value, propCategory) {

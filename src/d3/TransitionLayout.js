@@ -47,7 +47,6 @@ class TransitionLayout extends AbstractLayout {
                 .attr('opacity', d => 0)
                 .transition()
                 .duration(1000)
-                .attr('opacity', d => d.opacity)
               
             shapesSelection
                 .exit()
