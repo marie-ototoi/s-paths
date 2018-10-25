@@ -111,11 +111,6 @@ describe('lib/data', () => {
         expect(data.groupTimeData(dataSet1, 'prop1', 'Y', 150, ['countprop2', 'countprop3'])[2].countprop2).to.equal(7)
     })*/
 
-    it('should return specified number of rounded ranges between two values', () => {
-        expect(data.getThresholds(116, 145380, 6)).to.deep.equal([[1, 25000], [25001, 50000], [50001, 75000], [75001, 100000], [100001, 125000], [125001, 150000]])
-        expect(data.getThresholds(43500, 145380, 6)).to.deep.equal([[40001, 60000], [60001, 80000], [80001, 100000], [100001, 120000], [120001, 140000], [140001, 160000]])
-    })
-
     it('should return a string that can be used as id', () => {
         expect(data.makeId('http://data.nobelprize.org/resource/laureate/571')).to.equal('httpdatanobelprizeorgresourcelaureate571')
         expect(data.makeId('http://data.nobelprize.org/resource/laureate/210')).to.equal('httpdatanobelprizeorgresourcelaureate210')
