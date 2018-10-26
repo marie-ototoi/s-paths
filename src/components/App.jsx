@@ -117,7 +117,7 @@ class App extends React.PureComponent {
                 updateState.side_brush = getTransitionElements(this.state.aside_origin, elements, getSelectedView(getCurrentConfigs(configs, 'aside', 'active')) , getSelectedView(getCurrentConfigs(configs, 'main', 'active')), getResults(data, 'main', 'delta'), 'aside')
             }
             // console.log(updateState.main_brush, updateState.side_brush)
-            this.setState(updateState)
+            if (updateState !== {}) this.setState(updateState)
         } else if (role === 'target' && zone === 'main') {
             // console.log('transition target laid out', zone, role, elements)
             if (!this.state[`${zone}_target`]) {
