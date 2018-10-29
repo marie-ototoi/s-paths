@@ -512,7 +512,7 @@ class Header extends React.Component {
                     <Selection
                         isLoading={this.state.selectionIsLoading}
                         disable={!selectionEnabled}
-                        onClick={this.displaySelection}
+                        onClick={(e) => this.displaySelection()}
                     />
                     <Pivot
                         isLoading={this.state.pivotIsLoading}

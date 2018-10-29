@@ -1,7 +1,14 @@
 .Slider {
     position: absolute;
     right: 20px;
-    top: 150px;
+    top: 140px;
     z-index: 20;
-    width: 100px !important;
+    width: 150px;
+    height: 40px;
+    background: url('/images/slider.png') right top no-repeat;
+}
+.Slider input {
+    width: 65px !important;
+    margin-left: 48px;
+    margin-top: 5px;
 }

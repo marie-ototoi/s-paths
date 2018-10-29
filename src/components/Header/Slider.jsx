@@ -30,15 +30,17 @@ class Slider extends React.Component {
 
     render () {
         return (
-            <input
-                type='range'
-                className='Slider'
-                value={this.state.value}
-                min={0}
-                max={45}
-                step={this.state.step}
-                onChange = {this.drag}
-            />
+            <div className='Slider'>
+                <input
+                    type='range'
+                    
+                    value={this.state.value}
+                    min={0}
+                    max={45}
+                    step={this.state.step}
+                    onChange = {this.drag}
+                />
+            </div>
         )
     }
 
