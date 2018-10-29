@@ -5,12 +5,12 @@
     padding-top: 15px;
     border-bottom: 1px solid #ababab;
     box-shadow: 0 2px 2px 0 #ababab;
+    background: #fff;
 }
 
 .Header .Line {
     display: flex;
     align-items: center;
-    background: #f4f4f4;
     padding: 5px 0 0 0;
     justify-content: start;
 }
