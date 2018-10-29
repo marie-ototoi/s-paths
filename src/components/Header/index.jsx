@@ -86,11 +86,17 @@ class Header extends React.Component {
                     }
                 })
                 //console.log(pivot)
-                this.setState({pivot})
+                this.setState({
+                    pivot: pivot.sort((a,b) => {
+                        let aRank = a.prop === 'typeentrypoint' ? 0 : 1
+                        let bRank = b.prop === 'typeentrypoint' ? 0 : 1
+                        return aRank - bRank
+                    })
+                })
             })
             .catch(err => {
                 console.log('error fetching Pivot', err)
-                this.setState({pivot : {}})
+                this.setState({pivot : []})
             })
     }
     shouldComponentUpdate (nextProps, nextState) {
@@ -328,7 +334,7 @@ class Header extends React.Component {
                 { label: 'displayed', total: getNbDisplayed(data, zone, 'active') }
             ]
 
-            let pivotEnabled = true
+            let pivotEnabled = selections.length > 0
             // selection button
             let selectionEnabled = selections.length > 0
             let pointerClass = selectionEnabled ? '' : 'greyed'

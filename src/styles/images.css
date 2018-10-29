@@ -1,7 +1,11 @@
+.Images {
+    
+}
 .Images .content {
     align-items: center;
     display: flex;
     flex-wrap: wrap;
+    overflow-y: scroll;
 }
 .Images .content img {
     width: 50px;

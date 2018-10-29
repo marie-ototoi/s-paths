@@ -88,12 +88,11 @@ class Images extends React.Component {
                     position: 'relative',
                     left : `${dimensions.x + display.viz.horizontal_padding}px`,
                     top: `${dimensions.y + dimensions.top_padding}px`,
-                    width: `${dimensions.useful_width}px`,
-                    height: `${dimensions.useful_height}px`
+                    width: `${dimensions.useful_width}px`
                 }}
             >
                 <div className = "box" style = {{ width: dimensions.useful_width + 'px' }}>
-                    <div className = "content">
+                    <div className = "content" style = {{maxHeight: `${dimensions.useful_height}px`}}>
                         { 
                             uniqueData.map((el, i) => 
                                 (<img key = { `img_${zone}_${i}` }  className = "" src = { el.prop1.value } alt = { el.prop2.value } title = { el.prop2.value } />)
