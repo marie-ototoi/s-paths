@@ -4,47 +4,56 @@ import PropTypes from 'prop-types'
 import './Pivot.css'
 
 class Pivot extends React.Component {
+    constructor (props) {
+        super(props)
+        this.state = {
+            open: false
+        }
+    }
     render () {
         return (
             <div>
                 {(
                     !this.props.isLoading &&
-                    <div>
+                    <div className='Pivot'>
                         <button
-                            className='Pivot button'
-                            onClick={this.props.onClick}
+                            className='button'
                             disabled={this.props.disable}
+                            style={{
+                                maxWidth:'200px',
+                                minHeight: this.state.open ? (30 + this.props.elements.length * 20) : 10 +'px',
+                                position: 'relative !important'
+                            }}
+                            onClick={e => this.setState({open: !this.state.open})}
                         >
-                            Pivot from selection 
-                        </button>
-                        <div className="title is-7">Entities from the selection also belonging to the class:</div>
-                        <ul>
-                            {
-                                this.props.elements.typeentrypoint && this.props.elements.typeentrypoint.map((piv, i) => (
-                                    <li key = {`piv_ep${i}`} onClick={e => this.props.onClick({ prop: 'typeentrypoint', type: piv })}>{piv}</li>
+                            Pivot from selection to...
+                            {this.state.open &&
+                                this.props.elements.map((piv, i) => (
+                                    <li
+                                        key = {`piv_ep${i}`}
+                                        onClick={e => {
+                                            this.props.onClick(piv)
+                                            this.setState({open: false})
+                                        }}
+                                        title={piv.comment}
+                                    >
+                                        <span>{piv.label}</span>
+                                    </li>
                                 ))
                             }
-                        </ul>
-                        <div className="title is-7">Entities related to the selection through one of the currently displayed paths:</div>
-                        <ul>
-                            {
-                                this.props.elements.paths && this.props.elements.paths.map((classelt, cli) => {
-                                    return classelt.props.map((piv, i) => (
-                                        <li key = {`piv_cl${cli}ep${i}`} onClick={e => this.props.onClick(piv)}>{classelt.class} {piv.prop}</li>
-                                    ))
-                                })
-                            }
-                        </ul>
+                        </button>
+                      
+                        
                     </div>
                 ) ||
-                    <span className='Pivot button is-loading'>Pivot to</span>
+                    <span className='Pivot button is-loading'>Pivot from selection to...</span>
                 }
             </div>
         )
     }
 
     static propTypes = {
-        elements: PropTypes.object,
+        elements: PropTypes.array,
         isLoading: PropTypes.bool.isRequired,
         disable: PropTypes.bool.isRequired,
         onClick: PropTypes.func.isRequired

@@ -17,7 +17,7 @@ class ResourceSelect extends React.Component {
                 <ReactSelect
                     classNamePrefix='PropSelect'
                     isSearchable={true}
-                    defaultValue={this.props.selectedResource}
+                    value={this.props.selectedResource}
                     getOptionValue={(option) => (option['type'])}
                     getOptionLabel={ResourceSelect.getOptionLabel}
                     onChange={this.props.onChange}

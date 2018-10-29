@@ -6,11 +6,11 @@ import './Selection.css'
 class Selection extends React.Component {
     render () {
         return (
-            <div>
+            <div className='Selection'>
                 {(
                     !this.props.isLoading &&
                     <button
-                        className='Selection button'
+                        className='button'
                         onClick={this.props.onClick}
                         disabled={this.props.disable}
                     >

@@ -1,5 +1,9 @@
 .Header .Explain .resource-def {
-    padding-left: 5px;
+    margin-left: 5px;
+}
+.Explain {
+    position: relative;
+    top: 45px;
 }
 .Explain p {
     font-size: 0.8em;

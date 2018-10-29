@@ -33,7 +33,7 @@ class Header extends React.Component {
         this.preparePivot = this.preparePivot.bind(this)
         let initData = this.prepareData(props)
         this.state = {
-            pivot: {},
+            pivot: [],
             showConfig: (new URLSearchParams(window.location.search)).has('admin'),
             ...initData
         }
@@ -47,21 +47,39 @@ class Header extends React.Component {
         this.props.checkPivots(activeConfigs.views[displayedView].selectedMatch.properties, dataset)
             .then(res => {
                 // console.log(res.results.bindings)
-                let pivot = { typeentrypoint: [], paths:[] }
+                let pivot = []
                 res.results.bindings.forEach(piv => {
                     for (let p in piv) {
-                        if (p === 'typeentrypoint') {
-                            if (this.props.dataset.resources.find(r => r.type === piv[p].value).pathsNumber > 0 && !pivot[p].includes(piv[p].value)) pivot[p].push(piv[p].value)
-                        } else {
-                            if (this.props.dataset.resources.find(r => r.type === piv[p].value).pathsNumber > 0) {
-                                let index = pivot.paths.findIndex(pi => pi.class === piv[p].value)
+                        if (this.props.dataset.resources.find(r => r.type === piv[p].value).pathsNumber > 0 && piv[p].value !== dataset.entrypoint) {
+                            let index = pivot.findIndex(pi => pi.type === piv[p].value)
+                            let label = this.state.labelsDict[piv[p].value] ? this.state.labelsDict[piv[p].value].label : piv[p].value
+                            let comment = this.state.labelsDict[piv[p].value] ? this.state.labelsDict[piv[p].value].comment : undefined
+                            if (p === 'typeentrypoint') {
                                 if (index > -1) {
-                                    if (!pivot.paths[index].props.map(p=> p.prop).includes(p)) {
-                                        pivot.paths[index].props.push({ prop:p, propnb: p.substr(8, 1), internb: p.substr(14, 1), type: piv[p].value })
+                                    pivot[index] = {
+                                        type: piv[p].value,
+                                        prop:p,
+                                        label,
+                                        comment 
                                     }
                                 } else {
-                                    let pivobject = { props: [{ prop:p, propnb: p.substr(8, 1), internb: p.substr(14, 1), type: piv[p].value }], class: piv[p].value }
-                                    pivot.paths.push(pivobject)
+                                    pivot.push({
+                                        type: piv[p].value,
+                                        prop:p,
+                                        label,
+                                        comment
+                                    })
+                                }
+                            } else {
+                                if (index == -1) {
+                                    pivot.push({
+                                        prop:p,
+                                        propnb: p.substr(8, 1),
+                                        internb: p.substr(14, 1),
+                                        type: piv[p].value,
+                                        label,
+                                        comment
+                                    })
                                 }
                             }
                         }
@@ -109,7 +127,10 @@ class Header extends React.Component {
         let selectedProps = displayedProps
         let selectedView = displayedView
         // prepare pivot
-        
+        let labelsDict = {}
+        nextProps.dataset.resources.forEach(res => {
+            labelsDict[res.type] = { label: res.label, comment: res.comment }
+        })
         return {
             resourceIsLoading: false,
             selectionIsLoading: false,
@@ -120,6 +141,7 @@ class Header extends React.Component {
             keyword: '',
             displayedResource,
             selectedResource,
+            labelsDict,
             resourceList: nextProps.dataset.resources.filter(res => res.pathsNumber > 0),
             configsLists,
             displayedView,
@@ -321,7 +343,7 @@ class Header extends React.Component {
             return (
                 <div className='Header' ref = {(c) => { this.refHeader = c }} tabIndex = {1}>
                     <div className="Line">
-                        <div className='logo'>
+                        <div className='logo' style={{width: `${this.props.display.viz.horizontal_padding}px`}}>
                             <img
                                 src='/images/logo.svg'
                                 alt='S-Path Logo'
@@ -331,7 +353,6 @@ class Header extends React.Component {
                         <div
                             className='field'
                             style={{
-                                marginLeft: `${this.props.display.viz.horizontal_padding}px`,
                                 width: `${this.props.display.viz.useful_width * 4 / 5}px`
                             }}
                         >

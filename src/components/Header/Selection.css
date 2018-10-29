@@ -4,7 +4,10 @@
     font-size: 0.8em;
     z-index: 20;
     left: 15px;
-    top: 100px;
+    top: 138px;
+}
+.Selection button {
+    font-size: 1em;
 }
 
 .Selection .icon {
