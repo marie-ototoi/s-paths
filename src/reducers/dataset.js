@@ -14,13 +14,14 @@ const initialState = {
     rankPropFactors: {
         category: 1,
         definition: 4,
-        level: 2,
-        coverage: 8
+        level: 3,
+        coverage: 8,
+        customProps: 8
     },
     rankMatchFactors: {
         view: 4,
         propsNumber: 1,
-        propsAverage: 3
+        propsAverage: 4
     },
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',
@@ -32,8 +33,8 @@ const initialState = {
         freebase: 'http://rdf.freebase.com/ns/',
         map: 'http://data.nobelprize.org/resource/#',
         meta: 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#',
-        nobel_t: 'http://data.nobelprize.org/terms/',
-        nobel_r: 'http://data.nobelprize.org/resource/',
+        nobel: 'http://data.nobelprize.org/terms/',
+        nobelR: 'http://data.nobelprize.org/resource/',
         nobelprizes: 'http://nobelprize.org/nobel_prizes/',
         owl: 'http://www.w3.org/2002/07/owl#',
         rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
@@ -67,7 +68,13 @@ const initialState = {
         slickmem: 'http://slickmem.data.t-mus.org/terms/',
         umbel: 'http://umbel.org/umbel/rc/'
     },
-    stats: []
+    stats: [],
+    propertyPreferences: {
+        'nobel:Laureate/nobel:nobelPrize/*/nobel:year/*': 1,
+        'nobel:Laureate/foaf:name/*': 1,
+        'nobel:Laureate/gender/*': 0.9,
+        'nobel:Laureate/nobel:laureateAward/*/nobel:category/*/rdfs:label/*' : 1
+    }
 }
 
 const dataset = (state = initialState, action) => {

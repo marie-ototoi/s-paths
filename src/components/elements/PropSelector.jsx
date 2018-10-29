@@ -52,8 +52,7 @@ PropSelector.propTypes = {
     type: PropTypes.string,
     views: PropTypes.array,
     zone: PropTypes.string,
-    selectResource: PropTypes.func,
-    selectProperty: PropTypes.func
+    selectResource: PropTypes.func
 }
 
 function mapStateToProps (state) {

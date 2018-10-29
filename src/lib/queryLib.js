@@ -98,7 +98,9 @@ export const FSL2SPARQL = (FSLpath, options) => {
         let thisObject = (level === levels) ? propName : `${propName}inter${level}`
         query = whichGraph ? query.concat(`GRAPH ?g${level} { ?${thisSubject} ${predicate} ?${thisObject} . } `) : query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
         // if (level === levels) query = query.concat(`${!optional ? 'OPTIONAL { ' : ''}?${thisObject} rdfs:label ?label${propName}${!optional ? ' } .' : ''} `)
-        if (objectType !== '*') {
+        if (objectType === '?') {
+            query = query.concat(`?${thisObject} rdf:type ?type${thisObject} . `)
+        } else if (objectType !== '*') {
             query = query.concat(`?${thisObject} rdf:type ${objectType} . `)
         }
         prevSubjects.push(thisSubject)
@@ -183,6 +185,41 @@ export const makePath = (prop, previousProp, level, options) => {
         path,
         level
     }
+}
+
+export const makeCheckPivotQuery = (properties, dataset) => {
+    const { graphs, resourceGraph } = dataset
+    let defList = `?entrypoint rdf:type ?typeentrypoint . `
+    let groupList = `GROUP BY ?typeentrypoint `
+    let propList = `?typeentrypoint `
+    let orderList = `ORDER BY ?typeentrypoint `
+    // let graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
+    let graph = resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+    properties.forEach((prop, index) => {
+        let pathParts = prop.path.split('/')
+        if(pathParts.length > 3) {
+            for (let i = 1; i < pathParts.length - 2; i += 2) {
+                let level = Math.ceil(i / 2)
+                propList = propList.concat(`?typeprop${(index+1)}inter${level} `)
+            }
+        }
+    })
+    properties.forEach((prop, index) => {
+        index += 1
+        defList = defList.concat(FSL2SPARQL(prop.path, {
+            propName: `prop${index}`,
+            entrypointName: 'entrypoint',
+            entrypointType: (index === 1),
+            optional: false,
+            resourceGraph,
+            graphs,
+            hierarchical: false
+        }))
+    })
+    return `SELECT ${propList}${graph}
+WHERE {
+${defList}
+} ${groupList}${orderList}LIMIT 100`
 }
 
 export const makePropQuery = (prop, options, queryType) => {
@@ -309,14 +346,17 @@ export const makeKeywordConstraints = (keyword, options) => {
     return constraint
 }
 
-export const makeSelectionConstraints = (selections, selectedConfig, zone, dataset) => {
+export const makeSelectionConstraints = (selections, selectedConfig, zone, dataset, pivot) => {
     const { resourceGraph, graphs } = dataset
+    
     const uriSelections = selections.filter(sel => sel.query.type === 'uri' && sel.zone === zone)
     const uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
     // add constraints for constrained groups of entities (heatmap)
     const setSelection = selections.filter(sel => sel.query.type === 'set' && sel.zone === zone)
     let paths = ''
     let bind = ''
+    // console.log('SALUT', setSelection, zone)
+    let entrypointName = pivot ? 'formerentrypoint' : 'entrypoint'
     const setConstraints = setSelection.map((sel, iS) => {
         return '(' + sel.query.value.map((constraint, iC) => {
             const propName = 'contraint' + constraint.propName
@@ -324,7 +364,7 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone, datas
             if (iS === 0) {
                 paths += FSL2SPARQL(selectedConfig.properties[iC].path, {
                     propName,
-                    entrypointName: 'entrypoint',
+                    entrypointName,
                     entrypointType: true,
                     resourceGraph,
                     graphs
@@ -360,7 +400,7 @@ export const makeSelectionConstraints = (selections, selectedConfig, zone, datas
     }).join(' || ')
     let totalQuery = ''
 
-    if (uriRegex !== '') totalQuery += `FILTER regex(?entrypoint, '^${uriRegex}$', 'i') .`
+    if (uriRegex !== '') totalQuery += `FILTER regex(?${entrypointName}, '^${uriRegex}$', 'i') .`
     if (setConstraints !== '') totalQuery += `${paths} ${bind}FILTER (${setConstraints}) . `
     // console.log(totalQuery)
     return totalQuery
@@ -407,7 +447,26 @@ ${constraints}
 ${defList}
 } ${groupList} ${orderList}LIMIT 10`
 }
-
+export const makePivotConstraints = (entrypointName, entrypoint, configZone, options) => {
+    let { graphs, resourceGraph } = options
+    entrypoint, configZone
+    let selectedConfig = configLib.getSelectedMatch(configZone)    
+    let properties = selectedConfig.properties 
+    let defList = ``
+    properties.forEach((prop, index) => {
+        index += 1
+        defList = defList.concat(FSL2SPARQL(prop.path, {
+            propName: `formerprop${index}`,
+            entrypointName,
+            entrypointType: (index === 1),
+            optional: false,
+            resourceGraph,
+            graphs,
+            hierarchical: false
+        }))
+    })
+    return defList + ' '
+}
 // to do : take constraints into account
 export const makeQuery = (entrypoint, configZone, zone, options) => {
     let { graphs, constraints, maxDepth, maxLevel, prop1only, resourceGraph, singleURI, unique } = options
@@ -547,7 +606,7 @@ WHERE {
 }`
 }
 
-export const makeTransitionQuery = (newConfig, newOptions, config, options, zone) => {
+export const makeTransitionQuery = (newConfig, newOptions, config, options, zone, pivot) => {
     // let newConstraints = newOptions.constraints
     // newConstraints = newConstraints.replace('?', '?new')
     const { graphs, resourceGraph, constraints } = options

@@ -513,7 +513,8 @@ export const deduplicate = (data, props) => {
 }
 
 export const getTransitionElements = (originElements, targetElements, originConfig, targetSelectedView, deltaData, zone) => {
-    // console.log('before', zone, originElements, targetElements, originConfig, targetSelectedView, deltaData)
+    console.log('before', zone, originElements, targetElements, originConfig, targetSelectedView, deltaData)
+    
     deltaData = deltaData.map(data => {
         let indexOrigin = getDeltaIndex(data, originElements, { entrypoint: originConfig.entrypoint, isTarget: false })
         let indexTarget = getDeltaIndex(data, targetElements, { entrypoint: targetSelectedView.entrypoint, isTarget: true })
@@ -554,7 +555,7 @@ export const getTransitionElements = (originElements, targetElements, originConf
             }
         })
     }
-    // console.log('after', originElements, targetElements)
+    console.log('after', originElements, targetElements)
     // pour chaque zone d'arrivée identifier tous les points de départ
     // diviser la zone d'arrivée et la remplacer par le nombre de zones nécessaires
     // en donnant le nom de la zone de départ

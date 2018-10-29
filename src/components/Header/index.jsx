@@ -5,10 +5,10 @@ import shallowEqual from 'shallowequal'
 
 import { getConfigs, getCurrentConfigs, getSelectedMatch, getSelectedView } from '../../lib/configLib'
 import { getNbDisplayed } from '../../lib/dataLib'
-import { makeKeywordConstraints, makeSelectionConstraints } from '../../lib/queryLib'
+import { makeKeywordConstraints, makePivotConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 
 import { showSettings, showStats } from '../../actions/displayActions'
-import { displayConfig, loadSelection, selectResource } from '../../actions/dataActions'
+import { checkPivots, displayConfig, selectResource } from '../../actions/dataActions'
 import Submit from './Submit'
 import Quantifier from './Quantifier'
 import ViewSelect from './ViewSelect'
@@ -17,8 +17,8 @@ import ResourceSelect from './ResourceSelect'
 import Explain from './Explain'
 import Slider from './Slider'
 import Selection from './Selection'
+import Pivot from './Pivot'
 import './Header.css'
-import display from '../../reducers/display';
 
 class Header extends React.Component {
     constructor (props) {
@@ -27,13 +27,53 @@ class Header extends React.Component {
         this.displayKeyword = this.displayKeyword.bind(this)
         this.displayResource = this.displayResource.bind(this)
         this.displaySelection = this.displaySelection.bind(this)
+        this.displayPivot = this.displayPivot.bind(this)
         this.handleKeyDown = this.handleKeyDown.bind(this)
         this.prepareData = this.prepareData.bind(this)
-        this.state = this.prepareData(props)
-        this.state.showConfig = (new URLSearchParams(window.location.search)).has('admin')
+        this.preparePivot = this.preparePivot.bind(this)
+        let initData = this.prepareData(props)
+        this.state = {
+            pivot: {},
+            showConfig: (new URLSearchParams(window.location.search)).has('admin'),
+            ...initData
+        }
+        this.preparePivot(props.configs, initData.displayedView, props.dataset)
     }
     componentDidUpdate () {
         //console.log('dd', this.props.step)
+    }
+    preparePivot(configs, displayedView, dataset) {
+        let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+        this.props.checkPivots(activeConfigs.views[displayedView].selectedMatch.properties, dataset)
+            .then(res => {
+                // console.log(res.results.bindings)
+                let pivot = { typeentrypoint: [], paths:[] }
+                res.results.bindings.forEach(piv => {
+                    for (let p in piv) {
+                        if (p === 'typeentrypoint') {
+                            if (this.props.dataset.resources.find(r => r.type === piv[p].value).pathsNumber > 0 && !pivot[p].includes(piv[p].value)) pivot[p].push(piv[p].value)
+                        } else {
+                            if (this.props.dataset.resources.find(r => r.type === piv[p].value).pathsNumber > 0) {
+                                let index = pivot.paths.findIndex(pi => pi.class === piv[p].value)
+                                if (index > -1) {
+                                    if (!pivot.paths[index].props.map(p=> p.prop).includes(p)) {
+                                        pivot.paths[index].props.push({ prop:p, propnb: p.substr(8, 1), internb: p.substr(14, 1), type: piv[p].value })
+                                    }
+                                } else {
+                                    let pivobject = { props: [{ prop:p, propnb: p.substr(8, 1), internb: p.substr(14, 1), type: piv[p].value }], class: piv[p].value }
+                                    pivot.paths.push(pivobject)
+                                }
+                            }
+                        }
+                    }
+                })
+                //console.log(pivot)
+                this.setState({pivot})
+            })
+            .catch(err => {
+                console.log('error fetching Pivot', err)
+                this.setState({pivot : {}})
+            })
     }
     shouldComponentUpdate (nextProps, nextState) {
         let configChanged = nextProps.configs.past.length !== this.props.configs.past.length &&
@@ -41,9 +81,9 @@ class Header extends React.Component {
 
         if (configChanged || this.props.step !== nextProps.step) {
             let newData = this.prepareData(this.props)
-            
+           
+            this.preparePivot(nextProps.configs, newData.displayedView, nextProps.dataset)
             this.setState(newData)
-            return false
         }
         return true
     }
@@ -68,10 +108,13 @@ class Header extends React.Component {
         })
         let selectedProps = displayedProps
         let selectedView = displayedView
+        // prepare pivot
+        
         return {
             resourceIsLoading: false,
             selectionIsLoading: false,
             keywordIsLoading: false,
+            pivotIsLoading: false,
             errorSelection: '',
             propsAreLoading: false,
             keyword: '',
@@ -100,19 +143,52 @@ class Header extends React.Component {
             }
         }
     }    
-    displayResource () {
-        const { dataset, views } = this.props
-        this.setState({ resourceIsLoading: true, errorSelection: '' })
+    displayResource (pivot) {
+        const { config, configs, dataset, selections, views, zone } = this.props
+        let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+        let newResource
+        let selectedConfig 
+        let constraints = ``
+        if (pivot !== undefined) {
+            newResource = dataset.resources.find(res => res.type === pivot.type)
+
+            if (selections.some(s => s.zone === 'main')) {
+                selectedConfig = getSelectedMatch(config, zone)
+                constraints = makeSelectionConstraints(selections, selectedConfig, 'main', dataset, false)
+            } else if (selections.length > 0) {
+                activeConfigs = getCurrentConfigs(configs, 'aside', 'active')
+                // in case the entrypoint has changed
+                let entrypoint = activeConfigs.entrypoint
+                selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'))
+                constraints = makeSelectionConstraints(selections, selectedConfig, 'aside', { ...dataset, entrypoint }, false)
+            }
+            let pivotConstraints = makePivotConstraints('entrypoint', dataset.entrypoint, config, dataset)
+            constraints = constraints.concat(pivotConstraints)
+            //if (!constraints) constraints = `?entrypoint rdf:type <${dataset.entrypoint}> . `
+            this.setState({ pivotIsLoading: true })
+        } else {
+            newResource = this.state.selectedResource
+            this.setState({ resourceIsLoading: true, errorSelection: '' })
+        }
+        // console.log(pivot, newResource)
         this.props.selectResource({
             ...dataset,
-            entrypoint: this.state.selectedResource.type,
-            totalInstances: this.state.selectedResource.total,
-            constraints: ``
-        }, views)
+            entrypoint: newResource.type,
+            totalInstances: newResource.total,
+            constraints
+        }, views, activeConfigs, dataset)
             .then(() => this.setState({
                 resourceIsLoading: false,
-                displayedResource: this.state.selectedResource
+                pivotIsLoading: false,
+                displayedResource: newResource
             }))
+    }
+    displayPivot (pivot) {
+        if (pivot.prop === 'typeentrypoint') {
+            this.displayResource(pivot)
+        } else {
+            this.displaySelection(pivot)
+        }
     }
     displayKeyword () {
         const { configs, dataset, views } = this.props
@@ -131,7 +207,7 @@ class Header extends React.Component {
         }
         // console.log(newDataset)
         this.setState({ keywordIsLoading: true, errorSelection: '' })
-        this.props.loadSelection(newDataset, views, activeConfigs, dataset)
+        this.props.selectResource(newDataset, views, activeConfigs, dataset)
             .then(() => this.setState({
                 keywordIsLoading: false,
                 keyword: ''
@@ -165,33 +241,44 @@ class Header extends React.Component {
                 })
             })
     }
-    displaySelection () {
+    displaySelection (pivot) {
         // console.log('DISPLAY SELECTION')
         const { config, configs, dataset, selections, views, zone } = this.props
-        let activeConfigs
+        let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
         let selectedConfig
-        let constraints
-        let entrypoint = dataset.entrypoint
+        let constraints = ``
+        let formerentrypoint = dataset.entrypoint
+        let entrypoint
         if (selections.some(s => s.zone === 'main')) {
-            activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+            entrypoint = pivot !== undefined ? pivot.type : dataset.entrypoint
             selectedConfig = getSelectedMatch(config, zone)
-            constraints = makeSelectionConstraints(selections, selectedConfig, zone, dataset)
+            constraints = makeSelectionConstraints(selections, selectedConfig, zone, { ...dataset, entrypoint }, pivot !== undefined)
         } else if (selections.length > 0) {
             activeConfigs = getCurrentConfigs(configs, 'aside', 'active')
             // in case the entrypoint has changed
-            entrypoint = activeConfigs.entrypoint
+            entrypoint = pivot !== undefined ? pivot.type : activeConfigs.entrypoint
             selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'))
-            constraints = makeSelectionConstraints(selections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats })
-        } 
+            constraints = makeSelectionConstraints(selections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats }, pivot !== undefined)
+        } else if (pivot) {
+            constraints = dataset.constraints.replace(/entrypoint/g, 'formerentrypoint')
+        }
+        if (pivot) {
+            entrypoint = pivot.type
+            let pivotConstraints = makePivotConstraints('formerentrypoint', dataset.entrypoint, config, dataset)
+            // console.log(pivot, pivotConstraints)
+            pivotConstraints = pivotConstraints.replace(new RegExp(`formerprop${pivot.propnb}inter${pivot.internb}`, 'g'), `entrypoint`)
+            constraints = constraints.concat(pivotConstraints)
+        }
+        let res = dataset.resources.find(res => res.type === entrypoint)
         let newDataset = {
             ...dataset,
             entrypoint,
             constraints,
-            stats: activeConfigs.stats
+            totalInstances: res.total
         }
         this.setState({ selectionIsLoading: true, errorSelection: '' })
         // console.log('DISPLAY SELECTION 2')
-        this.props.loadSelection(newDataset, views, activeConfigs, dataset)
+        this.props.selectResource(newDataset, views, activeConfigs, dataset)
             .then(() => {
                 // console.log('DISPLAY SELECTION 3')
                 // this.forceUpdate()
@@ -219,6 +306,7 @@ class Header extends React.Component {
                 { label: 'displayed', total: getNbDisplayed(data, zone, 'active') }
             ]
 
+            let pivotEnabled = true
             // selection button
             let selectionEnabled = selections.length > 0
             let pointerClass = selectionEnabled ? '' : 'greyed'
@@ -263,7 +351,7 @@ class Header extends React.Component {
                             />
                             <Submit
                                 isLoading={this.state.resourceIsLoading}
-                                onClick={this.displayResource}
+                                onClick={(e) => this.displayResource()}
                                 disable={!selectResourceEnabled}
                             />
                             <div className='resource-control'>
@@ -399,6 +487,12 @@ class Header extends React.Component {
                         disable={!selectionEnabled}
                         onClick={this.displaySelection}
                     />
+                    <Pivot
+                        isLoading={this.state.pivotIsLoading}
+                        disable={!pivotEnabled}
+                        onClick={this.displayPivot}
+                        elements={this.state.pivot}
+                    />
                 </div>
             )
         } else {
@@ -416,8 +510,8 @@ class Header extends React.Component {
         views: PropTypes.array,
         zone: PropTypes.string,
         step: PropTypes.string,
+        checkPivots: PropTypes.func,
         displayConfig: PropTypes.func,
-        loadSelection: PropTypes.func,
         selectResource: PropTypes.func,
         showSettings: PropTypes.func,
         showStats: PropTypes.func
@@ -434,8 +528,8 @@ const HeaderConnect = connect(
         views: state.views
     }),
     (dispatch) => ({
+        checkPivots: checkPivots(dispatch),
         displayConfig: displayConfig(dispatch),
-        loadSelection: loadSelection(dispatch),
         selectResource: selectResource(dispatch),
         showSettings: showSettings(dispatch),
         showStats: showStats(dispatch)

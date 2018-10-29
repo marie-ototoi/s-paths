@@ -1,12 +1,11 @@
-.Selection {
+.Pivot {
     cursor: pointer;
     position: fixed;
     font-size: 0.8em;
     z-index: 20;
     left: 15px;
-    top: 100px;
+    top: 130px;
 }
-
-.Selection .icon {
-    padding-left: 10px;
+.Pivot .title {
+    font-weight: bold;
 }

@@ -82,7 +82,7 @@ class App extends React.PureComponent {
                 .append('rect')
                 .attr('class', 'selection')
                 .on('mouseup', d => {
-                    console.log(d3.event.pageX, d3.event.pageY)
+                    // console.log(d3.event.pageX, d3.event.pageY)
                     this.props.handleMouseUp({
                         pageX: d3.event.pageX - display.viz[zone + '_x'],
                         pageY: d3.event.pageY - display.viz[zone + '_top_padding'] - display.viz.top_margin
@@ -102,7 +102,7 @@ class App extends React.PureComponent {
         if (role === 'origin') {
             let updateState = {}
             if ((!this.state[`${zone}_origin`] || elements.length !== this.state[`${zone}_origin`].length) ||
-            (elements[0] && this.state[`${zone}_origin`][0] && elements[0].zone.width && this.state[`${zone}_origin`][0].zone.width)) {
+            (elements[0] && this.state[`${zone}_origin`][0] && elements[0].zone.width !== this.state[`${zone}_origin`][0].zone.width)) {
                 // console.log('x - transition ORIGIN LAID OUT', zone, elements)
                 updateState[`${zone}_origin`] =  elements
             }
@@ -112,12 +112,13 @@ class App extends React.PureComponent {
                 updateState[`${zone}_target`] = null
             }
             // console.log(this.state.main_origin, this.state.aside_origin)
-            if (zone === 'main' && this.state.aside_origin && display.viz.aside_width > 500) {
+            if (zone === 'main' && this.state.aside_origin && display.viz.aside_width > 500 && configs.past.length > 1) {
                 updateState.main_brush = getTransitionElements(elements, this.state.aside_origin, getSelectedView(getCurrentConfigs(configs, 'main', 'active')) , getSelectedView(getCurrentConfigs(configs, 'aside', 'active')), getResults(data, 'main', 'active'), 'main')
                 updateState.side_brush = getTransitionElements(this.state.aside_origin, elements, getSelectedView(getCurrentConfigs(configs, 'aside', 'active')) , getSelectedView(getCurrentConfigs(configs, 'main', 'active')), getResults(data, 'main', 'delta'), 'aside')
             }
-            // console.log(updateState.main_brush, updateState.side_brush)
-            if (updateState !== {}) this.setState(updateState)
+            //if (updateState[`${zone}_origin`] || updateState[`${zone}_step`] || updateState[`${zone}_target`] || updateState.main_brush) {
+            this.setState(updateState)
+            //}
         } else if (role === 'target' && zone === 'main') {
             // console.log('transition target laid out', zone, role, elements)
             if (!this.state[`${zone}_target`]) {
@@ -134,9 +135,12 @@ class App extends React.PureComponent {
     }
     handleEndTransition (zone) {
         const { display, data, configs } = this.props
-        //console.log('3 - transition ended', zone)        
+        // console.log('3 - transition ended', zone, !this.props.configs.future.length > 0, this.props.configs.future)        
         this.setState({ [`${zone}_step`]: 'done', [`${zone}_target`]: [] })
-        if (!this.props.configs.future.length > 0) this.props.endTransition(zone)
+        if (!this.props.configs.future.length > 0) {
+            this.props.endTransition(zone)
+            this.render()
+        }
     }
     UNSAFE_componentWillUpdate (nextProps, nextState) {
         // console.log('foutu ?', getCurrentState(this.props.data, 'main'), getCurrentState(nextProps.data, 'main'))
@@ -182,7 +186,7 @@ class App extends React.PureComponent {
         // console.log('display', display)
         // console.log('views', this.props.views)
         // console.log('dataset', this.props.dataset)
-        // console.log('configs', configs)
+        console.log('configs', configs)
         // console.log('data', data)
         // console.log('selections', selections)
         const componentIds = {
@@ -199,7 +203,7 @@ class App extends React.PureComponent {
         // relies on data in the reducer to know if the current state is transition or active
         const statusMain = getCurrentState(this.props.data, 'main')
         let mainConfig = (dataset.resources.length === 0) ? undefined : getSelectedView(getCurrentConfigs(configs, 'main', 'active'))
-        // console.log(getCurrentConfigs(configs, 'transition'))
+        //console.log(statusMain, dataset.resources, getCurrentConfigs(configs, 'main', 'active'), this.state.main_step, mainConfig)
         const mainTransitionConfig = getSelectedView(getCurrentConfigs(configs, 'main', 'transition'))
         const MainComponent = mainConfig ? componentIds[mainConfig.id] : ''
         const MainTransitionComponent = mainTransitionConfig ? componentIds[mainTransitionConfig.id] : ''

@@ -178,7 +178,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
     //
     let propsWithStats = []
     let temp
-    if (props.length === 0 || constraints !== '') {
+    if (props.length === 0) {
         let typeStats = []
         let countStats = []
         for (let i = 0; i < newCategorizedProps.length; i += maxRequests) {

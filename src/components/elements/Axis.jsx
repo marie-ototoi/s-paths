@@ -6,8 +6,6 @@ import AxisLayout from '../../d3/AxisLayout'
 
 import { getDimensions } from '../../lib/scaleLib'
 
-import { selectProperty } from '../../actions/dataActions'
-
 class Axis extends React.PureComponent {
     constructor (props) {
         super(props)
@@ -53,9 +51,7 @@ function mapStateToProps (state) {
 }
 
 function mapDispatchToProps (dispatch) {
-    return {
-        selectProperty: selectProperty(dispatch)
-    }
+    return {}
 }
 
 const AxisConnect = connect(mapStateToProps, mapDispatchToProps)(Axis)

@@ -65,7 +65,7 @@ const getCost = (val, min, max, optimal, score) => {
     }
     return score / 2
 }
-const scoreProp = (prop, constraint, rankFactors) => {
+const scoreProp = (prop, constraint, rankFactors, preferences) => {
     /* rankFactors = {
         category: 1,
         definition: 2,
@@ -84,19 +84,22 @@ const scoreProp = (prop, constraint, rankFactors) => {
         // repartition
         break
     case 'number':
-        score.category = 0.6
+        score.category = 0.4
         break
     case 'geo':
         score.category = 1
         break
     case 'text':
         // the closer to the optimal range, the better
-        score.category = 0.8
+        score.category = 0.6
         break
     default:
-        score.category = 0.3
+        score.category = 0.1
         //
     }
+    
+    score.customProps = preferences[prop.path] || 0.1
+    // console.log(prop.path, score.customProps)
     score.definition = 1 - getCost(prop.unique, min, max, optimal, 1)
     score.total = 0
     score.level = 1 - prop.level
@@ -181,7 +184,7 @@ export const defineConfigs = (views, stats, dataset) => {
                 let propSet = stats.statements.map(prop => {
                     return {
                         ...prop,
-                        score: scoreProp(prop, view.constraints[0][0], rankPropFactors)
+                        score: scoreProp(prop, view.constraints[0][0], rankPropFactors, dataset.propertyPreferences)
                     }
                 }).sort((a, b) => {
                     return b.score - a.score
@@ -216,7 +219,7 @@ export const defineConfigs = (views, stats, dataset) => {
                                 // console.log('PASSE ?')
                                 propSet.push({
                                     ...prop,
-                                    score: scoreProp(prop, constraint, rankPropFactors)
+                                    score: scoreProp(prop, constraint, rankPropFactors, dataset.propertyPreferences)
                                 })
                                 
                             }
@@ -276,7 +279,7 @@ export const defineConfigs = (views, stats, dataset) => {
     })
         .filter(view => view.selectedMatch !== undefined)
         .sort((a, b) => {
-            return b.selectedMatch.score - a.selectedMatch.score
+            return b.selectedMatch.scoreMatch - a.selectedMatch.scoreMatch
         })
     // if (configSetUp.matches) console.log('salut la config', configSetUp.matches.map(p => p.fullPath))
     // console.log(configSetUp)
@@ -293,56 +296,4 @@ export const activateDefaultConfigs = (config) => {
             }
         })
     }
-}
-export const selectProperty = (config, zone, propIndex, path) => {
-    let selectedMatch = getSelectedMatch(config, zone)
-    // console.log(config, zone, selectedMatch)
-    let possibleConfigs = config.matches.map((match, index) => {
-        let score
-        if (match.properties[propIndex].path !== path) {
-            score = null
-        } else {
-            let indexProp = 0
-            score = match.properties.reduce((acc, currentProp) => {
-                if (currentProp.path === selectedMatch.properties[indexProp].path) {
-                    acc += match.properties.length - indexProp
-                }
-                indexProp++
-                return acc
-            }, 0)
-        }
-        return {
-            index,
-            score
-        }
-    }).filter(match => {
-        return match.score !== null
-    }).sort((a, b) => {
-        return b.score - a.score
-    })
-    let bestConfigIndex = possibleConfigs[0].index
-    // console.log('bestConfigIndex', bestConfigIndex)
-    return {
-        ...config,
-        matches: config.matches.map((match, index) => {
-            return {
-                ...match,
-                selected: (index === bestConfigIndex)
-            }
-        })
-    }
-}
-export const selectView = (id, configs) => {
-    return configs.map(config => {
-        return {
-            ...config,
-            selected: (config.id === id),
-            matches: config.matches.map((match, index) => {
-                return {
-                    ...match,
-                    selected: (config.id === id && index === 0)
-                }
-            })
-        }
-    })
 }

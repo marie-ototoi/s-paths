@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
 import types from '../constants/ActionTypes'
-import { activateDefaultConfigs, defineConfigs, getSelectedView, selectProperty as selectPropertyConfig, selectView as selectViewConfig } from '../lib/configLib'
-import { getData, makeDetailQuery, makePropQuery, makeQuery, makeMultipleQuery, makeTransitionQuery } from '../lib/queryLib'
+import { activateDefaultConfigs, defineConfigs, getSelectedView } from '../lib/configLib'
+import { getData, makeCheckPivotQuery, makeDetailQuery, makePropQuery, makeQuery, makeMultipleQuery, makeTransitionQuery } from '../lib/queryLib'
 
 export const endTransition = (dispatch) => (zone) => {
     return dispatch({
@@ -89,7 +89,7 @@ const checkStatements = (statements, selectionInstances, dataset) => {
         })
 }
 
-const checkFirstValidConfigs = (configs, stats, dataset, previousConfig) => {
+const checkFirstValidConfigs = (configs, stats, dataset) => {
     // console.log(configs)
     let propsToCheck = []
     let matchesToCheck = {}
@@ -132,71 +132,6 @@ const checkFirstValidConfigs = (configs, stats, dataset, previousConfig) => {
             // if both main and aside send results
             // else start from new config keeping checked config if there is one and call recursive
         })
-}
-
-export const loadSelection = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
-    //console.log('load Data ', dataset.constraints)
-    let { constraints, endpoint, entrypoint, prefixes, graphs, resourceGraph, stats } = dataset
-    let graph =  resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
-    let countInstancesQuery = `SELECT (COUNT(DISTINCT ?entrypoint) as ?total) ${graph} WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
-    // console.log(countInstancesQuery)
-    return getData(endpoint, countInstancesQuery, prefixes)
-        .then(countInstances => {
-            // console.log('countInstances', countInstances)
-            const previousConfigMain = getSelectedView(previousConfigs, 'main')
-            let singleURI
-            return new Promise((resolve, reject) => {
-                let selectionInstances = Number(countInstances.results.bindings[0].total.value)
-                // console.log('selectionInstances', selectionInstances)
-                let configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
-                // console.log('alors ?', configs)
-                if (selectionInstances === 1) {
-                    let singleURIQuery =  `SELECT ?entrypoint ${graph} WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
-                    getData(endpoint, singleURIQuery, prefixes)
-                        .then(res => {
-                            singleURI = res.results.bindings[0].entrypoint.value
-                            resolve([configs, { ...stats, selectionInstances }])
-                        })
-                    
-                } else if (selectionInstances > 1) {
-                    stats = evaluateSubStats({ ...stats, selectionInstances })
-                    // console.log('evaluateSubStats', stats)
-                    // for each views, checks which properties ou sets of properties could match and evaluate
-                    // console.log('checkFirstValidConfigs', checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset))
-                    resolve(checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset, previousConfigMain))
-                } else {
-                    reject('No results')
-                }
-            }) 
-                .then(([newConfigs, newStats]) => {
-                    
-                    const configMain = getSelectedView(newConfigs, 'main')
-                    // console.log('then ? ',newConfigs, newConfigs.views, configMain, newStats)
-                    const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, singleURI, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
-                    const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
-                    let queryTransitionMain = makeTransitionQuery(configMain, dataset, previousConfigMain, previousOptions, 'main')
-                    // console.log(queryMain)
-                    return Promise.all([
-                        getData(endpoint, queryMain, prefixes),
-                        dataset.entrypoint === previousConfigs.entrypoint && !dataset.transitionOff ? getData(endpoint, queryTransitionMain, prefixes) : [],
-                        getData(endpoint, queryMainUnique, prefixes)
-                    ])
-                        .then(([dataMain, dataDeltaMain, uniqueMain]) => { // , coverageMain, coverageAside
-                            // console.log('DELTA', dataDeltaMain, newConfigs.entrypoint, previousConfigs.entrypoint)
-                            dispatch({
-                                type: types.SET_CONFIGS,
-                                constraints,
-                                main: { ...dataMain },
-                                mainDelta: dataDeltaMain,
-                                stats,
-                                entrypoint,
-                                mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMain.results.bindings[0].displayed.value),
-                                mainConfig: newConfigs.views
-                            })
-                        })
-                })
-        })
-            
 }
 
 export const analyseResources = (dispatch) => (dataset, resources) => {
@@ -297,37 +232,92 @@ export const loadResources = (dispatch) => (dataset, views) => {
         })
 }
 
-export const selectResource = (dispatch) => (dataset, views) => {
-    let { constraints, endpoint, entrypoint, prefixes, totalInstances } = dataset
-    return getStats({ ...dataset, stats: [] })
+export const checkPivots = (dispatch) => (properties, dataset) => {
+    properties = properties.map(prop => {
+        return {
+            ...prop,
+            path: prop.path.replace('/*/', '/?/')
+        }
+    })
+    return getData(dataset.endpoint, makeCheckPivotQuery(properties, dataset), dataset.prefixes)
+}
+
+export const selectResource = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
+    // console.log('ok on va cherche les stats', dataset)
+    let { constraints, endpoint, entrypoint, graphs, prefixes, totalInstances, resourceGraph } = dataset
+    let graph =  resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
+    return getStats({ ...dataset, stats: [], constraints: '' })
         .then(stats => {
+            let singleURI
             prefixes = stats.options.prefixes
-            // console.log('ok on a bien reçu les stats', stats, defineConfigs(views, stats))
-            // for each views, checks which properties ou sets of properties could match and evaluate
-            let configs = activateDefaultConfigs(defineConfigs(views, stats, dataset))
-            const configMain = getSelectedView(configs, 'main')
-            const queryMain = makeQuery(entrypoint, configMain, 'main', { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
-            const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
-           
-            return Promise.all([
-                getData(endpoint, queryMain, prefixes),
-                getData(endpoint, queryMainUnique, prefixes)
-            ])
-                .then(([dataMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
-                    dispatch({
-                        type: types.SET_STATS,
-                        stats,
-                        entrypoint,
-                        totalInstances,
-                        prefixes: stats.options.prefixes,
-                        labels: stats.options.labels,
-                        constraints,
-                        mainConfig: configs.views,
-                        main: { ...dataMain },
-                        mainDisplayed: configMain.id === 'ListAllProps' ? 1 : Number(uniqueMainPromise.results.bindings[0].displayed.value)
-                    })
+            // console.log('ok on a bien reçu les stats', stats)
+            return new Promise((resolve, reject) => {
+                // if pivot 
+                if (constraints !== '') {
+                    let countInstancesQuery = `SELECT (COUNT(DISTINCT ?entrypoint) as ?total) ${graph} WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
+                    // console.log(countInstancesQuery)
+                    getData(endpoint, countInstancesQuery, prefixes)
+                        .then(countInstances => {
+                            let selectionInstances = Number(countInstances.results.bindings[0].total.value)
+                            // console.log('selectionInstances', selectionInstances, stats.totalInstances)
+                            let configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
+                            // console.log(configs)
+                            if (selectionInstances === stats.totalInstances) {
+                                resolve(configs)
+                            } else if (selectionInstances === 1) {
+                                let singleURIQuery =  `SELECT ?entrypoint ${graph} WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
+                                getData(endpoint, singleURIQuery, prefixes)
+                                    .then(res => {
+                                        singleURI = res.results.bindings[0].entrypoint.value
+                                        resolve(configs)
+                                    })
+                                
+                            } else if (selectionInstances > 1) {
+                                stats = evaluateSubStats({ ...stats, selectionInstances })
+                                // console.log('evaluateSubStats', stats)
+                                // for each views, checks which properties ou sets of properties could match and evaluate
+                                // console.log('checkFirstValidConfigs', checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset))
+                                checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset)
+                                    .then(([conf, stats]) => resolve(conf))
+                            } else {
+                                reject('No results')
+                            }
+                        })
+                } else {
+                    // for each views, checks which properties ou sets of properties could match and evaluate
+                    let configs = activateDefaultConfigs(defineConfigs(views, stats, dataset))
+                    resolve(configs)
+                }
+            })
+                .then(configs => {
+                    const configMain = getSelectedView(configs, 'main')
+                    // console.log(configs, configMain)
+                    const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, singleURI, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
+                    const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
+                    const previousConfigMain = getSelectedView(previousConfigs, 'main')
+                    // console.log(previousConfigs, configMain, dataset, previousConfigMain, previousOptions)
+                    let queryTransitionMain = makeTransitionQuery(configMain, dataset, previousConfigMain, previousOptions, 'main')
+                    return Promise.all([
+                        getData(endpoint, queryMain, prefixes),
+                        !dataset.transitionOff ? getData(endpoint, queryTransitionMain, prefixes) : [],
+                        getData(endpoint, queryMainUnique, prefixes)
+                    ])
+                        .then(([dataMain, dataDeltaMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
+                            dispatch({
+                                type: types.SET_STATS,
+                                stats,
+                                entrypoint,
+                                totalInstances,
+                                prefixes: stats.options.prefixes,
+                                labels: stats.options.labels,
+                                mainDelta: dataDeltaMain,
+                                constraints,
+                                mainConfig: configs.views,
+                                main: { ...dataMain },
+                                mainDisplayed: configMain.id === 'ListAllProps' ? 1 : Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                            })
+                        })
                 })
-                
         })
         .catch(error => {
             console.error('Error getting resource', error)
@@ -370,83 +360,6 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
         })
         .catch(error => {
             console.error('Error getting data after property update', error)
-        })
-}
-
-
-export const selectProperty = (dispatch) => (propIndex, path, config, dataset, zone) => {
-
-    // console.log('select property')
-    const { endpoint, entrypoint, prefixes } = dataset
-    
-    const updatedConfig = selectPropertyConfig(config, zone, propIndex, path)
-    dispatch({
-        type: types.SET_CONFIG,
-        zone,
-        config: updatedConfig
-    })
-    const newQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, maxDepth: (updatedConfig.id === 'ListAllProps') ? 1 : null })
-    const queryTransition = makeTransitionQuery(updatedConfig, dataset, config, dataset, zone)
-    const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
-    // const coverageQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, prop1only: true })
-    
-    Promise.all([
-        getData(endpoint, newQuery, prefixes),
-        getData(endpoint, queryTransition, prefixes),
-        getData(endpoint, queryUnique, prefixes)
-    ])
-        .then(([newData, newDelta, newUnique]) => {
-            // console.log('queryUnique', newUnique.results.bindings[0].displayed.value, queryUnique)
-            const action = {
-                type: types.SET_DATA,
-                zone: zone
-            }
-            action[zone] = newData
-            action[zone + 'Delta'] = newDelta
-            action[zone + 'Displayed'] = Number(newUnique.results.bindings[0].displayed.value)
-            dispatch(action)
-        })
-        .catch(error => {
-            console.error('Error getting data after property update', error)
-        })
-}
-
-export const selectView = (dispatch) => (id, zone, selectedConfigs, dataset) => {
-    const { endpoint, entrypoint, prefixes } = dataset
-    // console.log(selectedConfigs)
-    const updatedConfigs = selectViewConfig(id, selectedConfigs)
-    const selectedConfig = selectedConfigs.filter(c => c.selected)[0]
-    const updatedConfig = updatedConfigs.filter(c => c.selected)[0]
-    dispatch({
-        type: types.SET_CONFIG,
-        zone,
-        config: updatedConfig
-    })
-    const newQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, maxDepth: (updatedConfig.id === 'ListAllProps') ? 1 : null })
-    const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
-    const queryTransition = makeTransitionQuery(updatedConfig, dataset, selectedConfig, dataset, zone)
-    // console.log('newQuery', dataset, newQuery)
-    // console.log('queryUnique', queryUnique)
-    // console.log('selectedConfig', updatedConfig)
-    Promise.all([
-        getData(endpoint, newQuery, prefixes),
-        (updatedConfig.id !== 'ListAllProps' && selectedConfig.id !== 'ListAllProps') ? getData(endpoint, queryTransition, prefixes) : null,
-        getData(endpoint, queryUnique, prefixes)
-    ])
-        .then(([newData, newDelta, newUnique]) => {
-            // console.log(newUnique.results.bindings[0].displayed.value)
-            const action = {
-                type: types.SET_DATA,
-                zone: zone
-            }
-            action[zone] = newData
-            action[zone + 'Delta'] = newDelta
-            action[zone + 'Displayed'] = Number(newUnique.results.bindings[0].displayed.value)
-            dispatch(action)
-        })
-        .catch(error => {
-            // to do : get back to state previous transition
-            console.error('Error getting data after view update', error)
         })
 }
 
