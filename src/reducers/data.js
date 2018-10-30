@@ -23,7 +23,7 @@ const data = (state = initialState, action) => {
         // console.log('ok on a recu les data', action.status, action)
         return {
             ...state,
-            statements: action.main,
+            statements: action.main || state.statements,
             status,
             deltaStatements: action.mainDelta || {},
             displayed: action.mainDisplayed,

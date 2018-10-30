@@ -44,7 +44,7 @@ class ListAllProps extends React.Component {
     prepareData (nextProps) {
         const { data, dataset, display, dimensions, selections, zone } = nextProps
         // prepare the data for display
-        // console.log(data)
+        console.log(data)
         // Save to reuse in render
         // console.log(prepareSingleData(data, dataset))
         //prepareSingleData(data, dataset)

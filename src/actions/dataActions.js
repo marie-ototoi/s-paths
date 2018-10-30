@@ -341,7 +341,7 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, maxDepth: (updatedConfig.id === 'ListAllProps' || updatedConfig.id === 'InfoCard') ? 1 : null })
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, prevConfig, dataset, zone)
     const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
-    
+    //console.log(newQuery)
     return Promise.all([
         getData(endpoint, newQuery, prefixes),
         getData(endpoint, queryTransition, prefixes),
@@ -354,9 +354,9 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
             }
             action.entrypoint = entrypoint
             action.stats = dataset.stats
-            action[zone] = newData
+            action[zone] = (updatedConfig.id === 'ListAllProps' || prevConfig.id === 'InfoCard') ? undefined : newData
             action[zone + 'Config'] = updatedConfigs
-            action[zone + 'Delta'] = newDelta
+            action[zone + 'Delta'] = (updatedConfig.id === 'ListAllProps' || prevConfig.id === 'InfoCard') ? {} : newDelta
             action[zone + 'Displayed'] = updatedConfig.id === 'ListAllProps' || updatedConfig.id === 'InfoCard' ? 1 : Number(newUnique.results.bindings[0].displayed.value)
             dispatch(action)
         })

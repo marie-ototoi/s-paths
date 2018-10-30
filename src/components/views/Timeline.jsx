@@ -51,7 +51,7 @@ class Timeline extends React.Component {
     handleSelect(...args) {
         const { display, selections, selectElements, zone } = this.props
         if (args[1]) {
-            console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items[5].items.filter(it =>it.selected))
+            // console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items[5].items.filter(it =>it.selected))
             let selected = this.customState.view.scenegraph().root.items[0].items[5].items.filter(it =>it.selected)
             // console.log('salut', selected)
             selected = selected.map(el => {
@@ -273,7 +273,7 @@ class Timeline extends React.Component {
         }).sort((a, b) => a.first - b.first)
         
         // console.log(fullData)
-        console.log(events)
+        // console.log(events)
         const timedata = [{
             "name": "entities",
             "values": fullData
