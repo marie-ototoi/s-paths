@@ -41,7 +41,7 @@ class Settings extends React.PureComponent {
                         <div className = "field" key = { `fact${key}` }>
                             <label className = "label">{ key }
                                 <input value={rankPropFactors[key]}
-                                       type='number'
+                                    type='number'
                                     name ={key}
                                     onChange = {(e) => {
                                         this.props.saveFactor('rankPropFactors', key, e.target.value)
@@ -57,7 +57,7 @@ class Settings extends React.PureComponent {
                         <div className = "field" key = { `fact${key}` }>
                             <label className = "label">{ key }
                                 <input value={rankMatchFactors[key]}
-                                       type='number'
+                                    type='number'
                                     name ={key}
                                     onChange = {(e) => {
                                         this.props.saveFactor('rankMatchFactors', key, e.target.value)
