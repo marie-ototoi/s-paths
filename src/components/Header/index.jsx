@@ -159,14 +159,18 @@ class Header extends React.Component {
     handleKeyDown (event) {
         const { dataset, selections } = this.props
         // console.log('eee', event.which, event)
-        if (event.which === 13) {
+        if (event.which === 13 &&
+            !(this.state.selectionIsLoading ||
+            this.state.propsAreLoading ||
+            this.state.resourceIsLoading ||
+            this.state.keywordIsLoading)) {
             if (selections.length > 0) {
                 this.displaySelection()
             } else if (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps)) {
                 this.displayConfig()
             } else if (this.state.keyword.length > 3) {
                 this.displayKeyword()
-            }else if (this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '') {
+            } else if (this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '') {
                 this.displayResource()
             }
         }
