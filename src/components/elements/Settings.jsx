@@ -41,10 +41,10 @@ class Settings extends React.PureComponent {
                         <div className = "field" key = { `fact${key}` }>
                             <label className = "label">{ key }
                                 <input value={rankPropFactors[key]}
+                                       type='number'
                                     name ={key}
                                     onChange = {(e) => {
-                                        saveFactor('rankPropFactors', key, e.target.value)
-                                        console.log(e, key, e.target.value)
+                                        this.props.saveFactor('rankPropFactors', key, e.target.value)
                                     }}
                                 />
                             </label>
@@ -57,10 +57,10 @@ class Settings extends React.PureComponent {
                         <div className = "field" key = { `fact${key}` }>
                             <label className = "label">{ key }
                                 <input value={rankMatchFactors[key]}
+                                       type='number'
                                     name ={key}
                                     onChange = {(e) => {
                                         this.props.saveFactor('rankMatchFactors', key, e.target.value)
-                                        console.log(e, key, e.target.value)
                                     }}
                                 />
                             </label>
@@ -76,11 +76,7 @@ class Settings extends React.PureComponent {
 Settings.propTypes = {
     dataset: PropTypes.object,
     dimensions: PropTypes.object,
-    display: PropTypes.object,
-    views: PropTypes.array,
     zone: PropTypes.string,
-    analyseResources: PropTypes.func,
-    loadStats: PropTypes.func,
     showSettings: PropTypes.func,
     saveFactor: PropTypes.func
 }
