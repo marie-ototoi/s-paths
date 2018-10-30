@@ -452,7 +452,14 @@ class Header extends React.Component {
                                     let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
                                     this.setState({
                                         selectedView,
-                                        selectedProps: this.state.configsLists[selectedView].map((list) => 0)
+                                        selectedProps: this.state.configsLists[selectedView].map((list, index) => {
+                                            // console.log(list, index)
+                                            return list.reduce((acc, cur, propIndex) => {
+                                                // console.log(index)
+                                                if (activeConfigs.views[selectedView].selectedMatch.properties[index].path === cur.path) acc = propIndex
+                                                return acc
+                                            }, 0)
+                                        })
                                     })
                                 }}
                                 isDisabled={
