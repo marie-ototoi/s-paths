@@ -15,6 +15,7 @@ import Transition from './elements/Transition'
 import GeoMap from './views/Geo'
 import HeatMap from './views/HeatMap'
 import Images from './views/Images'
+import InfoCard from './views/InfoCard'
 import ListAllProps from './views/ListAllProps'
 import SingleProp from './views/SingleProp'
 import StackedChart from './views/StackedChart'
@@ -193,6 +194,7 @@ class App extends React.PureComponent {
             'GeoMap': GeoMap,
             'HeatMap': HeatMap,
             'Images': Images,
+            'InfoCard': InfoCard,
             'ListAllProps': ListAllProps,
             'SingleProp': SingleProp,
             'StackedChart': StackedChart,
@@ -242,7 +244,7 @@ class App extends React.PureComponent {
                     <Transition
                         zone = "main"
                         dimensions = { getDimensions('mainbrush', display.viz) }
-                        elements = { this.state.main_transition }
+                        elements = { this.state.main_transition || { origin: [], target: [] } }
                         endTransition = { this.handleEndTransition }
                     />
                 }

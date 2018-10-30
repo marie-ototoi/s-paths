@@ -87,6 +87,7 @@ class Geo extends React.Component {
         }
     }
     render () {
+       
         const { dimensions, display, role, step } = this.props
         return (<div
             className = { `Geo ${this.customState.elementName} role_${role}` } tabIndex = "1">

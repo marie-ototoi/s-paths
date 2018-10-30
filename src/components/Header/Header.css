@@ -8,6 +8,14 @@
     background: #fff;
 }
 
+.Header .logo {
+    
+    padding-top: 5px;
+}
+.Header .logo img {
+    margin-left: 20px;
+}
+
 .Header .Line {
     display: flex;
     align-items: center;

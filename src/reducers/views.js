@@ -6,7 +6,7 @@ const defaultState = [
         name: 'stacked chart',
         thumb : '/images/stackedchart.svg',
         entrypoint: { min: 2, max: 1000, optimal: [4, 200] },
-        weight: 0.7,
+        weight: 1,
         constraints: [
             [
                 {
@@ -85,7 +85,7 @@ const defaultState = [
         id: 'Timeline',
         name: 'timeline',
         thumb : '/images/timeline.svg',
-        weight: 0.8,
+        weight: 0.9,
         entrypoint: { min: 2, max: 50, optimal: [10, 20] },
         constraints: [
             [
@@ -149,7 +149,7 @@ const defaultState = [
         name: 'map',
         thumb : '/images/geomap.svg',
         entrypoint: { min: 2, max: 1000 },
-        weight: 1,
+        weight: 0.9,
         constraints: [
             [
                 {
@@ -187,8 +187,25 @@ const defaultState = [
         name: 'node link diagram',
         thumb : '/images/listprop.svg',
         allProperties: true,
+        weight: 0.5,
+        entrypoint: { min: 1, max: 1 },
+        constraints: [
+            [
+                {
+                    category: '*',
+                    unique: {},
+                    multiple: true
+                }
+            ]
+        ]
+    },
+    {
+        id: 'InfoCard',
+        name: 'info card',
+        thumb : '/images/infocard.svg',
+        allProperties: true,
         weight: 1,
-        entrypoint: { min: 1, max: 1, optimal: [1, 10] },
+        entrypoint: { min: 1, max: 1 },
         constraints: [
             [
                 {
@@ -219,7 +236,7 @@ const defaultState = [
         name: 'images',
         thumb : '/images/images.svg',
         entrypoint: { min: 1, max: 1000 },
-        weight: 1,
+        weight: 0.8,
         constraints: [
             [
                 {

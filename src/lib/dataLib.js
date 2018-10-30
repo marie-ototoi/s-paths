@@ -368,6 +368,39 @@ export const prepareSinglePropData = (data, category, prefixes) => {
         })
 }
 
+export const prepareInfoCardData = (data, dataset) => {
+    let {stats} = dataset
+    let paths = {}
+    let dataDict = {}
+    data.forEach(dp => {
+        let path = '<' + stats.statements[0].entrypoint + '>/'
+        let count = 1
+        while (count <= dataset.maxLevel) {
+            if(dp['path' + count]) {
+                path = path.concat('<', dp['path' + count].value, '>/*/')
+                count ++
+            } else {
+                count = dataset.maxLevel + 1
+            }
+        }
+        dataDict[path] = dp
+    })
+    stats = stats.statements.sort((a, b) => a.level - b.level).filter(stat => stat.category !== 'uri' && stat.category !== 'number')
+    stats = stats.map(stat => {
+        let values = dataDict[stat.fullPath+'/']
+        
+        if (values) return {...stat, values}
+    }).filter(stat => stat)
+    paths.text = stats.filter(stat => stat.category === 'text')
+    paths.image = stats.filter(stat => stat.category === 'image')
+    paths.geo = stats.filter(stat => stat.category === 'geo')
+    paths.geolat = paths.geo.filter(stat => stat.subcategory === 'latitude')
+    paths.geolong = paths.geo.filter(stat => stat.subcategory === 'longitude')
+    paths.datetime = stats.filter(stat => stat.category === 'datetime')
+    // console.log(paths)
+    return paths
+}
+
 export const prepareGeoData = (data, dataset, selections, zone) => {
     let flatSelections = selections.filter(s => s.zone === zone).map(s => s.selector)
     // console.log(flatSelections)

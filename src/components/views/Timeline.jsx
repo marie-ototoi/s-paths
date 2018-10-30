@@ -273,7 +273,7 @@ class Timeline extends React.Component {
         }).sort((a, b) => a.first - b.first)
         
         // console.log(fullData)
-        // console.log(this.customState)
+        console.log(events)
         const timedata = [{
             "name": "entities",
             "values": fullData

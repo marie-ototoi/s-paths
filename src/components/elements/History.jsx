@@ -18,12 +18,11 @@ class History extends React.PureComponent {
         }
     }
     jumpHistory (index) {
-        console.log(index, this.customState.currentIndex)
+        // console.log(index, this.customState.currentIndex)
         this.props.jump(index, this.customState.currentIndex)
     }
     render () {
-        const { configs, display, offset, zone } = this.props
-        
+        const { configs, display, offset, zone } = this.props        
         // console.log(this.customState.currentIndex)
         this.customState.historyConfigs = [
             ...configs.past,

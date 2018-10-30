@@ -180,7 +180,7 @@ export const defineConfigs = (views, stats, dataset) => {
             if (view.entrypoint.min > stats.selectionInstances || view.entrypoint.max < stats.selectionInstances) return { selectedMatch: undefined }
         }
         if (stats.selectionInstances === 1) {
-            if (view.id === 'ListAllProps') {
+            if (view.id === 'ListAllProps' || view.id === 'InfoCard') {
                 let propSet = stats.statements.map(prop => {
                     return {
                         ...prop,

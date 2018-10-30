@@ -51,7 +51,8 @@ class TreeMap extends React.Component {
             category: 'text'
         }])
 
-        const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
+        const color = '#2b9053'
+        
         const propsLists = config.propList
 
         // Save to reuse in render

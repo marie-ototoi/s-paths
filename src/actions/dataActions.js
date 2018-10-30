@@ -183,7 +183,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
                         //
                         const configMain = getSelectedView(configs, 'main')
                         if (configMain) {
-                            const queryMain = makeQuery(dataset.entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
+                            const queryMain = makeQuery(dataset.entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps' || configMain.id === 'InfoCard') ? 1 : null })
                             
                             const queryMainUnique = makeQuery(dataset.entrypoint, configMain, 'main', { ...dataset, unique: true })
                             //
@@ -204,7 +204,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
                                         constraints: '',
                                         mainConfig: configs.views,
                                         main: { ...dataMain },
-                                        mainDisplayed: configMain.id === 'ListAllProps' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                                        mainDisplayed: configMain.id === 'ListAllProps' || configMain.id === 'InfoCard' ? dataset.stats.selectionInstances : Number(uniqueMainPromise.results.bindings[0].displayed.value)
                                     })
                                     return resources
                                 })
@@ -292,7 +292,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                 .then(configs => {
                     const configMain = getSelectedView(configs, 'main')
                     // console.log(configs, configMain)
-                    const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, singleURI, maxDepth: (configMain.id === 'ListAllProps') ? 1 : null })
+                    const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, singleURI, maxDepth: (configMain.id === 'ListAllProps' || configMain.id === 'InfoCard') ? 1 : null })
                     const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
                     const previousConfigMain = getSelectedView(previousConfigs, 'main')
                     // console.log(previousConfigs, configMain, dataset, previousConfigMain, previousOptions)
@@ -303,6 +303,8 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                         getData(endpoint, queryMainUnique, prefixes)
                     ])
                         .then(([dataMain, dataDeltaMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
+                            //console.log('select resource, get data', queryMain, dataMain)
+                            //console.log('select resource, get data', queryMainUnique, uniqueMainPromise)
                             dispatch({
                                 type: types.SET_STATS,
                                 stats,
@@ -314,7 +316,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                                 constraints,
                                 mainConfig: configs.views,
                                 main: { ...dataMain },
-                                mainDisplayed: configMain.id === 'ListAllProps' ? 1 : Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                                mainDisplayed: configMain.id === 'ListAllProps' || configMain.id === 'InfoCard' ? 1 : Number(uniqueMainPromise.results.bindings[0].displayed.value)
                             })
                         })
                 })
@@ -336,7 +338,7 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
 
     })
     let updatedConfig = updatedConfigs.filter(c => c.selected)[0]
-    const newQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, maxDepth: (updatedConfig.id === 'ListAllProps') ? 1 : null })
+    const newQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, maxDepth: (updatedConfig.id === 'ListAllProps' || updatedConfig.id === 'InfoCard') ? 1 : null })
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, prevConfig, dataset, zone)
     const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
     
@@ -355,7 +357,7 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
             action[zone] = newData
             action[zone + 'Config'] = updatedConfigs
             action[zone + 'Delta'] = newDelta
-            action[zone + 'Displayed'] = updatedConfig.id === 'ListAllProps' ? 1 : Number(newUnique.results.bindings[0].displayed.value)
+            action[zone + 'Displayed'] = updatedConfig.id === 'ListAllProps' || updatedConfig.id === 'InfoCard' ? 1 : Number(newUnique.results.bindings[0].displayed.value)
             dispatch(action)
         })
         .catch(error => {
