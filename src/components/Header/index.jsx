@@ -486,7 +486,7 @@ class Header extends React.Component {
                                             this.state.propsAreLoading ||
                                             this.state.resourceIsLoading ||
                                             this.state.keywordIsLoading ||
-                                            (activeConfigs[this.state.displayedView].constraints[index] && activeConfigs[this.state.displayedView].constraints[index][0].multiple !== undefined)
+                                            (activeConfigs[this.state.displayedView] && activeConfigs[this.state.displayedView].constraints[index] && activeConfigs[this.state.displayedView].constraints[index][0].multiple !== undefined)
                                         }
                                     />
                                 </div>
