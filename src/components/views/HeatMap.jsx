@@ -69,7 +69,7 @@ class HeatMap extends React.Component {
         // console.log(d3.scaleOrdinal(d3.schemeCategory10)('toto'), d3.scaleOrdinal(d3.schemeCategory10)('tata'))
 
         const thresholds = getThresholdsForLegend(nestedProp1, 'prop2', categoryProp2, 7)
-        //console.log(thresholds)
+        // console.log(thresholds, nestedProp1)
         let thedomain = [thresholds[0].key[0], thresholds[thresholds.length-1].key[1]]
         // console.log('av', thedomain)
         thedomain[0] = thedomain[0] - Math.floor(thedomain[0] * 0.2)

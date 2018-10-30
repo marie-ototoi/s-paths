@@ -27,11 +27,14 @@ export const getThresholdsForLegend = (nestedProps, propName, category, nbOfRang
                 acc.push(val['count' + propName])
             } else if (val['count' + propName] && val['count' + propName].value) {
                 acc.push(Number(val['count' + propName].value))
+            } else {
+                acc.push(1)
             }
         })
         return acc
     }, []).sort((a, b) => a - b)
     const thresholds = getThresholds(values[0], values[values.length - 1], nbOfRanges)
+    // console.log(thresholds)
     return thresholds.map(t => {
         return {
             key: t,
@@ -41,11 +44,16 @@ export const getThresholdsForLegend = (nestedProps, propName, category, nbOfRang
 }
 
 export const getThresholds = (minValue, maxValue, nbOfRanges) => {
-    //console.log(minValue, maxValue)
+    // console.log(minValue, maxValue)
     let diff = maxValue - minValue
-    if (diff === 1) nbOfRanges = 1
-    if (diff <= nbOfRanges) nbOfRanges = diff / 2
+    if (diff <= 1) {
+        diff = 1
+        nbOfRanges = 1
+    } else if (diff <= nbOfRanges) {
+        nbOfRanges = diff / 2
+    }
     let part = Math.ceil(diff / nbOfRanges)
+    // console.log(part)
     let ranges = Array.from(Array(nbOfRanges).keys())
     // return [diff, part, roundUnit, roundStart, start, roundPartStr, roundPart]
     return ranges.map((r) => [minValue + part * r, minValue + part * (r + 1) - 1])
