@@ -67,21 +67,7 @@ class Images extends React.Component {
        
         return (<div
             className = { `Images ${this.customState.elementName} role_${role}` } >
-            { role !== 'target' &&
-            <svg
-                style = {{ position: 'absolute' }}
-                width = { display.viz[zone + '_width'] }
-                height = { display.screen.height - 10 }
-            >
-                <SelectionZone
-                    zone = { zone }
-                    dimensions = { dimensions }
-                    handleMouseMove = { this.props.handleMouseMove }
-                    component = { this }
-                    selections = { selections }
-                />
-            </svg>
-            }            
+                       
             { step !== 'changing' && data && 
             <div
                 style = {{ 
@@ -102,6 +88,21 @@ class Images extends React.Component {
                 </div>
             </div>
             }
+            { role !== 'target' &&
+            <svg
+                style = {{ position: 'absolute' }}
+                width = { display.viz[zone + '_width'] }
+                height = { display.screen.height - 10 }
+            >
+                <SelectionZone
+                    zone = { zone }
+                    dimensions = { dimensions }
+                    handleMouseMove = { this.props.handleMouseMove }
+                    component = { this }
+                    selections = { selections }
+                />
+            </svg>
+            } 
         </div>)
     }
     getElementsForTransition () {

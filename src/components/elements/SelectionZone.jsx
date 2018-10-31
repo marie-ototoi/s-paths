@@ -8,16 +8,11 @@ import * as selectionLib from '../../lib/selectionLib'
 class SelectionZone extends React.PureComponent {
     constructor (props) {
         super(props)
-        this.testThrottle = this.testThrottle.bind(this)
         this.state = {
             x2: null,
             y2: null
         }
-        this.listener = window.addEventListener('mousemove', throttle(this.testThrottle, 200))
-    }
-    testThrottle(e) {
-        // console.log(e)
-        this.setState({ x2: e.pageX, y2: e.pageY })
+       
     }
     render () {
         const { dimensions, display, component, selections, zone } = this.props
@@ -34,10 +29,10 @@ class SelectionZone extends React.PureComponent {
                 fill = "transparent"
                 width = { dimensions.width }
                 height = { dimensions.height }
+                onMouseMove = { (e) => { this.setState({ x2: e.pageX, y2: e.pageY }) } }
                 onMouseDown = { (e) => { console.log('toto'); this.props.handleMouseDown(e, zone, display) } }
                 onMouseUp = { (e) => { console.log('toto'); this.props.handleMouseUp(e, zone, display, component, selections) } }
             ></rect>
-            { this.state.x2 }
             { display.selectedZone[zone].x1 && this.state.x2 &&
                 <rect
                     transform = { `translate(${-dimensions.x}, ${-dimensions.y})` }
@@ -52,9 +47,6 @@ class SelectionZone extends React.PureComponent {
                 ></rect>
             }
         </g>)
-    }
-    componentWillUnMount() {
-        window.removeEventListener('mousemove')
     }
 }
 /*
