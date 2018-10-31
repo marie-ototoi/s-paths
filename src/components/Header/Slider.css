@@ -6,8 +6,21 @@
     width: 150px;
     height: 40px;
     display: flex;
+    align-items: center;
 }
 .Slider input {
     width: 65px !important;
     margin: 10px;
+}
+.Slider button {
+    background: white;
+    height: fit-content;
+    border: none;
+    cursor: pointer;
+}
+.Slider button svg {
+    color: #888;
+}
+.Slider button:hover svg {
+    color: black;
 }
