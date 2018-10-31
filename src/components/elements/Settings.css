@@ -1,0 +1,13 @@
+.Settings {
+    font-size: 0.8em;
+}
+.Settings ul{
+    max-height: 200px;
+    overflow-y: scroll;
+}
+
+.Settings ul li{
+    line-height: 1.1em;
+    padding: 0;
+    margin: 0;
+}

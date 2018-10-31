@@ -1,10 +1,39 @@
 // import * as d3 from 'd3'
 // import moment from 'moment'
 import { SparqlClient } from 'sparql-client-2'
+import fetch from 'node-fetch'
 import * as configLib from './configLib'
 
-export const addSmallestPrefix = (url, prefixes) => {
+export const addPrefix = (url, prefixes) => {
+    //let find
     const root = getRoot(url)
+    let prefix
+    return fetch((`https://prefix.cc/reverse?uri=${root}&format=ini`),
+        {
+            method: 'GET'
+        })
+        .then(res => res.text())
+        .then(res => {
+            
+            console.log(res.substr(0, 4))
+            // if no results
+            if (res.substr(0, 5) === '<?xml')  {
+                prefix = getSmallestPrefix(root, prefixes)
+            } else {
+                prefix = res.split('=')[0]
+            }
+            prefixes[prefix] = root
+            return prefixes
+        })
+        .catch(err => {
+            prefix = getSmallestPrefix(root, prefixes)
+            prefixes[prefix] = root
+            return prefixes
+        })
+}
+
+export const getSmallestPrefix = (root, prefixes) => {
+
     const flatRoot = createPrefix(root)
     const checkRoot = (len) => {
         let newPref = flatRoot.substr(0, len)
@@ -14,9 +43,7 @@ export const addSmallestPrefix = (url, prefixes) => {
             return newPref
         }
     }
-    let prefix = checkRoot(5)
-    prefixes[prefix] = root
-    return prefixes
+    return checkRoot(5)
 }
 
 export const createPrefix = (uri) => {

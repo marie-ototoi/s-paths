@@ -1,9 +1,11 @@
 import chai, {expect} from 'chai'
+import chaiAsPromised from 'chai-as-promised'
 // import sinon from 'sinon'
 import sinonChai from 'sinon-chai'
 import * as queryLib from '../../src/lib/queryLib'
 
 chai.use(sinonChai)
+chai.use(chaiAsPromised)
 
 describe('lib/queryLib', () => {
     it('should write query to get stats', () => {
@@ -233,13 +235,18 @@ WHERE {
         let prefixes = {
             nobel: 'http://data.nobelprize.org/terms/'
         }
-        expect(queryLib.addSmallestPrefix('http://xmlns.com/foaf/0.1/gender', prefixes))
-            .to.deep.equal({
+        return expect(queryLib.addPrefix('http://xmlns.com/foaf/0.1/gender', prefixes))
+            .to.eventually.deep.equal({
                 ...prefixes,
-                xmlns: 'http://xmlns.com/foaf/0.1/'
+                foaf: 'http://xmlns.com/foaf/0.1/'
             })
-        expect(queryLib.addSmallestPrefix('http://data.nobelprize.org/te', prefixes))
-            .to.deep.equal({
+    })
+    it('should add the shortest prefix available prefix to the list', () => {
+        let prefixes = {
+            nobel: 'http://data.nobelprize.org/terms/'
+        }
+        return expect(queryLib.addPrefix('http://data.nobelprize.org/te', prefixes))
+            .to.eventually.deep.equal({
                 ...prefixes,
                 nobelp: 'http://data.nobelprize.org/'
             })

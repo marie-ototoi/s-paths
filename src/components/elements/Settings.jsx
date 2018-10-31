@@ -6,6 +6,8 @@ import { analyseResources, loadStats } from '../../actions/dataActions'
 import { showSettings } from '../../actions/displayActions'
 import { saveFactor } from '../../actions/configActions'
 
+import './Settings.css'
+
 class Settings extends React.PureComponent {
     constructor (props) {
         super(props)
@@ -67,7 +69,16 @@ class Settings extends React.PureComponent {
                         </div>
                     )
                 }
-                        
+                <h2>Prefixes</h2>
+                <ul>
+                    {
+                        Object.keys(dataset.prefixes).map((key) => 
+                            <li key = { `prefix${key}` }>
+                                <strong>{key}</strong>: {dataset.prefixes[key]}
+                            </li>
+                        )
+                    }
+                </ul>
             </div>
         </div>)
     }

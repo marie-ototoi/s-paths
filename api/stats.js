@@ -32,7 +32,7 @@ const getAllStats = async (options) => {
     // add prefix to entrypoint if full url
     if (!queryLib.usesPrefix(entrypoint, prefixes)) {
         if (!queryLib.prefixDefined(entrypoint, prefixes)) {
-            prefixes = queryLib.addSmallestPrefix(entrypoint, prefixes)
+            prefixes = await queryLib.addPrefix(entrypoint, prefixes)
         }
         entrypoint = queryLib.usePrefix(entrypoint, prefixes)
     }
@@ -126,15 +126,16 @@ const getProps = async (categorizedProps, level, options, instances) => {
     if (props.length > 0) {        
         // if available
         // generate current prefixes
-        newCategorizedProps = props.map(prop => {
+        for (let i = 0; i < props.length; i ++) {
+            let prop = props[i]
             if (!queryLib.prefixDefined(prop.property, prefixes)) {
-                prefixes = queryLib.addSmallestPrefix(prop.property, prefixes)
+                prefixes = await queryLib.addPrefix(prop.property, prefixes)
             }
-            return {
+            newCategorizedProps.push({
                 ...prop._doc,
                 path: queryLib.convertPath(prop.fullPath, prefixes) // generate prefixed paths
-            }
-        })
+            })
+        }
         // keep only those whose parents count > 0
     } else if (analyse) {
         const queriedProps = categorizedProps.filter(prop => {
@@ -160,16 +161,24 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 }))
             )
             // keep only promises that have been fulfilled
-            propsLists = propsLists
-                .map((props, index) => {
-                    return (props && props.results.bindings.length > 0) ? props.results.bindings.map(prop => {
-                    // generate prefixes if needed
+            for (let j = 0; j < propsLists.length; j ++) {
+                let props = propsLists[j]
+                if (props && props.results.bindings.length > 0) {
+                    let results = []
+                    for (let k = 0; k < props.results.bindings.length; k ++) {
+                        let prop = props.results.bindings[k]
+                        // generate prefixes if needed
                         if (!queryLib.prefixDefined(prop.property.value, prefixes)) {
-                            prefixes = queryLib.addSmallestPrefix(prop.property.value, prefixes)
+                            prefixes = await queryLib.addPrefix(prop.property.value, prefixes)
                         }
-                        return queryLib.makePath(prop, queriedProps[index + i], level, { prefixes, endpoint })
-                    }) : false
-                })
+                        results.push(queryLib.makePath(prop, queriedProps[j + i], level, { prefixes, endpoint }))
+                    }
+                    propsLists[i] = results
+                } else {
+                    propsLists[i] = false
+                } 
+            }
+            propsLists = propsLists
                 .filter(props => props !== false)
                 .reduce((flatArray, list) => flatArray.concat(list), [])
             newCategorizedProps.push(...propsLists)
