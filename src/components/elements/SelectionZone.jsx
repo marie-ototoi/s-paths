@@ -13,7 +13,7 @@ class SelectionZone extends React.PureComponent {
             x2: null,
             y2: null
         }
-        window.addEventListener('mousemove', throttle(this.testThrottle, 200))
+        this.listener = window.addEventListener('mousemove', throttle(this.testThrottle, 200))
     }
     testThrottle(e) {
         // console.log(e)
@@ -52,6 +52,9 @@ class SelectionZone extends React.PureComponent {
                 ></rect>
             }
         </g>)
+    }
+    componentWillUnMount() {
+        window.removeEventListener('mousemove')
     }
 }
 /*
