@@ -5,10 +5,9 @@
     z-index: 20;
     width: 150px;
     height: 40px;
-    background: url('/images/slider.png') right top no-repeat;
+    display: flex;
 }
 .Slider input {
     width: 65px !important;
-    margin-left: 48px;
-    margin-top: 5px;
+    margin: 10px;
 }

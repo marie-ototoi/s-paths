@@ -14,16 +14,15 @@ class Slider extends React.Component {
         }
     }
 
-    drag (event) {
+    drag (value) {
         const { display, setDisplay } = this.props
-        let asidePercent = event.target.value
-        this.setState({value: event.target.value})
+        this.setState({value})
         setDisplay({
             screen: display.screen,
             vizDefPercent: {
                 ...display.vizDefPercent,
-                aside_width: asidePercent,
-                main_width: 100 - asidePercent
+                aside_width: value,
+                main_width: 100 - value
             }
         })
     }
@@ -31,15 +30,24 @@ class Slider extends React.Component {
     render () {
         return (
             <div className='Slider'>
+                <button
+                    onClick={() => this.drag(0)}
+                >
+                    <i className='far fa-window-maximize'/>
+                </button>
                 <input
                     type='range'
-                    
                     value={this.state.value}
                     min={0}
                     max={45}
                     step={this.state.step}
-                    onChange = {this.drag}
+                    onChange={(event) => this.drag(event.target.value)}
                 />
+                <button
+                    onClick={() => this.drag(45)}
+                >
+                    <i className='fas fa-columns'/>
+                </button>
             </div>
         )
     }
