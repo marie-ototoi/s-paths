@@ -31,7 +31,7 @@ const getAllStats = async (options) => {
     
     // add prefix to entrypoint if full url
     if (!queryLib.usesPrefix(entrypoint, prefixes)) {
-        if (!queryLib.prefixDefined(entrypoint)) {
+        if (!queryLib.prefixDefined(entrypoint, prefixes)) {
             prefixes = queryLib.addSmallestPrefix(entrypoint, prefixes)
         }
         entrypoint = queryLib.usePrefix(entrypoint, prefixes)
