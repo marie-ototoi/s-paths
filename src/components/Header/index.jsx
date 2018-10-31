@@ -460,7 +460,7 @@ class Header extends React.Component {
                                             // console.log(list, index)
                                             return list.reduce((acc, cur, propIndex) => {
                                                 // console.log(index)
-                                                if (activeConfigs.views[selectedView].selectedMatch.properties[index].path === cur.path) acc = propIndex
+                                                if (activeConfigs.views[selectedView].selectedMatch.properties[index] && activeConfigs.views[selectedView].selectedMatch.properties[index].path === cur.path) acc = propIndex
                                                 return acc
                                             }, 0)
                                         })
