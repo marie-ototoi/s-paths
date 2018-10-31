@@ -19,7 +19,7 @@ class BrushLink extends React.PureComponent {
             width = { dimensions.width }
             height = { dimensions.height }
             style = {{ position: 'absolute', top: 0 }}
-            transform = { `translate(${dimensions.x}, ${dimensions.y})` }
+            transform = { `translate(${dimensions.x + 1}, ${dimensions.y})` }
             onMouseDown = { (e) => this.props.handleMouseDown(e, zone, display) }
         >
             <g      

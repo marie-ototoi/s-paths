@@ -177,14 +177,14 @@ export const getDimensions = (element, viz, offset = { x: 0, y: 0, width: 0, hei
     case 'mainLegend':
         return {
             x: viz.main_width - viz.horizontal_padding + offset.x,
-            y: viz.main_top_padding + offset.y,
+            y: viz.main_top_padding + viz.top_margin + offset.y,
             width: viz.horizontal_padding + offset.width,
             height: viz.main_useful_height + offset.height
         }
     case 'asideLegend':
         return {
             x: viz.aside_width - viz.horizontal_padding + offset.x,
-            y: viz.aside_top_padding + offset.y,
+            y: viz.aside_top_padding + viz.top_margin + offset.y,
             width: viz.horizontal_padding + offset.width,
             height: viz.aside_useful_height + offset.height
         }
@@ -198,70 +198,70 @@ export const getDimensions = (element, viz, offset = { x: 0, y: 0, width: 0, hei
     case 'mainAxisBottom':
         return {
             x: viz.horizontal_padding + offset.x,
-            y: viz.useful_height + offset.y,
+            y: viz.useful_height + viz.top_margin + offset.y,
             width: viz.main_useful_width + offset.width,
             height: viz.bottom_margin + offset.height
         }
     case 'asideAxisBottom':
         return {
             x: viz.horizontal_padding + offset.x,
-            y: viz.useful_height + offset.y,
+            y: viz.useful_height + viz.top_margin + offset.y,
             width: viz.aside_useful_width + offset.width,
             height: viz.bottom_margin + offset.height
         }
     case 'mainAxisLeft':
         return {
             x: offset.x,
-            y: offset.y + viz.main_top_padding,
+            y: offset.y + viz.top_margin,
             width: viz.horizontal_padding + offset.width,
             height: viz.useful_height - viz.main_top_padding + offset.height
         }
     case 'asideAxisLeft':
         return {
             x: offset.x,
-            y: offset.y + viz.aside_top_padding,
+            y: offset.y + viz.top_margin + viz.aside_top_padding,
             width: viz.horizontal_padding + offset.width,
             height: viz.useful_height - viz.aside_top_padding + offset.height
         }
     case 'mainLegendAxisBottom':
         return {
             x: offset.x,
-            y: viz.useful_height + offset.y,
+            y: viz.useful_height + viz.top_margin + offset.y,
             width: viz.horizontal_padding + offset.width,
             height: 20 + offset.height
         }
     case 'asideLegendAxisBottom':
         return {
             x: offset.x,
-            y: viz.useful_height + offset.y,
+            y: viz.useful_height + viz.top_margin + offset.y,
             width: viz.horizontal_padding + offset.width,
             height: 20 + offset.height
         }
     case 'mainLegendAxisLeft':
         return {
             x: offset.x,
-            y: viz.useful_height + viz.top_margin + offset.y,
+            y: viz.useful_height + viz.top_margin + viz.main_top_padding + offset.y,
             width: viz.horizontal_padding + offset.width,
             height: 20 + offset.height
         }
     case 'asideLegendAxisLeft':
         return {
             x: viz.aside_x + offset.x,
-            y: viz.useful_height + offset.y,
+            y: viz.useful_height + viz.top_margin + viz.aside_top_padding + offset.y,
             width: viz.horizontal_padding + offset.width,
             height: 20 + offset.height
         }
     case 'mainLegendLegend':
         return {
             x: viz.horizontal_padding + viz.main_useful_width + offset.x,
-            y: viz.useful_height + offset.y,
+            y: viz.useful_height + viz.top_margin + viz.main_top_padding + offset.y,
             width: viz.horizontal_padding + offset.width,
             height: 20 + offset.height
         }
     case 'asideLegendLegend':
         return {
             x: viz.horizontal_padding + viz.aside_useful_width + offset.x,
-            y: viz.useful_height + offset.y,
+            y: viz.useful_height + viz.top_margin + viz.aside_top_padding + offset.y,
             width: viz.horizontal_padding + offset.width,
             height: 20 + offset.height
         }

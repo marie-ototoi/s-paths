@@ -96,13 +96,13 @@ class HeatMap extends React.Component {
         return (<svg
             width = { display.viz[zone + '_width'] }
             height = { display.screen.height - 10 }
-            transform = { `translate(${dimensions.x }, ${dimensions.y})` }
+            transform = { `translate(${dimensions.x }, 0)` }
             className = { `HeatMap ${this.customState.elementName} role_${role}` } ref = {(c) => { this.refHeatMap = c }}
         >
             { step !== 'changing' &&
             <g
                 className = "content"
-                transform = { `translate(${dimensions.horizontal_padding }, ${dimensions.top_padding})` }
+                transform = { `translate(${dimensions.horizontal_padding}, ${dimensions.y + dimensions.top_padding})` }
                 ref = { (c) => { this[this.customState.elementName] = c } }
                 onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }

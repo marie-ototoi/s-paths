@@ -311,6 +311,7 @@ class App extends React.PureComponent {
                 />
             }
             { this.state.main_brush &&
+            display.viz.aside_width > 500 &&
             !display.selectedZone.main.x1 &&
             !selections.some(sel => sel.zone === 'main') &&
                 <BrushLink

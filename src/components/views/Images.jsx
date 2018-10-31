@@ -66,15 +66,36 @@ class Images extends React.Component {
         const { uniqueData } = this.customState
        
         return (<div
-            className = { `Images ${this.customState.elementName} role_${role}` } >
-                       
+            className = { `Images ${this.customState.elementName} role_${role}` } 
+            style = {{ 
+                position: 'relative',
+                left : `${dimensions.x}px`,
+                top: `${dimensions.y}px`,
+                width: `${dimensions.width}px`,
+            }}
+        >
+            { role !== 'target' &&
+            <svg
+                style = {{ position: 'absolute', zIndex: 20 }}
+                width = { dimensions.useful_width }
+                height = { dimensions.useful_height }
+            >
+                <SelectionZone
+                    zone = { zone }
+                    dimensions = { { ...dimensions, width: dimensions.useful_width + display.viz.horizontal_padding - 30 } }
+                    handleMouseMove = { this.props.handleMouseMove }
+                    component = { this }
+                    selections = { selections }
+                />
+            </svg>
+            }            
             { step !== 'changing' && data && 
             <div
                 style = {{ 
                     position: 'relative',
-                    left : `${dimensions.x + display.viz.horizontal_padding}px`,
-                    top: `${dimensions.y + dimensions.top_padding}px`,
-                    width: `${dimensions.useful_width}px`
+                    width: `${dimensions.useful_width}px`,
+                    left : `${display.viz.horizontal_padding}px`,
+                    top: `${dimensions.top_padding}px`
                 }}
             >
                 <div className = "box" style = {{ width: dimensions.useful_width + 'px' }}>
@@ -88,21 +109,7 @@ class Images extends React.Component {
                 </div>
             </div>
             }
-            { role !== 'target' &&
-            <svg
-                style = {{ position: 'absolute' }}
-                width = { display.viz[zone + '_width'] }
-                height = { display.screen.height - 10 }
-            >
-                <SelectionZone
-                    zone = { zone }
-                    dimensions = { dimensions }
-                    handleMouseMove = { this.props.handleMouseMove }
-                    component = { this }
-                    selections = { selections }
-                />
-            </svg>
-            } 
+            
         </div>)
     }
     getElementsForTransition () {

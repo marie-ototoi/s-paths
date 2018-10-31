@@ -187,18 +187,15 @@ class Timeline extends React.Component {
         return items
     }
     shouldComponentUpdate (nextProps, nextState) {
-
         let dataChanged = (this.props.data.length !== nextProps.data.length ||
-            (this.props.data[0] && nextProps.data[0] && this.props.data[0].prop1.value !== nextProps.data[0].prop1.value))
+            (this.props.data[0] && nextProps.data[0] && this.props.data[0].prop2.value !== nextProps.data[0].prop2.value))
         let selectionChanged = this.props.selections.length !== nextProps.selections.length
         let dimensionsChanged = (this.props.dimensions.width !== nextProps.dimensions.width || this.props.dimensions.height !== nextProps.dimensions.height)
         if (dataChanged) {
-            if (this.customState.view) {
-                this.customState.view.finalize()
-                this.customState.view = null
-            }
+            this.initData(nextProps)
+            this.fetchMultiple()
             this.prepareData(nextProps)
-            // console.log('PREPARE DATA', this.props.data.length, nextProps.data.length)
+            //console.log('PREPARE DATA', this.props.data.length, nextProps.data.length)
         }
         if (selectionChanged && !dataChanged) {
             // console.log('HAS CHANGED')
@@ -224,6 +221,9 @@ class Timeline extends React.Component {
             this.customState.shouldRender
     }
     initData (nextProps) {
+        this.customState.multipleLoaded = []
+        this.customState.multipleLoading = []
+        this.customState.data = []
         this.customState.multipleData = getTimelineDict(nextProps.data, 'entrypoint')
         const { config, dataset, zone } = nextProps
         const selectedConfig = getSelectedMatch(config, zone)
@@ -248,6 +248,7 @@ class Timeline extends React.Component {
     prepareData (nextProps) {
         // console.log('prepare data')
         const { display, dimensions, selections, zone } = nextProps
+
         // prepare the data for display
         let fullData = []
         for (let cle in this.customState.multipleData) {
@@ -291,6 +292,14 @@ class Timeline extends React.Component {
             "values": selections.filter(s => s.zone === zone).map(s => { return { selector: s.selector, entrypoint: s.other } })
         }]
         // console.log(timedata)
+        if (this.customState.view) {
+            let changesetEntities = vega.changeset().remove(() => true).insert(fullData) 
+            this.customState.view.change('entities', changesetEntities).run()
+            let changesetEvents = vega.changeset().remove(() => true).insert(events) 
+            this.customState.view.change('events', changesetEvents).run()
+            //console.log('ixi,', this.customState.view._runtime)
+            //console.log(fullData)
+        }
         let marks = [{
             "type": "rule",
             "name": "entitylines",
@@ -301,7 +310,7 @@ class Timeline extends React.Component {
                 },
                 "update": {
                     "x": {"value": 0},
-                    "y": {"scale": "yscale", "field": "prop2"},
+                    "y": {"scale": "yscale", "field": "entrypoint"},
                     "x2": {"signal": "width"},
                 }
             }
@@ -309,14 +318,13 @@ class Timeline extends React.Component {
         {
             "type": "text",
             "from": {"data": "entities"},
-            "key": "prop2",
             "encode": {
                 "enter": {
                     "align": {"value": "right"},
                 },
                 "update": {
                     "x": {"value": -3},
-                    "y": {"scale": "yscale", "field": "prop2", "offset": 3},
+                    "y": {"scale": "yscale", "field": "entrypoint", "offset": 3},
                     "text": {"field": "prop2"},
                     "fill": [
                         {"test": "otherZoneSelected || (zoneSelected && !indata('selections', 'entrypoint', datum.entrypoint))", "value": "#ccc"},
@@ -342,7 +350,7 @@ class Timeline extends React.Component {
                 },
                 "update": {
                     "xc": {"scale": "xscale", "field": "date"},
-                    "yc": {"scale": "yscale", "field": "prop2", "offset" : "datum.offset"},
+                    "yc": {"scale": "yscale", "field": "entrypoint", "offset" : "datum.offset"},
                     "zindex": [
                         {"test": "datum.offset >= 0", "signal" : "50 - datum.offset"},
                         {"signal": "100 - datum.offset"}
@@ -364,7 +372,7 @@ class Timeline extends React.Component {
                 "update": {
                     "opacity": {"value": 0.7},
                     "x": {"scale": "xscale", "signal": "datum.first"},
-                    "y": {"scale": "yscale", "field": "prop2"},
+                    "y": {"scale": "yscale", "field": "entrypoint"},
                     "x2": {"scale": "xscale", "signal": "datum.last"},
                     "stroke": [
                         {"test": "otherZoneSelected || (zoneSelected && !indata('selections', 'entrypoint', datum.entrypoint))", "value": "#ccc"},
@@ -392,7 +400,7 @@ class Timeline extends React.Component {
                         {"test": "scale('xscale', tooltip.date) > width / 2", "scale": "xscale", "signal": "tooltip.date", "offset": -3},
                         {"scale": "xscale", "signal": "tooltip.date", "offset": 3}
                     ],
-                    "y": {"scale": "yscale", "signal": "tooltip.prop2"},
+                    "y": {"scale": "yscale", "signal": "tooltip.entrypoint"},
                     "text": {"signal": "tooltip.label"},
                     "fillOpacity": [
                         {"test": "datum === tooltip", "value": 0},
@@ -451,7 +459,7 @@ class Timeline extends React.Component {
                 "name": "yscale",
                 "type": "band",
                 "range": [0, {"signal": "height"}],
-                "domain": {"data": "entities", "field": "prop2"}
+                "domain": {"data": "entities", "field": "entrypoint"}
             },
             {
                 "name": "xscale",
