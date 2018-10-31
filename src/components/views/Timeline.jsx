@@ -357,7 +357,7 @@ class Timeline extends React.Component {
                     ],
                     "fill": [
                         {"test": "otherZoneSelected || (zoneSelected && !indata('selections', 'entrypoint', datum.entrypoint))", "value": "#ccc"},
-                        {"scale": "color", "field": "prop2"}
+                        {"scale": "color", "field": "entrypoint"}
                     ],
                     "stroke":{"value": "#fff"}
                 }
@@ -367,7 +367,7 @@ class Timeline extends React.Component {
             "type": "rule",
             "name": "entitytimelines",
             "from": {"data": "entities"},
-            "key": "prop2",
+            "key": "entrypoint",
             "encode": {
                 "update": {
                     "opacity": {"value": 0.7},
@@ -376,7 +376,7 @@ class Timeline extends React.Component {
                     "x2": {"scale": "xscale", "signal": "datum.last"},
                     "stroke": [
                         {"test": "otherZoneSelected || (zoneSelected && !indata('selections', 'entrypoint', datum.entrypoint))", "value": "#ccc"},
-                        {"scale": "color", "field": "prop2"}
+                        {"scale": "color", "field": "entrypoint"}
                     ],
                     "selected": [
                         {"test": "inrange(item.y, domainY)", "value": true},
@@ -471,7 +471,7 @@ class Timeline extends React.Component {
                 "name": "color",
                 "type": "ordinal",
                 "range": {"scheme": "category10"},
-                "domain": {"data": "entities", "field": "prop2"}
+                "domain": {"data": "entities", "field": "entrypoint"}
             }],
             "axes": [
                 {"orient": "bottom", "scale": "xscale", "format": "%Y", "labelOverlap": "parity"},
