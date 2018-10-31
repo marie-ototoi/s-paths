@@ -36,7 +36,8 @@ class SelectionZone extends React.PureComponent {
                 <rect
                     fill = "#ddd"
                     fillOpacity = {0.2}
-                    stroke = "#333"
+                    stroke = "#666"
+                    strokeWidth = {0.5}
                     x = { selectedZone.x1 }
                     y = { selectedZone.y1 }
                     transform = { `translate(${-(dimensions.x + display.viz[zone+'_x'])}, 0)` }

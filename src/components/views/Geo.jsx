@@ -82,6 +82,7 @@ class Geo extends React.Component {
             let findSinglePoints =  this.customState.view.scenegraph().root.source.value[0].items[1].items.filter((it) => {
                 return el.latg === it.datum.latg && el.longg === it.datum.longg
             })
+            
             let label = d3.nest().key(p => p.datum.properties.label).entries(findSinglePoints)
             this.setState({ hover: id, label }) 
         }
@@ -200,8 +201,9 @@ class Geo extends React.Component {
             (this.props.display.modifierPressed !== 32 && this.state.label !== nextState.label)
     }
     prepareData (nextProps) {
-        const { data, dataset, dimensions, selections, zone } = nextProps
+        let { data, dataset, dimensions, selections, zone } = nextProps
         // prepare the data for display
+        data = dataLib.deduplicate(data, ['entrypoint'])
         const geodata = [{
             "name": "entities",
             "values": {
