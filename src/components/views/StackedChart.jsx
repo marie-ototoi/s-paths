@@ -46,7 +46,7 @@ class StackedChart extends React.Component {
             this.props.step !== nextProps.step    
     }
     prepareData (nextProps) {
-        const { data, config, getPropPalette, palettes, zone } = nextProps
+        const { data, config, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
         // First prop to be displayed in the bottom axis
@@ -110,19 +110,12 @@ class StackedChart extends React.Component {
         return (<svg
             width = { display.viz[zone + '_width'] }
             height = { display.screen.height - 10 }
+            transform = { `translate(${dimensions.x}, ${dimensions.y})` }
             className = { classN }
         >
-            { role !== 'target' &&
-            <SelectionZone
-                zone = { zone }
-                dimensions = { dimensions }
-                component = { this }
-                selections = { selections }
-            />
-            }
             { step !== 'changing' &&
             <g
-                transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y + dimensions.top_padding})` }
+                transform = { `translate(${dimensions.horizontal_padding}, ${dimensions.top_padding})` }
                 ref = {(c) => { this[this.customState.elementName] = c }}
                 onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
@@ -166,6 +159,14 @@ class StackedChart extends React.Component {
                     zone = { zone }
                 />
             </g>
+            }
+            { role !== 'target' &&
+            <SelectionZone
+                zone = { zone }
+                dimensions = { dimensions }
+                component = { this }
+                selections = { selections }
+            />
             }
         </svg>)
     }

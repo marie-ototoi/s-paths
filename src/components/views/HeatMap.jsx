@@ -12,7 +12,6 @@ import HeatMapLayout from '../../d3/HeatMapLayout'
 // libs
 import { getSelectedMatch } from '../../lib/configLib'
 import { getAxis, getLegend, getThresholdsForLegend, nestData } from '../../lib/dataLib'
-import { getQuantitativeColors } from '../../lib/paletteLib'
 import { getDimensions } from '../../lib/scaleLib'
 // redux functions
 import { getPropPalette } from '../../actions/palettesActions'
@@ -97,21 +96,13 @@ class HeatMap extends React.Component {
         return (<svg
             width = { display.viz[zone + '_width'] }
             height = { display.screen.height - 10 }
+            transform = { `translate(${dimensions.x }, ${dimensions.y})` }
             className = { `HeatMap ${this.customState.elementName} role_${role}` } ref = {(c) => { this.refHeatMap = c }}
         >
-            { role !== 'target' &&
-            <SelectionZone
-                zone = { zone }
-                dimensions = { dimensions }
-                component = { this }
-                selections = { selections }
-                handleMouseMove = { this.props.handleMouseMove }
-            />
-            }
             { step !== 'changing' &&
             <g
                 className = "content"
-                transform = { `translate(${dimensions.x + dimensions.horizontal_padding }, ${dimensions.y + dimensions.top_padding})` }
+                transform = { `translate(${dimensions.horizontal_padding }, ${dimensions.top_padding})` }
                 ref = { (c) => { this[this.customState.elementName] = c } }
                 onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, this, selections) } }
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
@@ -161,6 +152,15 @@ class HeatMap extends React.Component {
                     zone = { zone }
                 />
             </g>
+            }
+            { role !== 'target' &&
+            <SelectionZone
+                zone = { zone }
+                dimensions = { dimensions }
+                component = { this }
+                selections = { selections }
+                handleMouseMove = { this.props.handleMouseMove }
+            />
             }
         </svg>)
     }

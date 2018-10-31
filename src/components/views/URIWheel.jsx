@@ -77,14 +77,6 @@ class URIWheel extends React.Component {
             height = { display.screen.height - 10 }
             className = { `URIWheel ${this.customState.elementName} role_${role}` }
         >
-            { role !== 'target' &&
-            <SelectionZone
-                zone = { zone }
-                dimensions = { dimensions }
-                component = { this }
-                selections = { selections }
-            />
-            }
             { step !== 'changing' &&
             <g
                 transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y})` }
@@ -103,6 +95,14 @@ class URIWheel extends React.Component {
                     selectElements = { this.selectEnsemble }
                 />
             </g>
+            }
+            { role !== 'target' &&
+            <SelectionZone
+                zone = { zone }
+                dimensions = { dimensions }
+                component = { this }
+                selections = { selections }
+            />
             }
         </svg>)
     }

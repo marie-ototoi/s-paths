@@ -2,6 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 import BrushLinkLayout from '../../d3/BrushLinkLayout'
+import { handleMouseDown } from '../../actions/selectionActions'
 
 class BrushLink extends React.PureComponent {
     constructor (props) {
@@ -13,11 +14,19 @@ class BrushLink extends React.PureComponent {
     render () {
         // console.log('ici')
         const { dimensions, display, zone } = this.props
-        return (<g className = "BrushLink"
+        return (<svg
+            className = "BrushLink" 
+            width = { dimensions.width }
+            height = { dimensions.height }
+            style = {{ position: 'absolute', top: 0 }}
             transform = { `translate(${dimensions.x}, ${dimensions.y})` }
-            ref = {(c) => { this[this.customState.elementName] = c }}
+            onMouseDown = { (e) => this.props.handleMouseDown(e, zone, display) }
         >
-        </g>)
+            <g      
+                ref = {(c) => { this[this.customState.elementName] = c }}
+            >
+            </g>
+        </svg>)
     }
     componentDidMount () {
         this.layout = new BrushLinkLayout(this[this.customState.elementName], this.props)
@@ -34,6 +43,7 @@ BrushLink.propTypes = {
     display: PropTypes.object,
     dimensions: PropTypes.object,
     selections:  PropTypes.array,
+    handleMouseDown: PropTypes.func,
     zone: PropTypes.string.isRequired
 }
 
@@ -46,6 +56,7 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
+        handleMouseDown: handleMouseDown(dispatch),
     }
 }
 

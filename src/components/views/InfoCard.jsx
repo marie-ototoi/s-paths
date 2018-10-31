@@ -4,7 +4,6 @@ import { connect } from 'react-redux'
 import Vega from 'react-vega'
 import * as vega from 'vega-lib'
 // components
-import SelectionZone from '../elements/SelectionZone'
 // d3
 
 // libs

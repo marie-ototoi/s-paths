@@ -31,14 +31,20 @@ class History extends React.PureComponent {
         ]
         this.customState.currentIndex = configs.past.length
         // console.log(this.customState.currentIndex)
-        const dimensions = getDimensions('history', display.viz, offset)
+        const dimensions = getDimensions('history', display.viz, {x:0, y:-10, width:0, height:0})
         const { x, y } = dimensions
-        return (<g
+        return (<svg
             className = "History"
-            ref = {(c) => { this[this.customState.elementName] = c }}
-            transform = { `translate(${x}, ${y})` }
+            width = { dimensions.width }
+            height = { dimensions.height }
+            style = {{ position: 'absolute', zIndex: 30, top: y + 'px', left: x + 'px' }}
         >
-        </g>)
+            <g
+                ref = {(c) => { this[this.customState.elementName] = c }}
+                transform = { `translate(0, 5)` }
+            >
+            </g>
+        </svg>)
     }
     componentDidMount () {
         this.layout = new HistoryLayout(this[this.customState.elementName], { ...this.props, ...this.customState })

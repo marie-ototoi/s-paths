@@ -41,7 +41,6 @@ class App extends React.PureComponent {
         // transition state is handled locally in the component, to avoid re-rendering
         this.handleKeyDown = this.handleKeyDown.bind(this)
         this.handleKeyUp = this.handleKeyUp.bind(this)
-        this.handleMouseMove = this.handleMouseMove.bind(this)
         this.handleTransition = this.handleTransition.bind(this)
         this.handleEndTransition = this.handleEndTransition.bind(this)
         
@@ -66,35 +65,6 @@ class App extends React.PureComponent {
         window.addEventListener('resize', throttle(this.onResize, 500))
         document.addEventListener('keydown', this.handleKeyDown)
         document.addEventListener('keyup', this.handleKeyUp)
-    }
-    handleMouseMove (e, zone) {
-        const { display, selections } = this.props
-        if (display.selectedZone[zone].x1 !== null) {
-            // console.log(this.refmain.getWrappedInstance().getElementsInZone({zoneDimensions:}))
-            const selectedZone = selectionLib.getRectSelection({
-                ...display.selectedZone[zone],
-                x2: e.pageX,
-                y2: e.pageY
-            })
-            // console.log(zone, selectedZone, display.viz[zone + '_x'])
-            d3.select(this['refView']).selectAll('rect.selection')
-                .data([selectedZone])
-                .enter()
-                .append('rect')
-                .attr('class', 'selection')
-                .on('mouseup', d => {
-                    // console.log(d3.event.pageX, d3.event.pageY)
-                    this.props.handleMouseUp({
-                        pageX: d3.event.pageX - display.viz[zone + '_x'],
-                        pageY: d3.event.pageY - display.viz[zone + '_top_padding'] - display.viz.top_margin
-                    }, zone, display, this.refmain.getWrappedInstance(), selections)
-                })
-            d3.select(this['refView']).select('rect.selection')
-                .attr('width', selectedZone.x2 - selectedZone.x1)
-                .attr('height', selectedZone.y2 - selectedZone.y1)
-                .attr('x', selectedZone.x1)
-                .attr('y', selectedZone.y1)
-        }
     }
     handleTransition (props, elements) {
         const { role, status, zone } = props
@@ -233,45 +203,8 @@ class App extends React.PureComponent {
                     elements = { this.state.main_transition }
                 />
             }
-            <svg
-                ref = {(c) => { this['refView'] = c }}
-                width = { display.screen.width }
-                height = { display.screen.height + 10 }
-                style = {{ position: 'absolute', top: 0 }}
-            >
-                { mainConfig && 
-                    this.state.main_step === 'changing' &&
-                    <Transition
-                        zone = "main"
-                        dimensions = { getDimensions('mainbrush', display.viz) }
-                        elements = { this.state.main_transition || { origin: [], target: [] } }
-                        endTransition = { this.handleEndTransition }
-                    />
-                }
-                { asideConfig && data.past.length > 1 &&
-                    this.state.side_brush &&
-                    display.viz.aside_width > 500 &&
-                    <BrushLink
-                        zone = "aside"
-                        dimensions = { getDimensions('asidebrush', display.viz) }
-                        elements = { this.state.side_brush }
-                        step = { this.state.main_step }
-                    />
-                }
-                { this.state.main_brush &&
-                    <BrushLink
-                        zone = "main"
-                        dimensions = { getDimensions('mainbrush', display.viz) }
-                        elements = { this.state.main_brush }
-                        step = { this.state.main_step }
-                    />
-                }
-               
-                <History
-                    zone = "main"
-                />
-            </svg>
-            <div style = {{ position: 'absolute', width: display.viz.aside_width + 'px', height: display.screen.height - 10 + 'px' }}> 
+            
+            <div style = {{ position: 'absolute' }} className = "asideComponent"> 
                 
                 { asideConfig && data.past.length > 1 && 
                     this.state.main_step === 'active' && 
@@ -289,14 +222,13 @@ class App extends React.PureComponent {
                         selections = { selections }
                         ref = {(c) => { this.refaside = c }}
                         handleMouseDown = { this.handleMouseDown }
-                        handleMouseMove = { this.handleMouseMove }
                         handleTransition = { this.handleTransition }
                     />
                 }
                 
             
             </div>
-            <div style = {{ position: 'absolute', left: display.viz.aside_width + 'px', width: display.viz.main_width + 'px', height: display.screen.height - 10 + 'px' }}>
+            <div style = {{ position: 'absolute', left: display.viz.aside_width + 'px' }} className = "mainComponent">
                 { mainConfig && 
                     this.state.main_step === 'launch' &&
                     <MainTransitionComponent
@@ -328,7 +260,6 @@ class App extends React.PureComponent {
                         selections = { selections }
                         ref = {(c) => { this.refmain = c }}
                         handleMouseDown = { this.handleMouseDown }
-                        handleMouseMove = { this.handleMouseMove }
                         handleTransition = { this.handleTransition }
                     />
                 }
@@ -357,6 +288,41 @@ class App extends React.PureComponent {
                     zone = "main"
                 />
             }
+            
+            { mainConfig && 
+                this.state.main_step === 'changing' &&
+                <Transition
+                    zone = "main"
+                    dimensions = { getDimensions('mainbrush', display.viz) }
+                    elements = { this.state.main_transition || { origin: [], target: [] } }
+                    endTransition = { this.handleEndTransition }
+                />
+            }
+            { asideConfig && data.past.length > 1 &&
+                this.state.side_brush &&
+                display.viz.aside_width > 500 &&
+                !display.selectedZone.aside.x1 &&
+                !selections.some(sel => sel.zone === 'aside') &&
+                <BrushLink
+                    zone = "aside"
+                    dimensions = { getDimensions('asidebrush', display.viz) }
+                    elements = { this.state.side_brush }
+                    step = { this.state.main_step }
+                />
+            }
+            { this.state.main_brush &&
+            !display.selectedZone.main.x1 &&
+            !selections.some(sel => sel.zone === 'main') &&
+                <BrushLink
+                    zone = "main"
+                    dimensions = { getDimensions('mainbrush', display.viz) }
+                    elements = { this.state.main_brush }
+                    step = { this.state.main_step }
+                />
+            }
+            <History
+                zone = "main"
+            />
         </div>)
     }
 

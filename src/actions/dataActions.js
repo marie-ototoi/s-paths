@@ -354,9 +354,9 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
             }
             action.entrypoint = entrypoint
             action.stats = dataset.stats
-            action[zone] = (updatedConfig.id === 'ListAllProps' || prevConfig.id === 'InfoCard') ? undefined : newData
+            action[zone] = ((updatedConfig.id === 'ListAllProps' && prevConfig.id === 'InfoCard') || (updatedConfig.id === 'InfoCard' && prevConfig.id === 'ListAllProps')) ? undefined : newData
             action[zone + 'Config'] = updatedConfigs
-            action[zone + 'Delta'] = (updatedConfig.id === 'ListAllProps' || prevConfig.id === 'InfoCard') ? {} : newDelta
+            action[zone + 'Delta'] = ((updatedConfig.id === 'ListAllProps' && prevConfig.id === 'InfoCard') || (updatedConfig.id === 'InfoCard' && prevConfig.id === 'ListAllProps')) ? {} : newDelta
             action[zone + 'Displayed'] = updatedConfig.id === 'ListAllProps' || updatedConfig.id === 'InfoCard' ? 1 : Number(newUnique.results.bindings[0].displayed.value)
             dispatch(action)
         })

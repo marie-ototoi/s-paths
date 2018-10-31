@@ -81,7 +81,7 @@ class Images extends React.Component {
                     selections = { selections }
                 />
             </svg>
-            }
+            }            
             { step !== 'changing' && data && 
             <div
                 style = {{ 

@@ -13,11 +13,18 @@ class Transition extends React.PureComponent {
     render () {
         // console.log('ici')
         const { dimensions, display, zone } = this.props
-        return (<g className = "Transition"
-            transform = { `translate(${dimensions.x}, ${dimensions.y + display.viz[zone + '_top_padding']})` }
-            ref = {(c) => { this[this.customState.elementName] = c }}
+        return (<svg
+            className = "Transition"
+            width = { dimensions.width }
+            height = { dimensions.height + 10 }
+            style = {{ position: 'absolute', top: 0 }}
+            transform = { `translate(${dimensions.x}, ${dimensions.y})` }
         >
-        </g>)
+            <g
+                ref = {(c) => { this[this.customState.elementName] = c }}
+            >
+            </g>
+        </svg>)
     }
     componentDidMount () {
         this.layout = new TransitionLayout(this[this.customState.elementName], this.props)

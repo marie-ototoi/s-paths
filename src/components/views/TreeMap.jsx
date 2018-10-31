@@ -77,14 +77,6 @@ class TreeMap extends React.Component {
             height = { display.screen.height - 10 }
             className = { `TreeMap ${this.customState.elementName} role_${role}` }
         >
-            { role !== 'target' &&
-            <SelectionZone
-                zone = { zone }
-                dimensions = { dimensions }
-                component = { this }
-                selections = { selections }
-            />
-            }
             { step !== 'changing' &&
             <g
                 transform = { `translate(${dimensions.x + dimensions.horizontal_padding}, ${dimensions.y + dimensions.top_padding})` }
@@ -103,6 +95,14 @@ class TreeMap extends React.Component {
                     selectElements = { this.selectEnsemble }
                 />
             </g>
+            }
+            { role !== 'target' &&
+            <SelectionZone
+                zone = { zone }
+                dimensions = { dimensions }
+                component = { this }
+                selections = { selections }
+            />
             }
         </svg>)
     }

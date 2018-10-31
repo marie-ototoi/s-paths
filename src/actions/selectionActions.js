@@ -3,7 +3,7 @@ import * as d3 from 'd3'
 import * as selectionLib from '../lib/selectionLib'
 
 export const handleMouseDown = (dispatch) => (e, zone, display) => {
-    // console.log('handleMouseDown', e.pageX, e.pageY)
+    //console.log('handleMouseDown', e.pageX, e.pageY)
     return dispatch({
         type: types.START_SELECTED_ZONE,
         x1: e.pageX,
@@ -12,7 +12,7 @@ export const handleMouseDown = (dispatch) => (e, zone, display) => {
     })
 }
 export const handleMouseUp = (dispatch) => (e, zone, display, component, selections) => {    
-    // console.log('handleMouseUp', component.getElementsInZone)
+    //console.log('handleMouseUp', component.getElementsInZone)
     let selectionZone = {
         x1: display.selectedZone[zone].x1 || e.pageX,
         y1: display.selectedZone[zone].y1 || e.pageY,
