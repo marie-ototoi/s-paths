@@ -108,6 +108,15 @@ class HeatMap extends React.Component {
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             ></g>
             }
+            { role !== 'target' &&
+            <SelectionZone
+                zone = { zone }
+                dimensions = { dimensions }
+                component = { this }
+                selections = { selections }
+                handleMouseMove = { this.props.handleMouseMove }
+            />
+            }
             { role !== 'target' && step !== 'changing' &&
             <g>
                 <Legend
@@ -153,15 +162,7 @@ class HeatMap extends React.Component {
                 />
             </g>
             }
-            { role !== 'target' &&
-            <SelectionZone
-                zone = { zone }
-                dimensions = { dimensions }
-                component = { this }
-                selections = { selections }
-                handleMouseMove = { this.props.handleMouseMove }
-            />
-            }
+            
         </svg>)
     }
     getElementsInZone (zoneDimensions) {

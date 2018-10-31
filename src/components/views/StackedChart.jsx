@@ -121,6 +121,14 @@ class StackedChart extends React.Component {
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             ></g>
             }
+            { role !== 'target' &&
+            <SelectionZone
+                zone = { zone }
+                dimensions = { dimensions }
+                component = { this }
+                selections = { selections }
+            />
+            }
             { role !== 'target' && step !== 'changing' &&
             <g>
                 <Legend
@@ -160,14 +168,7 @@ class StackedChart extends React.Component {
                 />
             </g>
             }
-            { role !== 'target' &&
-            <SelectionZone
-                zone = { zone }
-                dimensions = { dimensions }
-                component = { this }
-                selections = { selections }
-            />
-            }
+           
         </svg>)
     }
     getElementsInZone (zoneDimensions) {
