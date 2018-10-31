@@ -1,26 +1,16 @@
 .Slider {
     position: absolute;
-    right: 20px;
+    right: 10px;
     top: 140px;
     z-index: 20;
-    width: 150px;
     height: 40px;
     display: flex;
     align-items: center;
 }
 .Slider input {
     width: 65px !important;
-    margin: 10px;
+    margin: 10px 8px;
 }
-.Slider button {
-    background: white;
-    height: fit-content;
-    border: none;
+.Slider img {
     cursor: pointer;
-}
-.Slider button svg {
-    color: #888;
-}
-.Slider button:hover svg {
-    color: black;
 }

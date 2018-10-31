@@ -30,11 +30,9 @@ class Slider extends React.Component {
     render () {
         return (
             <div className='Slider'>
-                <button
-                    onClick={() => this.drag(0)}
-                >
-                    <i className='far fa-window-maximize'/>
-                </button>
+                <img src = "/images/sliderone.png" alt = "single view" width="28"
+                    onClick={() => this.drag(0)}   
+                />
                 <input
                     type='range'
                     value={this.state.value}
@@ -43,11 +41,9 @@ class Slider extends React.Component {
                     step={this.state.step}
                     onChange={(event) => this.drag(event.target.value)}
                 />
-                <button
+                <img src = "/images/slidertwo.png" alt = "double view" width="28"
                     onClick={() => this.drag(45)}
-                >
-                    <i className='fas fa-columns'/>
-                </button>
+                />
             </div>
         )
     }
