@@ -554,7 +554,7 @@ export const deduplicate = (data, props) => {
 }
 
 export const getTransitionElements = (originElements, targetElements, originConfig, targetSelectedView, deltaData, zone) => {
-    // console.log('before', zone, originElements, targetElements, originConfig, targetSelectedView, deltaData)
+    //console.log('before', zone, originElements, targetElements, originConfig, targetSelectedView, deltaData)
     deltaData = deltaData.map(data => {
         let indexOrigin = getDeltaIndex(data, originElements, { entrypoint: originConfig.entrypoint, isTarget: false })
         let indexTarget = getDeltaIndex(data, targetElements, { entrypoint: targetSelectedView.entrypoint, isTarget: true })
@@ -567,7 +567,7 @@ export const getTransitionElements = (originElements, targetElements, originConf
     // console.log(deltaData)
     if (!originElements) {
         originElements = []
-    } else if (!originConfig.entrypoint && originElements.length > 0) {
+    } else if ((!originConfig.entrypoint || !deltaData[0].entrypoint) && originElements.length > 0) {
         originElements = splitTransitionElements(originElements, 'origin', zone, deltaData)
     } else {
         originElements = originElements.map(el => {
@@ -582,7 +582,7 @@ export const getTransitionElements = (originElements, targetElements, originConf
     }
     if (!targetElements) {
         targetElements = []
-    } else if (!targetSelectedView.entrypoint && targetElements.length > 0) {
+    } else if ((!targetSelectedView.entrypoint || !deltaData[0].entrypoint) && targetElements.length > 0) {
         targetElements = splitTransitionElements(targetElements, 'target', zone, deltaData)
     } else {
         targetElements = targetElements.map(el => {
