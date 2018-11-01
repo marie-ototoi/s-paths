@@ -345,7 +345,6 @@ class Header extends React.Component {
             let pivotEnabled = selections.length > 0
             // selection button
             let selectionEnabled = selections.length > 0
-            let pointerClass = selectionEnabled ? '' : 'greyed'
 
             // first line - resources
             let keywordEnabled = this.state.keyword.length > 3
@@ -489,7 +488,7 @@ class Header extends React.Component {
                                         options={selectedLists[index]}
                                         isDisabled={
                                             controlsDisabled ||
-                                            (activeConfigs[this.state.displayedView] && activeConfigs[this.state.displayedView].constraints[index] && activeConfigs[this.state.displayedView].constraints[index][0].multiple !== undefined)
+                                            (activeConfigs[this.state.selectedView] && activeConfigs[this.state.selectedView].constraints[index] && activeConfigs[this.state.selectedView].constraints[index][0].multiple !== undefined)
                                         }
                                     />
                                 </div>
