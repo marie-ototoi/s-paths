@@ -393,7 +393,7 @@ export const prepareInfoCardData = (data, dataset) => {
         }
         dataDict[path] = dp
     })
-    stats = stats.statements.sort((a, b) => a.level - b.level).filter(stat => stat.category !== 'uri' && stat.category !== 'number')
+    stats = stats.statements.sort((a, b) => a.level - b.level).filter(stat => stat.category !== 'number')
     stats = stats.map(stat => {
         let values = dataDict[stat.fullPath+'/']
         
@@ -405,7 +405,8 @@ export const prepareInfoCardData = (data, dataset) => {
     paths.geolat = paths.geo.filter(stat => stat.subcategory === 'latitude')
     paths.geolong = paths.geo.filter(stat => stat.subcategory === 'longitude')
     paths.datetime = stats.filter(stat => stat.category === 'datetime')
-    // console.log(paths)
+    paths.uri = stats.filter(stat => stat.category === 'uri')
+    console.log(paths)
     return paths
 }
 
@@ -567,7 +568,7 @@ export const getTransitionElements = (originElements, targetElements, originConf
     // console.log(deltaData)
     if (!originElements) {
         originElements = []
-    } else if ((!originConfig.entrypoint || !deltaData[0].entrypoint) && originElements.length > 0) {
+    } else if ((!originConfig.entrypoint || (deltaData[0] && !deltaData[0].entrypoint)) && originElements.length > 0) {
         originElements = splitTransitionElements(originElements, 'origin', zone, deltaData)
     } else {
         originElements = originElements.map(el => {
@@ -582,7 +583,7 @@ export const getTransitionElements = (originElements, targetElements, originConf
     }
     if (!targetElements) {
         targetElements = []
-    } else if ((!targetSelectedView.entrypoint || !deltaData[0].entrypoint) && targetElements.length > 0) {
+    } else if ((!targetSelectedView.entrypoint || (deltaData[0] && !deltaData[0].entrypoint)) && targetElements.length > 0) {
         targetElements = splitTransitionElements(targetElements, 'target', zone, deltaData)
     } else {
         targetElements = targetElements.map(el => {
@@ -678,7 +679,7 @@ const nestDataLevel = (data, props, parent) => {
         })
             .filter(prop => prop !== false)
             .sort((a, b) => a.year - b.year)
-
+        
         let yearNest = d3.nest().key(prop => prop.year).entries(dataToNest)
         let yearNumber = Number(yearNest[yearNest.length - 1].key) - Number(yearNest[0].key)
         let decadeNest = d3.nest().key(prop => prop.decade).entries(dataToNest)

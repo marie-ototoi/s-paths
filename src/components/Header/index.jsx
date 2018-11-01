@@ -272,6 +272,10 @@ class Header extends React.Component {
                     displayedView: this.state.selectedView
                 })
             })
+            .catch((e) => this.setState({
+                propsAreLoading: false,
+                errorSelection: e
+            }))
     }
     displaySelection (pivot) {
         // console.log('DISPLAY SELECTION')
@@ -513,7 +517,14 @@ class Header extends React.Component {
                             max={options[0].total}
                         />
                     </div>
-                    
+                    <div
+                        className='error'
+                        style={{
+                            marginLeft: `${this.props.display.viz.horizontal_padding}px`
+                        }}
+                    >
+                        {this.state.errorSelection}
+                    </div>
                     {this.props.step === 'active' &&
                         <Explain
                             options={options[2]}

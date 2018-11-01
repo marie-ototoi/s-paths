@@ -341,13 +341,13 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, maxDepth: (updatedConfig.id === 'ListAllProps' || updatedConfig.id === 'InfoCard') ? 1 : null })
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, prevConfig, dataset, zone)
     const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
-    //console.log(newQuery)
     return Promise.all([
         getData(endpoint, newQuery, prefixes),
         getData(endpoint, queryTransition, prefixes),
         getData(endpoint, queryUnique, prefixes)
     ])
         .then(([newData, newDelta, newUnique]) => {
+            if (newData.results.bindings.length === 0) throw 'No entities with this combination of paths'
             const action = {
                 type: types.SET_CONFIGS,
                 zone: zone
@@ -359,9 +359,6 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
             action[zone + 'Delta'] = ((updatedConfig.id === 'ListAllProps' && prevConfig.id === 'InfoCard') || (updatedConfig.id === 'InfoCard' && prevConfig.id === 'ListAllProps')) ? {} : newDelta
             action[zone + 'Displayed'] = updatedConfig.id === 'ListAllProps' || updatedConfig.id === 'InfoCard' ? 1 : Number(newUnique.results.bindings[0].displayed.value)
             dispatch(action)
-        })
-        .catch(error => {
-            console.error('Error getting data after property update', error)
         })
 }
 

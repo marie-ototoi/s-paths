@@ -58,7 +58,7 @@
 .Header .error {
     color: #f00;
     font-size: 0.7em;
-    padding-left: 45px;
+    position: absolute;
 }
 
 .Header select,

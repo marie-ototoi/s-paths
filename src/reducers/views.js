@@ -6,7 +6,7 @@ const defaultState = [
         name: 'stacked chart',
         thumb : '/images/stackedchart.svg',
         entrypoint: { min: 2, max: 1000, optimal: [4, 200] },
-        weight: 1,
+        weight: 0.9,
         constraints: [
             [
                 {
@@ -112,7 +112,7 @@ const defaultState = [
         id: 'TreeMap',
         name: 'treemap',
         thumb : '/images/treemap.svg',
-        weight : 0.5,
+        weight : 0.3,
         constraints: [
             [
                 {
@@ -149,7 +149,7 @@ const defaultState = [
         name: 'map',
         thumb : '/images/geomap.svg',
         entrypoint: { min: 2, max: 1000 },
-        weight: 0.9,
+        weight: 0.95,
         constraints: [
             [
                 {

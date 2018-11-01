@@ -4,7 +4,7 @@ const initialState = {
     endpoint: process.env.ENDPOINT || 'http://s-paths.lri.fr:8890/sparql',
     localEndpoint: process.env.LOCAL_ENDPOINT || 'http://virtuoso:8890/sparql',
     entrypoint: '',
-    graphs: ['http://nobel.ilda.fr', 'http://dbpedianobel.ilda.fr'],
+    graphs: ['http://nobel.ilda.fr', 'http://dbpedianobel.ilda.fr'], //['http://bnf.ilda.fr'],
     resourceGraph: null,
     constraints: '',
     labels: [],
@@ -19,9 +19,9 @@ const initialState = {
         customProps: 8
     },
     rankMatchFactors: {
-        view: 4,
-        propsNumber: 1,
-        propsAverage: 4
+        view: 6,
+        propsNumber: 3,
+        propsAverage: 5
     },
     prefixes: {
         dcterms: 'http://purl.org/dc/terms/',
@@ -70,9 +70,13 @@ const initialState = {
     },
     stats: [],
     propertyPreferences: {
+        'dbpedia-owl:Award/nobel:year/*': 1,
+        'dbpedia-owl:Award/nobel:category/*/rdfs:label/*': 0.9,
+        'dbpedia-owl:Award/nobel:laureate/*/foaf:gender/*': 0.8,
         'nobel:Laureate/nobel:nobelPrize/*/nobel:year/*': 1,
-        'nobel:Laureate/foaf:name/*': 1,
-        'nobel:Laureate/gender/*': 0.9,
+        'nobel:Laureate/dbpprop:dateOfBirth/*': 0.9,
+        'nobel:Laureate/foaf:name/*': 0.7,
+        'nobel:Laureate/foaf:gender/*': 0.8,
         'nobel:Laureate/nobel:laureateAward/*/nobel:category/*/rdfs:label/*' : 1
     }
 }
