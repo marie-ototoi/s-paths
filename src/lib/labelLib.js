@@ -58,6 +58,7 @@ export const getLabels = async (urisToLabel, prefixes) => {
             if (missing.length > 0) {
                 return missing[0]
             } else {
+                
                 return { ...prop, label: getPropName(prop.uri) }
             }
         }

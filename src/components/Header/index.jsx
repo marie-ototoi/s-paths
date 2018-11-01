@@ -350,6 +350,8 @@ class Header extends React.Component {
             // first line - resources
             let keywordEnabled = this.state.keyword.length > 3
             let selectResourceEnabled = (this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '')
+            let controlsDisabled =  this.props.step !== 'active'|| this.state.selectionIsLoading || this.state.propsAreLoading || this.state.resourceIsLoading || this.state.keywordIsLoading 
+            let keycontrolsDisabled = controlsDisabled ? { disabled: true } : {}
             // console.log(this.state.selectedResource.type, this.state.displayedResource.type, dataset.constraints)
             // second line - view + props
             let selectedLists = this.state.configsLists[this.state.selectedView]
@@ -377,12 +379,7 @@ class Header extends React.Component {
                                 onChange={(selectedResource) => {
                                     this.setState({ selectedResource })
                                 }}
-                                isDisabled={
-                                    this.props.step !== 'active' || 
-                                    this.state.selectionIsLoading ||
-                                    this.state.propsAreLoading ||
-                                    this.state.resourceIsLoading 
-                                }
+                                isDisabled={controlsDisabled}
                             />
                             <Submit
                                 isLoading={this.state.resourceIsLoading}
@@ -405,6 +402,7 @@ class Header extends React.Component {
                             <label className='label'>FILTER</label>
                             <div className='control'>
                                 <input
+                                    {...keycontrolsDisabled}
                                     className='input is-small'
                                     type='text'
                                     placeholder='Keyword'
@@ -470,13 +468,7 @@ class Header extends React.Component {
                                         })
                                     })
                                 }}
-                                isDisabled={
-                                    this.props.step !== 'active'|| 
-                                    this.state.selectionIsLoading ||
-                                    this.state.propsAreLoading ||
-                                    this.state.resourceIsLoading ||
-                                    this.state.keywordIsLoading 
-                                }
+                                isDisabled={controlsDisabled}
                                 options={activeConfigs.map((option, i) => ({ ...option, index: i }))}
                             />
                             { selectedLists && selectedLists.map((list, index) => (
@@ -496,11 +488,7 @@ class Header extends React.Component {
                                         }}
                                         options={selectedLists[index]}
                                         isDisabled={
-                                            this.props.step !== 'active'|| 
-                                            this.state.selectionIsLoading ||
-                                            this.state.propsAreLoading ||
-                                            this.state.resourceIsLoading ||
-                                            this.state.keywordIsLoading ||
+                                            controlsDisabled ||
                                             (activeConfigs[this.state.displayedView] && activeConfigs[this.state.displayedView].constraints[index] && activeConfigs[this.state.displayedView].constraints[index][0].multiple !== undefined)
                                         }
                                     />
