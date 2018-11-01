@@ -21,12 +21,12 @@ class PropSelect extends React.Component {
         })
     }
 
-    static getOptionLabel (option) {
+    static getOptionLabel (option, i) {
         return (
             <div>
-                <span className='tag'>
-                    {option.readablePath.map(p => p.label).join(' / ')}
-                </span>
+                {option.readablePath.map((p, pi) => (
+                    <span key= {`navprop${Math.ceil(Math.random()*10000)}_${i}_${pi}`} title = {p.comment}>{p.label} {pi < option.readablePath.length ? ' / ' : ''}</span>
+                ))}
             </div>
         )
     }
@@ -43,6 +43,74 @@ class PropSelect extends React.Component {
                 getOptionLabel={PropSelect.getOptionLabel}
                 onChange={this.props.onChange}
                 isDisabled={this.props.isDisabled}
+                styles={{
+                    option: (base, state) => {
+                        let color = '#999'  
+                        let borderColor = '#bbb'  
+                        if (state.isSelected) {
+                            color = '#d15793'
+                            borderColor = '#d15793'
+                        } else if (state.isFocused) {
+                            color = '#333'
+                            borderColor = '#666'
+                        }
+                        return {
+                            ...base,
+                            borderBottom: '1px solid ' + borderColor,
+                            color: color,
+                            fontWeight: state.isSelected ? 'bold' : 'normal',
+                            background: 'none',
+                            padding: '2px'
+                        }
+                    },
+                    control: (base, state) => ({
+                        ...base,
+                        border: 'none',
+                        boxShadow: 'none'   
+                    }),
+                    singleValue: (base, state) => {
+                        const opacity = state.isDisabled ? 0.5 : 1
+                        const transition = 'opacity 300ms'                    
+                        return { 
+                            ...base,
+                            opacity,
+                            transition
+                        }
+                    },
+                    container: (base, state) => {              
+                        return { 
+                            ...base,
+                            border: 'none',
+                            boxShadow: 'none',
+                            borderBottom: '1px solid #ccc',
+                            padding: '0'
+                        }
+                    },
+                    valueContainer: (base, state) => {              
+                        return { 
+                            ...base,
+                            border: 'none',
+                            margin: '0',
+                            padding: '0'
+                        }
+                    },
+                    menu: (base, state) => {              
+                        return { 
+                            ...base,
+                            border: 'none',
+                            boxShadow: 'none',
+                            padding: '0 0 10px 10px',
+                            marginLeft: '-10px',
+                            borderRadius: 0
+                        }
+                    },
+                    menuList: (base, state) => {              
+                        return { 
+                            ...base,
+                            paddingRight: '10px'
+                        }
+                    }
+                }}
             />
         )
     }

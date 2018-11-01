@@ -11,10 +11,6 @@
     opacity: 0.5;
 }
 
-.PropSelect__value-container {
-    padding: 0 8px !important;
-}
-
 .PropSelect__value-container input {
     padding-top: 8px;
 }

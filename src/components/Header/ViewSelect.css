@@ -1,8 +1,7 @@
 .ViewSelect__control {
     font-size: 0.75em;
     min-height: 28px !important;
-    width: 60px;
-    margin-right: 10px;
+    width: 50px;
 }
 
 .ViewSelect__value-container input {

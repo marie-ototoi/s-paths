@@ -406,7 +406,7 @@ class Header extends React.Component {
                                     placeholder='Keyword'
                                     value={this.state.keyword}
                                     onChange={(e) => this.setState({ keyword: e.target.value })}
-                                    style={{ paddingTop: '10px' }}
+                                    style={{ paddingTop: '10px', textAlign: 'left' }}
                                 />
                             </div>
                             
@@ -421,7 +421,7 @@ class Header extends React.Component {
                             value={options[1]}
                             max={options[0].total}
                         />
-                        <span>
+                        <span style={{position: 'absolute', right: '15px', cursor: 'pointer'}}>
                             {this.state.showConfig && (
                                 <span
                                     className='icon'

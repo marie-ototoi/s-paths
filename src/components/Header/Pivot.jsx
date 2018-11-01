@@ -19,27 +19,24 @@ class Pivot extends React.Component {
                         <button
                             className='button'
                             disabled={this.props.disable}
-                            style={{
-                                maxWidth:'200px',
-                                minHeight: this.state.open ? (30 + this.props.elements.length * 20) : 10 +'px',
-                                position: 'relative !important'
-                            }}
                             onClick={e => this.setState({open: !this.state.open})}
                         >
                             Pivot from selection to...
                             {this.state.open &&
-                                this.props.elements.map((piv, i) => (
-                                    <li
-                                        key = {`piv_ep${i}`}
-                                        onClick={e => {
-                                            this.props.onClick(piv)
-                                            this.setState({open: false})
-                                        }}
-                                        title={piv.comment}
-                                    >
-                                        <span>{piv.label}</span>
-                                    </li>
-                                ))
+                                <ul>
+                                    {this.props.elements.map((piv, i) => (
+                                        <li
+                                            key = {`piv_ep${i}`}
+                                            onClick={e => {
+                                                this.props.onClick(piv)
+                                                this.setState({open: false})
+                                            }}
+                                            title={piv.comment}
+                                        >
+                                            <span>{piv.label}</span>
+                                        </li>
+                                    ))}
+                                </ul>
                             }
                         </button>
                       

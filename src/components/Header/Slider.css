@@ -1,7 +1,7 @@
 .Slider {
     position: absolute;
-    right: 20px;
-    top: 140px;
+    right: 15px;
+    top: 142px;
     z-index: 20;
     height: 40px;
     display: flex;
@@ -9,7 +9,7 @@
 }
 .Slider input {
     width: 65px !important;
-    margin: 10px 8px;
+    margin: 0 8px;
 }
 .Slider img {
     cursor: pointer;

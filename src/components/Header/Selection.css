@@ -4,12 +4,29 @@
     font-size: 0.8em;
     z-index: 20;
     left: 15px;
-    top: 138px;
+    top: 146px;
 }
 .Selection button {
     font-size: 1em;
 }
-
+.Selection .button {
+    min-height: 28px;
+    min-width: 148px;
+    padding: 0;
+    border: none;
+    border-bottom: 1px solid #bbb;
+    border-radius: 0;
+    justify-content: start;
+}
+.Selection span.button {
+    font-size: 0.8em;
+}
 .Selection .icon {
     padding-left: 10px;
+}
+
+.Selection .button:focus, .Selection .button:not([disabled]):hover{
+    outline: none;
+    box-shadow: none;
+    border-color: #666;
 }

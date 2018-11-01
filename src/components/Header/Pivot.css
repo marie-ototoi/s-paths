@@ -4,21 +4,40 @@
     font-size: 0.8em;
     z-index: 20;
     left: 15px;
-    top: 170px;
-    
+    top: 178px;
 }
 .Pivot button {
     font-size: 1em;
+    display: block;
 }
-.Pivot button {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: start;
+.Pivot .button {
+    min-height: 28px;
+    min-width: 148px;
+    padding: 0 !important;
+    vertical-align: top;
+    border: none;
+    border-bottom: 1px solid #bbb;
+    border-radius: 0;
+    text-align: left;
 }
-.Pivot button li:hover span{
-    background: #3273dc;
-    color: #ddd;
+.Pivot .button ul {
+    text-align: left;
+    position: absolute;
+    margin: 15px 0 0 0; 
 }
-.Pivot .title {
-    font-weight: bold;
+.Pivot .button li:hover{
+    border-color: #666;
+    color: #333;
+}
+.Pivot .button li{
+   list-style-type: square;
+   border-bottom: 1px solid #bbb;
+   list-style-position: inside;
+   color: #666;
+}
+
+.Pivot .button:focus, .Pivot .button:not([disabled]):hover{
+    outline: none;
+    box-shadow: none;
+    border-color: #666;
 }

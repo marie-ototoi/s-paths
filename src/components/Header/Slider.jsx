@@ -30,7 +30,7 @@ class Slider extends React.Component {
     render () {
         return (
             <div className='Slider'>
-                <img src = "/images/sliderone.png" alt = "single view" width="28"
+                <img src = "/images/sliderone.png" alt = "single view" width="26"
                     onClick={() => this.drag(0)}   
                 />
                 <input
@@ -41,7 +41,7 @@ class Slider extends React.Component {
                     step={this.state.step}
                     onChange={(event) => this.drag(event.target.value)}
                 />
-                <img src = "/images/slidertwo.png" alt = "double view" width="28"
+                <img src = "/images/slidertwo.png" alt = "double view" width="26"
                     onClick={() => this.drag(45)}
                 />
             </div>

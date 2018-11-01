@@ -9,6 +9,14 @@
     width: 29px;
     padding-top: 0;
     padding-bottom: 0;
+    border: none;
+    border-bottom: 1px solid #bbb;
+    border-radius: 0;
+}
+.Submit .button:focus{
+    outline: none;
+    box-shadow: none;
+    border-color: #666;
 }
 
 .Submit .icon {

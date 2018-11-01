@@ -14,13 +14,10 @@ class Selection extends React.Component {
                         onClick={this.props.onClick}
                         disabled={this.props.disable}
                     >
-                        focus on selection
-                        <span className='icon'>
-                            <i className='fas fa-mouse-pointer' />
-                        </span>
+                        Focus on selection
                     </button>
                 ) ||
-                    <span className='Selection button is-loading'>focus on selection</span>
+                    <span className='button is-loading'>Focus on selection</span>
                 }
             </div>
         )
