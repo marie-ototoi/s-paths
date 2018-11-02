@@ -152,7 +152,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
 }
 
 export const getData = (endpoint, query, prefixes) => {
-    // console.log(query)
+    console.log(query)
     const client = new SparqlClient(endpoint, {
         requestDefaults: {
             headers: {
@@ -507,10 +507,11 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
     if (maxDepth) {
         //FILTER regex(?entrypoint, '^http://data.nobelprize.org/resource/laureateaward/22$$', 'i') .
         propList = `DISTINCT ?entrypoint ?path1 ?prop1 `
-        defList = `<${singleURI}> ?path1 ?prop1 .
-        OPTIONAL { `
-        for (let i = 1; i < maxLevel; i ++ ) {
-            defList = defList.concat(`?prop${i} ?path${(i + 1)} ?prop${(i + 1)} . `)        
+        defList = `<${singleURI}> ?path1 ?prop1 . `
+        orderList = orderList.concat(`?path1 ?prop$1 `)
+        groupList = groupList.concat(`?path1 ?prop$1 `)
+        for (let i = 1; i < maxDepth; i ++ ) {
+            defList = defList.concat(`?prop${i} ?path${(i + 1)} ?prop${(i + 1)} . `)
             defList = defList.concat(`FILTER (?path${(i + 1)} != <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> && `)
             for (let j = i; j >= 1; j--) {
                 defList = defList.concat(`?prop${(i + 1)} != ?prop${j}`)
@@ -519,11 +520,10 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
             defList = defList.concat(`) . `)
             propList = propList.concat(`?path${(i + 1)} ?prop${(i + 1)} `)
             groupList = groupList.concat(`?path${(i + 1)} ?prop${(i + 1)} `)
-            orderList = orderList.concat(`?path${(i + 1)} ?prop${(i + 1)} `)  
+            orderList = orderList.concat(`?path${(i + 1)} ?prop${(i + 1)} `)
         }
         constraints = ''
-        defList = defList.concat(`} .
-        BIND (<${singleURI}> as ?entrypoint)`)
+        defList = defList.concat(`BIND (<${singleURI}> as ?entrypoint)`)
     } else {
         let selectedConfig = configLib.getSelectedMatch(configZone)    
         let properties = !configZone.allProperties ? selectedConfig.properties : []

@@ -482,7 +482,6 @@ class Header extends React.Component {
                                             selectedProps[index] = selectedLists[index].findIndex((option) =>
                                                 option.path === selectedOption.path
                                             )
-                                
                                             this.setState({ selectedProps })
                                         }}
                                         options={selectedLists[index]}

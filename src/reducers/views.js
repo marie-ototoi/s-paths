@@ -85,7 +85,7 @@ const defaultState = [
         id: 'Timeline',
         name: 'timeline',
         thumb : '/images/timeline.svg',
-        weight: 0.9,
+        weight: 0.85,
         entrypoint: { min: 2, max: 50, optimal: [10, 20] },
         constraints: [
             [

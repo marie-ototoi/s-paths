@@ -14,13 +14,20 @@
 
 .InfoCard .geoBox{
     width: 100%;
-    height: 150px;
+    height: 200px;
+    margin-bottom: 20px;
 }
 
 .InfoCard .imageBox{
-    width: 25%;
-    text-align: center;
-    height: 150px;
+    height: 100px;
+    width: 100%;
+    display: flex;
+    justify-content: start;
+    margin-bottom: 10px;
+}
+.InfoCard .imageBox img{
+    margin-right: 5px;
+    max-height: 100px;
 }
 
 .InfoCard .textBox {
@@ -28,9 +35,12 @@
 }
 
 .InfoCard .datetimeBox{
-    width: 75%;
+    width: 100%;
+    height: 150px;
+    margin-bottom: 20px;
 }
-.InfoCard .textBox p{
+.InfoCard .textBox p,
+.InfoCard .uriBox p{
     font-size: 0.8em;
     margin: 0;
     padding: 0;

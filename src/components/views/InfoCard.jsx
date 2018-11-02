@@ -68,7 +68,7 @@ class InfoCard extends React.Component {
                 }
             })
         }
-        let geoWidth = Math.floor(dimensions.useful_width * 0.48) - 40
+        let geoWidth = Math.floor(dimensions.useful_width * 0.48) - 20
         let geospec = {
             ...defaultSpec,
             "width": geoWidth,
@@ -193,18 +193,17 @@ class InfoCard extends React.Component {
             pastEvents.push(theDate)
             return {
                 index: i,
-                offset: -10 * offset,
+                offset: -5 * offset,
                 label:  info.readablePath.map((rp, rpi) => rp.label).join(' / '),
                 date:theDate
             }            
         })
         //console.log('||||||||||',events)
-        let timeWidth = infoCardData.image.length > 0 ?  Math.floor(dimensions.useful_width * 0.48 * 0.75) - 40 :  Math.floor(dimensions.useful_width * 0.48) - 40
         
         let timespec = {
             ...defaultSpec,
-            "width": timeWidth,
-            "height": 100,
+            "width": Math.floor(dimensions.useful_width * 0.48) - 20 ,
+            "height": 140,
             "padding": {"bottom": 50},
             "signals": [
                 {
@@ -244,14 +243,14 @@ class InfoCard extends React.Component {
                     "from": {"data": "events"},
                     "encode": {
                         "enter": {
-                            "size": {"value": 60},
+                            "size": {"value": 110},
                             "opacity": [
                                 {"value": 0.8}
                             ]
                         },
                         "update": {
                             "xc": {"scale": "xscale", "field": "date"},
-                            "yc": {"value": 70, "offset" : "datum.offset"},
+                            "yc": {"value": 120, "offset" : "datum.offset"},
                             "fill": {"value": "#d71fa5"},
                             "stroke":{"value": "#fff"}
                         }
@@ -268,7 +267,7 @@ class InfoCard extends React.Component {
                                 {"value": "left"}
                             ],
                             "x": {"value": 10},
-                            "y": {"value": 100},
+                            "y": {"value": 140},
                             "text": {"signal": "tooltip.label"},
                             "fillOpacity": [
                                 {"test": "datum === tooltip", "value": 0},
@@ -313,51 +312,57 @@ class InfoCard extends React.Component {
                     width: `${dimensions.useful_width}px`
                 }}
             >
-                <div className = "box" style = {{ width: dimensions.useful_width + 'px' }}>
-                    <div className = "content" style = {{maxHeight: `${dimensions.useful_height}px`}}>
+                <div className = "content" style = {{maxHeight: `${dimensions.useful_height}px`}}>
+                    { this.customState.infoCardData.text.length > 0 &&
+                        <div className = "textBox">
+                            { this.customState.infoCardData.text.map((info, i) => 
+                                <p key={`InfoCardtext${i}`}><strong>{
+                                    info.readablePath.map((rp, rpi) => (<span key={`infotext${i}p${rpi}`} title={rp.comment}>{rp.label}{rpi < info.readablePath.length ? ' / ' : ''}</span>))
+                                }: </strong>{info.values['prop'+ info.level].value}</p>
+                            )}
+                        </div>
+                    }
+                    <div className = "sideBox">
+                        { this.customState.infoCardData.image.length > 0 &&
+                            <div className = "imageBox">
+                                {
+                                    this.customState.infoCardData.image.map((info, i) => 
+                                        (<img
+                                            key={`infoimage${i}`}
+                                            src={info.values['prop'+ info.level].value}
+                                            title={
+                                                info.readablePath.map((rp, rpi) => rp.label).join(' / ')
+                                            }
+                                            style={{ maxHeight: '100px' }}
+                                        />)
+                                    )
+                                }
+                            </div>
+                        }
+                        { this.customState.infoCardData.datetime.length > 0 &&
+                        <div className = "datetimeBox">
+                            <Vega
+                                spec = { this.customState.timespec }
+                            />
+                        </div>
+                        }
+                        { this.customState.infoCardData.geo.length > 0 &&
+                        <div className = "geoBox">
+                            <Vega
+                                spec = { this.customState.geospec }
+                            />
+                        </div>
+                        }
                         { this.customState.infoCardData.text.length > 0 &&
-                            <div className = "textBox">
-                                { this.customState.infoCardData.text.map((info, i) => 
+                            <div className = "uriBox">
+                                { this.customState.infoCardData.uri.map((info, i) => 
                                     <p key={`InfoCardtext${i}`}><strong>{
                                         info.readablePath.map((rp, rpi) => (<span key={`infotext${i}p${rpi}`} title={rp.comment}>{rp.label}{rpi < info.readablePath.length ? ' / ' : ''}</span>))
-                                    }: </strong>{info.values['prop'+ info.level].value}</p>
+                                    }: </strong><a href={info.values['prop'+ info.level].value} target="_blank" rel="noopener noreferrer">{info.values['prop'+ info.level].value}</a></p>
                                 )}
                             </div>
                         }
-                        <div className = "sideBox">
-                            { this.customState.infoCardData.image.length > 0 &&
-                                <div className = "imageBox">
-                                    {
-                                        this.customState.infoCardData.image.map((info, i) => 
-                                            (<img
-                                                key={`infoimage${i}`}
-                                                src={info.values['prop'+ info.level].value}
-                                                title={
-                                                    info.readablePath.map((rp, rpi) => rp.label).join(' / ')
-                                                }
-                                                style={{ maxHeight: '150px' }}
-                                            />)
-                                        )
-                                    }
-                                </div>
-                            }
-                            { this.customState.infoCardData.datetime.length > 0 &&
-                            <div className = "datetimeBox">
-                                <Vega
-                                    spec = { this.customState.timespec }
-                                />
-                            </div>
-                            }
-                            { this.customState.infoCardData.geo.length > 0 &&
-                            <div className = "geoBox">
-                                <Vega
-                                    spec = { this.customState.geospec }
-                                />
-                            </div>
-                            }
-                            
-                        </div>
-                    </div>
+                    </div>   
                 </div>
             </div>
             }

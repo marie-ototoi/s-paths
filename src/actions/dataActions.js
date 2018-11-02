@@ -242,6 +242,17 @@ export const checkPivots = (dispatch) => (properties, dataset) => {
     return getData(dataset.endpoint, makeCheckPivotQuery(properties, dataset), dataset.prefixes)
 }
 
+export const loadSingle = (dataset, configMain, singleURI) => {
+    let { maxLevel, entrypoint, endpoint, prefixes } = dataset
+    return Promise.all(Array.from(Array(maxLevel).keys()).map(depth => getData(endpoint, makeQuery(entrypoint, configMain, 'main',  { ...dataset, singleURI, maxDepth: depth + 1 }), prefixes)))
+        .then(allresults => {
+            return { results: { bindings: allresults.reduce((acc, cur) => {
+                acc.push(...cur.results.bindings)
+                return acc
+            }, []) } }
+        })
+}
+
 export const selectResource = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
     // console.log('ok on va cherche les stats', dataset)
     let { constraints, endpoint, entrypoint, graphs, prefixes, totalInstances, resourceGraph } = dataset
@@ -292,15 +303,13 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                 .then(configs => {
                     const configMain = getSelectedView(configs, 'main')
                     // console.log(configs, configMain)
-                    const queryMain = makeQuery(entrypoint, configMain, 'main',  { ...dataset, singleURI, maxDepth: (configMain.id === 'ListAllProps' || configMain.id === 'InfoCard') ? 1 : null })
-                    const queryMainUnique = makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true })
                     const previousConfigMain = getSelectedView(previousConfigs, 'main')
                     // console.log(previousConfigs, configMain, dataset, previousConfigMain, previousOptions)
                     let queryTransitionMain = makeTransitionQuery(configMain, dataset, previousConfigMain, previousOptions, 'main')
                     return Promise.all([
-                        getData(endpoint, queryMain, prefixes),
+                        singleURI ? loadSingle(dataset, configMain, singleURI) : getData(endpoint, makeQuery(entrypoint, configMain, 'main', dataset), prefixes),
                         !dataset.transitionOff ? getData(endpoint, queryTransitionMain, prefixes) : [],
-                        getData(endpoint, queryMainUnique, prefixes)
+                        singleURI ? 1 : getData(endpoint, makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true }), prefixes)
                     ])
                         .then(([dataMain, dataDeltaMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
                             //console.log('select resource, get data', queryMain, dataMain)
@@ -316,7 +325,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                                 constraints,
                                 mainConfig: configs.views,
                                 main: { ...dataMain },
-                                mainDisplayed: configMain.id === 'ListAllProps' || configMain.id === 'InfoCard' ? 1 : Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                                mainDisplayed: singleURI ? 1 : Number(uniqueMainPromise.results.bindings[0].displayed.value)
                             })
                         })
                 })
@@ -347,7 +356,7 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
         getData(endpoint, queryUnique, prefixes)
     ])
         .then(([newData, newDelta, newUnique]) => {
-            if (newData.results.bindings.length === 0) throw 'No entities with this combination of paths'
+            if (newData.results.bindings.length === 0 && updatedConfig.id !== 'ListAllProps' && updatedConfig.id !== 'InfoCard') throw 'No entities with this combination of paths'
             const action = {
                 type: types.SET_CONFIGS,
                 zone: zone
