@@ -29,6 +29,10 @@
     border-color: #666;
     color: #333;
 }
+.Pivot .button li:active{
+    border-color: #d15793;
+    color: #bc5186;
+}
 .Pivot .button li{
    list-style-type: square;
    border-bottom: 1px solid #bbb;

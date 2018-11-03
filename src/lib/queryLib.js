@@ -152,7 +152,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
 }
 
 export const getData = (endpoint, query, prefixes) => {
-    console.log(query)
+    // console.log(query)
     const client = new SparqlClient(endpoint, {
         requestDefaults: {
             headers: {
@@ -472,7 +472,7 @@ export const makeDetailQuery = (entrypoint, configZone, zone, options) => {
 WHERE {
 ${constraints}
 ${defList}
-} ${groupList} ${orderList}LIMIT 10`
+} ${groupList} ${orderList}LIMIT 5`
 }
 export const makePivotConstraints = (entrypointName, entrypoint, configZone, options) => {
     let { graphs, resourceGraph } = options

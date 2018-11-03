@@ -240,10 +240,12 @@ export const getReadablePathsParts = (path, labelsDic, prefixes) => {
     let rp = parts
         .filter((part, index) => index !== 0 && part !== '*')
         .map((part, index) => {
-            let prop = labelsDic[useFullUri(part, prefixes)]
+            let uri = useFullUri(part, prefixes)
+            let prop = labelsDic[uri]
             return {
                 label: (prop) ? prop.label : part,
-                comment: (prop) ? prop.comment : undefined
+                comment: (prop) ? prop.comment : undefined,
+                uri
             }
         })
     return rp

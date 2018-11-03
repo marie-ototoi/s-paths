@@ -22,7 +22,7 @@ class Details extends React.PureComponent {
         const colors = getGraphsColors()
 
         const graphs = {}
-        selectedProperties[0].graphs.forEach((graph, gi) => {
+        selectedProperties[0].triplesGraphs.forEach((graph, gi) => {
             graphs[graph] = colors[gi]
         })
         return (<div
@@ -45,7 +45,7 @@ class Details extends React.PureComponent {
                 >
                     <i className='fas fa-window-close' />
                 </span>
-                <strong>Instanciated paths of maximum 10 entities in the current selection</strong>
+                <strong>Sample of entities in the current selection</strong>
                 {
                     selectedProperties.map((prop, pi) => (<div key = {`pathinstanceprop${pi}`}>
                         
@@ -57,13 +57,22 @@ class Details extends React.PureComponent {
                                         className='path'
                                         key={`path_${zone}_${pi}_${i}`}
                                     >
-                                        <span
+                                        <a
                                             style={{ borderBottom: `1px solid ${graphs[prop.triplesGraphs[0]]}` }}
+                                            title={ entity.entrypoint.value }
+                                            href={ entity.entrypoint.value }
+                                            target="_blank"
+                                            rel="noopener noreferrer"
                                         >
                                             {usePrefix(entity.entrypoint.value, dataset.prefixes)} 
-                                        </span>
-                                        {prop.readablePath.map((rp, rpi) => (
-                                            <span
+                                        </a>
+                                        {prop.readablePath.map((rp, rpi) => {
+                                            let isLink = (rpi < prop.readablePath.length-1) || prop.category === 'uri'
+                                            let value = (rpi < prop.readablePath.length-1) ? 
+                                                entity['prop'+ (pi + 1) + 'inter' + (rpi + 1)].value : 
+                                                prop.category === 'uri' ? entity['prop'+ (pi + 1)].value: entity['prop'+ (pi + 1)].value 
+                                            let href = isLink ? { href: value } : {}
+                                            return (<span
                                                 className='triple'
                                                 style={{
                                                     borderBottom: `1px solid ${graphs[prop.triplesGraphs[rpi]]}`,
@@ -74,22 +83,29 @@ class Details extends React.PureComponent {
                                                 }}
                                                 key={`path_${zone}_${pi}_triple_${rpi}`}
                                             >
-                                                <span
+                                                &nbsp;/&nbsp;
+                                                <a
                                                     className='pathlabel'
                                                     title={rp.comment}
                                                     style={{
                                                         color: `#999`
                                                     }}
-                                                >/&nbsp;
+                                                >
                                                     {  usePrefix(rp.label, dataset.prefixes) }
-                                                    &nbsp;/&nbsp;
-                                                </span>
-                                                { (rpi < prop.readablePath.length-1) ? 
-                                                    usePrefix(entity['prop'+ (pi + 1) + 'inter' + (rpi + 1)].value, dataset.prefixes) : 
-                                                    prop.category === 'uri' ? usePrefix(entity['prop'+ (pi + 1)].value, dataset.prefixes): entity['prop'+ (pi + 1)].value 
-                                                }
+                                                </a>
+                                                &nbsp;/&nbsp;
+                                                <a
+                                                    className='pathvalue'
+                                                    title={ isLink ? value : ''}
+                                                    {...href}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                >
+                                                    { isLink ? usePrefix(value, dataset.prefixes): value }
+                                                </a>
                                             </span>
-                                        ))}
+                                            )
+                                        })}
                                     </div>
                                 ))
                             }

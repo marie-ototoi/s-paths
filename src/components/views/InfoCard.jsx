@@ -76,7 +76,7 @@ class InfoCard extends React.Component {
             "signals": [
                 {
                     "name": "extent",
-                    "value": [[50,50], [geoWidth - 50, 150]],
+                    "value": [[0,0], [geoWidth, 200]],
                     "on": [{
                         "events": {"type": "wheel", "consume": true},
                         "update": "[[extent[0][0] * pow(1.0005, -event.deltaX * pow(16, event.deltaMode)), extent[0][1] * pow(1.0005, event.deltaY * pow(16, event.deltaMode))], [extent[1][0] * pow(1.0005, -event.deltaX * pow(16, event.deltaMode)), extent[1][1] * pow(1.0005, -event.deltaY * pow(16, event.deltaMode))]]"
@@ -330,6 +330,7 @@ class InfoCard extends React.Component {
                                         (<img
                                             key={`infoimage${i}`}
                                             src={info.values['prop'+ info.level].value}
+                                            alt={info.values['prop'+ info.level].value}
                                             title={
                                                 info.readablePath.map((rp, rpi) => rp.label).join(' / ')
                                             }

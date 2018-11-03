@@ -342,7 +342,7 @@ class Header extends React.Component {
                 { label: 'displayed', total: getNbDisplayed(data, zone, 'active') }
             ]
 
-            let pivotEnabled = selections.length > 0
+            let pivotEnabled = this.state.pivot.length > 0
             // selection button
             let selectionEnabled = selections.length > 0
 

@@ -29,7 +29,7 @@ import { areLoaded, getCurrentState, getResults, getTransitionElements } from '.
 import { getSelectedMatch, getSelectedView, getCurrentConfigs } from '../lib/configLib'
 import * as selectionLib from '../lib/selectionLib'
 // redux actions
-import { setDisplay, setModifier } from '../actions/displayActions'
+import { setDisplay, setModifier, showGraphs, closeDetails } from '../actions/displayActions'
 import { endTransition, loadDetail, loadResources } from '../actions/dataActions'
 import { handleMouseUp } from '../actions/selectionActions'
 
@@ -121,33 +121,40 @@ class App extends React.PureComponent {
         }
     }
     handleKeyDown (event) {
-        //console.log('down', event)
-        let { dataset, configs, selections } = this.props
+        // console.log('down', event.keyCode)
+        let { dataset, display, configs, selections } = this.props
         // console.log('eee', event.which, event.key, event.metaKey, event)
         if (event.keyCode === 13) {
             this['refHeader'].getWrappedInstance().handleKeyDown(event)
         }
-        if (event.keyCode === 32 || event.keyCode === 16) {
+        if (event.keyCode === 32 || event.keyCode === 16 || event.keyCode === 18) {
             this.props.setModifier(event.which)
         }
+        if (event.keyCode === 69 && (event.metaKey || event.ctrlKey)) {
+            this.props.showGraphs()
+        }
         if (event.keyCode === 73 && (event.metaKey || event.ctrlKey)) {
-            let zone = (selections.some(s => s.zone === 'main')) ? 'main' : 'aside'
-            let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
-            let config = getSelectedView(activeConfigs)
-            if (selections.length > 0) {
-                let selectedConfig = getSelectedMatch(config, zone)
-                let constraints
-                let entrypoint = dataset.entrypoint
-                
-                constraints = makeSelectionConstraints(selections, selectedConfig, zone, { ...dataset, entrypoint, stats: activeConfigs.stats })
-                // let { constraints, zone } = this['refHeader'].getWrappedInstance().getDetailSelection(event)
-                this.props.loadDetail({ ...dataset, entrypoint, stats: activeConfigs.stats, constraints }, activeConfigs, zone)
+            if (display.details.length > 0) {
+                this.props.closeDetails()
+            } else {
+                let zone = (selections.some(s => s.zone === 'main')) ? 'main' : 'aside'
+                let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+                let config = getSelectedView(activeConfigs)
+                if (selections.length > 0) {
+                    let selectedConfig = getSelectedMatch(config, zone)
+                    let constraints
+                    let entrypoint = dataset.entrypoint
+                    
+                    constraints = makeSelectionConstraints(selections, selectedConfig, zone, { ...dataset, entrypoint, stats: activeConfigs.stats })
+                    // let { constraints, zone } = this['refHeader'].getWrappedInstance().getDetailSelection(event)
+                    this.props.loadDetail({ ...dataset, entrypoint, stats: activeConfigs.stats, constraints }, activeConfigs, zone)
+                }
             }
         }
     }
     handleKeyUp (event) {
         // console.log('up', event.which)
-        if (event.which === 16 || event.which === 32) {
+        if (event.which === 16 || event.which === 32 || event.which === 18) {
             this.props.setModifier(null)
         }
     }
@@ -277,13 +284,13 @@ class App extends React.PureComponent {
             }
             { display.graphsOpen &&
                 <Graphs
-                    dimensions = { getDimensions('graphs', display.viz, { x: 5, y: -30, width: -15, height: 0 }) }
+                    dimensions = { getDimensions('graphs', display.viz, { x: 2, y: -30, width: 0, height: 0 }) }
                     zone = "main"
                 />
             }
             { (display.details.length > 0) &&
                 <Details
-                    dimensions = { getDimensions('details', display.viz, { x: 10, y: -30, width: -15, height: 0 }) }
+                    dimensions = { getDimensions('details', display.viz, { x: 1, y: 0, width: 0, height: 0 }) }
                     elements = { display.details }
                     zone = "main"
                 />
@@ -351,11 +358,13 @@ App.propTypes = {
     endTransition: PropTypes.func.isRequired,
     handleTransition: PropTypes.func,
     handleMouseUp: PropTypes.func,
+    closeDetails: PropTypes.func,
     loadDetail: PropTypes.func,
     loadResources: PropTypes.func,
     select: PropTypes.func,
     setDisplay: PropTypes.func.isRequired,
-    setModifier: PropTypes.func
+    setModifier: PropTypes.func,
+    showGraphs: PropTypes.func
 }
 
 function mapStateToProps (state) {
@@ -372,11 +381,13 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
+        closeDetails: closeDetails(dispatch),
         endTransition: endTransition(dispatch),
         loadDetail: loadDetail(dispatch),
         loadResources: loadResources(dispatch),
         setDisplay: setDisplay(dispatch),
         setModifier: setModifier(dispatch),
+        showGraphs: showGraphs(dispatch),
         handleMouseUp: handleMouseUp(dispatch)
     }
 }

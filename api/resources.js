@@ -25,10 +25,10 @@ router.post('/', (req, res) => {
 
 const getResources = async (options) => {
     // add default options when not set
-    let { graphs, endpoint, localEndpoint } = options
+    let { graphs, endpoint, localEndpoint, prefixes } = options
 
     let resources = await resourceModel.find({ endpoint: endpoint, graphs: { $all: graphs, $size: graphs.length } }).sort('-total').exec()
-    console.log('GET RESOURCES', endpoint, graphs, resources)
+    console.log('GET RESOURCES')
     if (resources.length > 0) {
         resources = resources.map(resource => resource._doc)
     } else {
@@ -45,7 +45,6 @@ const getResources = async (options) => {
         return { uri: resource.type }
     }))
     let dico = dataLib.getDict(labels.map(label => { return { key: label.uri } }))
-    
     let pathsNumbers = []
     for (let i= 0; i < resources.length; i ++){
         let pathsNumber = await pathModel.countDocuments({ endpoint: endpoint, entrypoint: resources[i].type, graphs: { $all: graphs, $size: graphs.length } }).exec()
@@ -55,13 +54,14 @@ const getResources = async (options) => {
     let newresources = resources.map((resource, i) => {
         let newresource = {
             ...resource,
-            label: dico[resource.type]? labels[dico[resource.type]].label : resource.type,
+            label: queryLib.usePrefix(dico[resource.type]? labels[dico[resource.type]].label : resource.type, prefixes),
             comment: dico[resource.type] ? labels[dico[resource.type]].comment : null,
             pathsNumber: pathsNumbers[i] || 0
         }
-        //console.log(newresource)
+        
         return newresource
     }).sort((a, b) => b.pathsNumber - a.pathsNumber)
+    console.log(newresources)
     return newresources
 }
 

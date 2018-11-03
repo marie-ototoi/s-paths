@@ -48,7 +48,7 @@ class PropSelect extends React.Component {
                         let color = '#999'  
                         let borderColor = '#bbb'  
                         if (state.isSelected) {
-                            color = '#d15793'
+                            color = '#bc5186'
                             borderColor = '#d15793'
                         } else if (state.isFocused) {
                             color = '#333'
@@ -58,7 +58,6 @@ class PropSelect extends React.Component {
                             ...base,
                             borderBottom: '1px solid ' + borderColor,
                             color: color,
-                            fontWeight: state.isSelected ? 'bold' : 'normal',
                             background: 'none',
                             padding: '2px'
                         }

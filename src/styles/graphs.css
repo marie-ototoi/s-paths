@@ -4,9 +4,11 @@
 ul.graphList {
     margin: 0;
     padding: 0;
+    display: inline-block;
 }
 ul.graphList li {
-    margin: 0;
+    display: inline-block;
+    margin: 0 5px 0 0;
     padding: 0;
     list-style-position: inside;
 }

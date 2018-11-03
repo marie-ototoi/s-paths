@@ -1,5 +1,6 @@
 .Header .Explain .resource-def {
     margin-left: 5px;
+    top: -2px;
 }
 .Explain {
     position: relative;

@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
+import pluralize from 'pluralize'
 import { connect } from 'react-redux'
 import { getCurrentConfigs, getSelectedMatch, getSelectedView } from '../../lib/configLib'
 import { usePrefix } from '../../lib/queryLib'
@@ -13,21 +14,25 @@ class Graphs extends React.PureComponent {
     }
     render () {
         
-        const { configs, dataset, dimensions, zone } = this.props
+        const { configs, dataset, dimensions, display, zone } = this.props
         const { x, y, width, height } = dimensions
 
         let selectedConfig = getSelectedView(getCurrentConfigs(configs, zone, 'active'))
         let selectedProperties = getSelectedMatch(selectedConfig).properties
 
+        let pathsToDisplay = selectedProperties.map((selProp, si) => {
+            return [selProp, ...selectedConfig.multiple[si]]
+        })
+
         let allgraphs = [...new Set(selectedProperties.reduce((acc, cur) => {
-            acc.push(...cur.graphs)
+            acc.push(...cur.triplesGraphs)
             return acc
         }, []))]
-
+        console.log(selectedConfig)
         const colors = getGraphsColors()
 
         const graphs = {}
-        selectedProperties[0].graphs.forEach((graph, gi) => {
+        allgraphs.forEach((graph, gi) => {
             graphs[graph] = colors[gi]
         })
 
@@ -41,8 +46,10 @@ class Graphs extends React.PureComponent {
                 {
                     width,
                     minHeight: height,
+                    maxHeight: display.viz.useful_height + 70,
                     zIndex: 12,
                     position: 'absolute',
+                    overflowY: 'scroll',
                     left: x + 'px',
                     top: y + 'px'
                 }
@@ -55,57 +62,65 @@ class Graphs extends React.PureComponent {
                 >
                     <i className='fas fa-window-close' />
                 </span>
-                
-                <strong>Traversed graphs: </strong>
-                <ul className="graphList">
-                    {allgraphs.map((graph, gi) => (
-                        <li
-                            style={{ color: graphs[graph] }}
-                            key={`graph_${zone}_${gi}`}
-                        >
-                            {graph}
-                        </li>
-                    ))}
-                </ul>
-                <div><strong>Patterns of the paths displayed in the current visualization</strong></div>
-                {selectedProperties.map((prop, pi) => (
-                    <div
-                        className='path'
-                        key={`path_${zone}_${pi}`}
-                    >
-                        <strong>Path {(pi + 1)}:&nbsp;</strong>
-                        <span
-                            style={{ borderBottom: `1px solid ${graphs[prop.triplesGraphs[0]]}` }}
-                        >
-                            {displayedResource.label} /&nbsp;
-                        </span>
-                        {prop.readablePath.map((rp, rpi) => (
-                            <span
-                                className='triple'
-                                style={{
-                                    borderBottom: `1px solid ${graphs[prop.triplesGraphs[rpi]]}`,
-                                    paddingLeft: `${5 + (rpi < 1 ? 0 : 20)}px`,
-                                    paddingBottom: `${(rpi % 2 === 0 ? 0 : 1) * 3}px`,
-                                    position: 'relative',
-                                    left: `-${5 + (rpi * 20)}px`
-                                }}
-                                key={`path_${zone}_${pi}_triple_${rpi}`}
+                <div style={{paddingBottom: '10px', fontWeight: 'bold'}}>Paths displayed in the current visualization, traversing the {pluralize('graph', allgraphs.length)}:&nbsp;  
+                    <ul className="graphList">
+                        {allgraphs.map((graph, gi) => (
+                            <li
+                                style={{ color: graphs[graph] }}
+                                key={`graph_${zone}_${gi}`}
                             >
-                                <span
-                                    className='pathlabel'
-                                    title={rp.comment}
-                                    style={{
-                                        color: `#999`
-                                    }}
+                                {graph}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+                {pathsToDisplay.map((pathList, pli) => (
+                    <div key={`path_${zone}_${pli}`} style={{paddingBottom: '10px'}}>
+                        <strong>Dimension {(pli + 1)}:&nbsp;</strong>
+                        {pathList.map((prop, pi) => (
+                            <div
+                                className='path'
+                                key={`path_${zone}_${pli}_${pi}`}
+                            >
+                                
+                                <a
+                                    style={{ borderBottom: `1px solid ${graphs[prop.triplesGraphs[0]]}` }}
+                                    title={displayedResource.comment}
+                                    href={displayedResource.type}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
                                 >
-                                    { usePrefix(rp.label, dataset.prefixes) }
-                                </span>
-                                &nbsp;/ * / 
-                            </span>
+                                    { usePrefix(displayedResource.label, dataset.prefixes) }
+                                </a>
+                                <span style={{ borderBottom: `1px solid ${graphs[prop.triplesGraphs[0]]}` }}> /&nbsp;</span>
+                                { prop.readablePath.map((rp, rpi) => (
+                                    <span
+                                        className='triple'
+                                        style={{
+                                            borderBottom: `1px solid ${graphs[prop.triplesGraphs[rpi]]}`,
+                                            paddingLeft: `${5 + (rpi < 1 ? 0 : 20)}px`,
+                                            paddingBottom: `${(rpi % 2 === 0 ? 0 : 1) * 3}px`,
+                                            position: 'relative',
+                                            left: `-${5 + (rpi * 20)}px`
+                                        }}
+                                        key={`path_${zone}_${pi}_triple_${rpi}`}
+                                    >
+                                        <a
+                                            className='pathlabel'
+                                            title={rp.comment}
+                                            href={rp.uri}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            { usePrefix(rp.label, dataset.prefixes) }
+                                        </a>
+                                        &nbsp;/ * / 
+                                    </span>
+                                ))}
+                            </div>
                         ))}
                     </div>
                 ))}
-
             </div>
         </div>)
     }

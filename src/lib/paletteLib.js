@@ -13,9 +13,9 @@ export const getNextPaletteIndex = (palettes) => {
     return index
 }
 
-export const getGraphsColors = (length = 6) => {
+export const getGraphsColors = (length = 5) => {
     const colors = [
-        '#ff0000', '#5b2886', '#0071fc', '#fc00ed', '#09bc00', '#00bcad'
+        '#f868af', '#77cbb9', '#ff8a00', '#a0f268', '#bb18ff'
     ]
     return selectColorsInPalette(colors, length)
 }

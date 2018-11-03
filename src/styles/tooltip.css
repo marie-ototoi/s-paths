@@ -1,5 +1,20 @@
-span[title]:not([title=""]), strong[title]:not([title=""]) {
+span[title]:not([title=""]), strong[title]:not([title=""]), a[title]:not([title=""]) {
   background-color:#f0f0f0;
   padding: 0 2px;
   cursor: pointer;
+}
+a{
+  color: #333;
+}
+a[href]:not([href=""]):hover::after{
+  content: '⧉';
+  position: absolute;
+  font-weight: bold;
+  margin: 0 0 0 3px;
+  background: #fff;
+  color:#3273dc;
+  z-index: 2;
+}
+a[href]:not([href=""]){
+  color:#3273dc;
 }

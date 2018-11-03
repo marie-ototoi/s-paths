@@ -3,34 +3,33 @@ import PropTypes from 'prop-types'
 import pluralize from 'pluralize'
 import { connect } from 'react-redux'
 import { getCurrentConfigs, getSelectedMatch, getSelectedView } from '../../lib/configLib'
-import { getGraphsColors } from '../../lib/paletteLib'
 import { showGraphs } from '../../actions/displayActions'
+import { usePrefix } from '../../lib/queryLib'
 
 import './Explain.css'
 
 class Explain extends React.Component {
     render () {
-        const { configs, zone } = this.props
+        const { configs, dataset, zone } = this.props
 
         let selectedConfig = getSelectedView(getCurrentConfigs(configs, zone, 'active'))
         let selectedProperties = getSelectedMatch(selectedConfig).properties
 
-        let allgraphs = [...new Set(selectedProperties.reduce((acc, cur) => {
-            acc.push(...cur.graphs)
+        let pathsToDisplay = selectedProperties.map((selProp, si) => {
+            return [selProp, ...selectedConfig.multiple[si]]
+        })
+        let allgraphs = [...new Set(pathsToDisplay.flat().reduce((acc, cur) => {
+            acc.push(...cur.triplesGraphs)
             return acc
         }, []))]
-
-        const colors = getGraphsColors()
-
-        const graphs = {}
-        selectedProperties[0].graphs.forEach((graph, gi) => {
-            graphs[graph] = colors[gi]
-        })
 
         let displayedResource = this.props.dataset.resources.find((resource) =>
             resource.type === this.props.dataset.entrypoint
         )
-
+        let pathsNumber = selectedProperties.length 
+        selectedConfig.multiple.forEach(multipleList => {
+            pathsNumber += multipleList.length
+        })
         return (
             <div
                 className='Explain'
@@ -45,11 +44,11 @@ class Explain extends React.Component {
                     </strong>
                     belonging to the class of resources
                     <strong>
-                        {displayedResource.label}
+                        { usePrefix(displayedResource.label, dataset.prefixes) }
                     </strong>
                     according to
                     <strong>
-                        {selectedProperties.length} property {pluralize('path', selectedProperties.length)}
+                        {pathsNumber} property {pluralize('path', pathsNumber)}
                     </strong>
                     traversing
                     <strong>
