@@ -361,6 +361,6 @@ WHERE {
 WHERE {
 FILTER regex(?entrypoint, '^http://data.nobelprize.org/resource/laureateaward/306$|http://data.nobelprize.org/resource/laureateaward/578$|http://data.nobelprize.org/resource/laureateaward/575$|http://data.nobelprize.org/resource/laureateaward/472$|http://data.nobelprize.org/resource/laureateaward/174$|http://data.nobelprize.org/resource/laureateaward/579$|http://data.nobelprize.org/resource/laureateaward/21$|http://data.nobelprize.org/resource/laureateaward/302$|http://data.nobelprize.org/resource/laureateaward/477$|http://data.nobelprize.org/resource/laureateaward/169$|http://data.nobelprize.org/resource/laureateaward/22$|http://data.nobelprize.org/resource/laureateaward/175$|http://data.nobelprize.org/resource/laureateaward/307$|http://data.nobelprize.org/resource/laureateaward/23$|http://data.nobelprize.org/resource/laureateaward/478$|http://data.nobelprize.org/resource/laureateaward/582$$', 'i') .
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . FILTER (?prop1 != ?entrypoint) . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . FILTER (?prop2inter1 != ?entrypoint) . ?prop2inter1 foaf:gender ?prop2 . FILTER (?prop2 != ?prop2inter1 && ?prop2 != ?entrypoint) . 
-} GROUP BY ?prop1 ?prop2  ORDER BY ?prop1 ?prop2 LIMIT 10`)
+} GROUP BY ?prop1 ?prop2  ORDER BY ?prop1 ?prop2 LIMIT 5`)
     })
 })

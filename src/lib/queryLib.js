@@ -14,8 +14,6 @@ export const addPrefix = (url, prefixes) => {
         })
         .then(res => res.text())
         .then(res => {
-            
-            console.log(res.substr(0, 4))
             // if no results
             if (res.substr(0, 5) === '<?xml')  {
                 prefix = getSmallestPrefix(root, prefixes)

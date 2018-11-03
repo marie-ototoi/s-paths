@@ -408,7 +408,7 @@ export const prepareInfoCardData = (data, dataset) => {
     paths.geolong = paths.geo.filter(stat => stat.subcategory === 'longitude')
     paths.datetime = stats.filter(stat => stat.category === 'datetime')
     paths.uri = stats.filter(stat => stat.category === 'uri')
-    console.log(paths)
+    // console.log(paths)
     return paths
 }
 
