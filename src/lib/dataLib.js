@@ -46,17 +46,24 @@ export const getThresholdsForLegend = (nestedProps, propName, category, nbOfRang
 export const getThresholds = (minValue, maxValue, nbOfRanges) => {
     // console.log(minValue, maxValue, nbOfRanges)
     let diff = maxValue - minValue
-    if (diff <= 1) {
-        diff = 1
-        nbOfRanges = 1
+    let newDiff = diff
+    let newNbOfRanges = nbOfRanges
+    if (diff === 0) {
+        newDiff = 1
+        newNbOfRanges = 1
     } else if (diff <= nbOfRanges) {
-        nbOfRanges = Math.ceil(diff / 2)
+        newNbOfRanges = newDiff + 1
     }
-    let part = Math.ceil(diff / nbOfRanges)
+    let part = Math.ceil(newDiff / newNbOfRanges)
     // console.log(part)
-    let ranges = Array.from(Array(nbOfRanges).keys())
+    let ranges = Array.from(Array(newNbOfRanges).keys())
     // return [diff, part, roundUnit, roundStart, start, roundPartStr, roundPart]
-    return ranges.map((r) => [minValue + part * r, minValue + part * (r + 1) - 1])
+    // console.log(ranges.map((r) => [minValue + part * r, minValue + part * (r + 1)]))
+    if (diff <= nbOfRanges) {
+        return ranges.map((r) => [minValue + part * r, minValue + part * r])
+    } else {
+        return ranges.map((r) => [minValue + part * r, minValue + part * (r + 1) + (r < ranges.length - 1 ? -1 : 0)])        
+    }
 }
 
 // const groupAggregateData
