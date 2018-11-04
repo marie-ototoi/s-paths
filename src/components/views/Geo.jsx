@@ -9,7 +9,7 @@ import * as d3 from 'd3'
 // d3
 // libs
 import { getPropPalette } from '../../actions/palettesActions'
-import { handleMouseDown, handleMouseUp, selectElements, resetSelection } from '../../actions/selectionActions'
+import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 import * as dataLib from '../../lib/dataLib'
 import defaultSpec from '../../lib/spec'
 // redux functions
@@ -585,7 +585,6 @@ function mapDispatchToProps (dispatch) {
         getPropPalette: getPropPalette(dispatch),
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
-        resetSelection: resetSelection(dispatch),
         selectElements: selectElements(dispatch)
     }
 }

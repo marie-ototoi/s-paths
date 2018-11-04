@@ -6,6 +6,7 @@ import shallowEqual from 'shallowequal'
 import { getConfigs, getCurrentConfigs, getSelectedMatch, getSelectedView } from '../../lib/configLib'
 import { getNbDisplayed } from '../../lib/dataLib'
 import { makeKeywordConstraints, makePivotConstraints, makeSelectionConstraints } from '../../lib/queryLib'
+import { mergeSelections } from '../../lib/selectionLib'
 
 import { showSettings, showStats } from '../../actions/displayActions'
 import { checkPivots, displayConfig, selectResource } from '../../actions/dataActions'
@@ -181,18 +182,21 @@ class Header extends React.Component {
         let newResource
         let selectedConfig 
         let constraints = ``
+        let newSelections = pivot || config.entrypoint.aggregate ? mergeSelections(selections, activeConfigs.savedSelections) : [selections]
         if (pivot !== undefined) {
             newResource = dataset.resources.find(res => res.type === pivot.type)
-
             if (selections.some(s => s.zone === 'main')) {
                 selectedConfig = getSelectedMatch(config, zone)
-                constraints = makeSelectionConstraints(selections, selectedConfig, 'main', dataset, false)
+                constraints = makeSelectionConstraints(newSelections, selectedConfig, 'main', dataset, false)
             } else if (selections.length > 0) {
                 activeConfigs = getCurrentConfigs(configs, 'aside', 'active')
                 // in case the entrypoint has changed
                 let entrypoint = activeConfigs.entrypoint
                 selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'))
-                constraints = makeSelectionConstraints(selections, selectedConfig, 'aside', { ...dataset, entrypoint }, false)
+                constraints = makeSelectionConstraints(newSelections, selectedConfig, 'aside', { ...dataset, entrypoint }, false)
+            } else if (activeConfigs.savedSelections[0].length > 0) {
+                selectedConfig = getSelectedMatch(config, zone)
+                constraints = makeSelectionConstraints(newSelections, selectedConfig, 'main', dataset, false)
             }
             let pivotConstraints = makePivotConstraints('entrypoint', dataset.entrypoint, config, dataset)
             constraints = constraints.concat(pivotConstraints)
@@ -203,12 +207,13 @@ class Header extends React.Component {
             this.setState({ resourceIsLoading: true, errorSelection: '' })
         }
         // console.log(pivot, newResource)
+        
         this.props.selectResource({
             ...dataset,
             entrypoint: newResource.type,
             totalInstances: newResource.total,
             constraints
-        }, views, activeConfigs, dataset)
+        }, views, activeConfigs, dataset, pivot ? newSelections : [])
             .then(() => this.setState({
                 resourceIsLoading: false,
                 pivotIsLoading: false,
@@ -223,32 +228,38 @@ class Header extends React.Component {
         }
     }
     displayKeyword () {
-        const { configs, dataset, views } = this.props
-        let activeConfigs
-        let constraints = dataset.constraints
-        let entrypoint = dataset.entrypoint
         if (this.state.keyword.length > 3) {
-            if(!activeConfigs) activeConfigs = getCurrentConfigs(configs, 'main', 'active')
-            constraints = constraints.concat(makeKeywordConstraints(this.state.keyword, { ...dataset, entrypoint, stats: activeConfigs.stats }))
+            const { config, configs, dataset, selections, views, zone } = this.props
+            let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+            let constraints = dataset.constraints
+            let entrypoint = dataset.entrypoint
+            let selectedConfig = getSelectedMatch(config, zone)
+            let newCondition = [{ query: { type: 'keyword', value: this.state.keyword } }]
+            let newSelections = mergeSelections(newCondition, activeConfigs.savedSelections)
+            let saveSelections = (config.entrypoint.aggregate ? [...activeConfigs.savedSelections, ...selections] : activeConfigs.savedSelections)
+            // console.log(newSelections)
+            constraints = makeSelectionConstraints(newSelections, selectedConfig, 'main', dataset, false)
+            // console.log(constraints)
+            // constraints = constraints.concat(makeKeywordConstraints(this.state.keyword, { ...dataset, entrypoint, stats: activeConfigs.stats }))
+            let newDataset = {
+                ...dataset,
+                entrypoint,
+                constraints,
+                stats: activeConfigs.stats
+            }
+            // console.log(newDataset)
+            this.setState({ keywordIsLoading: true, errorSelection: '' })
+            this.props.selectResource(newDataset, views, activeConfigs, dataset, saveSelections)
+                .then(() => this.setState({
+                    keywordIsLoading: false,
+                    keyword: ''
+                }))
+                .catch((e) => this.setState({
+                    keywordIsLoading: false,
+                    keyword: '',
+                    errorSelection: 'Unable to display results: ' + e
+                }))
         }
-        let newDataset = {
-            ...dataset,
-            entrypoint,
-            constraints,
-            stats: activeConfigs.stats
-        }
-        // console.log(newDataset)
-        this.setState({ keywordIsLoading: true, errorSelection: '' })
-        this.props.selectResource(newDataset, views, activeConfigs, dataset)
-            .then(() => this.setState({
-                keywordIsLoading: false,
-                keyword: ''
-            }))
-            .catch((e) => this.setState({
-                keywordIsLoading: false,
-                keyword: '',
-                errorSelection: 'Unable to display results: ' + e
-            }))
     }
     displayConfig () {
         // console.log('DISPLAY CONFIG 1')
@@ -260,7 +271,7 @@ class Header extends React.Component {
         this.setState({
             propsAreLoading: true,
             errorSelection: ''
-        })
+        })        
         // console.log(
         // console.log('DISPLAY CONFIG 2', selectedMatch)
         this.props.displayConfig(this.state.selectedView, selectedMatch, this.props.configs.present.views, config, dataset, zone)
@@ -279,22 +290,25 @@ class Header extends React.Component {
     }
     displaySelection (pivot) {
         // console.log('DISPLAY SELECTION')
-        const { config, configs, dataset, selections, views, zone } = this.props
+        let { config, configs, dataset, selections, views, zone } = this.props
         let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
         let selectedConfig
         let constraints = ``
         let formerentrypoint = dataset.entrypoint
+        // console.log(!config.entrypoint.aggregate)
+        let newSelections = !config.entrypoint.aggregate ? [selections] : mergeSelections(selections, activeConfigs.savedSelections)
+        // let saveSelections = (pivot || config.entrypoint.aggregate ? newSelections : [])
         let entrypoint
         if (selections.some(s => s.zone === 'main')) {
             entrypoint = pivot !== undefined ? pivot.type : dataset.entrypoint
             selectedConfig = getSelectedMatch(config, zone)
-            constraints = makeSelectionConstraints(selections, selectedConfig, zone, { ...dataset, entrypoint }, pivot !== undefined)
+            constraints = makeSelectionConstraints(newSelections, selectedConfig, zone, { ...dataset, entrypoint }, pivot !== undefined)
         } else if (selections.length > 0) {
             activeConfigs = getCurrentConfigs(configs, 'aside', 'active')
             // in case the entrypoint has changed
             entrypoint = pivot !== undefined ? pivot.type : activeConfigs.entrypoint
             selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'))
-            constraints = makeSelectionConstraints(selections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats }, pivot !== undefined)
+            constraints = makeSelectionConstraints(newSelections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats }, pivot !== undefined)
         } else if (pivot) {
             constraints = dataset.constraints.replace(/entrypoint/g, 'formerentrypoint')
         }
@@ -314,7 +328,11 @@ class Header extends React.Component {
         }
         this.setState({ selectionIsLoading: true, errorSelection: '' })
         // console.log('DISPLAY SELECTION 2')
-        this.props.selectResource(newDataset, views, activeConfigs, dataset)
+        // ici eventuellement on recupere celles qui etaient deja sauvees
+        // console.log(activeConfigs.savedSelections, selections)
+        //let saveSelections = (config.entrypoint.aggregate ? [...activeConfigs.savedSelections, ...selections] : activeConfigs.savedSelections)
+        //console.log(saveSelections)
+        this.props.selectResource(newDataset, views, activeConfigs, dataset, newSelections)
             .then(() => {
                 // console.log('DISPLAY SELECTION 3')
                 // this.forceUpdate()

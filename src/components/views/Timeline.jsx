@@ -7,7 +7,7 @@ import * as vega from 'vega-lib'
 // d3
 // libs
 import { getPropPalette } from '../../actions/palettesActions'
-import { handleMouseDown, handleMouseUp, selectElements, resetSelection } from '../../actions/selectionActions'
+import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 import { loadMultiple } from '../../actions/dataActions'
 
 import { getCurrentConfigs, getTimelineDict, getSelectedMatch, getSelectedView } from '../../lib/configLib'
@@ -535,7 +535,6 @@ function mapDispatchToProps (dispatch) {
         getPropPalette: getPropPalette(dispatch),
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
-        resetSelection: resetSelection(dispatch),
         selectElements: selectElements(dispatch),
         loadMultiple: loadMultiple(dispatch)
     }

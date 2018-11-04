@@ -19,6 +19,14 @@ export const areSelected = (elements, zone, selections) => {
     return allSelected === elements.length
 }
 
+
+export const mergeSelections = (newSel, previousSel) => {
+    if(newSel.length > 0) previousSel.unshift(newSel)
+    return previousSel
+    // return [...newSel, ...previousSel]
+}
+
+
 export const detectRectCollision = (rect1, rect2) => {
     return (rect1.x1 < rect2.x2 &&
         rect1.x2 > rect2.x1 &&

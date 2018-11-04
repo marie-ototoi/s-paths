@@ -40,7 +40,8 @@ class TreeMapLayout extends AbstractLayout {
                         value: [{
                             category: selectedConfig.properties[0].category,
                             value: d.key,
-                            propName: 'prop1'
+                            propName: 'prop1',
+                            path: selectedConfig.properties[0].path
                         }]
                     }
                 }

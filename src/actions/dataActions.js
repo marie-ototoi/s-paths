@@ -98,7 +98,7 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
     let newStats
     for (let i = 0; i < views.length; i++) {
         views[i].propList.forEach(list => {
-            let max = 3
+            let max = 1 // the number of config checked could depend of the number of views, and the total number of entities
             if (list.length < max) max = list.length
             for(let i = 0; i < max; i ++){
                 let prop = list[i]
@@ -253,7 +253,7 @@ export const loadSingle = (dataset, configMain, singleURI) => {
         })
 }
 
-export const selectResource = (dispatch) => (dataset, views, previousConfigs, previousOptions) => {
+export const selectResource = (dispatch) => (dataset, views, previousConfigs, previousOptions, savedSelections) => {
     // console.log('ok on va cherche les stats', dataset)
     let { constraints, endpoint, entrypoint, graphs, prefixes, totalInstances, resourceGraph } = dataset
     let graph =  resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
@@ -319,6 +319,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                                 stats,
                                 entrypoint,
                                 totalInstances,
+                                savedSelections,
                                 prefixes: stats.options.prefixes,
                                 labels: stats.options.labels,
                                 mainDelta: dataDeltaMain,

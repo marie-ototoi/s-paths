@@ -2,7 +2,8 @@ import types from '../constants/ActionTypes'
 
 const initialConfig = {
     entrypoint: undefined,
-    views: []
+    views: [],
+    savedSelections: []
 }
 
 const configs = (state = initialConfig, action) => {
@@ -17,6 +18,7 @@ const configs = (state = initialConfig, action) => {
             ...state,
             views: action.mainConfig || state.views,
             status,
+            savedSelections: action.savedSelections || state.savedSelections,
             entrypoint: action.entrypoint,
             stats: action.stats
         }

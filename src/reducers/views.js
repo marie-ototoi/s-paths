@@ -52,6 +52,7 @@ const defaultState = [
         name: 'density plot',
         thumb : '/images/heatmap.svg',
         weight: 0.5,
+        entrypoint: { aggregate: true },
         constraints: [
             [
                 {
@@ -113,6 +114,7 @@ const defaultState = [
         name: 'treemap',
         thumb : '/images/treemap.svg',
         weight : 0.3,
+        entrypoint: { aggregate: true },
         constraints: [
             [
                 {

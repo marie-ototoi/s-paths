@@ -352,81 +352,105 @@ export const hasMoreSpecificPath = (path, level, pathList) => {
     }) !== undefined
 }
 
-export const makeKeywordConstraints = (keyword, options) => {
+export const makeKeywordConstraints = (keywords, options) => {
     let maxLevel = 3
     let start = `?value1`
     let def = ``
-    let filter = ``
     for (let i = 2; i <= maxLevel; i++) {
         def = def.concat(`
         ${start} ?level${i} ?value${i} . `)
-        filter = filter.concat(`(isLiteral(?value${i}) && regex(?value${i}, '${keyword}', 'i'))`)
-        if (i < maxLevel)  filter = filter.concat(` || `)
         start = `?value${i}`
     }
+    let filter = keywords.map(keyword => {
+        let fk = '('
+        for (let i = 1; i <= maxLevel; i++) {
+            fk += `((isLiteral(?value${i}) && regex(?value${i}, '${keyword}', 'i')) )`
+            if (i < maxLevel) fk += `||`
+        }
+        fk += ')'
+        return fk
+    })
     let constraint = `?entrypoint ?level1 ?value1 . 
     OPTIONAL {${def}
     }
-    FILTER ((isLiteral(?value1) && regex(?value1, '${keyword}', 'i')) || ${filter}) . `
+    FILTER (${filter}) . `
+    console.log(constraint)
     return constraint
 }
 
-export const makeSelectionConstraints = (selections, selectedConfig, zone, dataset, pivot) => {
+export const makeSelectionConstraints = (selectionsLayers, selectedConfig, zone, dataset, pivot) => {
     const { resourceGraph, graphs } = dataset
-    
-    const uriSelections = selections.filter(sel => sel.query.type === 'uri' && sel.zone === zone)
-    const uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
-    // add constraints for constrained groups of entities (heatmap)
-    const setSelection = selections.filter(sel => sel.query.type === 'set' && sel.zone === zone)
     let paths = ''
     let bind = ''
-    // console.log('SALUT', setSelection, zone)
-    let entrypointName = pivot ? 'formerentrypoint' : 'entrypoint'
-    const setConstraints = setSelection.map((sel, iS) => {
-        return '(' + sel.query.value.map((constraint, iC) => {
-            const propName = 'contraint' + constraint.propName
-            // console.log(constraint.category, constraint.subcategory)
-            if (iS === 0) {
-                paths += FSL2SPARQL(selectedConfig.properties[iC].path, {
-                    propName,
-                    entrypointName,
-                    entrypointType: true,
-                    resourceGraph,
-                    graphs
-                })
-            }
-            if (constraint.category === 'datetime') {
-                let datePropName = 'date' + propName
-                if (String(constraint.value[0]).match(/(\d{4})$/)) {
-                    bind += `BIND (xsd:integer(?${propName}) as ?${datePropName}) . `
-                } else {
-                    bind += `BIND (xsd:date(?${propName}) as ?${datePropName}) . `
+    let keywords = []
+    let uriRegex = ''
+    let mainentrypointName
+    const setConstraints = selectionsLayers.map((selections, si) => {
+        let keywordSelections = selections.filter(sel => sel.query.type === 'keyword')
+        if (keywordSelections.length > 0) {
+            keywords.push(keywordSelections[0].query.value)
+        }
+
+        let uriSelections = selections.filter(sel => sel.query.type === 'uri' && sel.zone === zone)
+        let entrypointName = pivot ? 'formerentrypoint' : 'entrypoint'
+        
+        if (uriSelections.length > 0) {
+            uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
+            mainentrypointName = entrypointName
+        }
+        // add constraints for constrained groups of entities (heatmap)
+        let setSelection = selections.filter(sel => sel.query.type === 'set' && sel.zone === zone)
+        // let def = ''
+        // console.log('SALUT', setSelection, zone)
+        
+        return setSelection.map((sel, iS) => {
+            // console.log('ici ?')
+            return '(' + sel.query.value.map((constraint, iC) => {
+                const propName = 'contraint' + constraint.propName
+                // console.log(constraint.category, constraint.subcategory)
+                if ((si === 0 && iS === 0) || si > 0) {
+                    paths += FSL2SPARQL(selectedConfig.properties[iC].path, {
+                        propName,
+                        entrypointName,
+                        entrypointType: iS === 0,
+                        resourceGraph,
+                        graphs
+                    })
                 }
-                const conditions = constraint.value.map((r, iR) => {
-                    // console.log(String(r).match(/(\d{4})$/), String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/), String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/))
-                    let theDate
-                    if (String(r).match(/(\d{4})$/)) {
-                        return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${Number(r)}'^^xsd:integer`
+                if (constraint.category === 'datetime') {
+                    let datePropName = 'date' + propName
+                    if (String(constraint.value[0]).match(/(\d{4})$/)) {
+                        bind += `BIND (xsd:integer(?${propName}) as ?${datePropName}) . `
                     } else {
-                        if (String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/)) {
-                            theDate = new Date(String(r).substr(0, 4), String(r).substr(5, 2), String(r).substr(8, 2))
-                        } else if (String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/)) {
-                            theDate = new Date(String(r).substr(0, 2), String(r).substr(3, 2), String(r).substr(6, 4))
-                        }
-                        // console.log(`?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}'^^xsd:date`)
-                        return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getMonth() + 1}-${theDate.getDate()}'^^xsd:date`
-                    }                    
-                }).join(' && ')
-                return `(${conditions})`
-            } else if (constraint.category === 'text' || constraint.category === 'uri' || (constraint.category === 'geo' && constraint.subcategory === 'name')) {
-                return ` regex(?${propName}, '^${constraint.value.replace(`'`, `\\'`)}$', 'i')`
-            }
-        }).join(' && ') + ')'
-    }).join(' || ')
+                        bind += `BIND (xsd:date(?${propName}) as ?${datePropName}) . `
+                    }
+                    const conditions = constraint.value.map((r, iR) => {
+                        // console.log(String(r).match(/(\d{4})$/), String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/), String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/))
+                        let theDate
+                        if (String(r).match(/(\d{4})$/)) {
+                            return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${Number(r)}'^^xsd:integer`
+                        } else {
+                            if (String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/)) {
+                                theDate = new Date(String(r).substr(0, 4), String(r).substr(5, 2), String(r).substr(8, 2))
+                            } else if (String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/)) {
+                                theDate = new Date(String(r).substr(0, 2), String(r).substr(3, 2), String(r).substr(6, 4))
+                            }
+                            // console.log(`?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}'^^xsd:date`)
+                            return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getMonth() + 1}-${theDate.getDate()}'^^xsd:date`
+                        }                    
+                    }).join(' && ')
+                    return `(${conditions})`
+                } else if (constraint.category === 'text' || constraint.category === 'uri' || (constraint.category === 'geo' && constraint.subcategory === 'name')) {
+                    return ` regex(?${propName}, '^${constraint.value.replace(`'`, `\\'`)}$', 'i')`
+                }
+            }).join(' && ') + ')'
+        }).join(' || ')
+    }).filter(s => s !== '').join(') && (')
     let totalQuery = ''
 
-    if (uriRegex !== '') totalQuery += `FILTER regex(?${entrypointName}, '^${uriRegex}$', 'i') .`
-    if (setConstraints !== '') totalQuery += `${paths} ${bind}FILTER (${setConstraints}) . `
+    if (setConstraints !== '') totalQuery += `${paths} ${bind}FILTER ((${setConstraints})) . `
+    if (uriRegex !== '') totalQuery += `FILTER regex(?${mainentrypointName}, '^${uriRegex}$', 'i') . `
+    if (keywords.length > 0) totalQuery +=  makeKeywordConstraints(keywords)
     // console.log(totalQuery)
     return totalQuery
 }
