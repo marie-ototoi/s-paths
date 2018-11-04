@@ -44,13 +44,13 @@ export const getThresholdsForLegend = (nestedProps, propName, category, nbOfRang
 }
 
 export const getThresholds = (minValue, maxValue, nbOfRanges) => {
-    // console.log(minValue, maxValue)
+    // console.log(minValue, maxValue, nbOfRanges)
     let diff = maxValue - minValue
     if (diff <= 1) {
         diff = 1
         nbOfRanges = 1
     } else if (diff <= nbOfRanges) {
-        nbOfRanges = diff / 2
+        nbOfRanges = Math.ceil(diff / 2)
     }
     let part = Math.ceil(diff / nbOfRanges)
     // console.log(part)
@@ -559,8 +559,8 @@ export const deduplicate = (data, props) => {
 export const getTransitionElements = (originElements, targetElements, originConfig, targetSelectedView, deltaData, zone) => {
     //console.log('before', zone, originElements, targetElements, originConfig, targetSelectedView, deltaData)
     deltaData = deltaData.map(data => {
-        let indexOrigin = getDeltaIndex(data, originElements, { entrypoint: originConfig.entrypoint, isTarget: false })
-        let indexTarget = getDeltaIndex(data, targetElements, { entrypoint: targetSelectedView.entrypoint, isTarget: true })
+        let indexOrigin = getDeltaIndex(data, originElements, { entrypoint: !originConfig.entrypoint.aggregate, isTarget: false })
+        let indexTarget = getDeltaIndex(data, targetElements, { entrypoint: !targetSelectedView.entrypoint.aggregate, isTarget: true })
         return {
             indexOrigin,
             indexTarget,
@@ -570,7 +570,7 @@ export const getTransitionElements = (originElements, targetElements, originConf
     // console.log(deltaData)
     if (!originElements) {
         originElements = []
-    } else if ((!originConfig.entrypoint || (deltaData[0] && !deltaData[0].entrypoint)) && originElements.length > 0) {
+    } else if ((originConfig.entrypoint.aggregate || (deltaData[0] && !deltaData[0].entrypoint)) && originElements.length > 0) {
         originElements = splitTransitionElements(originElements, 'origin', zone, deltaData)
     } else {
         originElements = originElements.map(el => {
@@ -585,7 +585,7 @@ export const getTransitionElements = (originElements, targetElements, originConf
     }
     if (!targetElements) {
         targetElements = []
-    } else if ((!targetSelectedView.entrypoint || (deltaData[0] && !deltaData[0].entrypoint)) && targetElements.length > 0) {
+    } else if ((targetSelectedView.entrypoint.aggregate || (deltaData[0] && !deltaData[0].entrypoint)) && targetElements.length > 0) {
         targetElements = splitTransitionElements(targetElements, 'target', zone, deltaData)
     } else {
         targetElements = targetElements.map(el => {
