@@ -364,8 +364,8 @@ export const makeKeywordConstraints = (keywords, options) => {
     let filter = keywords.map(keyword => {
         let fk = '('
         for (let i = 1; i <= maxLevel; i++) {
-            fk += `((isLiteral(?value${i}) && regex(?value${i}, '${keyword}', 'i')) )`
-            if (i < maxLevel) fk += `||`
+            fk += `(isLiteral(?value${i}) && regex(?value${i}, '${keyword}', 'i'))`
+            if (i < maxLevel) fk += ` || `
         }
         fk += ')'
         return fk
@@ -374,7 +374,7 @@ export const makeKeywordConstraints = (keywords, options) => {
     OPTIONAL {${def}
     }
     FILTER (${filter}) . `
-    console.log(constraint)
+    // console.log(constraint)
     return constraint
 }
 

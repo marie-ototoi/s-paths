@@ -55,13 +55,13 @@ WHERE {
         })).to.equal('?entrypoint rdf:type nobel:LaureateAward . ')    
     })
     it('should generate keyword search constraint', () => {
-        expect(queryLib.makeKeywordConstraints('einstein', { maxLevel: 3 }))
+        expect(queryLib.makeKeywordConstraints(['einstein'], { maxLevel: 3 }))
             .to.equal(`?entrypoint ?level1 ?value1 . 
     OPTIONAL {
         ?value1 ?level2 ?value2 . 
         ?value2 ?level3 ?value3 . 
     }
-    FILTER ((isLiteral(?value1) && regex(?value1, 'einstein', 'i')) || (isLiteral(?value2) && regex(?value2, 'einstein', 'i')) || (isLiteral(?value3) && regex(?value3, 'einstein', 'i'))) . `)
+    FILTER (((isLiteral(?value1) && regex(?value1, 'einstein', 'i')) || (isLiteral(?value2) && regex(?value2, 'einstein', 'i')) || (isLiteral(?value3) && regex(?value3, 'einstein', 'i')))) . `)
     })
     it('should make a valid SPARQL query to retrieve data for a specific config', () => {
         const config1 = {
