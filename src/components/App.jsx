@@ -146,7 +146,7 @@ class App extends React.PureComponent {
                     let constraints
                     let entrypoint = dataset.entrypoint
                     
-                    constraints = makeSelectionConstraints(selections, selectedConfig, zone, { ...dataset, entrypoint, stats: activeConfigs.stats })
+                    constraints = makeSelectionConstraints([selections], selectedConfig, zone, { ...dataset, entrypoint, stats: activeConfigs.stats })
                     // let { constraints, zone } = this['refHeader'].getWrappedInstance().getDetailSelection(event)
                     this.props.loadDetail({ ...dataset, entrypoint, stats: activeConfigs.stats, constraints }, activeConfigs, zone)
                 }
