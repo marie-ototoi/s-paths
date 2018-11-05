@@ -16,11 +16,6 @@
     color: #414141;
 }
 
-.Explain p strong::before,
-.Explain p strong::after {
-    content: ' ';
-}
-
 .Explain span {
     display: inline-block;
     color: #a5a5a5;

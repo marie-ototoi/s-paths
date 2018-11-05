@@ -38,19 +38,19 @@ class Explain extends React.Component {
                 }}
             >
                 <p>
-                    You are visualizing
+                    You are visualizing&nbsp;
                     <strong>
                         {this.props.options.total} { pluralize('entity', this.props.options.total)}
                     </strong>
-                    belonging to the class of resources
-                    <strong>
+                    &nbsp;belonging to the class of resources&nbsp;
+                    <strong title = {displayedResource.comment}>
                         { usePrefix(displayedResource.label, dataset.prefixes) }
                     </strong>
-                    according to
+                    &nbsp;according to&nbsp;
                     <strong>
                         {pathsNumber} property {pluralize('path', pathsNumber)}
                     </strong>
-                    traversing
+                    &nbsp;traversing&nbsp;
                     <strong>
                         {allgraphs.length} {pluralize('graph', allgraphs.length)}
                     </strong>

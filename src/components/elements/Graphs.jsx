@@ -28,7 +28,7 @@ class Graphs extends React.PureComponent {
             acc.push(...cur.triplesGraphs)
             return acc
         }, []))]
-        console.log(selectedConfig)
+        // console.log(selectedConfig)
         const colors = getGraphsColors()
 
         const graphs = {}
