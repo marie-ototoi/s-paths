@@ -5,7 +5,7 @@ import shallowEqual from 'shallowequal'
 
 import { getConfigs, getCurrentConfigs, getSelectedMatch, getSelectedView } from '../../lib/configLib'
 import { getNbDisplayed } from '../../lib/dataLib'
-import { makeKeywordConstraints, makePivotConstraints, makeSelectionConstraints } from '../../lib/queryLib'
+import { makePivotConstraints, makeSelectionConstraints } from '../../lib/queryLib'
 import { mergeSelections } from '../../lib/selectionLib'
 
 import { showSettings, showStats } from '../../actions/displayActions'

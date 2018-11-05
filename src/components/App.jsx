@@ -52,7 +52,8 @@ class App extends React.PureComponent {
             aside_target: null,
             aside_origin: null,
             main_transition: null,
-            aside_transition: null
+            aside_transition: null,
+            showConfig: (new URLSearchParams(window.location.search)).has('admin')
         }
         this.refmain = React.createRef()
         this.refaside = React.createRef()
@@ -272,7 +273,7 @@ class App extends React.PureComponent {
                 }
             
             </div>
-            { (!mainConfig || display.statsOpen) &&
+            { (!mainConfig || display.statsOpen) && this.state.showConfig &&
                 <Stats
                     dimensions = { getDimensions('stats', display.viz) }
                 />
