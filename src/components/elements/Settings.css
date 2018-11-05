@@ -2,8 +2,10 @@
     font-size: 0.8em;
 }
 .Settings ul{
-    max-height: 200px;
+    max-height: 350px;
     overflow-y: scroll;
+    padding: 0;
+    margin: 0;
 }
 
 .Settings ul li{

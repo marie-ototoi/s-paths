@@ -37,48 +37,62 @@ class Settings extends React.PureComponent {
                 >
                     <i className='fas fa-window-close' />
                 </span>
-                <h2>Prop level ranking factors</h2>
-                {
-                    Object.keys(rankPropFactors).map((key) => 
-                        <div className = "field" key = { `fact${key}` }>
-                            <label className = "label">{ key }
-                                <input value={rankPropFactors[key]}
-                                    type='number'
-                                    name ={key}
-                                    onChange = {(e) => {
-                                        this.props.saveFactor('rankPropFactors', key, e.target.value)
-                                    }}
-                                />
-                            </label>
-                        </div>
-                    )
-                }
-                <h2>Match level ranking factors</h2>
-                {
-                    Object.keys(rankMatchFactors).map((key) => 
-                        <div className = "field" key = { `fact${key}` }>
-                            <label className = "label">{ key }
-                                <input value={rankMatchFactors[key]}
-                                    type='number'
-                                    name ={key}
-                                    onChange = {(e) => {
-                                        this.props.saveFactor('rankMatchFactors', key, e.target.value)
-                                    }}
-                                />
-                            </label>
-                        </div>
-                    )
-                }
-                <h2>Prefixes</h2>
-                <ul>
-                    {
-                        Object.keys(dataset.prefixes).map((key) => 
-                            <li key = { `prefix${key}` }>
-                                <strong>{key}</strong>: {dataset.prefixes[key]}
-                            </li>
-                        )
-                    }
-                </ul>
+                <div style = {{ display: 'flex' }}>
+                    <div style = {{ width: '50%' }}>
+                        <h2 className="subtitle is-6">Prop level ranking factors</h2>
+                        {
+                            Object.keys(rankPropFactors).map((key) => 
+                                <div className = "field is-horizontal" key = { `fact${key}` }>
+                                    <div className="field-label"><label className = "label">{ key }</label></div>
+                                    <div className="field-body">
+                                        <div className="control">
+                                            <input value={rankPropFactors[key]}
+                                                type='number'
+                                                name ={key}
+                                                onChange = {(e) => {
+                                                    this.props.saveFactor('rankPropFactors', key, e.target.value)
+                                                }}
+                                                style={{ width: '50px' }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        }
+                        <h2 className="subtitle is-6">Match level ranking factors</h2>
+                        {
+                            Object.keys(rankMatchFactors).map((key) => 
+                                <div className = "field is-horizontal" key = { `fact${key}` }>
+                                    <div className="field-label"><label className = "label">{ key }</label></div>
+                                    <div className="field-body">
+                                        <div className="control">
+                                            <input value={rankMatchFactors[key]}
+                                                type='number'
+                                                name ={key}
+                                                onChange = {(e) => {
+                                                    this.props.saveFactor('rankMatchFactors', key, e.target.value)
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )
+                        }
+                    </div>
+                    <div style = {{ width: '50%' }}>
+                        <h2 className="subtitle is-6">Prefixes</h2>
+                        <ul>
+                            {
+                                Object.keys(dataset.prefixes).map((key) => 
+                                    <li key = { `prefix${key}` }>
+                                        <strong>{key}</strong>: {dataset.prefixes[key]}
+                                    </li>
+                                )
+                            }
+                        </ul>
+                    </div>
+                </div>
+                
             </div>
         </div>)
     }
