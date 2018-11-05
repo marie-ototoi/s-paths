@@ -95,7 +95,7 @@ WHERE {
                 selected: true
             }
         }
-        expect(queryLib.makeQuery('nobel:LaureateAward', config1, 'main', { graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'], constraints: '' }))
+        expect(queryLib.makeQuery('nobel:LaureateAward', { ...config1, entrypoint: { aggregate: true } }, 'main', { graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'], constraints: '' }))
             .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) ?prop2 (COUNT(?prop2) as ?countprop2) FROM <http://localhost:8890/nobel> FROM <http://localhost:8890/geonames> 
 WHERE {
 
@@ -107,19 +107,19 @@ WHERE {
 
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . FILTER (?prop1 != ?entrypoint) . ?entrypoint nobel:laureate ?prop2inter1 . ?prop2inter1 rdf:type nobel:Laureate . FILTER (?prop2inter1 != ?entrypoint) . ?prop2inter1 foaf:gender ?prop2 . FILTER (?prop2 != ?prop2inter1 && ?prop2 != ?entrypoint) . 
 } GROUP BY ?entrypoint ?prop1 ?prop2  ORDER BY ?prop1 ?prop2 `)
-        expect(queryLib.makeQuery('nobel:LaureateAward', config1, 'main', { graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'], constraints: '', prop1only: true }))
+        expect(queryLib.makeQuery('nobel:LaureateAward', { ...config1, entrypoint: { aggregate: true } }, 'main', { graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'], constraints: '', prop1only: true }))
             .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) FROM <http://localhost:8890/nobel> FROM <http://localhost:8890/geonames> 
 WHERE {
 
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . FILTER (?prop1 != ?entrypoint) . 
 } GROUP BY ?prop1  ORDER BY ?prop1 ?countprop1 `)
-        expect(queryLib.makeQuery('nobel:LaureateAward', config2, 'main', { graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'], constraints: '', prop1only: true }))
+        expect(queryLib.makeQuery('nobel:LaureateAward', { ...config2, entrypoint: { aggregate: true } }, 'main', { graphs:['http://localhost:8890/nobel', 'http://localhost:8890/geonames'], constraints: '', prop1only: true }))
             .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) FROM <http://localhost:8890/nobel> FROM <http://localhost:8890/geonames> 
 WHERE {
 
 ?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?prop1 . FILTER (?prop1 != ?entrypoint) . 
 } GROUP BY ?prop1  ORDER BY ?prop1 ?countprop1 `)
-        expect(queryLib.makeQuery('nobel:LaureateAward', config3, 'main', { constraints: '', graphs: [] }))
+        expect(queryLib.makeQuery('nobel:LaureateAward', { ...config3, entrypoint: { aggregate: true } }, 'main', { constraints: '', graphs: [] }))
             .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) 
 WHERE {
 
@@ -300,7 +300,7 @@ WHERE {
             graphs: [],
             resourceGraph: 'b'
         }
-        expect(queryLib.makeTransitionQuery(newConfig, newOptions, config, options, 'main'))
+        expect(queryLib.makeTransitionQuery({ ...newConfig, entrypoint: { aggregate: true } }, newOptions, { ...config, entrypoint: { aggregate: true } }, options, 'main'))
             .to.equal(`SELECT DISTINCT ?prop1 (COUNT(?prop1) as ?countprop1) ?prop2 (COUNT(?prop2) as ?countprop2) ?newprop1 (COUNT(?newprop1) as ?newcountprop1) ?newprop2 (COUNT(?newprop2) as ?newcountprop2) 
     WHERE {
         FILTER (?prop1 >= xsd:date("1930-01-01") && ?prop1 < xsd:date("1939-12-31")) . 
