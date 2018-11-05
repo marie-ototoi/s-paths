@@ -135,59 +135,62 @@ export const getResults = (data, zone, status) => {
 
 export const prepareSingleData = (data, dataset) => {
     // console.log(data)
-    let { maxLevel, prefixes } = dataset
+    let stats = matchStatementsValues(data, dataset)
+    let { prefixes } = dataset
     let shortname = usePrefix(data[0].entrypoint.value, prefixes)
-    let shortpath
     let tree = [{
         id: 1,
         name: data[0].entrypoint.value,
         charlength: shortname.length,
         shortname,
+        open: true,
+        parentCheck: 1,
         parents: []
     }]
     let check = {}
-    let counters = { c0: 1 }
+    check[data[0].entrypoint.value] = 1
     let counter = 2
     let maxDepth = 1
-    let leaves = data.reduce((acc, cur, pathindex) => {
-        let currentCheck = ''
-        for (let i = 1; i <= maxLevel; i ++) {
-            // console.log('dd')
-            if(cur['prop'+  i]) {
-                if (i > maxDepth) maxDepth = i
-                // console.log('ok rentre la')
-                let path = cur['path'+ i].value
-                let name = cur['prop'+ i].value
-                currentCheck += path + '' + name
-                // console.log('bon')
-                if (!check[currentCheck]) {
-                    // console.log('id+', counter, 'parent', counters['c' + (i - 1)])
-                    check[currentCheck] = true
-                    counters['c' + i] = counter
-                    let parents = [1]
-                    for (let j = 1; j <= i; j ++) {
-                        parents.push(counters['c' + j])
-                    }
-                    shortname = usePrefix(name, prefixes)
-                    shortpath = usePrefix(path, prefixes)
-                    acc.push({
-                        id: counter,
-                        name,
-                        charlength: shortname.length,
-                        shortname,
-                        pathcharlength: shortpath.length,
-                        path: shortpath,
-                        parent: counters['c' + (i - 1)],
-                        parents
-                    })
-                    counter ++
-                }
+    let leaves = stats.reduce((acc, cur, pathindex) => {
+        // console.log(cur.level, cur.path)
+        let parts = cur.path.split('/')
+ 
+        let parent = 1
+        let parents = [1]
+        let path = parts[0] + '/'
+        for (let i = 1; i <= cur.level * 2; i +=2) {
+            let propIndex = Math.ceil(i/2)
+            let part = parts[i]
+            path += part + '/'
+            if (check[path]) {
+                parent = check[path]
+                parents.push(parent)
+            } else {
+                parents.push(counter)
+                let name = cur.values['prop'+ propIndex].value
+                let shortname = usePrefix(name, prefixes)
+                if (shortname.length > 80) shortname = shortname.substr(0,80) + '...'
+                acc.push({
+                    id: counter,
+                    name,
+                    charlength: shortname.length,
+                    shortname,
+                    pathcharlength: path.length,
+                    path :  usePrefix(cur.values['path'+ propIndex].value, prefixes),
+                    pathDepth: cur.level,
+                    parent,
+                    parentCheck: parent,
+                    parents
+                })
+                check[path] = counter
+                parent = counter
+                counter ++
             }
-            
         }
+        
         return acc
     }, [])
-    leaves = leaves.map(leaf => { return { ...leaf, maxDepth } })
+    //console.log(leaves)
     tree.push(...leaves)
     // console.log(tree)
     return tree
@@ -385,9 +388,8 @@ export const prepareSinglePropData = (data, category, prefixes) => {
         })
 }
 
-export const prepareInfoCardData = (data, dataset) => {
+export const matchStatementsValues = (data, dataset) => {
     let {stats} = dataset
-    let paths = {}
     let dataDict = {}
     data.forEach(dp => {
         let path = '<' + stats.statements[0].entrypoint + '>/'
@@ -402,12 +404,17 @@ export const prepareInfoCardData = (data, dataset) => {
         }
         dataDict[path] = dp
     })
-    stats = stats.statements.sort((a, b) => a.level - b.level).filter(stat => stat.category !== 'number')
+    stats = stats.statements.sort((a, b) => a.level - b.level)
     stats = stats.map(stat => {
         let values = dataDict[stat.fullPath+'/']
-        
         if (values) return {...stat, values}
     }).filter(stat => stat)
+    return stats
+}
+
+export const prepareInfoCardData = (data, dataset) => {
+    let stats = matchStatementsValues(data, dataset)
+    let paths = {}
     paths.text = stats.filter(stat => stat.category === 'text')
     paths.image = stats.filter(stat => stat.category === 'image')
     paths.geo = stats.filter(stat => stat.category === 'geo')

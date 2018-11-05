@@ -44,14 +44,28 @@ class ListAllProps extends React.Component {
     prepareData (nextProps) {
         const { data, dataset, display, dimensions, selections, zone } = nextProps
         // prepare the data for display
-        console.log(data)
+        // console.log(data)
         // Save to reuse in render
         // console.log(prepareSingleData(data, dataset))
         //prepareSingleData(data, dataset)
         const datatree = [{
+            "name": "open",
+            "values": [{ "id": 1 }],
+            "on": [
+                {
+                    "trigger": "clicked",
+                    "toggle":  "clicked"
+                }
+            ]
+        },
+        {
             "name": "tree",
             "values": prepareSingleData(data, dataset),
             "transform": [
+                {
+                    "type": "filter",
+                    "expr": "indata('open', 'id', datum.parentCheck)"
+                },
                 {
                     "type": "stratify",
                     "key": "id",
@@ -75,23 +89,13 @@ class ListAllProps extends React.Component {
                 },
                 {
                     "type": "formula",
-                    "expr": "if(datum.children == 0 && datum.depth == 1 && datum.maxDepth > 1, datum.radians + (-0.05 * datum.id), datum.radians)",
-                    "as":   "newradians"
-                },
-                {
-                    "type": "formula",
-                    "expr": "if(datum.children == 0 && datum.depth == 1 && datum.maxDepth > 1, datum.radius + (2 * datum.id), datum.radius)",
-                    "as":   "newradius"
-                },
-                {
-                    "type": "formula",
-                    "expr": "originX + datum.newradius * cos(datum.newradians)",
+                    "expr": "originX + datum.radius * cos(datum.radians)",
                     "as":   "x"
                 },
                 
                 {
                     "type": "formula",
-                    "expr": "originY + datum.newradius * sin(datum.newradians)",
+                    "expr": "originY + datum.radius * sin(datum.radians)",
                     "as":   "y"
                 }
             ]
@@ -104,8 +108,8 @@ class ListAllProps extends React.Component {
                 {
                     "type": "linkpath",
                     "shape": {"signal": "links"}, "orient": "radial",
-                    "sourceX": "source.newradians", "sourceY": "source.newradius",
-                    "targetX": "target.newradians", "targetY": "target.newradius"
+                    "sourceX": "source.radians", "sourceY": "source.radius",
+                    "targetX": "target.radians", "targetY": "target.radius"
                 }
             ]
         },
@@ -180,14 +184,13 @@ class ListAllProps extends React.Component {
                 { "name": "originY", "update": "height / 2" },
                 {
                     "name": "parents",
-                    "value": [],
+                    "value": []
+                },
+                {
+                    "name": "clicked",
+                    "value": {},
                     "on": [
-                        {"events": "@nodes:mouseover{200}", "update": "datum.parents"},
-                        {"events": "@rectnodes:mouseover{200}", "update": "datum.parents"},
-                        {"events": "@textnodes:mouseover{200}", "update": "datum.parents"},
-                        {"events": "@nodes:mouseout{200}",  "update": "[]"},
-                        {"events": "@rectnodes:mouseout{200}",  "update": "[]"},
-                        {"events": "@textnodes:mouseout{200}",  "update": "[]"}
+                        {"events": "@nodes:click", "update": "{ id: datum.id }", "force": true},
                     ]
                 }
             ],
@@ -197,7 +200,7 @@ class ListAllProps extends React.Component {
                     "name": "color",
                     "type": "sequential",
                     "range": {"scheme": "viridis"},
-                    "domain": {"data": "tree", "field": "depth"},
+                    "domain": [1, 6],
                     "zero": true
                 }
             ],
@@ -213,7 +216,6 @@ class ListAllProps extends React.Component {
                             "y": {"signal": "originY"},
                             "path": {"field": "path"},
                             "stroke": [
-                                {"test": "length(parents) > 0 && indexof(parents, datum.source.id) >= 0 && indexof(parents, datum.target.id)  >= 0", "value": "#666"},
                                 {"value": "#ddd"}
                             ]
                         }
@@ -231,7 +233,20 @@ class ListAllProps extends React.Component {
                         "update": {
                             "x": {"field": "x"},
                             "y": {"field": "y"},
-                            "fill": {"scale": "color", "field": "depth"}
+                            "fill": {"scale": "color", "field": "depth"},
+                            "fillOpacity": [
+                                {"value": 0.8}
+                            ]
+                        },
+                        "hover": {
+                            "fillOpacity": [
+                                {"test": "datum.depth < datum.pathDepth", "value": 1},
+                                {"value": 0.8}
+                            ],
+                            "cursor": [
+                                {"test": "datum.depth < datum.pathDepth", "value": "pointer"},
+                                {"value": "default"}
+                            ]
                         }
                     }
                 },
@@ -249,13 +264,8 @@ class ListAllProps extends React.Component {
                             "x": {"field": "x", "offset": 6},
                             "yc": {"field": "y"},
                             "fillOpacity": [
-                                {"test": "datum.id != 1 && length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},
                                 {"test": "datum.id == 1", "value": 0},
                                 {"value": 0.1}
-                            ],
-                            "zindex": [
-                                {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},
-                                {"value": 0}
                             ]
                         }
                     }
@@ -275,40 +285,8 @@ class ListAllProps extends React.Component {
                             "y": {"field": "y"},
                             "dx": {"signal": "(datum.id == 1 ? -1 : 1) * 6"},
                             "align": {"signal": "datum.id == 1 ? 'right' : 'left'"},
-                            "opacity": [
-                                {"test": "(length(parents) > 0 && indexof(parents, datum.id) >= 0) || datum.children == 0", "value": 1},
-                                {"value": 0}
-                            ],
                             "fill": [
-                                {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": "#333"},
-                                {"test": "datum.id == 1", "value": "#666"},
-                                {"value": "#ccc"}
-                            ],
-                            "zindex": [
-                                {"test": "(length(parents) > 0 && indexof(parents, datum.id) >= 0)", "value": 1},
-                                {"value": 0}
-                            ]
-                        }
-                    }
-                },
-                {
-                    "type": "rect",
-                    "from": {"data": "links"},
-                    "name": "rectedges",
-                    "encode": {
-                        "update": {
-                            "x2": {"signal": "datum.target.x - 6"},
-                            "yc": {"signal": "datum.target.y"},
-                            "width": {"signal": "datum.target.pathcharlength * 5.2"},
-                            "height": {"value": 15},
-                            "fill": {"value": "#fff"},
-                            "fillOpacity": [
-                                {"test": "length(parents) > 0 && indexof(parents, datum.source.id) >= 0 && indexof(parents, datum.target.id) >= 0", "value": 1},
-                                {"value": 0.1}
-                            ],
-                            "zindex": [
-                                {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},
-                                {"value": 0}
+                                {"value": "#666"}
                             ]
                         }
                     }
@@ -324,17 +302,11 @@ class ListAllProps extends React.Component {
                             "text": {"signal": "datum.target.path"},
                             "align": {"value": "right"},
                             "fill": [
-                                {"test": "length(parents) > 0  && indexof(parents, datum.source.id) >= 0 && indexof(parents, datum.target.id) >= 0", "value": "#333"},
-                                {"test": "datum.id == 1", "value": "#666"},
-                                {"value": "#ccc"}
+                                {"value": "#aaa"}
                             ],
                             "baseline": {"value": "middle"},
                             "fillOpacity": [
                                 {"value": 1}
-                            ],
-                            "zindex": [
-                                {"test": "length(parents) > 0 && indexof(parents, datum.id) >= 0", "value": 1},
-                                {"value": 0}
                             ]
                         }
                     }
@@ -446,7 +418,7 @@ class ListAllProps extends React.Component {
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
         if (this.customState.view) {
-            // if(this.customState.view.scenegraph().source.value) console.log('componentDidUpdate', this.customState.view.scenegraph().source.value[0].items[2].items, this.props.display.modifierPressed, this.props.selections)
+            // if(this.customState.view) console.log('componentDidUpdate', this.customState.view.scenegraph(), this.customState.view._runtime)
             this.customState.view.run()
             // console.log(this.customState.view._runtime)
             this.props.handleTransition(this.props, this.getElementsForTransition())
