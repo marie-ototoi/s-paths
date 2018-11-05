@@ -550,9 +550,9 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
         let selectedConfig = configLib.getSelectedMatch(configZone)    
         let properties = !configZone.allProperties ? selectedConfig.properties : []
         if (prop1only === true) properties = [properties[0]]
-        propList = (configZone.entrypoint === undefined || unique) ? `DISTINCT ` : `DISTINCT ?entrypoint `
+        propList = (configZone.entrypoint.aggregate || unique) ? `DISTINCT ` : `DISTINCT ?entrypoint `
         if (unique) propList = propList.concat(`(COUNT(DISTINCT ?entrypoint) AS ?displayed) `)
-        if (configZone.entrypoint !== undefined && !unique) groupList = groupList.concat(`?entrypoint `)
+        if (!configZone.entrypoint.aggregate && !unique) groupList = groupList.concat(`?entrypoint `)
         properties.forEach((prop, index) => {
             index += 1
             let hierarchical = false
@@ -564,7 +564,7 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
                 propList = propList.concat(`?prop${index} `)
                 if (hierarchical) propList = propList.concat(`?directlink `)
                 orderList = orderList.concat(`?prop${index} `)
-                if (configZone.entrypoint === undefined) {
+                if (configZone.entrypoint.aggregate) {
                     propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
                     orderList = orderList.concat(`?countprop${index} `)
                 }
@@ -662,8 +662,8 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
     //const graph = `FROM <${resourceGraph}> FROM <${newOptions.resourceGraph}>`
     const graph = graphs ? graphs.map(gr => `FROM <${gr}> `).join('') : ``
     
-    let propList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``
-    let groupList = (config.entrypoint !== undefined || newConfig.entrypoint !== undefined) ? `?entrypoint ` : ``
+    let propList = (!config.entrypoint.aggregate || !newConfig.entrypoint.aggregate) ? `?entrypoint ` : ``
+    let groupList = (!config.entrypoint.aggregate || !newConfig.entrypoint.aggregate) ? `?entrypoint ` : ``
     let defList = ``
     let orderList = ``
     if (!config.allProperties) {
@@ -673,7 +673,7 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
                 index += 1
                 propList = propList.concat(`?prop${index} `)
                 orderList = orderList.concat(`?prop${index} `)
-                if (config.entrypoint === undefined) {
+                if (config.entrypoint.aggregate) {
                     propList = propList.concat(`(COUNT(?prop${index}) as ?countprop${index}) `)
                     orderList = orderList.concat(`?countprop${index} `)
                 }
@@ -693,8 +693,8 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
     //
     let newdefList = ``
     
-    propList.concat((newConfig.entrypoint && !config.entrypoint) ? `?entrypoint ` : ``)
-    groupList.concat((newConfig.entrypoint && !config.entrypoint) ? `?entrypoint ` : ``)
+    propList.concat((!newConfig.entrypoint.aggregate && config.entrypoint.aggregate) ? `?entrypoint ` : ``)
+    groupList.concat((!newConfig.entrypoint.aggregate && config.entrypoint.aggregate) ? `?entrypoint ` : ``)
     if(!newConfig.allProperties) {
         let newSelectedConfig = configLib.getSelectedMatch(newConfig, zone)
         newSelectedConfig.properties.forEach((prop, index) => {
@@ -702,7 +702,7 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
                 index += 1
                 propList = propList.concat(`?newprop${index} `)
                 orderList = orderList.concat(`?newprop${index} `)
-                if (config.entrypoint === undefined) {
+                if (config.entrypoint.aggregate) {
                     propList = propList.concat(`(COUNT(?newprop${index}) as ?newcountprop${index}) `)
                     orderList = orderList.concat(`?newcountprop${index} `)
                 }

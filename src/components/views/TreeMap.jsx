@@ -44,7 +44,7 @@ class TreeMap extends React.Component {
         const { config, data, getPropPalette, palettes, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
-
+        // console.log(data)
         // First prop
         const nestedProp1 = nestData(deduplicate(data, ['prop1']), [{
             propName: 'prop1',
