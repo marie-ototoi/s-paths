@@ -10,7 +10,6 @@ import URIWheelLayout from '../../d3/URIWheelLayout'
 import { getSelectedMatch } from '../../lib/configLib'
 import { deduplicate, nestData } from '../../lib/dataLib'
 // redux functions
-import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
 
 class URIWheel extends React.Component {
@@ -41,7 +40,7 @@ class URIWheel extends React.Component {
             this.props.step !== nextProps.step 
     }
     prepareData (nextProps) {
-        const { config, data, getPropPalette, palettes, zone } = nextProps
+        const { config, data, zone } = nextProps
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
         // First prop
@@ -52,7 +51,8 @@ class URIWheel extends React.Component {
 
         const propsLists = config.propList
 
-        const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
+        // const color = getPropPalette(palettes, selectedConfig.properties[0].path, 1)
+        const color = '#a064e4'
 
         // console.log(nestedProp1)
         // Save to reuse in render
@@ -148,7 +148,6 @@ function mapStateToProps (state) {
 
 function mapDispatchToProps (dispatch) {
     return {
-        getPropPalette: getPropPalette(dispatch),
         handleMouseDown: handleMouseDown(dispatch),
         handleMouseUp: handleMouseUp(dispatch),
         selectElements: selectElements(dispatch)
