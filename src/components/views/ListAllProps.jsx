@@ -418,7 +418,7 @@ class ListAllProps extends React.Component {
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
         if (this.customState.view) {
-            // if(this.customState.view) console.log('componentDidUpdate', this.customState.view.scenegraph(), this.customState.view._runtime)
+            // if (this.customState.view) console.log('componentDidUpdate', this.customState.view.scenegraph(), this.customState.view._runtime)
             this.customState.view.run()
             // console.log(this.customState.view._runtime)
             this.props.handleTransition(this.props, this.getElementsForTransition())

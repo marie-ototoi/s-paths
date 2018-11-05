@@ -187,7 +187,7 @@ const defaultState = [
     {
         id: 'ListAllProps',
         name: 'node link diagram',
-        thumb : '/images/listprop.svg',
+        thumb : '/images/node_link_diagram.svg',
         allProperties: true,
         weight: 0.5,
         entrypoint: { min: 1, max: 1 },
