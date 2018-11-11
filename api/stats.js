@@ -26,15 +26,17 @@ router.post('/', (req, res) => {
 
 const getAllStats = async (options) => {
     // console.log('oy', options)
-    let { analyse, prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
+    let { analyse, prefixcc, prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
     let selectionInstances
     
     // add prefix to entrypoint if full url
+    // console.log(entrypoint, queryLib.usesPrefix(entrypoint, prefixes))
     if (!queryLib.usesPrefix(entrypoint, prefixes)) {
         if (!queryLib.prefixDefined(entrypoint, prefixes)) {
-            prefixes = await queryLib.addPrefix(entrypoint, prefixes)
+            prefixes = await queryLib.addPrefix(entrypoint, prefixes, prefixcc)
         }
         entrypoint = queryLib.usePrefix(entrypoint, prefixes)
+        // console.log('new entrypoint', entrypoint)
     }
     if (analyse) {
         await pathModel.deleteMany({ endpoint, graphs: { $all: graphs }, entrypoint: queryLib.useFullUri(entrypoint, prefixes) }).exec()
@@ -68,7 +70,6 @@ const getAllStats = async (options) => {
         // if necessary retrieve missing level
         // or recursively retrieve properties
         let paths = await getProps(entryProp, 1, options, { totalInstances, selectionInstances })
-        
         // console.log(paths.statements[1])
         // last parameter is for first time query, should be changed dynamically
         // get human readable rdfs:labels and rdfs:comments of all properties listed
@@ -116,7 +117,7 @@ const getMaxRequest = (parentQuantities) => {
 }
 
 const getProps = async (categorizedProps, level, options, instances) => {
-    let { analyse, constraints, graphs, entrypoint, endpoint, localEndpoint, prefixes, maxLevel } = options
+    let { analyse, constraints, graphs, entrypoint, endpoint, localEndpoint, prefixcc, prefixes, maxLevel } = options
     let { totalInstances, selectionInstances } = instances
     let maxRequests = getMaxRequest(totalInstances)
     let newCategorizedProps = []
@@ -126,10 +127,11 @@ const getProps = async (categorizedProps, level, options, instances) => {
     if (props.length > 0) {        
         // if available
         // generate current prefixes
+        
         for (let i = 0; i < props.length; i ++) {
             let prop = props[i]
             if (!queryLib.prefixDefined(prop.property, prefixes)) {
-                prefixes = await queryLib.addPrefix(prop.property, prefixes)
+                prefixes = await queryLib.addPrefix(prop.property, prefixes, prefixcc)
             }
             newCategorizedProps.push({
                 ...prop._doc,
@@ -138,13 +140,15 @@ const getProps = async (categorizedProps, level, options, instances) => {
         }
         // keep only those whose parents count > 0
     } else if (analyse) {
+
         const queriedProps = categorizedProps.filter(prop => {
-            // console.log(prop.total)
+            // console.log(prop.path, prop.level, prop.category, prop.total, prop.type)
             return (prop.level === level - 1 &&
                 (prop.category === 'entrypoint' ||
-                prop.type === 'uri') &&
+                prop.category === 'uri') &&
                 (!prop.total || (prop.total && prop.total > 0)))
         })
+        // console.log('TOTAL queriedProps', queriedProps.length, queriedProps)
         // deal with props by bunches of promises
         for (let i = 0; i < queriedProps.length; i += maxRequests) {
             let elementsToSlice = (queriedProps.length - i < maxRequests) ? queriedProps.length - i : maxRequests
@@ -160,28 +164,23 @@ const getProps = async (categorizedProps, level, options, instances) => {
                     return undefined
                 }))
             )
-            // keep only promises that have been fulfilled
+            let results = []
             for (let j = 0; j < propsLists.length; j ++) {
+                
                 let props = propsLists[j]
-                if (props && props.results.bindings.length > 0) {
-                    let results = []
+                if (props && props.results && props.results.bindings.length > 0) {
                     for (let k = 0; k < props.results.bindings.length; k ++) {
                         let prop = props.results.bindings[k]
                         // generate prefixes if needed
                         if (!queryLib.prefixDefined(prop.property.value, prefixes)) {
-                            prefixes = await queryLib.addPrefix(prop.property.value, prefixes)
+                            prefixes = await queryLib.addPrefix(prop.property.value, prefixes, prefixcc)
                         }
                         results.push(queryLib.makePath(prop, queriedProps[j + i], level, { prefixes, endpoint }))
-                    }
-                    propsLists[i] = results
-                } else {
-                    propsLists[i] = false
-                } 
+                    }   
+                }
             }
-            propsLists = propsLists
-                .filter(props => props !== false)
-                .reduce((flatArray, list) => flatArray.concat(list), [])
-            newCategorizedProps.push(...propsLists)
+            
+            newCategorizedProps.push(...results)
         }
     }
     //
@@ -195,11 +194,13 @@ const getProps = async (categorizedProps, level, options, instances) => {
             temp = await Promise.all(newCategorizedProps
                 .slice(i, i + elementsToSlice)
                 .map(prop => {
-                    let propQuery = queryLib.makePropQuery(prop, options, 'count')
-                    return queryLib.getData(localEndpoint, propQuery, options.prefixes)
+                    // console.log(prop.path)
+                    let propQuery = queryLib.makePropQuery(prop, { ...options, prefixes }, 'count')
+                    console.log(propQuery)
+                    return queryLib.getData(localEndpoint, propQuery, prefixes)
                 })
                 .map((promise, i) => promise.catch(e => {
-                    console.error('Error with makePropQuery count', e, queryLib.makePropQuery(newCategorizedProps[i], options, 'count'))
+                    console.error('Error with makePropQuery count', e, queryLib.makePropQuery(newCategorizedProps[i], { ...options, prefixes }, 'count'))
                     return undefined
                 })))
             countStats.push(...temp)
@@ -207,12 +208,12 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 temp = await Promise.all(newCategorizedProps
                     .slice(i, i + elementsToSlice)
                     .map(prop => {
-                        let propQuery = queryLib.makePropQuery(prop, options, 'type')
+                        let propQuery = queryLib.makePropQuery(prop, { ...options, prefixes }, 'type')
                         console.log('type ', propQuery)
-                        return queryLib.getData(localEndpoint, propQuery, options.prefixes)
+                        return queryLib.getData(localEndpoint, propQuery, prefixes)
                     })
                     .map((promise, i) => promise.catch(e => {
-                        console.error('Error with makePropQuery type', e, queryLib.makePropQuery(newCategorizedProps[i], options, 'type'))
+                        console.error('Error with makePropQuery type', e, queryLib.makePropQuery(newCategorizedProps[i], { ...options, prefixes }, 'type'))
                         return undefined
                     })))
                 typeStats.push(...temp)
@@ -228,8 +229,8 @@ const getProps = async (categorizedProps, level, options, instances) => {
             temp = await Promise.all(propsWithStats
                 .map(prop => {
                     if ((prop.category === 'datetime' || prop.category === 'text') && prop.total > 0) {
-                        let sampleQuery = queryLib.makePropQuery(prop, options, 'dateformat')
-                        return queryLib.getData(localEndpoint, sampleQuery, options.prefixes)
+                        let sampleQuery = queryLib.makePropQuery(prop, { ...options, prefixes }, 'dateformat')
+                        return queryLib.getData(localEndpoint, sampleQuery, prefixes)
                             .then(sampleData => {
                                 if (sampleData && sampleData.results.bindings.length > 0) {
                                     let category = prop.category
@@ -267,17 +268,19 @@ const getProps = async (categorizedProps, level, options, instances) => {
     } else {
         propsWithStats = newCategorizedProps
     }
+    
     let returnProps = [
         ...categorizedProps,
         ...propsWithStats
     ]
+    // console.log('RETURN PROPS ', level, returnProps.map(p => p.path))
     if (level < maxLevel && newCategorizedProps.length > 0) {
-        return getProps(returnProps, level + 1, options, instances)
+        return getProps(returnProps, level + 1, {...options, prefixes}, instances)
     } else {
         // discard uris when there are more specific paths
         return {
             statements: returnProps.filter(prop => (prop.total > 0 && !queryLib.hasMoreSpecificPath(prop.path, prop.level, returnProps))), 
-            options 
+            options: {...options, prefixes}
         }
     }
 }

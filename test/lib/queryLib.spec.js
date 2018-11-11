@@ -235,7 +235,7 @@ WHERE {
         let prefixes = {
             nobel: 'http://data.nobelprize.org/terms/'
         }
-        return expect(queryLib.addPrefix('http://xmlns.com/foaf/0.1/gender', prefixes))
+        return expect(queryLib.addPrefix('http://xmlns.com/foaf/0.1/gender', prefixes, true))
             .to.eventually.deep.equal({
                 ...prefixes,
                 foaf: 'http://xmlns.com/foaf/0.1/'
@@ -245,7 +245,7 @@ WHERE {
         let prefixes = {
             nobel: 'http://data.nobelprize.org/terms/'
         }
-        return expect(queryLib.addPrefix('http://data.nobelprize.org/te', prefixes))
+        return expect(queryLib.addPrefix('http://data.nobelprize.org/te', prefixes, true))
             .to.eventually.deep.equal({
                 ...prefixes,
                 nobelp: 'http://data.nobelprize.org/'

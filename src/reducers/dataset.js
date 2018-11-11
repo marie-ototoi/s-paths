@@ -4,7 +4,7 @@ const initialState = {
     endpoint: process.env.ENDPOINT || 'http://s-paths.lri.fr:8890/sparql',
     localEndpoint: process.env.LOCAL_ENDPOINT || 'http://virtuoso:8890/sparql',
     entrypoint: '',
-    graphs: ['http://nobel.ilda.fr', 'http://dbpedianobel.ilda.fr'], //['http://bnf.ilda.fr'],
+    graphs: ['http://nobel.ilda.fr', 'http://dbpedianobel.ilda.fr'], //['http://bnf.ilda.fr'], //
     resourceGraph: null,
     constraints: '',
     labels: [],
@@ -78,7 +78,8 @@ const initialState = {
         'nobel:Laureate/foaf:name/*': 0.7,
         'nobel:Laureate/foaf:gender/*': 0.8,
         'nobel:Laureate/nobel:laureateAward/*/nobel:category/*/rdfs:label/*' : 1
-    }
+    },
+    prefixcc: false
 }
 
 const dataset = (state = initialState, action) => {

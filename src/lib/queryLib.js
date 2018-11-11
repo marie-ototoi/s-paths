@@ -4,30 +4,36 @@ import { SparqlClient } from 'sparql-client-2'
 import fetch from 'node-fetch'
 import * as configLib from './configLib'
 
-export const addPrefix = (url, prefixes) => {
+export const addPrefix = (url, prefixes, prefixcc) => {
     //let find
     const root = getRoot(url)
     let prefix
-    return fetch((`https://prefix.cc/reverse?uri=${root}&format=ini`),
-        {
-            method: 'GET'
-        })
-        .then(res => res.text())
-        .then(res => {
-            // if no results
-            if (res.substr(0, 5) === '<?xml')  {
+    if (prefixcc) {
+        return fetch((`https://prefix.cc/reverse?uri=${root}&format=ini`),
+            {
+                method: 'GET'
+            })
+            .then(res => res.text())
+            .then(res => {
+                // if no results
+                if (res.substr(0, 5) === '<?xml') {
+                    prefix = getSmallestPrefix(root, prefixes)
+                } else {
+                    prefix = res.split('=')[0]
+                }
+                prefixes[prefix] = root
+                return prefixes
+            })
+            .catch(err => {
                 prefix = getSmallestPrefix(root, prefixes)
-            } else {
-                prefix = res.split('=')[0]
-            }
-            prefixes[prefix] = root
-            return prefixes
-        })
-        .catch(err => {
-            prefix = getSmallestPrefix(root, prefixes)
-            prefixes[prefix] = root
-            return prefixes
-        })
+                prefixes[prefix] = root
+                return prefixes
+            })
+    } else {
+        prefix = getSmallestPrefix(root, prefixes)
+        prefixes[prefix] = root
+        return prefixes
+    }
 }
 
 export const getSmallestPrefix = (root, prefixes) => {

@@ -68,7 +68,7 @@ class Stats extends React.PureComponent {
                             return (<tr key = { `resource_${zone}_${ri}` }>
                                 <td>{ resource.type }</td>
                                 <td>{ resource.pathsNumber }</td>
-                                <td><a onClick = { e => {
+                                <td><a onMouseUp = { e => {
                                     this.props.loadStats({
                                         ...dataset,
                                         analyse: true,
