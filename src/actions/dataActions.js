@@ -51,7 +51,6 @@ const getResources = (options) => {
 const evaluateSubStats = (stats) => {
     let { selectionInstances, totalInstances, statements } = stats
     let ratio = selectionInstances / totalInstances
-    
     return {
         ...stats,
         statements: statements.map(statement => {
@@ -87,6 +86,24 @@ const checkStatements = (statements, selectionInstances, dataset) => {
             })
             return checked
         })
+}
+
+const checkEvaluationConfigs = async (configs, stats, dataset) => {
+    let views = configs.views
+    // TO DO 1
+    // for each view
+    // verify selectedMatch.properties using checkStatements function (it is used in the fonction below as an exemple)
+
+    // compute the new score of checked stats (function scoreMatch in configLib.js)
+    // compare the former score, 'unique' and 'total' value of estimated stats with the new checked values
+    // if the difference is no more than, let's say 10 %, we will adjust later,
+    // break the loop, put the current view as first in the list and return configs
+    // else check next view
+    
+    // TO DO 2
+    // if all views have been checked without success
+    // for each view, find the next property match
+
 }
 
 const checkFirstValidConfigs = (configs, stats, dataset) => {
@@ -162,7 +179,6 @@ export const getGraphs = (dispatch) => (dataset) => {
             }).filter(graph => graph)
         })
 }
-
 
 export const loadResources = (dispatch) => (dataset, views) => {
     let { endpoint, graphs, prefixes } = dataset
@@ -284,12 +300,17 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                                     })
                                 
                             } else if (selectionInstances > 1) {
+                                // evaluation of 'unique' and 'total' values for all paths on the subset
                                 stats = evaluateSubStats({ ...stats, selectionInstances })
                                 // console.log('evaluateSubStats', stats)
-                                // for each views, checks which properties ou sets of properties could match and evaluate
+                                // definition of the new configs based on the estimation 
+                                configs = defineConfigs(views, { ...stats, selectionInstances }, dataset)
+                                // console.log('evaluateConfigs', configs)
+                                // check evaluation 
                                 // console.log('checkFirstValidConfigs', checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset))
-                                checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset)
-                                    .then(([conf, stats]) => resolve(conf))
+                                return checkEvaluationConfigs(configs, { ...stats, selectionInstances }, dataset)
+                                //checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset)
+                                    //.then(([conf, stats]) => resolve(conf))
                             } else {
                                 reject('No results')
                             }
