@@ -103,7 +103,7 @@ const checkEvaluationConfigs = async (configs, stats, dataset) => {
     // TO DO 2
     // if all views have been checked without success
     // for each view, find the next property match
-
+    return configs
 }
 
 const checkFirstValidConfigs = (configs, stats, dataset) => {
@@ -304,13 +304,10 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                                 stats = evaluateSubStats({ ...stats, selectionInstances })
                                 // console.log('evaluateSubStats', stats)
                                 // definition of the new configs based on the estimation 
-                                configs = defineConfigs(views, { ...stats, selectionInstances }, dataset)
+                                configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
                                 // console.log('evaluateConfigs', configs)
-                                // check evaluation 
-                                // console.log('checkFirstValidConfigs', checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset))
-                                return checkEvaluationConfigs(configs, { ...stats, selectionInstances }, dataset)
-                                //checkFirstValidConfigs(configs, { ...stats, selectionInstances }, dataset)
-                                    //.then(([conf, stats]) => resolve(conf))
+                                // check evaluation
+                                resolve(checkEvaluationConfigs(configs, { ...stats, selectionInstances }, dataset)) 
                             } else {
                                 reject('No results')
                             }
