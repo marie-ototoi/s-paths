@@ -1,6 +1,7 @@
 import express from 'express'
 import resourceModel from '../models/resource'
 import pathModel from '../models/path'
+import prefixModel from '../models/prefix'
 import { getLabels } from '../src/lib/labelLib'
 import * as queryLib from '../src/lib/queryLib'
 import * as dataLib from '../src/lib/dataLib'
@@ -26,7 +27,10 @@ router.post('/', (req, res) => {
 const getResources = async (options) => {
     // add default options when not set
     let { graphs, endpoint, localEndpoint, prefixes } = options
-
+    let newprefixes = await prefixModel.find({}).exec()
+    newprefixes.forEach(pref => {
+        prefixes[pref._doc.pref] = pref._doc.uri
+    })
     let resources = await resourceModel.find({ endpoint: endpoint, graphs: { $all: graphs, $size: graphs.length } }).sort('-total').exec()
     console.log('GET RESOURCES')
     if (resources.length > 0) {
@@ -41,10 +45,9 @@ const getResources = async (options) => {
         // console.log(resources)
         await resourceModel.createOrUpdate(resources) 
     }
-    //let labels = await getLabels(resources.map(resource => {
-    //    return { uri: resource.type }
-    //}))
-    let labels = []
+    let labels = await getLabels(resources.map(resource => {
+        return { uri: resource.type }
+    }))
     let dico = dataLib.getDict(labels.map(label => { return { key: label.uri } }))
     let pathsNumbers = []
     for (let i= 0; i < resources.length; i ++){

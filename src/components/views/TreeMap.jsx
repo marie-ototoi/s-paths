@@ -41,7 +41,8 @@ class TreeMap extends React.Component {
             this.props.step !== nextProps.step
     }
     prepareData (nextProps) {
-        const { config, data, getPropPalette, palettes, zone } = nextProps
+        const { config, data, zone } = nextProps
+        if (this.layout) this.layout.destroy(this[this.customState.elementName])
         // prepare the data for display
         const selectedConfig = getSelectedMatch(config, zone)
         // console.log(data)

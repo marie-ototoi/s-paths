@@ -1,5 +1,6 @@
 import express from 'express'
 import pathModel from '../models/path'
+import prefixModel from '../models/prefix'
 
 import { getReadablePathsParts } from '../src/lib/dataLib'
 import { getPropsLabels } from '../src/lib/labelLib'
@@ -271,7 +272,15 @@ const getProps = async (categorizedProps, level, options, instances) => {
             })
             // console.log('PROPS WITH STATS', propsWithStats)
             // save all stats, only if they are relative to the whole ensemble
-            if (constraints === '') await pathModel.createOrUpdate(propsWithStats).catch(e => console.error('Error updating stats', e))
+            if (constraints === '') {
+                let pref = []
+                for (let key in prefixes) {
+                    pref.push({ pref: key, uri: prefixes[key] })
+                }
+                console.log('oooh', pref)
+                await prefixModel.createOrUpdate(pref).catch(e => console.error('Error updating prefix', e))
+                await pathModel.createOrUpdate(propsWithStats).catch(e => console.error('Error updating stats', e))
+            }
         }
     } else {
         propsWithStats = newCategorizedProps

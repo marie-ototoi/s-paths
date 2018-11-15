@@ -87,7 +87,7 @@ const initialState = {
         'nobel:Laureate/foaf:gender/*': 0.8,
         'nobel:Laureate/nobel:laureateAward/*/nobel:category/*/rdfs:label/*' : 1
     },
-    prefixcc: false
+    prefixcc: true
 }
 
 const dataset = (state = initialState, action) => {
