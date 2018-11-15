@@ -111,7 +111,15 @@ const scoreProp = (prop, constraint, rankFactors, preferences) => {
     score.total = Math.round(score.total / coeff * 100) / 100
     return score.total
 }
-const scoreMatch = (match, viewWeight, rankFactors) => {
+
+/**
+ *
+ * @param match
+ * @param viewWeight
+ * @param rankFactors
+ * @returns {number|*}
+ */
+export const scoreMatch = (match, viewWeight, rankFactors) => {
     /* rankFactors = {
         view: 1,
         propsNumber: 1,
@@ -120,18 +128,16 @@ const scoreMatch = (match, viewWeight, rankFactors) => {
     let score = {}
     match = match.filter(p => p.score >= 0)
     // mean of each property's score
-    score.propsNumber = match.length/5
+    score.propsNumber = match.length / 5
     score.propsAverage = match.map(p => p.score).reduce((a, b) => a + b, 0) / match.length
     score.view = viewWeight
-    score.total = 0
+    let total = 0
     let coeff = 0
     for (let factor in rankFactors) {
-        score.total += score[factor] * rankFactors[factor]
+        total += score[factor] * rankFactors[factor]
         coeff += rankFactors[factor]
     }
-    score.total = Math.round(score.total / coeff * 100) / 100
-    // console.log(score)
-    return score.total
+    return Math.round(total / coeff * 100) / 100
 }
 export const findAllMatches = (inputList, addList) => {
     return inputList.map(match => {

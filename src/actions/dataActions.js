@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import types from '../constants/ActionTypes'
-import { activateDefaultConfigs, defineConfigs, getSelectedView } from '../lib/configLib'
+import { activateDefaultConfigs, defineConfigs, getSelectedView, scoreMatch } from '../lib/configLib'
 import { getData, makeCheckPivotQuery, makeDetailQuery, makePropQuery, makeQuery, makeMultipleQuery, makeTransitionQuery } from '../lib/queryLib'
 
 export const endTransition = (dispatch) => (zone) => {
@@ -72,38 +72,75 @@ const checkStatements = (statements, selectionInstances, dataset) => {
         .then((results) => {
             // mix stats and results
             // add checked property
-            
-            let checked = {}
+
+            let checked = []
             statements.forEach((prop, index) => {
                 let countStat = results[index].results.bindings[0]
                 // console.log('countStat', countStat.total.value, countStat.unique.value, countStat.coverage.value, selectionInstances)
-                checked[prop.fullPath] = {
+                checked.push({
                     ...prop,
                     total: Number(countStat.total.value),
                     unique: Number(countStat.unique.value),
                     coverage: Number(countStat.coverage.value) * 100 / selectionInstances
-                }
+                })
             })
             return checked
         })
 }
 
-const checkEvaluationConfigs = async (configs, stats, dataset) => {
-    let views = configs.views
-    // TO DO 1
-    // for each view
-    // verify selectedMatch.properties using checkStatements function (it is used in the fonction below as an exemple)
+const checkStatementsValidity = (props, checkedProps) => {
+    for (const prop of props) {
+        const checkedProp = checkedProps.find(p => p.fullPath === prop.fullPath)
+        if (checkedProp.coverage / prop.coverage < 0.9) {
+            return false
+        }
+        if (checkedProp.unique / prop.unique < 0.9) {
+            return false
+        }
+        if (checkedProp.total / prop.total < 0.9) {
+            return false
+        }
+    }
+    return true
+}
 
-    // compute the new score of checked stats (function scoreMatch in configLib.js)
-    // compare the former score, 'unique' and 'total' value of estimated stats with the new checked values
-    // if the difference is no more than, let's say 10 %, we will adjust later,
-    // break the loop, put the current view as first in the list and return configs
-    // else check next view
-    
-    // TO DO 2
-    // if all views have been checked without success
-    // for each view, find the next property match
-    return configs
+const checkEvaluationConfigs = async (configs, stats, dataset) => {
+    for (const view of configs.views) {
+        // verify selectedMatch.properties using checkStatements function (it is used in the function below as an example)
+        const checkedProps = await checkStatements(
+            view.selectedMatch.properties,
+            stats.selectionInstances,
+            dataset
+        )
+
+        // if all views have been checked without success
+        // for each view, find the next property match
+        for (const [key, prop] of Object.entries(view.selectedMatch.properties)) {
+            if (prop.total === 0) {
+                const propIndex = view.propList[key].findIndex(p => p.fullPath === prop.fullPath)
+                view.propList[key].splice(propIndex, 1)
+                view.selectedMatch.properties[key] = view.propList[key][propIndex]
+            }
+        }
+
+        // compute the new score of checked stats (function scoreMatch in configLib.js)
+        // compare the former score, 'unique' and 'total' value of estimated stats with the new checked values
+        // if the difference is no more than, let's say 10 %, we will adjust later,
+        // break the loop, put the current view as first in the list and return configs
+        // else check next view
+        const previousScoreMatch = view.selectedMatch.scoreMatch
+        view.selectedMatch.scoreMatch = scoreMatch(checkedProps, view.weight, dataset.rankMatchFactors)
+        if (view.selectedMatch.scoreMatch / previousScoreMatch < 0.9) {
+            continue
+        }
+        if (checkStatementsValidity(view.selectedMatch.properties, checkedProps)) {
+            configs.views.splice(configs.views.findIndex(v => v.id === view.id), 1)
+            configs.views.unshift(view)
+            return configs
+        }
+    }
+
+    return checkEvaluationConfigs(configs, stats, dataset)
 }
 
 const checkFirstValidConfigs = (configs, stats, dataset) => {
@@ -117,7 +154,7 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
         views[i].propList.forEach(list => {
             let max = 1 // the number of config checked could depend of the number of views, and the total number of entities
             if (list.length < max) max = list.length
-            for(let i = 0; i < max; i ++){
+            for (let i = 0; i < max; i++) {
                 let prop = list[i]
                 if (!double.includes(prop.fullPath)) {
                     propsToCheck.push(prop)
@@ -127,16 +164,17 @@ const checkFirstValidConfigs = (configs, stats, dataset) => {
         })
         matchesToCheck[views[i].id] = views[i].selectedMatch.properties
     }
-    
+
     return checkStatements(propsToCheck, stats.selectionInstances, dataset)
         .then(propsChecked => {
             newStats = {
                 ...stats,
                 statements: stats.statements.map(prop => {
-                    if (propsChecked[prop.fullPath]) {
+                    const propChecked = propsChecked.find(p => p.fullPath === prop.fullPath)
+                    if (propChecked) {
                         return {
                             ...prop,
-                            ...propsChecked[prop.fullPath],
+                            ...propChecked,
                             checked: true
                         }
                     } else {
@@ -304,12 +342,10 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                             } else if (selectionInstances > 1) {
                                 // evaluation of 'unique' and 'total' values for all paths on the subset
                                 stats = evaluateSubStats({ ...stats, selectionInstances })
-                                // console.log('evaluateSubStats', stats)
-                                // definition of the new configs based on the estimation 
+                                // definition of the new configs based on the estimation
                                 configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
-                                // console.log('evaluateConfigs', configs)
                                 // check evaluation
-                                resolve(checkEvaluationConfigs(configs, { ...stats, selectionInstances }, dataset)) 
+                                resolve(checkEvaluationConfigs(configs, { ...stats, selectionInstances }, dataset))
                             } else {
                                 reject('No results')
                             }
