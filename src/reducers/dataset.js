@@ -4,7 +4,7 @@ const initialState = {
     endpoint: process.env.ENDPOINT || 'http://s-paths.lri.fr:8890/sparql',
     localEndpoint: process.env.LOCAL_ENDPOINT || 'http://virtuoso:8890/sparql',
     entrypoint: '',
-    graphs: ['http://nobel.ilda.fr', 'http://dbpedianobel.ilda.fr'], //['http://bnf.ilda.fr'], //
+    graphs: ['http://bnf.ilda.fr'], //['http://nobel.ilda.fr', 'http://dbpedianobel.ilda.fr'], //
     resourceGraph: null,
     constraints: '',
     labels: [],
@@ -66,9 +66,17 @@ const initialState = {
         sim: 'http://purl.org/ontology/similarity/',
         slickm: 'http://slickmem.data.t-mus.org/',
         slickmem: 'http://slickmem.data.t-mus.org/terms/',
-        umbel: 'http://umbel.org/umbel/rc/'
+        umbel: 'http://umbel.org/umbel/rc/',
+        'loc-vocabulary': 'http://id.loc.gov/vocabulary/'
     },
     stats: [],
+    /*matchPreferences: {
+        'dbpedia-owl:Award/nobel:year/*': {
+            'dbpedia-owl:Award/nobel:category/*': 1,
+            'dbpedia-owl:Award/nobel:categoy/*': 0.8,
+            'dbpedia-owl:Award/nobel:cagory/*': 0.6
+        }
+    },*/
     propertyPreferences: {
         'dbpedia-owl:Award/nobel:year/*': 1,
         'dbpedia-owl:Award/nobel:category/*/rdfs:label/*': 0.9,

@@ -149,11 +149,12 @@ export const findAllMatches = (inputList, addList) => {
         return a.concat(b)
     }, [])
 }
-export const getDictStats = (stats) => {
-    let statsDict = { '*' : stats.statements }
+export const getDictStats = (stats, limit=40) => {
+    let statsDict = { '*': stats.statements }
     let nestedStats = d3.nest().key(stat => stat.category).entries(stats.statements)
     nestedStats.forEach(ns => {
-        statsDict[ns.key] = ns.values
+        if (!limit || limit > ns.values.length) limit = ns.values.length + 1
+        statsDict[ns.key] = ns.values.sort((a, b) => b.coverage - a.coverage).slice(0, limit)
     })
     return statsDict
 }

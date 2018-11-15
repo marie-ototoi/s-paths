@@ -38,20 +38,23 @@ const getResources = async (options) => {
         resources = result.results.bindings.map(resource => {
             return { total: Number(resource.occurrences.value), type: resource.type.value, endpoint, graphs }
         })
-        console.log(resources)
+        // console.log(resources)
         await resourceModel.createOrUpdate(resources) 
     }
-    let labels = await getLabels(resources.map(resource => {
-        return { uri: resource.type }
-    }))
+    //let labels = await getLabels(resources.map(resource => {
+    //    return { uri: resource.type }
+    //}))
+    let labels = []
     let dico = dataLib.getDict(labels.map(label => { return { key: label.uri } }))
     let pathsNumbers = []
     for (let i= 0; i < resources.length; i ++){
         let pathsNumber = await pathModel.countDocuments({ endpoint: endpoint, entrypoint: resources[i].type, graphs: { $all: graphs, $size: graphs.length } }).exec()
         pathsNumbers[i] = pathsNumber
+        // console.log('count', i, pathsNumber)
     }
     // console.log('agg', resources, pathsNumbers, resources.length, pathsNumbers.length)
     let newresources = resources.map((resource, i) => {
+        // console.log('new resource', i)
         let newresource = {
             ...resource,
             label: queryLib.usePrefix(dico[resource.type]? labels[dico[resource.type]].label : resource.type, prefixes),

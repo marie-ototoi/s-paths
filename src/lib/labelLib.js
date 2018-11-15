@@ -45,15 +45,20 @@ export const getLabels = async (urisToLabel, prefixes) => {
         }
     })
     missingUris = urisToLabel.filter(prop => !prop.label)
+    console.log(missingUris)
     // load
-    await Promise.all(missingUris.map(prop => loadUri(prop.uri, graph)).map(ignorePromise))
-    missingUris = await Promise.all(getLabelsFromGraph(missingUris, graph))
-    propertyModel.createOrUpdate(missingUris)
+    if (missingUris.length > 0) {
+        await Promise.all(missingUris.map(prop => loadUri(prop.uri, graph)).map(ignorePromise))
+        missingUris = await Promise.all(getLabelsFromGraph(missingUris, graph))
+        propertyModel.createOrUpdate(missingUris)
+    }
+    console.log(missingUris)
     //
     return urisToLabel.map(prop => {
         if (prop.label) {
             return prop
         } else {
+            // console.log('ICI prop', prop)
             const missing = missingUris.filter(missingprop => missingprop.uri === prop.uri && missingprop.label)
             if (missing.length > 0) {
                 return missing[0]

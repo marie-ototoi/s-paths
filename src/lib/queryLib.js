@@ -775,16 +775,15 @@ export const prefixDefined = (uri, prefixes) => {
 }
 
 export const useFullUri = (path, prefixes) => {
-    return path.replace(path, (match, offset, string) => {
-        for (let pref in prefixes) {
-            let splittedUri = match.split(pref + ':')
-            if (splittedUri.length > 1) return `${prefixes[pref]}${splittedUri[1]}`
-        }
-        return match
-    })
+    let splittedUri = path.split(':')
+    if (prefixes[splittedUri[0]]) {
+        return prefixes[splittedUri[0]] + splittedUri[1]
+    }
+    return path
 }
 
 export const usePrefix = (uri, prefixes) => {
+    if (!uri.substr(0,1) === 'h') return uri
     let newuri = uri.replace(uri, (match, offset, string) => {
         for (let pref in prefixes) {
             let splittedUri = match.split(prefixes[pref])

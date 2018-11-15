@@ -31,15 +31,12 @@ const getAllStats = async (options) => {
     
     // add prefix to entrypoint if full url
     // console.log(entrypoint, queryLib.usesPrefix(entrypoint, prefixes))
-    if (!queryLib.usesPrefix(entrypoint, prefixes)) {
-        if (!queryLib.prefixDefined(entrypoint, prefixes)) {
-            prefixes = await queryLib.addPrefix(entrypoint, prefixes, prefixcc)
-        }
-        entrypoint = queryLib.usePrefix(entrypoint, prefixes)
-        // console.log('new entrypoint', entrypoint)
+    if (!queryLib.prefixDefined(entrypoint, prefixes)) {
+        prefixes = await queryLib.addPrefix(entrypoint, prefixes, prefixcc)
     }
+  
     if (analyse) {
-        await pathModel.deleteMany({ endpoint, graphs: { $all: graphs }, entrypoint: queryLib.useFullUri(entrypoint, prefixes) }).exec()
+        await pathModel.deleteMany({ endpoint, graphs: { $all: graphs }, entrypoint }).exec()
     }
     // number of entities of the set of entrypoint class limited by given constraints
     let selectionQuery = queryLib.makeTotalQuery(entrypoint, options)
@@ -56,9 +53,9 @@ const getAllStats = async (options) => {
     } else {
         // create first prop for entrypoint to feed recursive function
         const entryProp = [{
-            fullPath: '<' + queryLib.useFullUri(entrypoint, prefixes) + '>',
-            path: entrypoint,
-            entrypoint: queryLib.useFullUri(entrypoint, prefixes),
+            fullPath: '<' + entrypoint + '>',
+            path: queryLib.usePrefix(entrypoint, prefixes),
+            entrypoint,
             level: 0,
             endpoint,
             graphs,
@@ -70,27 +67,16 @@ const getAllStats = async (options) => {
         // if necessary retrieve missing level
         // or recursively retrieve properties
         let paths = await getProps(entryProp, 1, options, { totalInstances, selectionInstances })
-        // console.log(paths.statements[1])
-        // last parameter is for first time query, should be changed dynamically
-        // get human readable rdfs:labels and rdfs:comments of all properties listed
-        let newlabels = await getPropsLabels(paths.options.prefixes, paths.statements)
 
-        let labelsDic = {}
-        let allLabels = [...labels, ...newlabels]
-        allLabels.forEach(lab => {
-            labelsDic[lab.uri] = { label: lab.label, comment: lab.comment }
-        })
-        // console.log(labelsDic)
         return {
             statements: paths.statements
-                .map(stat => { return { ...stat, readablePath: getReadablePathsParts(stat.path, labelsDic, paths.options.prefixes ) } })
-                .sort((a, b) => a.level - b.level),
+                .sort((a, b) => a.level - b.level),//.map(stat => { return { ...stat, readablePath: getReadablePathsParts(stat.path, labelsDic, paths.options.prefixes ) } })                
             totalInstances,
             selectionInstances,
             options: {
-                ...paths.options,
+                ...paths.options/*,
                 labels: allLabels,
-                labelsDic
+                labelsDic*/
             }
         }
     }
@@ -117,7 +103,7 @@ const getMaxRequest = (parentQuantities) => {
 }
 
 const getProps = async (categorizedProps, level, options, instances) => {
-    let { analyse, constraints, graphs, entrypoint, endpoint, localEndpoint, prefixcc, prefixes, maxLevel } = options
+    let { analyse, constraints, graphs, entrypoint, endpoint, localEndpoint, prefixcc, prefixes, maxLevel, labels } = options
     let { totalInstances, selectionInstances } = instances
     let maxRequests = getMaxRequest(totalInstances)
     let newCategorizedProps = []
@@ -130,12 +116,8 @@ const getProps = async (categorizedProps, level, options, instances) => {
         
         for (let i = 0; i < props.length; i ++) {
             let prop = props[i]
-            if (!queryLib.prefixDefined(prop.property, prefixes)) {
-                prefixes = await queryLib.addPrefix(prop.property, prefixes, prefixcc)
-            }
             newCategorizedProps.push({
-                ...prop._doc,
-                path: queryLib.convertPath(prop.fullPath, prefixes) // generate prefixed paths
+                ...prop._doc
             })
         }
         // keep only those whose parents count > 0
@@ -156,7 +138,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 .slice(i, i + elementsToSlice)
                 .map(prop => {
                     let propsQuery = queryLib.makePropsQuery(prop.path, options, level, prefixes)
-                    console.log(propsQuery)
+                    console.log(prop.path, propsQuery)
                     return queryLib.getData(localEndpoint, propsQuery, prefixes)
                 })
                 .map((promise, index) => promise.catch(e => {
@@ -262,6 +244,32 @@ const getProps = async (categorizedProps, level, options, instances) => {
             propsWithStats = propsWithSample
                 .filter(prop => (prop && prop.category !== 'ignore'))
                 .map(prop => { return { ...prop, endpoint, graphs } })
+
+            for (let i = 0; i < propsWithStats.length; i ++) {
+                let prop = propsWithStats[i]
+                if (!queryLib.prefixDefined(prop.property, prefixes)) {
+                    prefixes = await queryLib.addPrefix(prop.property, prefixes, prefixcc)
+                }
+            }
+            // console.log('LABELS', labels)
+            let newlabels = await getPropsLabels(prefixes, propsWithStats)
+            // console.log('NEW LABELS', newlabels)
+            let labelsDic = {}
+            labels = [...labels, ...newlabels]
+            labels.forEach(lab => {
+                labelsDic[lab.uri] = { label: lab.label, comment: lab.comment }
+            })
+
+            propsWithStats = propsWithStats.map (prop => {
+                let path = queryLib.convertPath(prop.fullPath, prefixes)
+                // console.log(getReadablePathsParts(path, labelsDic, prefixes))
+                return {
+                    ...prop,
+                    path,
+                    readablePath: getReadablePathsParts(path, labelsDic, prefixes)
+                }
+            })
+            // console.log('PROPS WITH STATS', propsWithStats)
             // save all stats, only if they are relative to the whole ensemble
             if (constraints === '') await pathModel.createOrUpdate(propsWithStats).catch(e => console.error('Error updating stats', e))
         }
@@ -273,14 +281,14 @@ const getProps = async (categorizedProps, level, options, instances) => {
         ...categorizedProps,
         ...propsWithStats
     ]
-    // console.log('RETURN PROPS ', level, returnProps.map(p => p.path))
+    // console.log('RETURN PROPS ', level, returnProps, level < maxLevel && newCategorizedProps.length > 0)
     if (level < maxLevel && newCategorizedProps.length > 0) {
-        return getProps(returnProps, level + 1, {...options, prefixes}, instances)
+        return getProps(returnProps, level + 1, {...options, prefixes, labels}, instances)
     } else {
         // discard uris when there are more specific paths
         return {
             statements: returnProps.filter(prop => (prop.total > 0 && !queryLib.hasMoreSpecificPath(prop.path, prop.level, returnProps))), 
-            options: {...options, prefixes}
+            options: {...options, prefixes, labels}
         }
     }
 }

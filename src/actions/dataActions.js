@@ -193,7 +193,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
                 return getStats({ ...dataset, stats: [], resources })
                     .then(stats => {
                         prefixes = stats.options.prefixes
-                        // console.log('ok on a bien reçu les stats', defineConfigs(views, stats))
+                        // console.log('ok on a bien reçu les stats', stats) //, defineConfigs(views, stats)
                         // for each views, checks which properties ou sets of properties could match and evaluate
                         let configs = activateDefaultConfigs(defineConfigs(views, stats, dataset))
                         //
@@ -287,11 +287,13 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                         .then(countInstances => {
                             let selectionInstances = Number(countInstances.results.bindings[0].total.value)
                             // console.log('selectionInstances', selectionInstances, stats.totalInstances)
-                            let configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
+                            let configs
                             // console.log(configs)
                             if (selectionInstances === stats.totalInstances) {
+                                configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
                                 resolve(configs)
                             } else if (selectionInstances === 1) {
+                                configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
                                 let singleURIQuery =  `SELECT ?entrypoint ${graph} WHERE { ?entrypoint rdf:type <${entrypoint}> . ${constraints} }`
                                 getData(endpoint, singleURIQuery, prefixes)
                                     .then(res => {
