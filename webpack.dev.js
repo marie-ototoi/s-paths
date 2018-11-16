@@ -11,7 +11,8 @@ module.exports = merge(common, {
             'process.env': {
                 ENDPOINT: JSON.stringify(process.env.ENDPOINT),
                 LOCAL_ENDPOINT: JSON.stringify(process.env.LOCAL_ENDPOINT),
-                NODE_ENV: JSON.stringify(process.env.NODE_ENV)
+                NODE_ENV: JSON.stringify(process.env.NODE_ENV),
+                APP_NAME: JSON.stringify(process.env.APP_NAME)
             }
         }),
         new CleanWebpackPlugin(common.output.path)
