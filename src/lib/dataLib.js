@@ -673,6 +673,14 @@ const sortData = (data, sortOn, sortOrder) => {
         }
     })
 }
+export const convertDate = (date, def = { month: 0, day: 1 }) => {
+    let reg = new RegExp(/^(-{0,1})(\s{0,1})(\d{1,4})([-/.]{0,1})(\d{0,2})([-/.]{0,1})(\d{0,2})/)
+    let res = reg.exec(date)
+    let year = res[1] ? res[1] + res[3] : res[3]
+    let month = res[5] ? res[5] : def.month
+    let day = res[7] ? res[7] : def.day
+    return new Date(year, month, day)
+}
 
 const nestDataLevel = (data, props, parent) => {
     let index = parent ? 1 : 0
@@ -683,7 +691,9 @@ const nestDataLevel = (data, props, parent) => {
     let group
     if (category === 'datetime') {
         let dataToNest = data.map(d => {
-            let dateProp = new Date(d[propName].value)
+
+            let dateProp = convertDate(d[propName].value)
+   
             if (dateProp.toString() === 'Invalid Date') return false
             return {
                 ...d,

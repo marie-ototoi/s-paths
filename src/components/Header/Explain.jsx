@@ -19,7 +19,7 @@ class Explain extends React.Component {
             return [selProp, ...selectedConfig.multiple[si]]
         })
         let allgraphs = [...new Set(pathsToDisplay.flat().reduce((acc, cur) => {
-            acc.push(...cur.triplesGraphs)
+            if (cur.triplesGraphs) acc.push(...cur.triplesGraphs)
             return acc
         }, []))]
 

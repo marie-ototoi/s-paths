@@ -155,6 +155,15 @@ describe('lib/data', () => {
         expect([tree[1].zone.x1, tree[1].zone.y1, tree[1].zone.x2, tree[1].zone.y2]).to.deep.equal([10, 133, 81, 215])
         expect([tree[2].zone.x1, tree[2].zone.y1, tree[2].zone.x2, tree[2].zone.y2]).to.deep.equal([82, 133, 110, 215])
     })
+    it('should convert a date into a valid js Date', () => {
+        expect(data.convertDate('- 200').getFullYear()).to.equal(-200)
+        expect(data.convertDate('-100').getFullYear()).to.equal(-100)
+        expect(data.convertDate('2004').getFullYear()).to.equal(2004)
+        expect(data.convertDate('2003-11').getFullYear()).to.equal(2003)
+        expect(data.convertDate('500-11').getFullYear()).to.equal(500)
+        expect(data.convertDate('500-11').getMonth()).to.equal(11)
+        expect(data.convertDate('2015-04-3').getMonth()).to.equal(4)
+    })
 
     it('should identify the origin and target groups of each piece of delta data', () => {
         let originElements = [
