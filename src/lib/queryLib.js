@@ -427,11 +427,12 @@ export const makeSelectionConstraints = (selectionsLayers, selectedConfig, zone,
                 if (constraint.category === 'datetime') {
                     // console.log(constraint)
                     let datePropName = 'date' + propName
-                    if (constraint.format === 'yearstring') {
+                    if (iS === 0 && constraint.format === 'yearstring') {
                         bind += `BIND (xsd:integer(?${propName}) as ?${datePropName}) . `
-                    } else {
+                    } else if (iS === 0) {
                         bind += `BIND (xsd:date(?${propName}) as ?${datePropName}) . `
                     }
+                    // console.log(constraint, iC, iS)
                     const conditions = constraint.value.map((r, iR) => {
                         // console.log(String(r).match(/(\d{4})$/), String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/), String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/))
                         let theDate
