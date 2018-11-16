@@ -227,11 +227,11 @@ export const loadResources = (dispatch) => (dataset, views) => {
             if(resources.length > 0) { 
                 dataset.entrypoint = resources[0].type
                 dataset.totalInstances = resources[0].total
-                console.log('resources', resources) 
+                // console.log('resources', resources) 
                 return getStats({ ...dataset, stats: [], resources })
                     .then(stats => {
                         prefixes = stats.options.prefixes
-                        console.log('ok on a bien reçu les stats', stats) //, defineConfigs(views, stats)
+                        // console.log('ok on a bien reçu les stats', stats) //, defineConfigs(views, stats)
                         // for each views, checks which properties ou sets of properties could match and evaluate
                         let configs = activateDefaultConfigs(defineConfigs(views, stats, dataset))
                         //
@@ -372,25 +372,26 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                         .then(([dataMain, dataDeltaMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
                             //console.log('select resource, get data', queryMain, dataMain)
                             //console.log('select resource, get data', queryMainUnique, uniqueMainPromise)
-                            dispatch({
-                                type: types.SET_STATS,
-                                stats,
-                                entrypoint,
-                                totalInstances,
-                                savedSelections,
-                                prefixes: stats.options.prefixes,
-                                labels: stats.options.labels,
-                                mainDelta: dataDeltaMain,
-                                constraints,
-                                mainConfig: configs.views,
-                                main: { ...dataMain },
-                                mainDisplayed: singleURI ? 1 : Number(uniqueMainPromise.results.bindings[0].displayed.value)
-                            })
+                            if (singleURI || Number(uniqueMainPromise.results.bindings[0].displayed.value) >= 1) {
+                                dispatch({
+                                    type: types.SET_STATS,
+                                    stats,
+                                    entrypoint,
+                                    totalInstances,
+                                    savedSelections,
+                                    prefixes: stats.options.prefixes,
+                                    labels: stats.options.labels,
+                                    mainDelta: dataDeltaMain,
+                                    constraints,
+                                    mainConfig: configs.views,
+                                    main: { ...dataMain },
+                                    mainDisplayed: singleURI ? 1 : Number(uniqueMainPromise.results.bindings[0].displayed.value)
+                                })
+                            } else {
+                                return new Promise((resolve, reject) => reject('No results'))
+                            }
                         })
                 })
-        })
-        .catch(error => {
-            console.error('Error getting resource', error)
         })
 }
 

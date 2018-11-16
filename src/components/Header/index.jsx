@@ -219,6 +219,13 @@ class Header extends React.Component {
                 pivotIsLoading: false,
                 displayedResource: newResource
             }))
+            .catch(() => {
+                console.log('catch ici ')
+                this.setState({
+                    resourceIsLoading: false,
+                    pivotIsLoading: false
+                })
+            })
     }
     displayPivot (pivot) {
         if (pivot.prop === 'typeentrypoint') {
@@ -254,11 +261,13 @@ class Header extends React.Component {
                     keywordIsLoading: false,
                     keyword: ''
                 }))
-                .catch((e) => this.setState({
-                    keywordIsLoading: false,
-                    keyword: '',
-                    errorSelection: 'Unable to display results: ' + e
-                }))
+                .catch((e) => {
+                    this.setState({
+                        keywordIsLoading: false,
+                        keyword: '',
+                        errorSelection: 'Unable to display results: ' + e
+                    })
+                })
         }
     }
     displayConfig () {
@@ -366,7 +375,7 @@ class Header extends React.Component {
 
             // first line - resources
             let keywordEnabled = this.state.keyword.length > 3
-            let selectResourceEnabled = (this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '')
+            let selectResourceEnabled = ((this.state.selectedResource.type !== this.state.displayedResource.type || dataset.constraints !== '') && !(this.state.selectionIsLoading || this.state.propsAreLoading || this.state.resourceIsLoading || this.state.keywordIsLoading))
             let controlsDisabled =  this.props.step !== 'active'|| this.state.selectionIsLoading || this.state.propsAreLoading || this.state.resourceIsLoading || this.state.keywordIsLoading 
             let keycontrolsDisabled = controlsDisabled ? { disabled: true } : {}
             // console.log(this.state.selectedResource.type, this.state.displayedResource.type, dataset.constraints)

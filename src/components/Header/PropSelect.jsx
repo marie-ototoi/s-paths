@@ -15,9 +15,9 @@ class PropSelect extends React.Component {
             if (inputValue) {
                 resolve(this.props.options.filter(i =>
                     i.path.toLowerCase().includes(inputValue)
-                ).slice(0, 100))
+                ).slice(0, 50))
             }
-            resolve(this.props.options.slice(0, 100))
+            resolve(this.props.options.slice(0, 50))
         })
     }
 
@@ -36,7 +36,7 @@ class PropSelect extends React.Component {
             <ReactSelect
                 classNamePrefix='PropSelect'
                 cacheOptions
-                defaultOptions={this.props.options.slice(0, 100)}
+                defaultOptions={this.props.options.slice(0, 50)}
                 loadOptions={this.loadOptions}
                 value={this.props.options[this.props.currentValue]}
                 getOptionValue={(option) => option['path']}

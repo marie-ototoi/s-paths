@@ -48,10 +48,11 @@ class HeatMap extends React.Component {
     prepareData (nextProps) {
         const { config, data, zone } = nextProps
         // prepare the data for display
+        console.log(data)
         const selectedConfig = getSelectedMatch(config, zone)
         // First prop to be displayed in the bottom axis
         let categoryProp1 = selectedConfig.properties[0].category
-        console.log(selectedConfig.properties[0])
+        // console.log(selectedConfig.properties[0])
         let nestedProp1 = nestData(data, [{
             propName: 'prop1',
             category: categoryProp1,

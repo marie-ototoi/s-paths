@@ -155,12 +155,11 @@ export const findAllMatches = (inputList, addList) => {
         return a.concat(b)
     }, [])
 }
-export const getDictStats = (stats, limit=40) => {
+export const getDictStats = (stats) => {
     let statsDict = { '*': stats.statements }
     let nestedStats = d3.nest().key(stat => stat.category).entries(stats.statements)
     nestedStats.forEach(ns => {
-        if (!limit || limit > ns.values.length) limit = ns.values.length + 1
-        statsDict[ns.key] = ns.values.sort((a, b) => b.coverage - a.coverage).slice(0, limit)
+        statsDict[ns.key] = ns.values.sort((a, b) => b.coverage - a.coverage)
     })
     return statsDict
 }
@@ -205,6 +204,7 @@ export const defineConfigs = (views, stats, dataset) => {
             // make a list of all possible properties for each constrained prop zone
             view.constraints.forEach(constraintSet => {
                 let propSet = []
+                let count = 0
                 constraintSet.forEach(constraint => {
                     if(statsDict[constraint.category]) {
                         statsDict[constraint.category].forEach(prop => {                
@@ -226,9 +226,9 @@ export const defineConfigs = (views, stats, dataset) => {
                                 // console.log('PASSE ?')
                                 propSet.push({
                                     ...prop,
-                                    score: scoreProp(prop, constraint, rankPropFactors, dataset.propertyPreferences)
+                                    score: count > 50 ? 0.1 : scoreProp(prop, constraint, rankPropFactors, dataset.propertyPreferences)
                                 })
-                                
+                                count ++
                             }
                         })
                     }

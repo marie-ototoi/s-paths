@@ -391,6 +391,7 @@ export const makeSelectionConstraints = (selectionsLayers, selectedConfig, zone,
     let keywords = []
     let uriRegex = ''
     let mainentrypointName
+    // console.log(selectionsLayers)
     const setConstraints = selectionsLayers.map((selections, si) => {
         let keywordSelections = selections.filter(sel => sel.query.type === 'keyword')
         if (keywordSelections.length > 0) {
