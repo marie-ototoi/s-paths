@@ -712,6 +712,7 @@ const nestDataLevel = (data, props, parent) => {
         let decadeNumber = (Number(decadeNest[decadeNest.length - 1].key) - Number(decadeNest[0].key)) / 10
         let centuryNest = d3.nest().key(prop => prop.century).entries(dataToNest)
         let nest
+        
         if (forceGroup === 'year' || (!forceGroup && yearNumber < max)) {
             nest = yearNest
             group = 'year'
