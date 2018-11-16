@@ -447,6 +447,8 @@ export const makeSelectionConstraints = (selectionsLayers, selectedConfig, zone,
                                 } else {
                                     theDate = new Date(r, 11, 31)
                                 }
+                            } else {
+                                theDate = new Date(r)
                             }
                             // console.log(`?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}'^^xsd:date`)
                             return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getMonth() + 1}-${theDate.getDate()}'^^xsd:date`

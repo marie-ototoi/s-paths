@@ -76,7 +76,7 @@ const getAllStats = async (options) => {
         } else {
             paths = await getAllProps(entryProp, { ...options, prefixes })
         }
-        console.log('ici ?', paths.length)
+        // console.log('ici ?', paths.length)
         return {
             statements: paths.statements,
             totalInstances,
@@ -135,7 +135,6 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 ...prop._doc
             })
         }
-        console.log('DEJA LA')
         // keep only those whose parents count > 0
     } else if (analyse) {
 
@@ -309,7 +308,6 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 for (let key in prefixes) {
                     pref.push({ pref: key, uri: prefixes[key] })
                 }
-                console.log('oooh', pref)
                 await prefixModel.createOrUpdate(pref).catch(e => console.error('Error updating prefix', e))
                 await pathModel.createOrUpdate(propsWithStats).catch(e => console.error('Error updating stats', e))
             }
