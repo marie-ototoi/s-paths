@@ -48,6 +48,7 @@ class HeatMapLayout extends AbstractLayout {
                         type: 'set',
                         value: [{
                             category: selectedConfig.properties[0].category,
+                            format: selectedConfig.properties[0].format,
                             group: d.values[0].group,
                             value: (selectedConfig.properties[0].category === 'datetime') ? d.range : d.values[0].prop1.value,
                             propName: 'prop1',

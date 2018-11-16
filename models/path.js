@@ -16,6 +16,7 @@ const pathSchema = new mongoose.Schema({
     //
     avgcharlength: Number,
     category: { type: String, required: true },
+    format: { type: String },
     coverage: Number,
     datatype: { type: String, required: true },
     interlinks: [],
@@ -44,6 +45,7 @@ pathSchema.statics = {
                         category: prop.category,
                         coverage: prop.coverage || null,
                         datatype: prop.datatype,
+                        format: prop.format,
                         total: prop.total || null,
                         triplesGraphs: prop.triplesGraphs,
                         readablePath: prop.readablePath,

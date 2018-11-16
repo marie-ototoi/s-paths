@@ -424,8 +424,9 @@ export const makeSelectionConstraints = (selectionsLayers, selectedConfig, zone,
                     })
                 }
                 if (constraint.category === 'datetime') {
+                    // console.log(constraint)
                     let datePropName = 'date' + propName
-                    if (String(constraint.value[0]).match(/(\d{4})$/)) {
+                    if (constraint.format === 'yearstring') {
                         bind += `BIND (xsd:integer(?${propName}) as ?${datePropName}) . `
                     } else {
                         bind += `BIND (xsd:date(?${propName}) as ?${datePropName}) . `
@@ -433,13 +434,19 @@ export const makeSelectionConstraints = (selectionsLayers, selectedConfig, zone,
                     const conditions = constraint.value.map((r, iR) => {
                         // console.log(String(r).match(/(\d{4})$/), String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/), String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/))
                         let theDate
-                        if (String(r).match(/(\d{4})$/)) {
+                        if (constraint.format === 'yearstring') {
                             return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${Number(r)}'^^xsd:integer`
                         } else {
                             if (String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/)) {
                                 theDate = new Date(String(r).substr(0, 4), String(r).substr(5, 2), String(r).substr(8, 2))
                             } else if (String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/)) {
                                 theDate = new Date(String(r).substr(0, 2), String(r).substr(3, 2), String(r).substr(6, 4))
+                            } else if (String(r).match(/(\d{4})$/)) {
+                                if (iR === 0) {
+                                    theDate = new Date(r, 0, 1)
+                                } else {
+                                    theDate = new Date(r, 11, 31)
+                                }
                             }
                             // console.log(`?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}'^^xsd:date`)
                             return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getMonth() + 1}-${theDate.getDate()}'^^xsd:date`

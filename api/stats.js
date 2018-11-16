@@ -29,7 +29,10 @@ const getAllStats = async (options) => {
     // console.log('oy', options)
     let { analyse, prefixcc, prefixes, endpoint, graphs, localEndpoint, entrypoint, labels, totalInstances } = options
     let selectionInstances
-    
+    let newprefixes = await prefixModel.find({}).exec()
+    newprefixes.forEach(pref => {
+        prefixes[pref._doc.pref] = pref._doc.uri
+    })
     // add prefix to entrypoint if full url
     // console.log(entrypoint, queryLib.usesPrefix(entrypoint, prefixes))
     if (!queryLib.prefixDefined(entrypoint, prefixes)) {
@@ -67,18 +70,18 @@ const getAllStats = async (options) => {
         // check if props available in database
         // if necessary retrieve missing level
         // or recursively retrieve properties
-        let paths = await getProps(entryProp, 1, options, { totalInstances, selectionInstances })
-
+        let paths 
+        if (analyse) {
+            paths  = await getProps(entryProp, 1, { ...options, prefixes }, { totalInstances, selectionInstances })
+        } else {
+            paths = await getAllProps(entryProp, { ...options, prefixes })
+        }
+        console.log('ici ?', paths.length)
         return {
-            statements: paths.statements
-                .sort((a, b) => a.level - b.level),//.map(stat => { return { ...stat, readablePath: getReadablePathsParts(stat.path, labelsDic, paths.options.prefixes ) } })                
+            statements: paths.statements,
             totalInstances,
             selectionInstances,
-            options: {
-                ...paths.options/*,
-                labels: allLabels,
-                labelsDic*/
-            }
+            options: paths.options
         }
     }
 }
@@ -103,6 +106,17 @@ const getMaxRequest = (parentQuantities) => {
     return maxRequests
 }
 
+const getAllProps = (categorizedProps, options) => {
+    let { graphs, entrypoint, endpoint, maxLevel } = options
+    return pathModel.find({ entrypoint: entrypoint, endpoint: endpoint, level: { $lt: maxLevel }, graphs: { $all: graphs } }).exec()
+        .then(props => {
+            return {
+                statements: props, 
+                options
+            }
+        })
+}
+
 const getProps = async (categorizedProps, level, options, instances) => {
     let { analyse, constraints, graphs, entrypoint, endpoint, localEndpoint, prefixcc, prefixes, maxLevel, labels } = options
     let { totalInstances, selectionInstances } = instances
@@ -121,6 +135,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 ...prop._doc
             })
         }
+        console.log('DEJA LA')
         // keep only those whose parents count > 0
     } else if (analyse) {
 
@@ -209,39 +224,56 @@ const getProps = async (categorizedProps, level, options, instances) => {
                 return queryLib.defineGroup(prop, options)
             })
             let propsWithSample = []
-            temp = await Promise.all(propsWithStats
-                .map(prop => {
-                    if ((prop.category === 'datetime' || prop.category === 'text') && prop.total > 0) {
-                        let sampleQuery = queryLib.makePropQuery(prop, { ...options, prefixes }, 'dateformat')
-                        return queryLib.getData(localEndpoint, sampleQuery, prefixes)
-                            .then(sampleData => {
-                                if (sampleData && sampleData.results.bindings.length > 0) {
-                                    let category = prop.category
-                                    let subcategory = prop.subcategory
-                                    let value = sampleData.results.bindings[0].object.value
-                                    if (prop.category === 'datetime') {
-                                        let thedate = new Date(value)
-                                        if (thedate.toString() === 'Invalid Date') category = 'text'
+
+            //
+            for (let i = 0; i < propsWithStats.length; i += maxRequests) {
+                let elementsToSlice = (propsWithStats.length - i < maxRequests) ? propsWithStats.length - i : maxRequests
+                temp = await Promise.all(propsWithStats
+                    .slice(i, i + elementsToSlice)
+                    .map(prop => {
+                        if ((prop.category === 'datetime' || prop.category === 'text') && prop.total > 0) {
+                            let sampleQuery = queryLib.makePropQuery(prop, { ...options, prefixes }, 'dateformat')
+                            console.log('SAMPLE ', sampleQuery)
+                            return queryLib.getData(localEndpoint, sampleQuery, prefixes)
+                                .then(sampleData => {
+                                    if (sampleData && sampleData.results.bindings.length > 0) {
+                                        let category = prop.category
+                                        let subcategory = prop.subcategory
+                                        let format
+                                        let value = sampleData.results.bindings[0].object.value
+                                        if (prop.category === 'datetime') {
+                                            let thedate = new Date(value)
+                                            if (thedate.toString() === 'Invalid Date') {
+                                                category = 'text'
+                                            } else {
+                                                if (prop.datatype !== 'http://www.w3.org/2001/XMLSchema#date' && String(value).match(/(\d{4})$/)) {
+                                                    format = 'yearstring'
+                                                } else {
+                                                    format = 'date'
+                                                }
+                                            }
+                                        }
+                                        return {
+                                            ...prop,
+                                            category,
+                                            subcategory,
+                                            format
+                                        }
+                                    } else {
+                                        return prop
                                     }
-                                    return {
-                                        ...prop,
-                                        category,
-                                        subcategory
-                                    }
-                                } else {
-                                    return prop
-                                }
-                            })
-                            .catch(e => {
-                                console.error('Error with makePropQuery sample dateformat', e)
-                                return undefined
-                            })
-                    } else {
-                        return prop
-                    }
-                })
-            )
-            propsWithSample.push(...temp)
+                                })
+                                .catch(e => {
+                                    console.error('Error with makePropQuery sample dateformat', e)
+                                    return undefined
+                                })
+                        } else {
+                            return new Promise(resolve => resolve(prop))
+                        }
+                    })       
+                )
+                propsWithSample.push(...temp)
+            }            
             propsWithStats = propsWithSample
                 .filter(prop => (prop && prop.category !== 'ignore'))
                 .map(prop => { return { ...prop, endpoint, graphs } })
@@ -290,7 +322,7 @@ const getProps = async (categorizedProps, level, options, instances) => {
         ...categorizedProps,
         ...propsWithStats
     ]
-    // console.log('RETURN PROPS ', level, returnProps, level < maxLevel && newCategorizedProps.length > 0)
+    console.log('RETURN PROPS ', level, returnProps, level < maxLevel && newCategorizedProps.length > 0)
     if (level < maxLevel && newCategorizedProps.length > 0) {
         return getProps(returnProps, level + 1, {...options, prefixes, labels}, instances)
     } else {

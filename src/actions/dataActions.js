@@ -227,7 +227,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
             if(resources.length > 0) { 
                 dataset.entrypoint = resources[0].type
                 dataset.totalInstances = resources[0].total
-                
+                console.log('resources', resources) 
                 return getStats({ ...dataset, stats: [], resources })
                     .then(stats => {
                         prefixes = stats.options.prefixes
@@ -235,7 +235,9 @@ export const loadResources = (dispatch) => (dataset, views) => {
                         // for each views, checks which properties ou sets of properties could match and evaluate
                         let configs = activateDefaultConfigs(defineConfigs(views, stats, dataset))
                         //
+                        // console.log('configs', configs) 
                         const configMain = getSelectedView(configs, 'main')
+                        // console.log('configMain', configMain) 
                         if (configMain) {
                             const queryMain = makeQuery(dataset.entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps' || configMain.id === 'InfoCard') ? 1 : null })
                             

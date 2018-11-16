@@ -39,16 +39,23 @@ const getResources = async (options) => {
         let query = queryLib.makeQueryResources(options)
         console.log(query)
         let result = await queryLib.getData(localEndpoint, query, {})
+        let labels = await getLabels(result.results.bindings.map(resource => {
+            return { uri: resource.type.value }
+        }))
+        let dico = dataLib.getDict(labels.map(label => { return { key: label.uri } }))
         resources = result.results.bindings.map(resource => {
-            return { total: Number(resource.occurrences.value), type: resource.type.value, endpoint, graphs }
+            return {
+                total: Number(resource.occurrences.value),
+                type: resource.type.value,
+                endpoint, graphs,
+                label: queryLib.usePrefix(dico[resource.type.value]? labels[dico[resource.type.value]].label : resource.type.value, prefixes),
+                comment: dico[resource.type.value] ? labels[dico[resource.type.value]].comment : null
+            }
         })
         // console.log(resources)
         await resourceModel.createOrUpdate(resources) 
     }
-    let labels = await getLabels(resources.map(resource => {
-        return { uri: resource.type }
-    }))
-    let dico = dataLib.getDict(labels.map(label => { return { key: label.uri } }))
+    
     let pathsNumbers = []
     for (let i= 0; i < resources.length; i ++){
         let pathsNumber = await pathModel.countDocuments({ endpoint: endpoint, entrypoint: resources[i].type, graphs: { $all: graphs, $size: graphs.length } }).exec()
@@ -60,8 +67,6 @@ const getResources = async (options) => {
         // console.log('new resource', i)
         let newresource = {
             ...resource,
-            label: queryLib.usePrefix(dico[resource.type]? labels[dico[resource.type]].label : resource.type, prefixes),
-            comment: dico[resource.type] ? labels[dico[resource.type]].comment : null,
             pathsNumber: pathsNumbers[i] || 0
         }
         
