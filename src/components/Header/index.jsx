@@ -115,7 +115,7 @@ class Header extends React.Component {
     }
     prepareData (nextProps) {
         // TODO: remove data duplication
-        console.log("UPDATE")
+        // console.log("UPDATE")
         let displayedResource = nextProps.dataset.resources.find((resource) =>
             resource.type === nextProps.dataset.entrypoint
         )
@@ -139,24 +139,6 @@ class Header extends React.Component {
         let labelsDict = {}
         nextProps.dataset.resources.forEach(res => {
             labelsDict[res.type] = { label: res.label, comment: res.comment }
-        })
-        console.log({
-            resourceIsLoading: false,
-            selectionIsLoading: false,
-            keywordIsLoading: false,
-            pivotIsLoading: false,
-            errorSelection: '',
-            propsAreLoading: false,
-            keyword: '',
-            displayedResource,
-            selectedResource,
-            labelsDict,
-            resourceList: nextProps.dataset.resources.filter(res => res.pathsNumber > 0),
-            configsLists,
-            displayedView,
-            displayedProps,
-            selectedProps,
-            selectedView
         })
         return {
             resourceIsLoading: false,

@@ -18,7 +18,7 @@ const configs = (state = initialConfig, action) => {
             ...state,
             views: action.mainConfig || state.views,
             status,
-            token: action.token || null,
+            token: action.token || state.token,
             savedSelections: action.savedSelections || state.savedSelections,
             entrypoint: action.entrypoint,
             stats: action.stats,
@@ -48,16 +48,16 @@ const configs = (state = initialConfig, action) => {
             status: 'active'
         }
     case types.UPDATE_CONFIGS:
-        console.log('UPDATE_CONFIGS', action.configs)
-        //if (state.token === action.token) {
-        return {
-            ...state,
-            views: action.configs.views,
-            checked: true
+        // console.log('UPDATE_CONFIGS', state.token, action.token, action.configs)
+        if (state.token === action.token) {
+            return {
+                ...state,
+                views: action.configs.views,
+                checked: true
+            }
+        } else {
+            return state
         }
-        //} else {
-            //return state
-        //}
         
     default:
         return state

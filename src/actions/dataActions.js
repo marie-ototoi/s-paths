@@ -438,7 +438,8 @@ export const loadSingle = (dataset, configMain, singleURI) => {
 export const selectResource = (dispatch) => (dataset, views, previousConfigs, previousOptions, savedSelections) => {
     // console.log('ok on va cherche les stats', dataset)
     // cancelPromises = true
-    let token = Math.random * Math.random * 1000
+    let token = Math.round(Math.random() * Math.random() * 100000)
+    console.log(token)
     let { constraints, endpoint, entrypoint, graphs, prefixes, totalInstances, resourceGraph } = dataset
     let graph =  resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     return getStats({ ...dataset, stats: [], constraints: '' })
