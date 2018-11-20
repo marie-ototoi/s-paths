@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import types from '../constants/ActionTypes'
-import { activateDefaultConfigs, defineConfigs, getSelectedView, scoreMatch } from '../lib/configLib'
+import { activateDefaultConfigs, defineConfigs, getSelectedView, scoreProp } from '../lib/configLib'
 import { getData, makeCheckPivotQuery, makeDetailQuery, makePropQuery, makeQuery, makeMultipleQuery, makeTransitionQuery } from '../lib/queryLib'
 
 export const endTransition = (dispatch) => (zone) => {
@@ -15,7 +15,7 @@ export const loadStats = (dispatch) => (dataset) => {
 }
 
 const getStats = (options) => {
-    return fetch((`${process.env.API || '/'}stats`),
+    return fetch((`${process.env.API || '/'}stats/analyse`),
         {
             method: 'POST',
             body: JSON.stringify(options),
@@ -29,8 +29,43 @@ const getStats = (options) => {
             }
         })
         .then((resp) => resp.json())
-    // return rp('http://localhost:80/stats/' + entrypoint)
 }
+
+const checkStats = (options) => {
+    return fetch((`${process.env.API || '/'}stats/check`),
+        {
+            method: 'POST',
+            body: JSON.stringify(options),
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': 'true',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, DELETE',
+                'Access-Control-Allow-Headers': 'Content-Type, User-Agent, Origin'
+            }
+        })
+        .then((resp) => resp.json())
+}
+
+
+export const countPaths = (dispatch) => (dataset) => {
+    return fetch((`${process.env.API || '/'}stats/count`),
+        {
+            method: 'POST',
+            body: JSON.stringify(dataset),
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': 'true',
+                'Access-Control-Allow-Methods': 'GET, POST, OPTIONS, DELETE',
+                'Access-Control-Allow-Headers': 'Content-Type, User-Agent, Origin'
+            }
+        })
+        .then((resp) => resp.json())
+}
+
 const getResources = (options) => {
     return fetch((`${process.env.API || '/'}resources`),
         {
@@ -67,126 +102,216 @@ const evaluateSubStats = (stats) => {
 const checkStatements = (statements, selectionInstances, dataset) => {
     return Promise.all(statements.map(prop => {
         let propQuery = makePropQuery(prop, dataset, 'count')
+        // console.log(propQuery)
         return getData(dataset.endpoint, propQuery, dataset.prefixes)
     }))
         .then((results) => {
             // mix stats and results
             // add checked property
 
-            let checked = []
+            let checked = {}
             statements.forEach((prop, index) => {
                 let countStat = results[index].results.bindings[0]
                 // console.log('countStat', countStat.total.value, countStat.unique.value, countStat.coverage.value, selectionInstances)
-                checked.push({
-                    ...prop,
+                checked[prop.path] = {
+                    checked: true,
                     total: Number(countStat.total.value),
                     unique: Number(countStat.unique.value),
                     coverage: Number(countStat.coverage.value) * 100 / selectionInstances
-                })
+                }
             })
             return checked
         })
 }
 
-const checkStatementsValidity = (props, checkedProps) => {
-    for (const prop of props) {
-        const checkedProp = checkedProps.find(p => p.fullPath === prop.fullPath)
-        if (checkedProp.coverage / prop.coverage < 0.9) {
-            return false
-        }
-        if (checkedProp.unique / prop.unique < 0.9) {
-            return false
-        }
-        if (checkedProp.total / prop.total < 0.9) {
-            return false
-        }
-    }
-    return true
-}
+const checkStatsConfigs = (configs, selectedView, selectionInstances, totalInstances, dataset, checkDict) => {
 
-const checkEvaluationConfigs = async (configs, stats, dataset) => {
-    for (const view of configs.views) {
-        // verify selectedMatch.properties using checkStatements function (it is used in the function below as an example)
-        const checkedProps = await checkStatements(
-            view.selectedMatch.properties,
-            stats.selectionInstances,
-            dataset
-        )
-
-        // if all views have been checked without success
-        // for each view, find the next property match
-        for (const [key, prop] of Object.entries(view.selectedMatch.properties)) {
-            if (prop.total === 0) {
-                const propIndex = view.propList[key].findIndex(p => p.fullPath === prop.fullPath)
-                view.propList[key].splice(propIndex, 1)
-                view.selectedMatch.properties[key] = view.propList[key][propIndex]
-            }
-        }
-
-        // compute the new score of checked stats (function scoreMatch in configLib.js)
-        // compare the former score, 'unique' and 'total' value of estimated stats with the new checked values
-        // if the difference is no more than, let's say 10 %, we will adjust later,
-        // break the loop, put the current view as first in the list and return configs
-        // else check next view
-        const previousScoreMatch = view.selectedMatch.scoreMatch
-        view.selectedMatch.scoreMatch = scoreMatch(checkedProps, view.weight, dataset.rankMatchFactors)
-        if (view.selectedMatch.scoreMatch / previousScoreMatch < 0.9) {
-            continue
-        }
-        if (checkStatementsValidity(view.selectedMatch.properties, checkedProps)) {
-            configs.views.splice(configs.views.findIndex(v => v.id === view.id), 1)
-            configs.views.unshift(view)
-            return configs
-        }
-    }
-
-    return checkEvaluationConfigs(configs, stats, dataset)
-}
-
-const checkFirstValidConfigs = (configs, stats, dataset) => {
-    // console.log(configs)
+    let index = 0
+    let endList = 0
+    let alreadyPlanned = []
     let propsToCheck = []
-    let matchesToCheck = {}
-    let views = configs.views
-    let double = []
-    let newStats
-    for (let i = 0; i < views.length; i++) {
-        views[i].propList.forEach(list => {
-            let max = 1 // the number of config checked could depend of the number of views, and the total number of entities
-            if (list.length < max) max = list.length
-            for (let i = 0; i < max; i++) {
-                let prop = list[i]
-                if (!double.includes(prop.fullPath)) {
-                    propsToCheck.push(prop)
-                    double.push(prop)
-                }
-            }
+    while(propsToCheck.length < 20 && endList < configs.views.length) {
+        configs.views.forEach(view => {
+            view.propList.forEach(list => {
+                if (index < list.length && !list[index].checked && !checkDict[list[index].path] && !alreadyPlanned.includes(list[index].path)) propsToCheck.push(list[index])
+                if (index === list.length -1) endList ++ 
+            })
         })
-        matchesToCheck[views[i].id] = views[i].selectedMatch.properties
+        index ++ 
     }
-
-    return checkStatements(propsToCheck, stats.selectionInstances, dataset)
-        .then(propsChecked => {
-            newStats = {
-                ...stats,
-                statements: stats.statements.map(prop => {
-                    const propChecked = propsChecked.find(p => p.fullPath === prop.fullPath)
-                    if (propChecked) {
-                        return {
-                            ...prop,
-                            ...propChecked,
-                            checked: true
-                        }
-                    } else {
-                        return prop
+    // console.log(propsToCheck)
+    return checkStatements(propsToCheck, selectionInstances, dataset)
+        .then(checkedStatements => {
+            console.log(checkedStatements)
+            return {
+                ...configs,
+                views: configs.views.map(view => {
+                    let newview = {
+                        ...view,
+                        propList: view.propList.map((list, iL ) => {
+                            return list.map((prop, i) => {
+                                if (checkDict[prop.path]) {
+                                    if (checkDict[prop.path].total > 0) {
+                                        let newprop = {
+                                            ...prop,
+                                            index: i,
+                                            checked: true,
+                                            total: checkDict[prop.path].total,
+                                            coverage: checkDict[prop.path].coverage, 
+                                        }
+                                        //console.log(scoreProp(newprop, view.constraints[iL][0], dataset.rankPropFactors, dataset.propertyPreferences))
+                                        return {
+                                            ...newprop,
+                                            score: (i > index) ? 0.1 : scoreProp(newprop, view.constraints[iL][0], dataset.rankPropFactors, dataset.propertyPreferences)
+                                        }
+                                    }
+                                } else if (checkedStatements[prop.path]) {
+                                    if (checkedStatements[prop.path].total > 0) {
+                                        let newprop = {
+                                            ...prop,
+                                            index: i,
+                                            checked: true,
+                                            total: checkedStatements[prop.path].total,
+                                            coverage: checkedStatements[prop.path].coverage,
+                                            unique: checkedStatements[prop.path].unique,                                    } 
+                                        return {
+                                            ...newprop,                                        
+                                            score: i > index ? 0.1 : scoreProp(newprop, view.constraints[iL][0], dataset.rankPropFactors, dataset.propertyPreferences)
+                                        }
+                                    }
+                                } else {
+                                    return {
+                                        ...prop,
+                                        index: i
+                                    }
+                                }
+                            }).filter(p => p).sort((a,b) => {
+                                return (b.index < index ? 100000 : -100000 + b.score) - (a.index < index ? 100000 : -100000 + a.score)
+                            })
+                        })
                     }
-                })
+                    // console.log(newview)
+                    let alreadyInMatch = []
+                    let valid = true
+                    let selectedMatch = newview.propList.map((list, listIndex) => {
+                        if (list.length > 0) {
+                            let index = 0
+                            while (alreadyInMatch.includes(list[index].path) && list[index + 1]){
+                                index ++
+                            }
+                            if (!alreadyInMatch.includes(list[index].path)) {
+                                alreadyInMatch.push(list[index].path)
+                                return list[index]
+                            }
+                        }
+                    })
+                    selectedMatch.forEach(m => {if (!m) valid = false})
+                    if (valid) {
+                        return {
+                            ...newview,
+                            selected: selectedView.id === newview.id,
+                            selectedMatch : selectedView.id === newview.id ? selectedView.selectedMatch : { properties: selectedMatch }
+                        }
+                    }
+                }).filter(v => v)
             }
-            let newConfigs = activateDefaultConfigs(defineConfigs(views, newStats, dataset))
-            return [newConfigs, newStats]
-            // if both main and aside send results
-            // else start from new config keeping checked config if there is one and call recursive
         })
+}
+
+
+const checkStatementGap = (prop, checkedProp) => {
+    // console.log(checkedProp.coverage, prop.coverage, checkedProp.coverage / prop.coverage)
+    // check if the new coverage is not less than 80% of the estimated one
+    return checkedProp.coverage / prop.coverage > 0.8
+}
+
+const checkConfig =  (config, dataset, zone) => {
+    // check if the combination of props covers at leat some entities
+    let { endpoint, entrypoint, prefixes } = dataset
+    let queryUnique = makeQuery(entrypoint, config, zone, { ...dataset, unique: true })
+    return getData(endpoint, queryUnique, prefixes)
+        .then(nb => {
+            return (nb.results.bindings[0].displayed.value > 0)
+        })    
+}
+
+
+const checkFirstValidConfig = async (configs, stats, dataset, zone, evaluation) => {
+    let { selectionInstances } = stats
+    let checkDict = {}
+    // 1 - check if first config ok
+    let firstConfig = configs.views[0]
+    let check_ok = true 
+    let checkedProps = await checkStatements(firstConfig.selectedMatch.properties, selectionInstances, dataset)
+    // console.log(checkedProps)
+    for (let key in checkedProps) {
+        checkDict[key] = checkedProps[key]
+    }
+    //ici il faudrait verifier si ça correspond tjs aux contraintes de la vue
+    //
+    // console.log(checkDict)
+    // console.log(check_ok)
+    for (let i = 0; i < firstConfig.selectedMatch.properties.length; i ++) {
+        let propIndex = firstConfig.propList[i].findIndex(p => p.path === firstConfig.selectedMatch.properties[i].path)
+        // if no entities for this prop
+        if (checkDict[firstConfig.propList[i][propIndex].path].total === 0) {
+            firstConfig.propList[i].splice(propIndex, 1)
+            check_ok = false
+            break
+        }
+        // else if gap with prediction too big
+        if (!checkStatementGap(firstConfig.selectedMatch.properties[i], checkDict[firstConfig.selectedMatch.properties[i].path])) {
+            check_ok = false
+            break
+        }
+    }
+    // console.log(check_ok)
+    // if no entities in the selection for the conjunction of props
+    if (check_ok && firstConfig.selectedMatch.length > 1) {
+        check_ok = await checkConfig(firstConfig, dataset, zone)
+    }
+    
+    // if the estimated best config is valid
+    if (check_ok) {
+        // send it back together with the dictionnary of verified statements
+        return { views : [{...firstConfig, selected: true, propList: firstConfig.selectedMatch.properties.map(p => [p])}], checkDict }
+    }
+    
+    // console.log(check_ok)
+    // 2 - else, find a view with one prop only
+    let singlePropView = configs.views.find(v => v.constraints.length === 1)
+    let index = 0
+    let prop = singlePropView.propList[0][index]
+    let checkProp = checkDict[prop.path] ? checkDict[prop.path] : await checkStatements([prop], selectionInstances, dataset)
+    for (let key in checkProp) {
+        checkDict[key] = checkProp[key]
+    }
+    let valid = checkStatementGap(prop, checkProp[prop.path])
+    let propList = []
+    while (index < singlePropView.propList[0].length && !valid) {
+        index ++
+        prop = singlePropView.propList[0][index]
+        if (checkDict[prop.path]) {
+            checkProp = checkDict[prop.path]
+        } else {
+            checkProp = await checkStatements([prop], selectionInstances, dataset)
+            for (let key in checkProp) {
+                checkDict[key] = checkProp[key]
+            }
+        }
+        if (checkDict[prop.path].total > 0) propList.push({
+            ...prop,
+            total: checkDict[prop.path].total,
+            unique: checkDict[prop.path].unique,
+            coverage: checkDict[prop.path].coverage
+        })
+        valid = checkStatementGap(prop, checkDict[prop.path])
+    }
+    propList = propList.sort((a, b) => b.coverage - a.coverage)
+    if (valid || propList.length > 0) {
+        // send the config back together with the dictionnary of verified statements
+        return { views : [{...singlePropView, selected: true, propList, selectedMatch: { properties: [propList[0]] }}], checkDict }
+    }
 }
 
 export const analyseResources = (dispatch) => (dataset, resources) => {
@@ -219,17 +344,19 @@ export const getGraphs = (dispatch) => (dataset) => {
 }
 
 export const loadResources = (dispatch) => (dataset, views) => {
-    let { endpoint, graphs, prefixes } = dataset
+    let { endpoint, prefixes } = dataset
     // console.log('load resources', graphs)
     let totalInstances
     return getResources(dataset)
         .then(resources => {
+           
             if(resources.length > 0) { 
                 dataset.entrypoint = resources[0].type
                 dataset.totalInstances = resources[0].total
                 // console.log('resources', resources) 
-                return getStats({ ...dataset, stats: [], resources })
+                return getStats({ ...dataset, stats: [], resources, totalInstances: resources[0].total })
                     .then(stats => {
+                        // console.log('load resources', stats)
                         prefixes = stats.options.prefixes
                         // console.log('ok on a bien reçu les stats', stats) //, defineConfigs(views, stats)
                         // for each views, checks which properties ou sets of properties could match and evaluate
@@ -240,7 +367,6 @@ export const loadResources = (dispatch) => (dataset, views) => {
                         // console.log('configMain', configMain) 
                         if (configMain) {
                             const queryMain = makeQuery(dataset.entrypoint, configMain, 'main',  { ...dataset, maxDepth: (configMain.id === 'ListAllProps' || configMain.id === 'InfoCard') ? 1 : null })
-                            
                             const queryMainUnique = makeQuery(dataset.entrypoint, configMain, 'main', { ...dataset, unique: true })
                             //
                             return Promise.all([
@@ -311,6 +437,8 @@ export const loadSingle = (dataset, configMain, singleURI) => {
 
 export const selectResource = (dispatch) => (dataset, views, previousConfigs, previousOptions, savedSelections) => {
     // console.log('ok on va cherche les stats', dataset)
+    // cancelPromises = true
+    let token = Math.random * Math.random * 1000
     let { constraints, endpoint, entrypoint, graphs, prefixes, totalInstances, resourceGraph } = dataset
     let graph =  resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     return getStats({ ...dataset, stats: [], constraints: '' })
@@ -339,15 +467,34 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                                     .then(res => {
                                         singleURI = res.results.bindings[0].entrypoint.value
                                         resolve(configs)
-                                    })
-                                
+                                    })                                
                             } else if (selectionInstances > 1) {
                                 // evaluation of 'unique' and 'total' values for all paths on the subset
                                 stats = evaluateSubStats({ ...stats, selectionInstances })
                                 // definition of the new configs based on the estimation
-                                configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
+                                configs = defineConfigs(views, { ...stats, selectionInstances }, dataset)
+                                // console.log(configs)
                                 // check evaluation
-                                resolve(checkEvaluationConfigs(configs, { ...stats, selectionInstances }, dataset))
+                                checkFirstValidConfig(configs, { ...stats, selectionInstances }, dataset, 'main', true)
+                                    .then(checked =>{
+                                        // console.log(checked)
+                                        //checkAllStats({ ...stats, selectionInstances }, dataset)
+                                        new Promise(resolve =>
+                                            window.setTimeout(() => resolve(), 5000)    
+                                        ).then(ok =>{
+                                            
+                                            checkStatsConfigs(configs, checked.views[0], selectionInstances, totalInstances, dataset, checked.checkDict)
+                                                .then((newconfigs) => {
+                                                    // console.log('end check',newconfigs)
+                                                    dispatch({
+                                                        type: types.UPDATE_CONFIGS,
+                                                        configs: newconfigs,
+                                                        token
+                                                    })
+                                                }) 
+                                        })                             
+                                        resolve(checked)
+                                    })
                             } else {
                                 reject('No results')
                             }
@@ -379,6 +526,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                                     entrypoint,
                                     totalInstances,
                                     savedSelections,
+                                    token,
                                     prefixes: stats.options.prefixes,
                                     labels: stats.options.labels,
                                     mainDelta: dataDeltaMain,
@@ -410,6 +558,7 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, maxDepth: (updatedConfig.id === 'ListAllProps' || updatedConfig.id === 'InfoCard') ? 1 : null })
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, prevConfig, dataset, zone)
     const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
+    // console.log(newQuery)
     return Promise.all([
         getData(endpoint, newQuery, prefixes),
         getData(endpoint, queryTransition, prefixes),

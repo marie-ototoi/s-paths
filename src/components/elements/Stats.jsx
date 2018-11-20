@@ -2,7 +2,7 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 
-import { analyseResources, loadResources, loadStats } from '../../actions/dataActions'
+import { analyseResources, loadResources, loadStats, countPaths } from '../../actions/dataActions'
 import { showStats } from '../../actions/displayActions'
 import { saveGraphs } from '../../actions/configActions'
 
@@ -67,7 +67,14 @@ class Stats extends React.PureComponent {
                         { dataset.resources.map((resource, ri) => {
                             return (<tr key = { `resource_${zone}_${ri}` }>
                                 <td>{ resource.type }</td>
+                                <td>{ resource.total }</td>
                                 <td>{ resource.pathsNumber }</td>
+                                <td><a onMouseUp = { e => {
+                                    this.props.countPaths({
+                                        ...dataset,
+                                        entrypoint: resource.type
+                                    })
+                                } }>count paths</a></td>
                                 <td><a onMouseUp = { e => {
                                     this.props.loadStats({
                                         ...dataset,
@@ -96,7 +103,8 @@ Stats.propTypes = {
     loadStats: PropTypes.func,
     saveGraphs: PropTypes.func,
     showStats: PropTypes.func,
-    loadResources: PropTypes.func
+    loadResources: PropTypes.func,
+    countPaths: PropTypes.func
 }
 
 function mapStateToProps (state) {
@@ -112,6 +120,7 @@ function mapStateToProps (state) {
 function mapDispatchToProps (dispatch) {
     return {
         analyseResources: analyseResources(dispatch),
+        countPaths: countPaths(dispatch),
         loadStats: loadStats(dispatch),
         loadResources: loadResources(dispatch),
         showStats: showStats(dispatch),

@@ -66,8 +66,7 @@ const initialState = process.env.APP_NAME === 'bnf' ? {
         sim: 'http://purl.org/ontology/similarity/',
         slickm: 'http://slickmem.data.t-mus.org/',
         slickmem: 'http://slickmem.data.t-mus.org/terms/',
-        umbel: 'http://umbel.org/umbel/rc/',
-        'loc-vocabulary': 'http://id.loc.gov/vocabulary/'
+        umbel: 'http://umbel.org/umbel/rc/'
     },
     stats: [],
     /*matchPreferences: {

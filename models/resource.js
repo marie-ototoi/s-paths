@@ -6,6 +6,7 @@ const resourceSchema = new mongoose.Schema({
     graphs: { type: Array },
     subgraph: Boolean,
     total: Number,
+    pathsNumber: Number,
     label: { type: String },
     comment: { type: String },
     createdAt: Date,
@@ -23,9 +24,10 @@ resourceSchema.statics = {
                 },
                 {
                     $set: {
-                        total: prop.total || null,
+                        total: prop.total || 0,
                         label: prop.label || '',
                         comment: prop.comment || '',
+                        pathsNumber: prop.pathsNumber || 0,
                         modifiedAt: Date.now()
                     },
                     $setOnInsert: {

@@ -65,7 +65,7 @@ const getCost = (val, min, max, optimal, score) => {
     }
     return score / 2
 }
-const scoreProp = (prop, constraint, rankFactors, preferences) => {
+export const scoreProp = (prop, constraint, rankFactors, preferences) => {
     /* rankFactors = {
         category: 1,
         definition: 2,
@@ -155,11 +155,12 @@ export const findAllMatches = (inputList, addList) => {
         return a.concat(b)
     }, [])
 }
-export const getDictStats = (stats) => {
+export const getDictStats = (stats, limit = 400) => {
     let statsDict = { '*': stats.statements }
     let nestedStats = d3.nest().key(stat => stat.category).entries(stats.statements)
     nestedStats.forEach(ns => {
-        statsDict[ns.key] = ns.values.sort((a, b) => b.coverage - a.coverage)
+        if (!limit || limit > ns.values.length) limit = ns.values.length + 1
+        statsDict[ns.key] = ns.values.sort((a, b) => b.coverage - a.coverage).slice(0, limit)
     })
     return statsDict
 }

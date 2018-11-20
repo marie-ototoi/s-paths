@@ -1,6 +1,5 @@
 import express from 'express'
 import resourceModel from '../models/resource'
-import pathModel from '../models/path'
 import prefixModel from '../models/prefix'
 import { getLabels } from '../src/lib/labelLib'
 import * as queryLib from '../src/lib/queryLib'
@@ -31,7 +30,7 @@ const getResources = async (options) => {
     newprefixes.forEach(pref => {
         prefixes[pref._doc.pref] = pref._doc.uri
     })
-    let resources = await resourceModel.find({ endpoint: endpoint, graphs: { $all: graphs, $size: graphs.length } }).sort('-total').exec()
+    let resources = await resourceModel.find({ endpoint: endpoint, graphs: { $all: graphs, $size: graphs.length } }).sort('-pathsNumber').exec()
     console.log('GET RESOURCES')
     if (resources.length > 0) {
         resources = resources.map(resource => resource._doc)
@@ -54,26 +53,10 @@ const getResources = async (options) => {
         })
         // console.log(resources)
         await resourceModel.createOrUpdate(resources) 
-    }
-    
-    let pathsNumbers = []
-    for (let i= 0; i < resources.length; i ++){
-        let pathsNumber = await pathModel.countDocuments({ endpoint: endpoint, entrypoint: resources[i].type, graphs: { $all: graphs, $size: graphs.length } }).exec()
-        pathsNumbers[i] = pathsNumber
-        // console.log('count', i, pathsNumber)
-    }
+    }    
     // console.log('agg', resources, pathsNumbers, resources.length, pathsNumbers.length)
-    let newresources = resources.map((resource, i) => {
-        // console.log('new resource', i)
-        let newresource = {
-            ...resource,
-            pathsNumber: pathsNumbers[i] || 0
-        }
-        
-        return newresource
-    }).sort((a, b) => b.pathsNumber - a.pathsNumber)
-    console.log(newresources)
-    return newresources
+    console.log('resources', resources)
+    return resources
 }
 
 export default router

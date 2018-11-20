@@ -101,11 +101,12 @@ class Header extends React.Component {
             })
     }
     shouldComponentUpdate (nextProps, nextState) {
+        // console.log(nextProps)
         let configChanged = nextProps.configs.past.length !== this.props.configs.past.length &&
             this.props.configs.present.status !== 'transition'
 
         if (configChanged || this.props.step !== nextProps.step) {
-            let newData = this.prepareData(this.props)
+            let newData = this.prepareData(nextProps)
            
             this.preparePivot(nextProps.configs, newData.displayedView, nextProps.dataset)
             this.setState(newData)
@@ -114,6 +115,7 @@ class Header extends React.Component {
     }
     prepareData (nextProps) {
         // TODO: remove data duplication
+        console.log("UPDATE")
         let displayedResource = nextProps.dataset.resources.find((resource) =>
             resource.type === nextProps.dataset.entrypoint
         )
@@ -137,6 +139,24 @@ class Header extends React.Component {
         let labelsDict = {}
         nextProps.dataset.resources.forEach(res => {
             labelsDict[res.type] = { label: res.label, comment: res.comment }
+        })
+        console.log({
+            resourceIsLoading: false,
+            selectionIsLoading: false,
+            keywordIsLoading: false,
+            pivotIsLoading: false,
+            errorSelection: '',
+            propsAreLoading: false,
+            keyword: '',
+            displayedResource,
+            selectedResource,
+            labelsDict,
+            resourceList: nextProps.dataset.resources.filter(res => res.pathsNumber > 0),
+            configsLists,
+            displayedView,
+            displayedProps,
+            selectedProps,
+            selectedView
         })
         return {
             resourceIsLoading: false,
@@ -482,12 +502,13 @@ class Header extends React.Component {
                                 onChange={(selectedOption) => {
                                     const selectedView = selectedOption.index
                                     let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+                                    //console.log(activeConfigs)
                                     this.setState({
                                         selectedView,
                                         selectedProps: this.state.configsLists[selectedView].map((list, index) => {
-                                            // console.log(list, index)
+                                            // console.log(list, index, activeConfigs)
                                             return list.reduce((acc, cur, propIndex) => {
-                                                // console.log(index)
+                                                // console.log(activeConfigs.views[selectedView], index)
                                                 if (activeConfigs.views[selectedView].selectedMatch.properties[index] && activeConfigs.views[selectedView].selectedMatch.properties[index].path === cur.path) acc = propIndex
                                                 return acc
                                             }, 0)

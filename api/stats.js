@@ -1,4 +1,5 @@
 import express from 'express'
+import resourceModel from '../models/resource'
 import pathModel from '../models/path'
 import prefixModel from '../models/prefix'
 
@@ -8,12 +9,13 @@ import * as queryLib from '../src/lib/queryLib'
 
 const router = express.Router()
 
-router.post('/', (req, res) => {
+router.post('/analyse', (req, res) => {
     // req.setTimeout(600000)
-    if (!req.body.entrypoint || !req.body.endpoint || !req.body.totalInstances) {
+    if (!req.body.entrypoint || !req.body.endpoint) {
         console.error('You must provide at least an entrypoint and an endpoint, and the total number of instances')
         res.end()
     } else {
+        console.log('load resources')
         getAllStats(req.body)
             .then(props => {
                 res.json(props)
@@ -24,6 +26,40 @@ router.post('/', (req, res) => {
             })
     }
 })
+
+
+router.post('/count', (req, res) => {
+    if (!req.body.entrypoint) {
+        console.error('You must provide at least an entrypoint')
+        res.end()
+    } else {
+        countPaths(req.body)
+            .then(props => {
+                res.json(props)
+                res.end()
+            })
+            .catch((err) => {
+                console.error('Error counting stats', err)
+            })
+    }
+})
+
+const countPaths = async (options) => {
+    let { graphs, endpoint, entrypoint } = options
+    let pathsNumber = await pathModel.countDocuments({ endpoint, entrypoint, graphs: { $all: graphs, $size: graphs.length } }).exec()
+    if (pathsNumber > 0) {
+        let prevResource = await resourceModel.findOne({
+            type: entrypoint,
+            endpoint,
+            graphs: { $all: graphs, $size: graphs.length }
+        }).exec()
+        await resourceModel.createOrUpdate([{
+            ... prevResource._doc,
+            pathsNumber
+        }]).catch(e => console.error('Error updating resources with countPaths', e))
+    }
+    return true
+}
 
 const getAllStats = async (options) => {
     // console.log('oy', options)

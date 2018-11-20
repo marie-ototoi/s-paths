@@ -18,9 +18,11 @@ const configs = (state = initialConfig, action) => {
             ...state,
             views: action.mainConfig || state.views,
             status,
+            token: action.token || null,
             savedSelections: action.savedSelections || state.savedSelections,
             entrypoint: action.entrypoint,
-            stats: action.stats
+            stats: action.stats,
+            checked: false
         }
     case types.SET_CONFIG:
         return {
@@ -36,7 +38,8 @@ const configs = (state = initialConfig, action) => {
             }),
             status: 'transition',
             entrypoint: action.entrypoint,
-            stats: action.stats
+            stats: action.stats,
+            checked: false
         }
     case types.END_TRANSITION:
         // console.log('END_TRANSITION')
@@ -44,6 +47,18 @@ const configs = (state = initialConfig, action) => {
             ...state,
             status: 'active'
         }
+    case types.UPDATE_CONFIGS:
+        console.log('UPDATE_CONFIGS', action.configs)
+        if (state.token === action.token) {
+            return {
+                ...state,
+                views: action.configs.views,
+                checked: true
+            }
+        } else {
+            return state
+        }
+        
     default:
         return state
     }
