@@ -3,6 +3,7 @@
 import { SparqlClient } from 'sparql-client-2'
 import fetch from 'node-fetch'
 import * as configLib from './configLib'
+import { convertDate } from './dataLib'
 
 export const addPrefix = (url, prefixes, prefixcc) => {
     //let find
@@ -439,21 +440,15 @@ export const makeSelectionConstraints = (selectionsLayers, selectedConfig, zone,
                         if (constraint.format === 'yearstring') {
                             return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${Number(r)}'^^xsd:integer`
                         } else {
-                            if (String(r).match(/(\d{4})[-/.](\d{2})[-/.](\d{2})$/)) {
-                                theDate = new Date(String(r).substr(0, 4), String(r).substr(5, 2), String(r).substr(8, 2))
-                            } else if (String(r).match(/(\d{2})[-/.](\d{2})[-/.](\d{4})$/)) {
-                                theDate = new Date(String(r).substr(0, 2), String(r).substr(3, 2), String(r).substr(6, 4))
-                            } else if (String(r).match(/(\d{4})$/)) {
-                                if (iR === 0) {
-                                    theDate = new Date(r, 0, 1)
-                                } else {
-                                    theDate = new Date(r, 11, 31)
-                                }
+                            if (iR === 0) {
+                                theDate = convertDate(r)
                             } else {
-                                theDate = new Date(r)
+                                theDate = convertDate(r, { month: 11, day: 31 })
                             }
+                            let month = (theDate.getMonth() + 1) <10 ? '0' +  (theDate.getMonth() + 1) : (theDate.getMonth() + 1)
+                            let day = theDate.getDate() <10 ? '0' +  theDate.getDate() : theDate.getDate()
                             // console.log(`?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}'^^xsd:date`)
-                            return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getMonth() + 1}-${theDate.getDate()}'^^xsd:date`
+                            return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${month}-${day}'^^xsd:date`
                         }                    
                     }).join(' && ')
                     return `(${conditions})`

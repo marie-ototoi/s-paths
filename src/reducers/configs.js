@@ -49,15 +49,15 @@ const configs = (state = initialConfig, action) => {
         }
     case types.UPDATE_CONFIGS:
         console.log('UPDATE_CONFIGS', action.configs)
-        if (state.token === action.token) {
-            return {
-                ...state,
-                views: action.configs.views,
-                checked: true
-            }
-        } else {
-            return state
+        //if (state.token === action.token) {
+        return {
+            ...state,
+            views: action.configs.views,
+            checked: true
         }
+        //} else {
+            //return state
+        //}
         
     default:
         return state
