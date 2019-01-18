@@ -1,7 +1,0 @@
-DB.DBA.VHOST_REMOVE ( lhost=>'*ini*', vhost=>'*ini*', lpath=>'/sparql');
-DB.DBA.VHOST_DEFINE (lpath=>'/sparql/', ppath => '/!sparql/', is_dav => 1, vsp_user => 'dba', opts => vector('noinherit', 1, 'cors', '*')); 
-
-isql -U dba -P dba     
-ld_dir_all('geonames/', '%.nt', 'http://geonames.ilda.fr');
-ld_dir_all('nobel/', '%.nt', 'http://nobel.ilda.fr');
-rdf_loader_run();

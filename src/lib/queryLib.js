@@ -84,8 +84,9 @@ export const defineGroup = (prop, options) => {
             category = 'uri'
         }
     } else if ((datatype && datatype === 'http://www.w3.org/2001/XMLSchema#date') ||
-        propName.match(/year|date|birthday/gi) ||
-        propName.match(/(birth|death|created|modified)$/gi)) {
+        propName.match(/year/gi)) {
+        //||
+        //propName.match(/(birth|death|created|modified)$/gi)) 
         category = 'datetime'
     } else if (propName.match(/latitude/gi) ||
         propName.match(/(lat|latd)$/gi)) {

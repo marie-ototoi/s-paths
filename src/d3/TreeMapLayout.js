@@ -24,7 +24,7 @@ class TreeMapLayout extends AbstractLayout {
         units
             .exit()
             .remove()
-
+            
         d3.select(this.el)
             .selectAll('g.units')
             .each((d, i) => {

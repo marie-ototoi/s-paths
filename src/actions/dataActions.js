@@ -518,8 +518,8 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                         singleURI ? 1 : getData(endpoint, makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true }), prefixes)
                     ])
                         .then(([dataMain, dataDeltaMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
-                            //console.log('select resource, get data', queryMain, dataMain)
-                            //console.log('select resource, get data', queryMainUnique, uniqueMainPromise)
+                            console.log('select resource, get data main', dataMain.results.bindings)
+                            console.log('select resource, get data delta', dataDeltaMain.results.bindings)
                             if (singleURI || Number(uniqueMainPromise.results.bindings[0].displayed.value) >= 1) {
                                 dispatch({
                                     type: types.SET_STATS,
@@ -566,6 +566,8 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
         getData(endpoint, queryUnique, prefixes)
     ])
         .then(([newData, newDelta, newUnique]) => {
+            // console.log('select resource, get data main', newData.results.bindings)
+            // console.log('select resource, get data delta', newDelta.results.bindings)             
             if (newData.results.bindings.length === 0 && updatedConfig.id !== 'ListAllProps' && updatedConfig.id !== 'InfoCard') throw 'No entities with this combination of paths'
             const action = {
                 type: types.SET_CONFIGS,

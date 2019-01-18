@@ -43,5 +43,4 @@ if (process.env.NODE_ENV === 'development') {
     }));
 }
 
-const appPort = process.env.APP_PORT || 80
-app.listen(appPort, () => console.log('ℹ ｢app｣: S-Paths server running on port', appPort))
+app.listen(80, () => console.log('ℹ ｢app｣: S-Paths server running on port', 80))

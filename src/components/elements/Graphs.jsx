@@ -69,7 +69,7 @@ class Graphs extends React.PureComponent {
                                 style={{ color: graphs[graph] }}
                                 key={`graph_${zone}_${gi}`}
                             >
-                                {graph}
+                                { graph }
                             </li>
                         ))}
                     </ul>
@@ -82,11 +82,10 @@ class Graphs extends React.PureComponent {
                                 className='path'
                                 key={`path_${zone}_${pli}_${pi}`}
                             >
-                                
                                 <a
                                     style={{ borderBottom: `1px solid ${graphs[prop.triplesGraphs[0]]}` }}
-                                    title={displayedResource.comment}
-                                    href={displayedResource.type}
+                                    title={ displayedResource.comment }
+                                    href={ displayedResource.type }
                                     target="_blank"
                                     rel="noopener noreferrer"
                                 >
@@ -103,12 +102,12 @@ class Graphs extends React.PureComponent {
                                             position: 'relative',
                                             left: `-${5 + (rpi * 20)}px`
                                         }}
-                                        key={`path_${zone}_${pi}_triple_${rpi}`}
+                                        key={ `path_${zone}_${pi}_triple_${rpi}` }
                                     >
                                         <a
                                             className='pathlabel'
-                                            title={rp.comment}
-                                            href={rp.uri}
+                                            title={ rp.comment }
+                                            href={ rp.uri }
                                             target="_blank"
                                             rel="noopener noreferrer"
                                         >

@@ -46,7 +46,8 @@ const getResources = async (options) => {
             return {
                 total: Number(resource.occurrences.value),
                 type: resource.type.value,
-                endpoint, graphs,
+                endpoint,
+                graphs,
                 label: queryLib.usePrefix(dico[resource.type.value]? labels[dico[resource.type.value]].label : resource.type.value, prefixes),
                 comment: dico[resource.type.value] ? labels[dico[resource.type.value]].comment : null
             }

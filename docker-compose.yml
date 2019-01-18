@@ -3,7 +3,6 @@ services:
   virtuoso:
     image: openlink/virtuoso_opensource
     volumes:
-      - data-virtuoso:/opt/virtuoso-opensource/vad
       - db-virtuoso:/opt/virtuoso-opensource/database
     ports:
       - 8890:8890
@@ -30,6 +29,5 @@ services:
       - virtuoso
       - mongo
 volumes:
-  data-virtuoso:
   db-virtuoso:
   db-mongo:

@@ -4,7 +4,7 @@ const initialState = process.env.APP_NAME === 'bnf' ? {
     endpoint: process.env.ENDPOINT || 'http://s-paths.lri.fr:8890/sparql',
     localEndpoint: process.env.LOCAL_ENDPOINT || 'http://virtuoso:8890/sparql',
     entrypoint: '',
-    graphs: ['http://bnf.ilda.fr'], //['http://nobel.ilda.fr', 'http://dbpedianobel.ilda.fr'], //
+    graphs: ['http://bnf.ilda.fr'], //['http://nobel.ilda.fr', 'http://dbpedianobel.ilda.fr'], // 
     resourceGraph: null,
     constraints: '',
     labels: [],
