@@ -8,7 +8,7 @@ services:
       - 8890:8890
       - 1111:1111
   mongo:
-    image: mongo:3
+    image: mongo:3.4-jessie
     ports:
       - 27017:27017
     volumes:
