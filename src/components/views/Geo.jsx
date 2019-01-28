@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-import Vega from 'react-vega'
 import * as vega from 'vega-lib'
 import * as d3 from 'd3'
 
@@ -18,8 +17,9 @@ class Geo extends React.Component {
     constructor (props) {
         super(props)
         this.getElementsForTransition = this.getElementsForTransition.bind(this)
+        this.createView = this.createView.bind(this)
+        this.viewCreated = this.viewCreated.bind(this)
         this.handleSelect = this.handleSelect.bind(this)
-        this.handleNewView = this.handleNewView.bind(this)
         this.handleTooltip = this.handleTooltip.bind(this)
         this.updateSelections = this.updateSelections.bind(this)
         this.handleZoneSelected = this.handleZoneSelected.bind(this)
@@ -32,7 +32,6 @@ class Geo extends React.Component {
         }
         this.prepareData(props)
     }
-
     handleSelect(...args) {
         const { display, selections, selectElements, zone } = this.props
         if (args[1]) {
@@ -62,13 +61,26 @@ class Geo extends React.Component {
             selectElements(selected, zone, selections, display.modifierPressed)
         }
     }
-    handleNewView(args) {
-        // console.log(args._runtime, args.scenegraph('start'))
-        this.customState = {...this.customState, view: args}
-        window.setTimeout(() => this.props.handleTransition(this.props, this.getElementsForTransition()), 500)
+    createView() {
+        // console.log('fn create view')
+        this.customState.view = new vega.View(vega.parse(this.customState.spec))
+            .renderer('svg')  // set renderer (canvas or svg)
+            .initialize('#' + this.customState.elementName) // initialize view within parent DOM container
+            .hover() // enable hover encode set processing
+            .run();
+        window.setTimeout(() => this.viewCreated(), 500)
+
+        
+    }
+    viewCreated() {
+        this.props.handleTransition(this.props, this.getElementsForTransition())
+        this.customState.view.addSignalListener('endZone', this.handleSelect)
+        this.customState.view.addSignalListener('zoneSelected', this.handleZoneSelected)
+        this.customState.view.addSignalListener('tooltip', this.handleTooltip)
+        this.customState.view.addSignalListener('scalePrecision', this.handleZoneSelected)
     }
     handleZoneSelected(...args) {
-        // console.log('coucou', ...args)
+        console.log('coucou', ...args)
     }
     handleTooltip(...args) {
         
@@ -82,13 +94,11 @@ class Geo extends React.Component {
             let findSinglePoints =  this.customState.view.scenegraph().root.source.value[0].items[1].items.filter((it) => {
                 return el.latg === it.datum.latg && el.longg === it.datum.longg
             })
-            
             let label = d3.nest().key(p => p.datum.properties.label).entries(findSinglePoints)
             this.setState({ hover: id, label }) 
         }
     }
     render () {
-       
         const { dimensions, display, role, step } = this.props
         return (<div
             className = { `Geo ${this.customState.elementName} role_${role}` } tabIndex = "1">
@@ -101,28 +111,18 @@ class Geo extends React.Component {
                     width: `${dimensions.useful_width}px`,
                     height: `${dimensions.useful_height}px`
                 }}
-                
             >
                 <p
                     className = "legend"
                     style = {{ marginLeft: display.viz.useful_width + 'px', width: (display.viz.horizontal_padding - 20) + 'px' }}
                 >{ this.state.label && this.state.label.map(agg => (<span key={`acc${agg.key}`}>{agg.key} <span style={{color: '#999'}}>({agg.values.length})</span><br /></span>)) }</p>
-                { this.customState.spec &&
-                    <Vega
-                        spec = { this.customState.spec }
-                        onSignalEndZone = { this.handleSelect }
-                        onSignalZoneSelected  = { this.handleZoneSelected }
-                        onSignalTooltip  = { this.handleTooltip }
-                        onSignalScalePrecision  = { this.handleZoneSelected }
-                        onNewView = { this.handleNewView }
-                    />
-                }
+                <div id = { this.customState.elementName }></div>
             </div>
             }
         </div>)
     }
     getElementsForTransition () {
-        // console.log("coucou geo", this.customState.view.scenegraph().root.source.value[0].items[1].items[0])
+        // console.log("coucou geo", this.customState.view.scenegraph())
         // console.log(this.customState.view.scenegraph().root.source.value[0].items[1].items)
         let items = []
         // console.log(this.customState.view.scenegraph().root.source.value[0])
@@ -158,7 +158,6 @@ class Geo extends React.Component {
     }
     updateSelections (nextProps) {
         let { selections, zone } = nextProps
-        // console.log("FOIS FOIS")
         if (this.customState.view) {
             // this.customState.view.remove('entities', this.customState.view.data('entities'))
             let changeset = vega.changeset().remove(() => true).insert(selections.filter(s => s.zone === zone).map(s => { return { selector: s.selector, id: s.other } }));
@@ -172,7 +171,6 @@ class Geo extends React.Component {
         let selectionChanged = this.props.selections.length !== nextProps.selections.length
         let dimensionsChanged = (this.props.dimensions.width !== nextProps.dimensions.width || this.props.dimensions.height !== nextProps.dimensions.height)
         if (selectionChanged && !dataChanged) {
-            // console.log('HAS CHANGED')
             this.updateSelections(nextProps)
         }
         if (dataChanged) {
@@ -527,10 +525,7 @@ class Geo extends React.Component {
                 ...defaultSpec.marks
             ]
         }
-        /* 
-        
-        */
-        // console.log(spec)
+        // console.log('salut', spec)
         // "pointRadius": {"expr": "scale('size', exp(datum.properties.mag))"}
         //
         // Save to reuse in render
@@ -541,10 +536,13 @@ class Geo extends React.Component {
             //selectedConfig
         }
     }
+    componentDidMount () {
+        // console.log('create mount')
+        this.createView()
+    }
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
         if (this.customState.view) {
-            // if(this.customState.view.scenegraph().source.value) console.log('componentDidUpdate', this.customState.view.scenegraph().source.value[0].items[2].items, this.props.display.modifierPressed, this.props.selections)
             this.customState.view.run()
             // console.log(this.props.selections, this.customState.view._runtime)
             this.props.handleTransition(this.props, this.getElementsForTransition())

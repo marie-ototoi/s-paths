@@ -15,7 +15,7 @@ router.post('/analyse', (req, res) => {
         console.error('You must provide at least an entrypoint and an endpoint, and the total number of instances')
         res.end()
     } else {
-        console.log('load resources')
+        console.log('analyse resources', new Date())
         getAllStats(req.body)
             .then(props => {
                 res.json(props)
@@ -356,11 +356,11 @@ const getProps = async (categorizedProps, level, options, instances) => {
         ...categorizedProps,
         ...propsWithStats
     ]
-    console.log('RETURN PROPS ', level, returnProps, level < maxLevel && newCategorizedProps.length > 0)
+    console.log('RETURN PROPS ', new Date(), level, returnProps, level < maxLevel && newCategorizedProps.length > 0)
     if (level < maxLevel && newCategorizedProps.length > 0) {
         return getProps(returnProps, level + 1, {...options, prefixes, labels}, instances)
     } else {
-        // discard uris when there are more specific paths
+        console.log('the end', new Date())
         return {
             statements: returnProps.filter(prop => (prop.total > 0 && !queryLib.hasMoreSpecificPath(prop.path, prop.level, returnProps))), 
             options: {...options, prefixes, labels}

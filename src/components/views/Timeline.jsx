@@ -1,7 +1,6 @@
 import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
-import Vega from 'react-vega'
 import * as vega from 'vega-lib'
 // components
 // d3
@@ -22,7 +21,8 @@ class Timeline extends React.Component {
         this.fetchMultiple = this.fetchMultiple.bind(this)
         this.getElementsForTransition = this.getElementsForTransition.bind(this)
         this.handleSelect = this.handleSelect.bind(this)
-        this.handleNewView = this.handleNewView.bind(this)
+        this.createView = this.createView.bind(this)
+        this.viewCreated = this.viewCreated.bind(this)
         this.handleZoneSelected = this.handleZoneSelected.bind(this)
         this.initData = this.initData.bind(this)
         this.prepareData = this.prepareData.bind(this)
@@ -118,11 +118,21 @@ class Timeline extends React.Component {
             }
         }
     }
-    handleNewView(args) {
-        this.fetchMultiple()
-        // console.log('salut')
-        this.customState = {...this.customState, view: args}
-        window.setTimeout(() => this.props.handleTransition(this.props, this.getElementsForTransition()), 500)
+    createView() {
+        // console.log('fn create view')
+        this.customState.view = new vega.View(vega.parse(this.customState.spec))
+            .renderer('svg')  // set renderer (canvas or svg)
+            .initialize('#' + this.customState.elementName) // initialize view within parent DOM container
+            .hover() // enable hover encode set processing
+            .run();
+        window.setTimeout(() => this.viewCreated(), 500)
+
+        
+    }
+    viewCreated() {
+        this.props.handleTransition(this.props, this.getElementsForTransition())
+        this.customState.view.addSignalListener('endZone', this.handleSelect)
+        this.customState.view.addSignalListener('zoneSelected', this.handleZoneSelected)
     }
     handleZoneSelected(args) {
         // console.log('coucou')
@@ -144,12 +154,7 @@ class Timeline extends React.Component {
                 
             >
                 { this.customState.spec &&
-                    <Vega
-                        spec = { this.customState.spec }
-                        onSignalEndZone = { this.handleSelect }
-                        onSignalZoneSelected  = { this.handleZoneSelected }
-                        onNewView = { this.handleNewView }
-                    />
+                    <div id = { this.customState.elementName }></div>
                 }
             </div>
             }
@@ -486,6 +491,10 @@ class Timeline extends React.Component {
             timedata
             //selectedConfig
         }
+    }
+    componentDidMount () {
+        // console.log('create mount')
+        this.createView()
     }
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()

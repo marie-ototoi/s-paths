@@ -2,7 +2,6 @@ import PropTypes from 'prop-types'
 import React from 'react'
 import { connect } from 'react-redux'
 import defaultSpec from '../../lib/spec'
-import Vega from 'react-vega';
 import * as vega from 'vega-lib';
 // components
 // d3
@@ -18,7 +17,8 @@ class ListAllProps extends React.Component {
         super(props)
         this.getElementsForTransition = this.getElementsForTransition.bind(this)
         this.handleSelect = this.handleSelect.bind(this)
-        this.handleNewView = this.handleNewView.bind(this)
+        this.createView = this.createView.bind(this)
+        this.viewCreated = this.viewCreated.bind(this)
         this.handleTooltip = this.handleTooltip.bind(this)
         this.updateSelections = this.updateSelections.bind(this)
         this.handleZoneSelected = this.handleZoneSelected.bind(this)
@@ -30,10 +30,21 @@ class ListAllProps extends React.Component {
     handleSelect(...args) {
         //
     }
-    handleNewView(args) {
-        // console.log(args._runtime, args.scenegraph('test'))
-        this.customState = {...this.customState, view: args}
-        window.setTimeout(() => this.props.handleTransition(this.props, this.getElementsForTransition()), 500)
+    createView() {
+        // console.log('fn create view')
+        this.customState.view = new vega.View(vega.parse(this.customState.spec))
+            .renderer('svg')  // set renderer (canvas or svg)
+            .initialize('#' + this.customState.elementName) // initialize view within parent DOM container
+            .hover() // enable hover encode set processing
+            .run();
+        window.setTimeout(() => this.viewCreated(), 500)
+
+        
+    }
+    viewCreated() {
+        this.props.handleTransition(this.props, this.getElementsForTransition())
+        this.customState.view.addSignalListener('endZone', this.handleSelect)
+        this.customState.view.addSignalListener('zoneSelected', this.handleZoneSelected)
     }
     handleZoneSelected(...args) {
         // console.log('coucou', ...args)
@@ -340,14 +351,7 @@ class ListAllProps extends React.Component {
                 
             >
                 { this.customState.spec &&
-                    <Vega
-                        spec = { this.customState.spec }
-                        onSignalEndZone = { this.handleSelect }
-                        onSignalZoneSelected  = { this.handleZoneSelected }
-                        onSignalTooltip  = { this.handleTooltip }
-                        onSignalScalePrecision  = { this.handleZoneSelected }
-                        onNewView = { this.handleNewView }
-                    />
+                    <div id = { this.customState.elementName }></div>
                 }
             </div>
             }
@@ -414,6 +418,10 @@ class ListAllProps extends React.Component {
             // For some reason source_0 is the default dataset name
             this.customState.view.change('selections', changeset).run()
         }
+    }
+    componentDidMount () {
+        // console.log('create mount')
+        this.createView()
     }
     componentDidUpdate () {
         //let elements = this.getElementsForTransition()
