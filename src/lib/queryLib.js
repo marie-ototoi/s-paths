@@ -404,7 +404,7 @@ export const makeSelectionConstraints = (selectionsLayers, selectedConfig, zone,
         let entrypointName = pivot ? 'formerentrypoint' : 'entrypoint'
         
         if (uriSelections.length > 0) {
-            uriRegex = uriSelections.map(sel => sel.query.value + '$').join('|')
+            uriRegex = uriSelections.map(sel => sel.query.value.replace(/\?/g, '.') + '$').join('|')
             mainentrypointName = entrypointName
         }
         // add constraints for constrained groups of entities (heatmap)
