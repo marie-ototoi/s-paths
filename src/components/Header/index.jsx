@@ -126,7 +126,7 @@ class Header extends React.Component {
         let activeConfigs = getCurrentConfigs(nextProps.configs, 'main', 'active')
         // console.log(configsLists, displayedView, activeConfigs.views[displayedView])
         let displayedProps = configsLists[displayedView].map((list, index) => {
-            // console.log(list, index)
+            //console.log(list, index)
             return list.reduce((acc, cur, propIndex) => {
                 // console.log(index)
                 if (activeConfigs.views[displayedView].selectedMatch.properties[index].path === cur.path) acc = propIndex

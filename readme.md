@@ -97,7 +97,7 @@ You can now use bulk upload (leave the full directory path as below, it is mappe
 
 ```
 > SPARQL CREATE GRAPH <http://geonames.ilda.fr>;
-> ld_dir_all('/opt/virtuoso-opensource/vad', '%.nt', 'http://geonames.ilda.fr');
+> ld_dir_all('/opt/virtuoso-opensource/database', '%.nt', 'http://geonames.ilda.fr');
 > select * from DB.DBA.load_list;
 > rdf_loader_run();
 > DELETE FROM DB.DBA.load_list;

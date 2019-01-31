@@ -369,6 +369,7 @@ class ListAllProps extends React.Component {
         if (dataChanged) {
             if(this.customState.view) this.customState.view.finalize() 
             this.prepareData(nextProps)
+            this.createView()
         }
         if (dimensionsChanged) {
             this.customState.view.signal('width', nextProps.dimensions.useful_width).run()

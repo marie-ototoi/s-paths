@@ -34,7 +34,9 @@ class SingleProp extends React.Component {
         let selectionChanged = this.props.selections.length !== nextProps.selections.length
         let dimensionsChanged = (this.props.dimensions.width !== nextProps.dimensions.width || this.props.dimensions.height !== nextProps.dimensions.height)
         if (dataChanged) {
+            if(this.customState.view) this.customState.view.finalize() 
             this.prepareData(nextProps)
+            this.createView()
         }
         if (selectionChanged && !dataChanged) {
             // console.log('HAS CHANGED')
