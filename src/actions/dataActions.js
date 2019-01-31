@@ -286,7 +286,8 @@ const checkFirstValidConfig = async (configs, stats, dataset, zone, evaluation) 
     for (let key in checkProp) {
         checkDict[key] = checkProp[key]
     }
-    let valid = checkStatementGap(prop, checkProp[prop.path])
+    // console.log(prop.path, checkProp, checkProp[prop.path])
+    let valid = checkStatementGap(prop, checkProp)
     let propList = []
     while (index < singlePropView.propList[0].length && !valid) {
         index ++
@@ -310,7 +311,8 @@ const checkFirstValidConfig = async (configs, stats, dataset, zone, evaluation) 
     propList = propList.sort((a, b) => b.coverage - a.coverage)
     if (valid || propList.length > 0) {
         // send the config back together with the dictionnary of verified statements
-        return { views : [{...singlePropView, selected: true, propList, selectedMatch: { properties: [propList[0]] }}], checkDict }
+        //console.log({ views : [{...singlePropView, selected: true, propList, selectedMatch: { properties: [propList[0]] }}], checkDict })
+        return { views : [{...singlePropView, selected: true, propList: [propList], selectedMatch: { properties: [propList[0]] }}], checkDict }
     }
 }
 
@@ -439,7 +441,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
     // console.log('ok on va cherche les stats', dataset)
     // cancelPromises = true
     let token = Math.round(Math.random() * Math.random() * 100000)
-    console.log(token)
+    // console.log(token)
     let { constraints, endpoint, entrypoint, graphs, prefixes, totalInstances, resourceGraph } = dataset
     let graph =  resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     return getStats({ ...dataset, stats: [], constraints: '' })
@@ -474,7 +476,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                                 stats = evaluateSubStats({ ...stats, selectionInstances })
                                 // definition of the new configs based on the estimation
                                 configs = defineConfigs(views, { ...stats, selectionInstances }, dataset)
-                                // console.log(configs)
+                                console.log('ici', configs)
                                 // check evaluation
                                 checkFirstValidConfig(configs, { ...stats, selectionInstances }, dataset, 'main', true)
                                     .then(checked =>{
@@ -486,7 +488,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                                             
                                             checkStatsConfigs(configs, checked.views[0], selectionInstances, totalInstances, dataset, checked.checkDict)
                                                 .then((newconfigs) => {
-                                                    // console.log('end check',newconfigs)
+                                                    console.log('end check',configs, newconfigs)
                                                     dispatch({
                                                         type: types.UPDATE_CONFIGS,
                                                         configs: newconfigs,
@@ -518,8 +520,8 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                         singleURI ? 1 : getData(endpoint, makeQuery(entrypoint, configMain, 'main', { ...dataset, unique: true }), prefixes)
                     ])
                         .then(([dataMain, dataDeltaMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
-                            console.log('select resource, get data main', dataMain.results.bindings)
-                            console.log('select resource, get data delta', dataDeltaMain.results.bindings)
+                            // console.log('select resource, get data main', dataMain.results.bindings)
+                            // console.log('select resource, get data delta', dataDeltaMain.results.bindings)
                             if (singleURI || Number(uniqueMainPromise.results.bindings[0].displayed.value) >= 1) {
                                 dispatch({
                                     type: types.SET_STATS,
