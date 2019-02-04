@@ -64,36 +64,9 @@ Docker:
     - docker pull $CI_REGISTRY_IMAGE:latest || true
     - docker build -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:latest
-    # - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+  when: manual
   only:
     - master
-
-# Deploy stage
-# -> Automate deployment and provide continuous deployment
-
-#Review:
-#  extends: .docker-deploy
-#  tags:
-#    - inria
-#  only:
-#    - branches
-#  except:
-#    - master
-#  environment:
-#    name: review/$CI_COMMIT_REF_NAME
-#    url: https://$CI_ENVIRONMENT_SLUG.s-paths.inria.fr
-#    on_stop: StopReview
-#
-#StopReview:
-#  stage: deploy
-#  variables:
-#    GIT_STRATEGY: none
-#  script:
-#    - echo "Remove review app"
-#  when: manual
-#  environment:
-#    name: review/$CI_COMMIT_REF_NAME
-#    action: stop
 
 Production Nobel:
   extends: .docker-deploy
