@@ -92,6 +92,7 @@ class AxisLayout extends AbstractLayout {
                 } else {
                     data = axis.info.filter(i => i.key === String(d))
                 }
+                // console.log(data)
                 if (data.length > 0) {
                     // console.log(data[0])
                     selectElements(data[0].propName, data[0].range, data[0].category)

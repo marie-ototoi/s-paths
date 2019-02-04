@@ -39,7 +39,7 @@ export const getLabels = async (urisToLabel, prefixes) => {
             if (prop.label && prop.label !== '') {
                 urisToLabel[index].label = prop.label
             } else if (prop.loadAttempts > 3 && new Date(prop.modifiedAt) > limitDate) {
-                urisToLabel[index].label = prop.property
+                urisToLabel[index].label = getPropName(prop.property)
             }
             urisToLabel[index].comment = prop.comment
         }

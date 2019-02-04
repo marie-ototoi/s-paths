@@ -61,7 +61,7 @@ const defaultState = process.env.APP_NAME === 'bnf' ? [
                 },
                 {
                     category: 'text',
-                    avg: { max: 70, optimal: [10, 40] },
+                    avg: { max: 100, optimal: [10, 40] },
                     unique: { min: 2, max: 130 }
                 },
                 {

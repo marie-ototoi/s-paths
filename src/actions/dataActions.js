@@ -437,7 +437,7 @@ export const loadSingle = (dataset, configMain, singleURI) => {
         })
 }
 
-export const selectResource = (dispatch) => (dataset, views, previousConfigs, previousOptions, savedSelections) => {
+export const selectResource = (dispatch) => (dataset, views, previousConfigs, previousOptions, savedSelections, sameconfig) => {
     // console.log('ok on va cherche les stats', dataset)
     // cancelPromises = true
     let token = Math.round(Math.random() * Math.random() * 100000)
@@ -460,7 +460,9 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                             // console.log('selectionInstances', selectionInstances, stats.totalInstances)
                             let configs
                             // console.log(configs)
-                            if (selectionInstances === stats.totalInstances) {
+                            if (sameconfig) {
+                                resolve(previousConfigs)
+                            } else if (selectionInstances === stats.totalInstances) {
                                 configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
                                 resolve(configs)
                             } else if (selectionInstances === 1) {

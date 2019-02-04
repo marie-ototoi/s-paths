@@ -6,6 +6,9 @@
     left: 15px;
     top: 146px;
 }
+.Selection_sameconfig {
+    top: 178px;
+}
 .Selection button {
     font-size: 1em;
 }

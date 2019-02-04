@@ -6,7 +6,7 @@ import './Selection.css'
 class Selection extends React.Component {
     render () {
         return (
-            <div className='Selection'>
+            <div className={`Selection Selection_${this.props.type}`}>
                 {(
                     !this.props.isLoading &&
                     <button
@@ -14,10 +14,10 @@ class Selection extends React.Component {
                         onClick={this.props.onClick}
                         disabled={this.props.disable}
                     >
-                        Focus on selection
+                        { this.props.type === 'standard' ? 'Focus on selection' : 'Focus in same config' }
                     </button>
                 ) ||
-                    <span className='button is-loading'>Focus on selection</span>
+                    <span className='button is-loading'>{ this.props.type === 'standard' ? 'Focus on selection' : 'Focus in same config' }</span>
                 }
             </div>
         )
@@ -26,7 +26,8 @@ class Selection extends React.Component {
     static propTypes = {
         isLoading: PropTypes.bool.isRequired,
         disable: PropTypes.bool.isRequired,
-        onClick: PropTypes.func.isRequired
+        onClick: PropTypes.func.isRequired,
+        type: PropTypes.string
     }
 }
 

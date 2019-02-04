@@ -185,7 +185,7 @@ class Header extends React.Component {
         let selectedConfig 
         let constraints = ``
         let newSelections = pivot || config.entrypoint.aggregate ? mergeSelections(selections, activeConfigs.savedSelections) : [selections]
-        if (pivot !== undefined) {
+        if (pivot) {
             newResource = dataset.resources.find(res => res.type === pivot.type)
             if (selections.some(s => s.zone === 'main')) {
                 selectedConfig = getSelectedMatch(config, zone)
@@ -299,8 +299,9 @@ class Header extends React.Component {
                 errorSelection: e
             }))
     }
-    displaySelection (pivot) {
+    displaySelection (pivot, sameconfig) {
         // console.log('DISPLAY SELECTION')
+        if (pivot === undefined) pivot = false
         let { config, configs, dataset, selections, views, zone } = this.props
         let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
         let selectedConfig
@@ -311,15 +312,15 @@ class Header extends React.Component {
         // let saveSelections = (pivot || config.entrypoint.aggregate ? newSelections : [])
         let entrypoint
         if (selections.some(s => s.zone === 'main')) {
-            entrypoint = pivot !== undefined ? pivot.type : dataset.entrypoint
+            entrypoint = pivot ? pivot.type : dataset.entrypoint
             selectedConfig = getSelectedMatch(config, zone)
-            constraints = makeSelectionConstraints(newSelections, selectedConfig, zone, { ...dataset, entrypoint }, pivot !== undefined)
+            constraints = makeSelectionConstraints(newSelections, selectedConfig, zone, { ...dataset, entrypoint }, pivot)
         } else if (selections.length > 0) {
             activeConfigs = getCurrentConfigs(configs, 'aside', 'active')
             // in case the entrypoint has changed
-            entrypoint = pivot !== undefined ? pivot.type : activeConfigs.entrypoint
+            entrypoint = pivot ? pivot.type : activeConfigs.entrypoint
             selectedConfig = getSelectedMatch(getSelectedView(activeConfigs, 'aside'))
-            constraints = makeSelectionConstraints(newSelections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats }, pivot !== undefined)
+            constraints = makeSelectionConstraints(newSelections, selectedConfig, 'aside', { ...dataset, entrypoint, stats: activeConfigs.stats }, pivot)
         } else if (pivot) {
             constraints = dataset.constraints.replace(/entrypoint/g, 'formerentrypoint')
         }
@@ -331,29 +332,32 @@ class Header extends React.Component {
             constraints = constraints.concat(pivotConstraints)
         }
         let res = dataset.resources.find(res => res.type === entrypoint)
+        //console.log(res, entrypoint)
         let newDataset = {
             ...dataset,
             entrypoint,
             constraints,
             totalInstances: res.total
         }
-        this.setState({ selectionIsLoading: true, errorSelection: '' })
+        this.setState({ selectionIsLoading: !sameconfig, selectionSameconfigIsLoading: sameconfig, errorSelection: '' })
         // console.log('DISPLAY SELECTION 2')
         // ici eventuellement on recupere celles qui etaient deja sauvees
         // console.log(activeConfigs.savedSelections, selections)
         //let saveSelections = (config.entrypoint.aggregate ? [...activeConfigs.savedSelections, ...selections] : activeConfigs.savedSelections)
         //console.log(saveSelections)
-        this.props.selectResource(newDataset, views, activeConfigs, dataset, newSelections)
+        this.props.selectResource(newDataset, views, activeConfigs, dataset, newSelections, sameconfig)
             .then(() => {
                 // console.log('DISPLAY SELECTION 3')
                 // this.forceUpdate()
                 this.setState({
                     selectionIsLoading: false,
+                    selectionSameconfigIsLoading: false,
                     keyword: ''
                 })
             })
             .catch((e) => this.setState({
                 selectionIsLoading: false,
+                selectionSameconfigIsLoading: false,
                 keyword: '',
                 errorSelection: 'Unable to display results: ' + e
             }))
@@ -551,6 +555,13 @@ class Header extends React.Component {
                         isLoading={this.state.selectionIsLoading}
                         disable={!selectionEnabled}
                         onClick={(e) => this.displaySelection()}
+                        type="standard"
+                    />
+                    <Selection
+                        isLoading={this.state.selectionSameconfigIsLoading}
+                        disable={!selectionEnabled}
+                        onClick={(e) => this.displaySelection(false, true)}
+                        type="sameconfig"
                     />
                     <Pivot
                         isLoading={this.state.pivotIsLoading}
