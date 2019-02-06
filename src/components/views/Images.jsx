@@ -7,6 +7,8 @@ import SelectionZone from '../elements/SelectionZone'
 
 // libs
 import { getSelectedMatch } from '../../lib/configLib'
+import { detectRectCollision } from '../../lib/selectionLib'
+import { getRelativeRectangle } from '../../lib/scaleLib'
 // redux functions
 import { getPropPalette } from '../../actions/palettesActions'
 import { handleMouseDown, handleMouseUp, selectElements } from '../../actions/selectionActions'
@@ -16,7 +18,6 @@ class Images extends React.Component {
     constructor (props) {
         super(props)
         this.getElementsForTransition = this.getElementsForTransition.bind(this)
-        this.selectEnsemble = this.selectEnsemble.bind(this)
         this.customState = {
             elementName: `refListProp_${props.zone}`
         }
@@ -53,13 +54,18 @@ class Images extends React.Component {
             selectedConfig
         }
     }
-    selectEnsemble (prop, value, category) {
-        const elements = this.layout.getElements(prop, value, category)
-        const { selectElements, zone, selections } = this.props
-        selectElements(elements, zone, selections)
-    }
     getElementsInZone (zoneDimensions) {
-        return []
+        console.log(zoneDimensions)
+        const { display, zone } = this.props
+        let relativeZone = getRelativeRectangle(zoneDimensions, zone, display)
+        this.customState.uniqueData = this.customState.uniqueData.map((el, index) => {
+            let inZone = detectRectCollision(relativeZone, el.zone)
+            return {
+                ...el,
+                selected: inZone
+            }
+        })
+        return this.customState.uniqueData.filter(c => c.selected)
     }
     render () {
         const { dimensions, display, data, role, selections, step, zone } = this.props
@@ -68,21 +74,23 @@ class Images extends React.Component {
         return (<div
             className = { `Images ${this.customState.elementName} role_${role}` } 
             style = {{ 
-                position: 'relative',
-                left : `${dimensions.x}px`,
-                top: `${dimensions.y}px`,
-                width: `${dimensions.width}px`,
+                position: 'relative'
             }}
         >
             { role !== 'target' &&
             <svg
-                style = {{ position: 'absolute', zIndex: 20 }}
-                width = { dimensions.useful_width }
-                height = { dimensions.useful_height }
+                style = {{ 
+                    position: 'absolute',
+                    zIndex: 3
+                }}
+                width = { display.viz[zone + '_width'] }
+                height = { display.screen.height - 10 }
+                transform = { `translate(${dimensions.x }, 0)` }
+                className = { `Images ${this.customState.elementName} role_${role}` } ref = {(c) => { this.refImages = c }}
             >
                 <SelectionZone
                     zone = { zone }
-                    dimensions = { { ...dimensions, width: dimensions.useful_width + display.viz.horizontal_padding - 30 } }
+                    dimensions = { { ...dimensions } }
                     handleMouseMove = { this.props.handleMouseMove }
                     component = { this }
                     selections = { selections }
@@ -94,15 +102,26 @@ class Images extends React.Component {
                 style = {{ 
                     position: 'relative',
                     width: `${dimensions.useful_width}px`,
-                    left : `${display.viz.horizontal_padding}px`,
-                    top: `${dimensions.top_padding}px`
+                    left : `${dimensions.x + display.viz.horizontal_padding}px`,
+                    top: `${dimensions.y + dimensions.top_padding}px`
                 }}
             >
                 <div className = "box" style = {{ width: dimensions.useful_width + 'px' }}>
                     <div className = "content" style = {{maxHeight: `${dimensions.useful_height}px`}}>
                         { 
                             uniqueData.map((el, i) => 
-                                (<img key = { `img_${zone}_${i}` }  className = "" src = { el.prop1.value } alt = { el.prop2.value } title = { el.prop2.value } />)
+                                (<span
+                                    key = { `img_${zone}_${i}` }
+                                >
+                                    <img 
+                                        src = { el.prop1.value }
+                                        alt = { el.prop2.value }
+                                        title = { el.prop2.value }
+                                        style = {{ 
+                                            opacity: (selections.length > 0 && el.selected) || selections.length === 0 ? 1 : 0.2 
+                                        }}
+                                    />
+                                </span>)
                             )
                         }
                     </div>
@@ -113,16 +132,22 @@ class Images extends React.Component {
         </div>)
     }
     getElementsForTransition () {
-        const { zone } = this.props
-        return this.customState.uniqueData.map((el, index) => {
+        const { dimensions, zone } = this.props
+        let imagesPerRow = Math.floor(dimensions.useful_width / 60)
+        this.customState.uniqueData = this.customState.uniqueData.map((el, index) => {
+            let row = index % imagesPerRow 
+            let col = Math.floor(index / imagesPerRow)
+            let x1 = 60 * row + 5
+            let y1 = 85 * col + 5
             return { 
+                ...el,
                 zone: {
-                    x1: 0,
-                    y1: 0,
-                    x2: 10,
-                    y2: 10,
-                    width: 10,
-                    height: 10
+                    x1,
+                    y1,
+                    x2: x1 + 50,
+                    y2: y1 + 75,
+                    width: 50,
+                    height: 75
                 },
                 selector:`img_${zone}_${index}`,
                 index: index,
@@ -130,12 +155,13 @@ class Images extends React.Component {
                     type: 'uri',
                     value: el.entrypoint.value
                 },
-                color: "#666",
-                opacity: el.opacity,
+                color: "#13439a",
+                opacity: 0.5,
                 shape: 'rectangle',
                 rotation: 0
             }
         })
+        return this.customState.uniqueData
     }
     componentDidMount () {
         this.props.handleTransition(this.props, this.getElementsForTransition())
