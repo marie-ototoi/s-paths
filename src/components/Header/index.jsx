@@ -143,6 +143,7 @@ class Header extends React.Component {
         return {
             resourceIsLoading: false,
             selectionIsLoading: false,
+            selectionSameconfigIsLoading: false,
             keywordIsLoading: false,
             pivotIsLoading: false,
             errorSelection: '',
@@ -299,9 +300,8 @@ class Header extends React.Component {
                 errorSelection: e
             }))
     }
-    displaySelection (pivot, sameconfig) {
+    displaySelection (pivot = false, sameconfig = false) {
         // console.log('DISPLAY SELECTION')
-        if (pivot === undefined) pivot = false
         let { config, configs, dataset, selections, views, zone } = this.props
         let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
         let selectedConfig

@@ -142,7 +142,7 @@ const checkStatsConfigs = (configs, selectedView, selectionInstances, totalInsta
     // console.log(propsToCheck)
     return checkStatements(propsToCheck, selectionInstances, dataset)
         .then(checkedStatements => {
-            console.log(checkedStatements)
+            // console.log(checkedStatements)
             return {
                 ...configs,
                 views: configs.views.map(view => {
@@ -461,6 +461,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                             let configs
                             // console.log(configs)
                             if (sameconfig) {
+                                stats = evaluateSubStats({ ...stats, selectionInstances })
                                 resolve(previousConfigs)
                             } else if (selectionInstances === stats.totalInstances) {
                                 configs = activateDefaultConfigs(defineConfigs(views, { ...stats, selectionInstances }, dataset))
@@ -478,7 +479,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                                 stats = evaluateSubStats({ ...stats, selectionInstances })
                                 // definition of the new configs based on the estimation
                                 configs = defineConfigs(views, { ...stats, selectionInstances }, dataset)
-                                console.log('ici', configs)
+                                // console.log('ici', configs)
                                 // check evaluation
                                 checkFirstValidConfig(configs, { ...stats, selectionInstances }, dataset, 'main', true)
                                     .then(checked =>{
@@ -490,7 +491,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                                             
                                             checkStatsConfigs(configs, checked.views[0], selectionInstances, totalInstances, dataset, checked.checkDict)
                                                 .then((newconfigs) => {
-                                                    console.log('end check',configs, newconfigs)
+                                                    // console.log('end check',configs, newconfigs)
                                                     dispatch({
                                                         type: types.UPDATE_CONFIGS,
                                                         configs: newconfigs,
@@ -524,6 +525,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                         .then(([dataMain, dataDeltaMain, uniqueMainPromise]) => { // , coverageMain, coverageAside
                             // console.log('select resource, get data main', dataMain.results.bindings)
                             // console.log('select resource, get data delta', dataDeltaMain.results.bindings)
+                            // console.log('select resource, uniqueMainPromise', uniqueMainPromise)
                             if (singleURI || Number(uniqueMainPromise.results.bindings[0].displayed.value) >= 1) {
                                 dispatch({
                                     type: types.SET_STATS,
@@ -590,16 +592,16 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
 export const loadMultiple = (dispatch) => (dataset, path, indexC, indexP, zone) => {
     let { endpoint, entrypoint, prefixes } = dataset
     let queryMain = makeMultipleQuery(entrypoint, path, indexP, 'main', dataset)
-    // console.log(queryMain)
+    //console.log(queryMain)
     return getData(endpoint, queryMain, prefixes)
         .then(data => {
-            /* dispatch({
+            dispatch({
                 type: types.SET_MULTIPLE,
                 indexC,
                 indexP,
                 zone,
                 elements: data
-            }) */
+            })
             // console.log('youpi', data)
             return data
         })

@@ -2,6 +2,7 @@ version: "3.5"
 services:
   virtuoso:
     image: openlink/virtuoso_opensource
+    restart: always
     volumes:
       - db-virtuoso:/opt/virtuoso-opensource/database
     ports:
@@ -9,6 +10,7 @@ services:
       - 1111:1111
   mongo:
     image: mongo
+    restart: always
     ports:
       - 27017:27017
     volumes:

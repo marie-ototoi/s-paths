@@ -22,7 +22,8 @@ const configs = (state = initialConfig, action) => {
             savedSelections: action.savedSelections || state.savedSelections,
             entrypoint: action.entrypoint,
             stats: action.stats,
-            checked: false
+            checked: false,
+            multiple: false
         }
     case types.SET_CONFIG:
         return {
@@ -39,7 +40,8 @@ const configs = (state = initialConfig, action) => {
             status: 'transition',
             entrypoint: action.entrypoint,
             stats: action.stats,
-            checked: false
+            checked: false,
+            multiple: false
         }
     case types.END_TRANSITION:
         // console.log('END_TRANSITION')
@@ -58,7 +60,11 @@ const configs = (state = initialConfig, action) => {
         } else {
             return state
         }
-        
+    case types.SET_MULTIPLE:
+        return {
+            ...state,
+            multiple: true
+        }
     default:
         return state
     }

@@ -83,24 +83,5 @@ Nobel LRI:
     - master
   when: manual
   environment:
-    name: production
+    name: nobel
     url: http://s-paths.lri.fr
-
-Staging:
-  extends: .docker-deploy
-  tags:
-    - inria
-  variables:
-    TLSCACERT: $TLSCACERT_staging
-    TLSCERT: $TLSCERT_staging
-    TLSKEY: $TLSKEY_staging
-    ENV_FILE: $ENV_FILE_staging
-    DOCKER_TLS_VERIFY: 1
-    DOCKER_MACHINE_NAME: default
-    DOCKER_HOST: tcp://195.83.213.227:2376
-  only:
-    - master
-  when: manual
-  environment:
-    name: staging
-    url: https://s-paths.inria.fr

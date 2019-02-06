@@ -39,6 +39,7 @@ class Timeline extends React.Component {
         this.state = {}
         this.initData(props)
         this.prepareData(props)
+        this.fetchMultiple()
     }
     updateSelections (nextProps) {
         let { selections, zone } = nextProps
@@ -106,7 +107,7 @@ class Timeline extends React.Component {
                                     label: selectedConfig.multiple[0][theIndex].readablePath.map(p => p.label).join(' / * / ')
                                 })
                             })
-                            // console.log('multipleData', this.customState.multipleData)
+                            //console.log('multipleData', this.customState.multipleData)
                             // load next index
                             this.fetchMultiple()
                             this.prepareData(this.props)

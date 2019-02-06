@@ -8,7 +8,7 @@ let initialState = {
     resourceGraph: null,
     constraints: '',
     labels: [],
-    maxLevel: 6,
+    maxLevel: 8,
     ignoreList: ['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
     resources: [],
     rankPropFactors: {
@@ -35,16 +35,20 @@ if (process.env.APP_NAME === 'bnf') {
         ...initialState,
         graphs: ['http://bnf.ilda.fr'], //['http://nobel.ilda.fr', 'http://dbpedianobel.ilda.fr'], // 
         prefixes: {
+            ark: 'http://data.bnf.fr/ark:/',
+            bnf: 'http://data.bnf.fr/ontology/bnf-onto/',
+            'bnf-roles': 'http://data.bnf.fr/vocabulary/roles/',
             dcterms: 'http://purl.org/dc/terms/',
             d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
             dbpedia: 'http://dbpedia.org/resource/',
             'dbpedia-owl': 'http://dbpedia.org/ontology/',
-            dbpprop: 'http://dbpedia.org/property/',
+            dbpprop: 'http://dbpedia.loc/property/',
             foaf: 'http://xmlns.com/foaf/0.1/',
             freebase: 'http://rdf.freebase.com/ns/',
             map: 'http://data.nobelprize.org/resource/#',
             meta: 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#',
             owl: 'http://www.w3.org/2002/07/owl#',
+            'owl-time': 'http://www.w3.org/TR/owl-time/',
             rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
             rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
             skos: 'http://www.w3.org/2004/02/skos/core#',
@@ -62,6 +66,7 @@ if (process.env.APP_NAME === 'bnf') {
             insee: 'http://rdf.insee.fr/def/geo#',
             isni: 'http://isni.org/ontology#',
             marcrel: 'http://id.loc.gov/vocabulary/relators/',
+            'loc-countries': 'http://id.loc.gov/vocabulary/countries/',
             mo: 'http://musicontology.com/',
             ore: 'http://www.openarchives.org/ore/terms/',
             rdagroup1elements: 'http://rdvocab.info/Elements/',
@@ -80,7 +85,7 @@ if (process.env.APP_NAME === 'bnf') {
 } else if (process.env.APP_NAME === 'nobel') { 
     initialState = {
         ...initialState,
-        graphs: ['http://nobel.ilda.fr', 'http://dbpedianobel.ilda.fr'],
+        graphs: ['http://nobel.ilda.fr', 'http://nobeladdon.ilda.fr'],
         prefixes: {
             dcterms: 'http://purl.org/dc/terms/',
             d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
@@ -147,6 +152,26 @@ if (process.env.APP_NAME === 'bnf') {
             foaf: 'http://xmlns.com/foaf/0.1/',
             dc: 'http://purl.org/dc/elements/1.1/'
         }
+    }
+} else if (process.env.APP_NAME === 'eli') { 
+    initialState = {
+        ...initialState,
+        graphs: ['http://eli.ilda.fr','http://types.eli.ilda.fr'],
+        prefixes: {
+            rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+            rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
+            eli: 'http://data.europa.eu/eli/ontology#'
+        }
+    }
+} else if (process.env.APP_NAME === 'lri') { 
+    initialState = {
+        ...initialState,
+        graphs: ['http://lri.ilda.fr']
+    }
+} else if (process.env.APP_NAME === 'mdb') { 
+    initialState = {
+        ...initialState,
+        graphs: ['http://mdb.ilda.fr']
     }
 }
 

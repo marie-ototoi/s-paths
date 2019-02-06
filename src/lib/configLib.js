@@ -102,7 +102,7 @@ export const scoreProp = (prop, constraint, rankFactors, preferences) => {
     // console.log(prop.path, score.customProps)
     score.definition = 1 - getCost(prop.unique, min, max, optimal, 1)
     score.total = 0
-    score.level = 1 - prop.level
+    score.level = 1 - prop.level/10
     let coeff = 0
     for (let factor in rankFactors) {
         score.total += score[factor] * rankFactors[factor]
@@ -208,7 +208,8 @@ export const defineConfigs = (views, stats, dataset) => {
                 let count = 0
                 constraintSet.forEach(constraint => {
                     if(statsDict[constraint.category]) {
-                        statsDict[constraint.category].forEach(prop => {                
+                        statsDict[constraint.category].forEach(prop => {   
+                            //if (view.id === 'GeoMap') console.log(prop.path)             
                             // generic conditions
                             // console.log(prop.total, prop.path)
                             // console.log(constraint.unique, prop.unique, (!constraint.unique.min || (constraint.unique.min && prop.unique >= constraint.unique.min)), (!constraint.unique.max || (constraint.unique.max && prop.unique <= constraint.unique.max)))
@@ -225,6 +226,7 @@ export const defineConfigs = (views, stats, dataset) => {
                             (!constraint.avg || !constraint.avg.max || (constraint.avg.max && prop.avgcharlength <= constraint.avg.max))
                             ) {
                                 // console.log('PASSE ?')
+                                // if (constraint.category === 'geo' && view.id === 'GeoMap') console.log(count, prop.path)
                                 propSet.push({
                                     ...prop,
                                     score: count > 50 ? 0.1 : scoreProp(prop, constraint, rankPropFactors, dataset.propertyPreferences)
@@ -233,7 +235,9 @@ export const defineConfigs = (views, stats, dataset) => {
                             }
                         })
                     }
+                    //if (constraint.category === 'geo' && view.id === 'GeoMap') console.log(propSet)
                 })
+                
                 propList.push(propSet.sort((a, b) => {
                     return b.score - a.score
                 }).filter(p => p.score > 0))

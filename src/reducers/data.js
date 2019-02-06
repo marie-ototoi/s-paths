@@ -27,7 +27,8 @@ const data = (state = initialState, action) => {
             status,
             deltaStatements: action.mainDelta || {},
             displayed: action.mainDisplayed,
-            multiple: []
+            multiple: [],
+            updated: false
         }
     case types.SET_DETAIL:
         // if data are already set, make a transition
@@ -46,6 +47,11 @@ const data = (state = initialState, action) => {
         return {
             ...state,
             detailStatements
+        }
+    case types.UPDATE_CONFIGS:
+        return {
+            ...state,
+            updated:true
         }
     case types.SET_MULTIPLE:
         return {
