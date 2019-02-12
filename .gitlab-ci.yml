@@ -78,7 +78,7 @@ Nobel LRI:
     ENV_FILE: $ENV_FILE
     DOCKER_TLS_VERIFY: 1
     DOCKER_MACHINE_NAME: default
-    DOCKER_HOST: tcp://129.175.22.62:2376
+    DOCKER_HOST: tcp://129.175.22.62:2377
   only:
     - master
   when: manual
