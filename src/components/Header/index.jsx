@@ -115,15 +115,17 @@ class Header extends React.Component {
     }
     prepareData (nextProps) {
         // TODO: remove data duplication
-        // console.log("UPDATE")
+        
+        //console.log(getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone))
+        let conf = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone)
+        let configsLists = conf.map(view => view.propList)
+        let displayedView = conf.reduce((acc, cur, i) => (cur.selected ? i : acc), null)
+        let activeConfigs = getCurrentConfigs(nextProps.configs, 'main', 'active')
+        //console.log("UPDATE", activeConfigs)
         let displayedResource = nextProps.dataset.resources.find((resource) =>
-            resource.type === nextProps.dataset.entrypoint
+            resource.type === activeConfigs.entrypoint
         )
         let selectedResource = displayedResource
-        //console.log(getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone))
-        let configsLists = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).map(view => view.propList)
-        let displayedView = getConfigs(getCurrentConfigs(nextProps.configs, nextProps.zone, 'active'), nextProps.zone).reduce((acc, cur, i) => (cur.selected ? i : acc), null)
-        let activeConfigs = getCurrentConfigs(nextProps.configs, 'main', 'active')
         // console.log(configsLists, displayedView, activeConfigs.views[displayedView])
         let displayedProps = configsLists[displayedView].map((list, index) => {
             //console.log(list, index)
@@ -139,7 +141,7 @@ class Header extends React.Component {
         let labelsDict = {}
         nextProps.dataset.resources.forEach(res => {
             labelsDict[res.type] = { label: res.label, comment: res.comment }
-        })
+        })  
         return {
             resourceIsLoading: false,
             selectionIsLoading: false,
@@ -301,9 +303,11 @@ class Header extends React.Component {
             }))
     }
     displaySelection (pivot = false, sameconfig = false) {
-        // console.log('DISPLAY SELECTION')
-        let { config, configs, dataset, selections, views, zone } = this.props
+        
+        let { config, configs, dataset, selections, views, zone } = {...this.props}
+        console.log('DISPLAY SELECTION', selections)
         let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
+        console.log('DISPLAY SELECTION', activeConfigs)
         let selectedConfig
         let constraints = ``
         let formerentrypoint = dataset.entrypoint

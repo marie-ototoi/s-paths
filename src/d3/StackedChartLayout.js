@@ -39,6 +39,7 @@ class StackedChartLayout extends AbstractLayout {
                 d.selection = {
                     selector: `stackedchart_element_${dataLib.makeId(d.entrypoint.value)}_${i}_${zone}`,
                     index: i,
+                    config: props.config,
                     query: {
                         type: 'uri',
                         value: d.entrypoint.value

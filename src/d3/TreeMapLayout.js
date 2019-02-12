@@ -35,6 +35,7 @@ class TreeMapLayout extends AbstractLayout {
                     selector: `treemap_element_p1_${dataLib.makeId(d.key)}`,
                     count: (d.values.length > 0) ? Number(d.values[0].countprop1.value) : 1,
                     index: i,
+                    config: props.config,
                     query: {
                         type: 'set',
                         value: [{

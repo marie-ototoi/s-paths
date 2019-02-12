@@ -14,6 +14,7 @@ const configs = (state = initialConfig, action) => {
     case types.SET_STATS:
         // except at first load a new config is always a transition
         status = (state.views[0]) ? 'transition' : 'active'
+        console.log(status, action.savedSelections, state.savedSelections)
         return {
             ...state,
             views: action.mainConfig || state.views,
@@ -45,6 +46,7 @@ const configs = (state = initialConfig, action) => {
         }
     case types.END_TRANSITION:
         // console.log('END_TRANSITION')
+        console.log('active', action.savedSelections, state.savedSelections)
         return {
             ...state,
             status: 'active'

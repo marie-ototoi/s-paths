@@ -62,6 +62,7 @@ class URIWheelLayout extends AbstractLayout {
                 d.color = color
                 d.selection = {
                     selector: 'radius' + i + 'zone',
+                    config: props.config,
                     query: {
                         type: 'set',
                         value: [{

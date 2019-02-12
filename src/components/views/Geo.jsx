@@ -33,7 +33,7 @@ class Geo extends React.Component {
         this.prepareData(props)
     }
     handleSelect(...args) {
-        const { display, selections, selectElements, zone } = this.props
+        const { config, display, selections, selectElements, zone } = this.props
         if (args[1]) {
             let selected = this.customState.view.scenegraph().root.source.value[0].items[2].items.filter(it =>it.selected)
             // console.log(this.customState.view.scenegraph().root.source.value[0].items[2].items.filter(it =>it.selected))
@@ -54,6 +54,7 @@ class Geo extends React.Component {
                             value: el.datum.properties.entrypoint
                         },
                         zone,
+                        config,
                         other: el.id
                     }
                 })

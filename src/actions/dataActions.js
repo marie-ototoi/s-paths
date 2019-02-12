@@ -130,7 +130,7 @@ const checkStatsConfigs = (configs, selectedView, selectionInstances, totalInsta
     let endList = 0
     let alreadyPlanned = []
     let propsToCheck = []
-    while(propsToCheck.length < 20 && endList < configs.views.length) {
+    while(propsToCheck.length < 50 && endList < configs.views.length) {
         configs.views.forEach(view => {
             view.propList.forEach(list => {
                 if (index < list.length && !list[index].checked && !checkDict[list[index].path] && !alreadyPlanned.includes(list[index].path)) propsToCheck.push(list[index])
@@ -355,10 +355,10 @@ export const loadResources = (dispatch) => (dataset, views) => {
             if(resources.length > 0) { 
                 dataset.entrypoint = resources[0].type
                 dataset.totalInstances = resources[0].total
-                // console.log('resources', resources) 
+                //console.log('resources', resources) 
                 return getStats({ ...dataset, stats: [], resources, totalInstances: resources[0].total })
                     .then(stats => {
-                        // console.log('load resources', stats)
+                        console.log('load resources', stats)
                         prefixes = stats.options.prefixes
                         // console.log('ok on a bien reçu les stats', stats) //, defineConfigs(views, stats)
                         // for each views, checks which properties ou sets of properties could match and evaluate
@@ -396,6 +396,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
                             dispatch({
                                 type: types.SET_RESOURCES,
                                 resources,
+                                entrypoint: dataset.entrypoint,
                                 graphs: dataset.graphs
                             })
                             return resources
@@ -442,7 +443,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
     // cancelPromises = true
     let token = Math.round(Math.random() * Math.random() * 100000)
     // console.log(token)
-    let { constraints, endpoint, entrypoint, graphs, prefixes, totalInstances, resourceGraph } = dataset
+    let { constraints, endpoint, entrypoint, graphs, prefixes, totalInstances, resourceGraph } = {...dataset}
     let graph =  resourceGraph ? `FROM <${resourceGraph}> ` : graphs.map(gr => `FROM <${gr}> `).join('')
     return getStats({ ...dataset, stats: [], constraints: '' })
         .then(stats => {

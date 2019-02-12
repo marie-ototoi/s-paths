@@ -75,7 +75,7 @@ class SingleProp extends React.Component {
     }
     handleSelect(...args) {
         // console.log('yes we can')
-        const { display, selections, selectElements, zone } = this.props
+        const { config, display, selections, selectElements, zone } = this.props
         if (args[1]) {
             // console.log('yes we can', args, this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected))
             let selected = this.customState.view.scenegraph().root.source.value[0].items[6].items.filter(it =>it.selected)
@@ -89,6 +89,7 @@ class SingleProp extends React.Component {
                             type: 'uri',
                             value: el.datum.entrypoint
                         },
+                        config,
                         other: el.datum.entrypoint
                     }
                 })

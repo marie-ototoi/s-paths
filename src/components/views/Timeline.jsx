@@ -50,7 +50,7 @@ class Timeline extends React.Component {
         }
     }
     handleSelect(...args) {
-        const { display, selections, selectElements, zone } = this.props
+        const { config, display, selections, selectElements, zone } = this.props
         if (args[1]) {
             // console.log('yes we can', args, this.customState.view.scenegraph().root.items[0].items[5].items.filter(it =>it.selected))
             let selected = this.customState.view.scenegraph().root.items[0].items[5].items.filter(it =>it.selected)
@@ -59,6 +59,7 @@ class Timeline extends React.Component {
                 return {
                     selector: el.datum.selector,
                     index: el.datum.index,
+                    config,
                     query: {
                         type: 'uri',
                         value: el.datum.entrypoint

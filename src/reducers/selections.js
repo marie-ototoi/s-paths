@@ -17,6 +17,7 @@ const selection = (state, action) => {
             selector: action.selector,
             index: action.index,
             zone: action.zone,
+            config: action.config,
             query: action.query,
             count: action.count || 0,
             other: action.other
@@ -38,7 +39,15 @@ const selections = (state = defaultState, action) => {
             ).length === 0
         })
         elementsAdded = elements2Add.map(el => {
-            return selection(undefined, { ...action, query: el.query, selector: el.selector, count: el.count, index: el.index, other: el.other })
+            return selection(undefined, {
+                ...action,
+                query: el.query,
+                selector: el.selector,
+                count: el.count,
+                index: el.index,
+                other: el.other,
+                config: el.config
+            })
         })
         return [
             ...state.filter(sel => sel.zone === action.zone),
@@ -46,7 +55,15 @@ const selections = (state = defaultState, action) => {
         ]
     case types.REPLACE_SELECTION:
         return action.elements.map(el => {
-            return selection(undefined, { ...action, query: el.query, selector: el.selector, count: el.count, index: el.index, other: el.other })
+            return selection(undefined, {
+                ...action,
+                query: el.query,
+                selector: el.selector,
+                count: el.count,
+                index: el.index,
+                other: el.other,
+                config: el.config
+            })
         })
     case types.REMOVE_SELECTION:
         elements2Remove = action.elements.map(s => s.selector)

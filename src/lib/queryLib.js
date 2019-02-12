@@ -131,6 +131,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
         let thisObject = (level === levels) ? propName : `${propName}inter${level}`
         query = whichGraph ? query.concat(`GRAPH ?g${level} { ?${thisSubject} ${predicate} ?${thisObject} . } `) : query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
         // if (level === levels) query = query.concat(`${!optional ? 'OPTIONAL { ' : ''}?${thisObject} rdfs:label ?label${propName}${!optional ? ' } .' : ''} `)
+        
         if (objectType === '?') {
             query = query.concat(`?${thisObject} rdf:type ?type${thisObject} . `)
         } else if (objectType !== '*') {
@@ -411,17 +412,19 @@ export const makeSelectionConstraints = (selectionsLayers, selectedConfig, zone,
         let setSelection = selections.filter(sel => sel.query.type === 'set' && sel.zone === zone)
         // let def = ''
         // console.log('SALUT', setSelection, zone)
+        // console.log('ici ?', selectedConfig, selections)
         
         return setSelection.map((sel, iS) => {
             // console.log('ici ?')
+            selectedConfig = sel.config.selectedMatch
             return '(' + sel.query.value.map((constraint, iC) => {
-                const propName = 'contraint' + constraint.propName
-                // console.log(constraint.category, constraint.subcategory)
+                const propName = 'set_' + si + '_contraint' + constraint.propName
+                console.log(constraint.category, constraint.subcategory, selectedConfig.properties, iC)
                 if ((si === 0 && iS === 0) || si > 0) {
                     paths += FSL2SPARQL(selectedConfig.properties[iC].path, {
                         propName,
                         entrypointName,
-                        entrypointType: iS === 0,
+                        entrypointType: entrypointName !== 'entrypoint',
                         resourceGraph,
                         graphs
                     })
@@ -451,6 +454,11 @@ export const makeSelectionConstraints = (selectionsLayers, selectedConfig, zone,
                             // console.log(`?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${theDate.getUTCMonth() + 1}-${theDate.getUTCDate()}'^^xsd:date`)
                             return `?${datePropName} ${(iR === 0) ? '>=' : '<='} '${theDate.getFullYear()}-${month}-${day}'^^xsd:date`
                         }                    
+                    }).join(' && ')
+                    return `(${conditions})`
+                } else if (constraint.category === 'geo' ) {
+                    const conditions = constraint.value.map((r, iR) => {
+                        return `?${propName} ${(iR === 0) ? '>=' : '<='} ${r}`                   
                     }).join(' && ')
                     return `(${conditions})`
                 } else if (constraint.category === 'text' || constraint.category === 'uri' || (constraint.category === 'geo' && constraint.subcategory === 'name')) {
@@ -574,6 +582,8 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
                 // hierarchical = prop.category === 'text' ? 'previous' : 'last'
             }
             if (!unique) {
+                // if geo 
+                // BIND( FLOOR(YEAR(?born)/100)*100 AS ?century ) 
                 propList = propList.concat(`?prop${index} `)
                 if (hierarchical) propList = propList.concat(`?directlink `)
                 orderList = orderList.concat(`?prop${index} `)

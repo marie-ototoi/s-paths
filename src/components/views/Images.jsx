@@ -132,7 +132,7 @@ class Images extends React.Component {
         </div>)
     }
     getElementsForTransition () {
-        const { dimensions, zone } = this.props
+        const { config, dimensions, zone } = this.props
         let imagesPerRow = Math.floor(dimensions.useful_width / 60)
         this.customState.uniqueData = this.customState.uniqueData.map((el, index) => {
             let row = index % imagesPerRow 
@@ -155,6 +155,7 @@ class Images extends React.Component {
                     type: 'uri',
                     value: el.entrypoint.value
                 },
+                config,
                 color: "#13439a",
                 opacity: 0.5,
                 shape: 'rectangle',

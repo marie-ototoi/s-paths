@@ -29,7 +29,7 @@ class HeatMapLayout extends AbstractLayout {
         yUnits
             .exit()
             .remove()
-        
+        //console.log(props.config)
         let thisZone = selections.some(s => s.zone === zone)
         d3.select(this.el)
             .selectAll('g.xUnits g.yUnits')
@@ -44,6 +44,7 @@ class HeatMapLayout extends AbstractLayout {
                     selector: `heatmap_element_p1_${dataLib.makeId(d.values[0].prop1.value)}_p2_${dataLib.makeId(d.values[0].prop2.value)}`,
                     count: Number(d.countprop2),
                     index: i,
+                    config: props.config,
                     query: {
                         type: 'set',
                         value: [{

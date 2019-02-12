@@ -11,7 +11,7 @@ import SelectionZone from '../elements/SelectionZone'
 import StackedChartLayout from '../../d3/StackedChartLayout'
 // libs
 import { getSelectedMatch } from '../../lib/configLib'
-import { getAxis, getLegend, nestData } from '../../lib/dataLib'
+import { deduplicate, getAxis, getLegend, nestData } from '../../lib/dataLib'
 import { getDimensions } from '../../lib/scaleLib'
 // redux functions
 import { getPropPalette } from '../../actions/palettesActions'
@@ -46,8 +46,9 @@ class StackedChart extends React.Component {
             this.props.step !== nextProps.step    
     }
     prepareData (nextProps) {
-        const { data, config, zone } = nextProps
+        let { data, config, zone } = nextProps
         // prepare the data for display
+        data = deduplicate(data, ['entrypoint'])
         const selectedConfig = getSelectedMatch(config, zone)
         // First prop to be displayed in the bottom axis
         let maxUnitsPerYear

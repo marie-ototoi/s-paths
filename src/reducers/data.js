@@ -25,6 +25,7 @@ const data = (state = initialState, action) => {
             ...state,
             statements: action.main || state.statements,
             status,
+            token: action.token || state.token,
             deltaStatements: action.mainDelta || {},
             displayed: action.mainDisplayed,
             multiple: [],
@@ -49,9 +50,13 @@ const data = (state = initialState, action) => {
             detailStatements
         }
     case types.UPDATE_CONFIGS:
-        return {
-            ...state,
-            updated:true
+        if (state.token === action.token) {
+            return {
+                ...state,
+                updated:true
+            }
+        } else {
+            return state
         }
     case types.SET_MULTIPLE:
         return {

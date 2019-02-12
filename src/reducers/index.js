@@ -10,6 +10,7 @@ import undoable from 'redux-undo'
 
 const discoverApp = combineReducers({
     configs: undoable(configs, { filter: (action, currentState, previousState) => {
+        console.log('changed', currentState, previousState, currentState !== previousState)
         return currentState !== previousState // only add to history if state changed
     }}),
     data: undoable(data, { filter: (action, currentState, previousState) => {
