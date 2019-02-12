@@ -101,7 +101,7 @@ class StackedChart extends React.Component {
     selectEnsemble (prop, value, category) {
         const elements = this.layout.getElements(prop, value, category)
         const { selectElements, zone, selections } = this.props
-        selectElements(elements, zone, selections, 16)
+        selectElements(elements, zone, selections, this.props.display.modifierPressed)
     }
     render () {
         const { axisBottom, legend } = this.customState
