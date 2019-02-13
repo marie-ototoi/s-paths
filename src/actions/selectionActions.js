@@ -60,11 +60,19 @@ export const selectElements = (dispatch) => (elements, zone, selections, modifie
         }
     } else {
         // console.log('YEAH', elements, zone, selections, modifierPressed)
-        return dispatch({
-            type: types.REPLACE_SELECTION,
-            elements,
-            zone
-        })
+        if (selectionLib.areSelected(elements, zone, selections)) {
+            return dispatch({
+                type: types.REMOVE_SELECTION,
+                elements,
+                zone
+            })
+        } else {
+            return dispatch({
+                type: types.REPLACE_SELECTION,
+                elements,
+                zone
+            })
+        }
     }
     // console.log(selections)
 }
