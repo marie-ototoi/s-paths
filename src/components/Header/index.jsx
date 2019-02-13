@@ -310,7 +310,7 @@ class Header extends React.Component {
         let constraints = ``
         let formerentrypoint = dataset.entrypoint
         // console.log(!config.entrypoint.aggregate)
-        let newSelections = !config.entrypoint.aggregate ? [selections] : mergeSelections(selections, activeConfigs.savedSelections)
+        let newSelections = mergeSelections(selections, activeConfigs.savedSelections)
         // let saveSelections = (pivot || config.entrypoint.aggregate ? newSelections : [])
         let entrypoint
         if (selections.some(s => s.zone === 'main')) {

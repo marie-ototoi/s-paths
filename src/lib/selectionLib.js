@@ -21,7 +21,33 @@ export const areSelected = (elements, zone, selections) => {
 
 
 export const mergeSelections = (newSel, previousSel) => {
-    if(newSel.length > 0) previousSel.unshift(newSel)
+    if(newSel.length > 0) {
+        console.log('there s a new sel')
+        let newSelConfig = newSel[0].config
+        if (!newSelConfig.entrypoint.aggregate) {
+            console.log('replace every old sel')
+            previousSel = [newSel]
+        } else {
+            if (previousSel.length > 0) {
+                console.log('there s a previous sel')
+                let prevSelConfig = previousSel[0][0].config
+                let same = true
+                if (prevSelConfig.id !== newSelConfig.id ||
+                    prevSelConfig.selectedMatch.properties.length !== newSelConfig.selectedMatch.properties.length) {
+                    same = false
+                } else {
+                    prevSelConfig.selectedMatch.properties.forEach((prop, pi ) =>{
+                        if (prop.path !== newSelConfig.selectedMatch.properties[pi].path) same = false
+                    })
+                }
+                if (same) {
+                    console.log('config is the same')
+                    previousSel = previousSel.splice(1, previousSel.length)
+                }
+            }
+            previousSel.unshift(newSel)
+        }
+    }
     return previousSel
     // return [...newSel, ...previousSel]
 }

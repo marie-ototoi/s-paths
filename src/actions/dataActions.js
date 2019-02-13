@@ -462,7 +462,6 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                             let configs
                             // console.log(configs)
                             if (sameconfig) {
-                                savedSelections = savedSelections.splice(1, savedSelections.length)
                                 stats = evaluateSubStats({ ...stats, selectionInstances })
                                 resolve(previousConfigs)
                             } else if (selectionInstances === stats.totalInstances) {
