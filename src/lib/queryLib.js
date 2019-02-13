@@ -419,7 +419,7 @@ export const makeSelectionConstraints = (selectionsLayers, selectedConfig, zone,
             selectedConfig = sel.config.selectedMatch
             return '(' + sel.query.value.map((constraint, iC) => {
                 const propName = 'set_' + si + '_contraint' + constraint.propName
-                console.log(constraint.category, constraint.subcategory, selectedConfig.properties, iC)
+                // console.log(constraint.category, constraint.subcategory, selectedConfig.properties, iC)
                 if ((si === 0 && iS === 0) || si > 0) {
                     paths += FSL2SPARQL(selectedConfig.properties[iC].path, {
                         propName,

@@ -37,6 +37,7 @@ class Legend extends React.PureComponent {
 
 Legend.propTypes = {
     display: PropTypes.object,
+    dataset: PropTypes.object,
     offset: PropTypes.object,
     type: PropTypes.string,
     zone: PropTypes.string,
@@ -45,6 +46,7 @@ Legend.propTypes = {
 function mapStateToProps (state) {
     return {
         display: state.display,
+        dataset: state.dataset,
         selections: state.selections
     }
 }

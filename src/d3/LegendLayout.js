@@ -1,5 +1,6 @@
 import * as d3 from 'd3'
 import AbstractLayout from './AbstractLayout'
+import { usePrefix } from '../lib/queryLib'
 
 class LegendLayout extends AbstractLayout {
     draw (props) {
@@ -25,6 +26,7 @@ class LegendLayout extends AbstractLayout {
         }
     }
     resize (props) {
+        const { dataset } = props
         let total = d3.select(this.el).selectAll('g.legenditem').size() * 13
         d3.select(this.el).selectAll('g.legenditem').select('rect')
             .attr('width', (d, i) => 15)
@@ -37,7 +39,7 @@ class LegendLayout extends AbstractLayout {
             .attr('text-anchor', 'end')
             .attr('x', props.dimensions.width - 42)
             .attr('y', (d, i) => props.dimensions.height - total + Math.ceil(i * 13) + 9)
-            .text(d => d.label)
+            .text(d => usePrefix(d.label, dataset.prefixes))
     }
     checkSelection (props) {}
 }

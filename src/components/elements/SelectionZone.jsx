@@ -26,8 +26,9 @@ class SelectionZone extends React.PureComponent {
             <rect
                 ref = { `selectionZone_${zone}` }
                 fill = "transparent"
-                width = { dimensions.width - display.viz.horizontal_padding / 2 }
-                height = { dimensions.height + display.viz.bottom_padding + display.viz.top_margin }
+                width = { dimensions.width - (display.viz.horizontal_padding * 2 ) }
+                height = { dimensions.height  }
+                transform = { `translate(${dimensions.x + dimensions.horizontal_padding }, ${dimensions.y})` }
                 onMouseMove = { (e) => { this.setState({ x2: e.pageX, y2: e.pageY }) } }
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
                 onMouseUp = { (e) => { this.props.handleMouseUp(e, zone, display, component, selections) } }

@@ -30,6 +30,7 @@ let initialState = {
     },
     prefixcc: true
 }
+
 if (process.env.APP_NAME === 'bnf') {
     initialState = {
         ...initialState,
@@ -80,39 +81,6 @@ if (process.env.APP_NAME === 'bnf') {
             slickm: 'http://slickmem.data.t-mus.org/',
             slickmem: 'http://slickmem.data.t-mus.org/terms/',
             umbel: 'http://umbel.org/umbel/rc/'
-        }
-    }
-} else if (process.env.APP_NAME === 'nobel') { 
-    initialState = {
-        ...initialState,
-        graphs: ['http://nobel.ilda.fr', 'http://nobeladdon.ilda.fr'],
-        prefixes: {
-            dcterms: 'http://purl.org/dc/terms/',
-            d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
-            dbpedia: 'http://dbpedia.org/resource/',
-            'dbpedia-owl': 'http://dbpedia.org/ontology/',
-            dbpprop: 'http://dbpedia.org/property/',
-            foaf: 'http://xmlns.com/foaf/0.1/',
-            freebase: 'http://rdf.freebase.com/ns/',
-            map: 'http://data.nobelprize.org/resource/#',
-            meta: 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#',
-            nobel: 'http://data.nobelprize.org/terms/',
-            nobelR: 'http://data.nobelprize.org/resource/',
-            nobelprizes: 'http://nobelprize.org/nobel_prizes/',
-            owl: 'http://www.w3.org/2002/07/owl#',
-            rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-            rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
-            skos: 'http://www.w3.org/2004/02/skos/core#'
-        },
-        propertyPreferences: {
-            'dbpedia-owl:Award/nobel:year/*': 1,
-            'dbpedia-owl:Award/nobel:category/*/rdfs:label/*': 0.9,
-            'dbpedia-owl:Award/nobel:laureate/*/foaf:gender/*': 0.8,
-            'nobel:Laureate/nobel:nobelPrize/*/nobel:year/*': 1,
-            'nobel:Laureate/dbpprop:dateOfBirth/*': 0.9,
-            'nobel:Laureate/foaf:name/*': 0.7,
-            'nobel:Laureate/foaf:gender/*': 0.8,
-            'nobel:Laureate/nobel:laureateAward/*/nobel:category/*/rdfs:label/*' : 1
         }
     }
 } else if (process.env.APP_NAME === 'amd') { 
@@ -184,6 +152,39 @@ if (process.env.APP_NAME === 'bnf') {
             dcterms: 'http://purl.org/dc/terms/',
             foaf: 'http://xmlns.com/foaf/0.1/',
             dc: 'http://purl.org/dc/elements/1.1/'
+        }
+    }
+} else {
+    initialState = {
+        ...initialState,
+        graphs: ['http://nobel.ilda.fr', 'http://dbpedianobel.ilda.fr'],
+        prefixes: {
+            dcterms: 'http://purl.org/dc/terms/',
+            d2r: 'http://sites.wiwiss.fu-berlin.de/suhl/bizer/d2r-server/config.rdf#',
+            dbpedia: 'http://dbpedia.org/resource/',
+            'dbpedia-owl': 'http://dbpedia.org/ontology/',
+            dbpprop: 'http://dbpedia.org/property/',
+            foaf: 'http://xmlns.com/foaf/0.1/',
+            freebase: 'http://rdf.freebase.com/ns/',
+            map: 'http://data.nobelprize.org/resource/#',
+            meta: 'http://www4.wiwiss.fu-berlin.de/bizer/d2r-server/metadata#',
+            nobel: 'http://data.nobelprize.org/terms/',
+            nobelR: 'http://data.nobelprize.org/resource/',
+            nobelprizes: 'http://nobelprize.org/nobel_prizes/',
+            owl: 'http://www.w3.org/2002/07/owl#',
+            rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+            rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
+            skos: 'http://www.w3.org/2004/02/skos/core#'
+        },
+        propertyPreferences: {
+            'dbpedia-owl:Award/nobel:year/*': 1,
+            'dbpedia-owl:Award/nobel:category/*/rdfs:label/*': 0.9,
+            'dbpedia-owl:Award/nobel:laureate/*/foaf:gender/*': 0.8,
+            'nobel:Laureate/nobel:nobelPrize/*/nobel:year/*': 1,
+            'nobel:Laureate/dbpprop:dateOfBirth/*': 0.9,
+            'nobel:Laureate/foaf:name/*': 0.7,
+            'nobel:Laureate/foaf:gender/*': 0.8,
+            'nobel:Laureate/nobel:laureateAward/*/nobel:category/*/rdfs:label/*' : 1
         }
     }
 }

@@ -224,8 +224,8 @@ class Header extends React.Component {
                 pivotIsLoading: false,
                 displayedResource: newResource
             }))
-            .catch(() => {
-                console.log('catch ici ')
+            .catch((err) => {
+                console.log('catch ici ', err)
                 this.setState({
                     resourceIsLoading: false,
                     pivotIsLoading: false
@@ -305,9 +305,7 @@ class Header extends React.Component {
     displaySelection (pivot = false, sameconfig = false) {
         
         let { config, configs, dataset, selections, views, zone } = {...this.props}
-        console.log('DISPLAY SELECTION', selections)
         let activeConfigs = getCurrentConfigs(configs, 'main', 'active')
-        console.log('DISPLAY SELECTION', activeConfigs)
         let selectedConfig
         let constraints = ``
         let formerentrypoint = dataset.entrypoint

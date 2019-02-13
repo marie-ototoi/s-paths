@@ -110,17 +110,28 @@ class HeatMap extends React.Component {
                 onMouseDown = { (e) => { this.props.handleMouseDown(e, zone, display) } }
             ></g>
             }
-            { role !== 'target' &&
-            <SelectionZone
-                zone = { zone }
-                dimensions = { dimensions }
-                component = { this }
-                selections = { selections }
-                handleMouseMove = { this.props.handleMouseMove }
-            />
-            }
             { role !== 'target' && step !== 'changing' &&
             <g>
+                <PropSelector
+                    selected = { false }
+                    key = { zone + '_propselector_21' }
+                    propList = { this.customState.propsLists[0] }
+                    config = { config }
+                    align = "right"
+                    dimensions = { getDimensions(zone + 'LegendAxisBottom', display.viz, { x: 0, y: -15, width: -35, height: 0 }) }
+                    propIndex = { 0 }
+                    zone = { zone }
+                />
+                <PropSelector
+                    selected = { false }
+                    key = { zone + '_propselector_22' }
+                    propList = { this.customState.propsLists[1] }
+                    config = { config }
+                    align = "right"
+                    dimensions = { getDimensions(zone + 'LegendAxisLeft', display.viz, { x: 0, y: 30, width: 0, height: 0 }) }
+                    propIndex = { 1 }
+                    zone = { zone }
+                />
                 <Legend
                     type = "plain"
                     zone = { zone }
@@ -142,28 +153,19 @@ class HeatMap extends React.Component {
                     propIndex = { 1 }
                     selectElements = { this.selectEnsemble }
                 />
-                <PropSelector
-                    selected = { false }
-                    key = { zone + '_propselector_21' }
-                    propList = { this.customState.propsLists[0] }
-                    config = { config }
-                    align = "right"
-                    dimensions = { getDimensions(zone + 'LegendAxisBottom', display.viz, { x: 0, y: -15, width: -35, height: 0 }) }
-                    propIndex = { 0 }
-                    zone = { zone }
-                />
-                <PropSelector
-                    selected = { false }
-                    key = { zone + '_propselector_22' }
-                    propList = { this.customState.propsLists[1] }
-                    config = { config }
-                    align = "right"
-                    dimensions = { getDimensions(zone + 'LegendAxisLeft', display.viz, { x: 0, y: 30, width: 0, height: 0 }) }
-                    propIndex = { 1 }
-                    zone = { zone }
-                />
+                
             </g>
             }
+            { role !== 'target' &&
+            <SelectionZone
+                zone = { zone }
+                dimensions = { dimensions }
+                component = { this }
+                selections = { selections }
+                handleMouseMove = { this.props.handleMouseMove }
+            />
+            }
+           
             
         </svg>)
     }

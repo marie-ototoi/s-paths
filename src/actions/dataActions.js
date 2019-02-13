@@ -358,7 +358,7 @@ export const loadResources = (dispatch) => (dataset, views) => {
                 //console.log('resources', resources) 
                 return getStats({ ...dataset, stats: [], resources, totalInstances: resources[0].total })
                     .then(stats => {
-                        console.log('load resources', stats)
+                        // console.log('load resources', stats)
                         prefixes = stats.options.prefixes
                         // console.log('ok on a bien reçu les stats', stats) //, defineConfigs(views, stats)
                         // for each views, checks which properties ou sets of properties could match and evaluate
@@ -462,6 +462,7 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                             let configs
                             // console.log(configs)
                             if (sameconfig) {
+                                savedSelections = savedSelections.splice(1, savedSelections.length)
                                 stats = evaluateSubStats({ ...stats, selectionInstances })
                                 resolve(previousConfigs)
                             } else if (selectionInstances === stats.totalInstances) {
@@ -516,7 +517,9 @@ export const selectResource = (dispatch) => (dataset, views, previousConfigs, pr
                     const configMain = getSelectedView(configs, 'main')
                     // console.log(configs, configMain)
                     const previousConfigMain = getSelectedView(previousConfigs, 'main')
-                    // console.log(previousConfigs, configMain, dataset, previousConfigMain, previousOptions)
+                    //console.log(previousConfigs)
+                    //console.log(configMain, configs, stats)
+                    //console.log(previousConfigMain)
                     let queryTransitionMain = makeTransitionQuery(configMain, dataset, previousConfigMain, previousOptions, 'main')
                     return Promise.all([
                         singleURI ? loadSingle(dataset, configMain, singleURI) : getData(endpoint, makeQuery(entrypoint, configMain, 'main', dataset), prefixes),
