@@ -180,7 +180,7 @@ $ npm test
 
 ## Many thanks to
 
-* **Léo, Silvio, Dylan**
+* **Silvio and Dylan**
 * **Logilab**: Adrien, Tanguy, Luc & co
 * **BnF**: Aude, Raphaëlle and Sébastien & co
 * **Staff** = technical support team @ LRI: Laurent & co
