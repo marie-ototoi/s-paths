@@ -23,7 +23,8 @@ class Stats extends React.PureComponent {
                     height,
                     position: 'absolute',
                     left: x + 'px',
-                    top: y + 'px'
+                    top: y + 'px',
+                    overflowY: 'scroll'
                 }
             }
         >

@@ -433,24 +433,28 @@ class Header extends React.Component {
                                 }
                                 
                             </div>
-                            <label className='label'>FILTER</label>
-                            <div className='control'>
-                                <input
-                                    {...keycontrolsDisabled}
-                                    className='input is-small'
-                                    type='text'
-                                    placeholder='Keyword'
-                                    value={this.state.keyword}
-                                    onChange={(e) => this.setState({ keyword: e.target.value })}
-                                    style={{ paddingTop: '10px', textAlign: 'left' }}
+                            { false && 
+                            <div>
+                                <label className='label'>FILTER</label>
+                                <div className='control'>
+                                    <input
+                                        {...keycontrolsDisabled}
+                                        className='input is-small'
+                                        type='text'
+                                        placeholder='Keyword'
+                                        value={this.state.keyword}
+                                        onChange={(e) => this.setState({ keyword: e.target.value })}
+                                        style={{ paddingTop: '10px', textAlign: 'left' }}
+                                    />
+                                </div>
+                                
+                                <Submit
+                                    isLoading={this.state.keywordIsLoading}
+                                    onClick={this.displayKeyword}
+                                    disable={!keywordEnabled}
                                 />
                             </div>
-                            
-                            <Submit
-                                isLoading={this.state.keywordIsLoading}
-                                onClick={this.displayKeyword}
-                                disable={!keywordEnabled}
-                            />
+                            }
                        
                         </div>
                         <Quantifier

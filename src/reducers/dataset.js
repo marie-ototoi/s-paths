@@ -179,7 +179,6 @@ if (process.env.APP_NAME === 'bnf') {
         propertyPreferences: {
             'dbpedia-owl:Award/nobel:year/*': 1,
             'dbpedia-owl:Award/nobel:category/*/rdfs:label/*': 0.9,
-            'dbpedia-owl:Award/nobel:laureate/*/foaf:gender/*': 0.8,
             'nobel:Laureate/nobel:nobelPrize/*/nobel:year/*': 1,
             'nobel:Laureate/dbpprop:dateOfBirth/*': 0.9,
             'nobel:Laureate/foaf:name/*': 0.7,

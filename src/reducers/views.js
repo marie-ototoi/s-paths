@@ -406,7 +406,7 @@ const defaultState = process.env.APP_NAME === 'bnf' ? [
         name: 'map',
         thumb : '/images/geomap.svg',
         entrypoint: { min: 2, max: 1000 },
-        weight: 0.95,
+        weight: 0.85,
         constraints: [
             [
                 {
