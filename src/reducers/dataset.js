@@ -8,7 +8,7 @@ let initialState = {
     resourceGraph: null,
     constraints: '',
     labels: [],
-    maxLevel: 8,
+    maxLevel: 6,
     ignoreList: ['http://www.w3.org/1999/02/22-rdf-syntax-ns#type'],
     resources: [],
     rankPropFactors: {
@@ -128,7 +128,9 @@ if (process.env.APP_NAME === 'bnf') {
         prefixes: {
             rdf: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
             rdfs: 'http://www.w3.org/2000/01/rdf-schema#',
-            eli: 'http://data.europa.eu/eli/ontology#'
+            eli: 'http://data.europa.eu/eli/ontology#',
+            'legilux-resource': 'http://data.legilux.public.lu/resource/authority/',
+            'legilux-eli': 'http://data.legilux.public.lu/eli/'
         }
     }
 } else if (process.env.APP_NAME === 'lri') { 

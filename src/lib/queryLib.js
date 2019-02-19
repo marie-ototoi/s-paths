@@ -582,8 +582,10 @@ export const makeQuery = (entrypoint, configZone, zone, options) => {
                 // hierarchical = prop.category === 'text' ? 'previous' : 'last'
             }
             if (!unique) {
-                // if geo 
+                // if geo, we want a max of 1000 results
                 // BIND( FLOOR(YEAR(?born)/100)*100 AS ?century ) 
+
+                // if date we want a year
                 propList = propList.concat(`?prop${index} `)
                 if (hierarchical) propList = propList.concat(`?directlink `)
                 orderList = orderList.concat(`?prop${index} `)
