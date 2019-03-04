@@ -52,7 +52,7 @@ const defaultState = process.env.APP_NAME === 'bnf' ? [
         name: 'density plot',
         thumb : '/images/heatmap.svg',
         weight: 0.5,
-        entrypoint: { aggregate: true },
+        entrypoint: { aggregate: true, max: 200000 },
         constraints: [
             [
                 {
@@ -113,7 +113,7 @@ const defaultState = process.env.APP_NAME === 'bnf' ? [
         id: 'TreeMap',
         name: 'treemap',
         thumb : '/images/treemap.svg',
-        weight : 0.3,
+        weight : 0.4,
         entrypoint: { aggregate: true },
         constraints: [
             [
@@ -135,7 +135,7 @@ const defaultState = process.env.APP_NAME === 'bnf' ? [
         name: 'URI wheel',
         thumb : '/images/uriwheel.svg',
         entrypoint: { min: 2 },
-        weight: 0.4,
+        weight: 0.3,
         constraints: [
             [
                 {
@@ -150,7 +150,7 @@ const defaultState = process.env.APP_NAME === 'bnf' ? [
         id: 'GeoMap',
         name: 'map',
         thumb : '/images/geomap.svg',
-        entrypoint: { min: 2 },
+        entrypoint: { min: 2, max: 10000 },
         weight: 0.85,
         constraints: [
             [
@@ -237,7 +237,7 @@ const defaultState = process.env.APP_NAME === 'bnf' ? [
         id: 'Images',
         name: 'images',
         thumb : '/images/images.svg',
-        entrypoint: { min: 1 },
+        entrypoint: { min: 1, max: 10000 },
         weight: 0.8,
         constraints: [
             [

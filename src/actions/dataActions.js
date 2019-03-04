@@ -130,7 +130,7 @@ const checkStatsConfigs = (configs, selectedView, selectionInstances, totalInsta
     let endList = 0
     let alreadyPlanned = []
     let propsToCheck = []
-    while(propsToCheck.length < 50 && endList < configs.views.length) {
+    while(propsToCheck.length < 25 && endList < configs.views.length) {
         configs.views.forEach(view => {
             view.propList.forEach(list => {
                 if (index < list.length && !list[index].checked && !checkDict[list[index].path] && !alreadyPlanned.includes(list[index].path)) propsToCheck.push(list[index])

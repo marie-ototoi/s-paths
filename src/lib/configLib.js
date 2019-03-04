@@ -99,7 +99,7 @@ export const scoreProp = (prop, constraint, rankFactors, preferences) => {
     }
     
     score.customProps = preferences[prop.path] || 0.1
-    // console.log(prop.path, score.customProps)
+    console.log(prop.path, score.customProps)
     score.definition = 1 - getCost(prop.unique, min, max, optimal, 1)
     score.total = 0
     score.level = 1 - prop.level/10
