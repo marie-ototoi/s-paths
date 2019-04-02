@@ -472,7 +472,7 @@ export const makeSelectionConstraints = (selectionsLayers, selectedConfig, zone,
     if (setConstraints !== '') totalQuery += `${paths} ${bind}FILTER ((${setConstraints})) . `
     if (uriRegex !== '') totalQuery += `FILTER regex(?${mainentrypointName}, '^${uriRegex}$', 'i') . `
     if (keywords.length > 0) totalQuery +=  makeKeywordConstraints(keywords)
-    // console.log(totalQuery)
+    //console.log(']]]]]]', totalQuery)
     return totalQuery
 }
 
@@ -743,6 +743,16 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
             }
         })
     }
+    console.log(`}}}}SELECT DISTINCT ${propList}${graph}
+    WHERE {
+        ${constraints}
+        ${(constraints !== newOptions.constraints) ? newOptions.constraints : ''}
+        ${defList}
+        OPTIONAL {
+            ${newdefList}
+        }
+    } 
+    GROUP BY ${groupList}`)
     return `SELECT DISTINCT ${propList}${graph}
     WHERE {
         ${constraints}

@@ -205,9 +205,10 @@ export const defineConfigs = (views, stats, dataset) => {
             // make a list of all possible properties for each constrained prop zone
             view.constraints.forEach(constraintSet => {
                 let propSet = []
-                let count = 0
+                let count = {}
                 constraintSet.forEach(constraint => {
-                    if(statsDict[constraint.category]) {
+                    if (!count[constraint.category]) count[constraint.category] = 0
+                    if(statsDict[constraint.category] && count[constraint.category] < 15) {
                         statsDict[constraint.category].forEach(prop => {   
                             //if (view.id === 'GeoMap') console.log(prop.path)             
                             // generic conditions
@@ -229,9 +230,9 @@ export const defineConfigs = (views, stats, dataset) => {
                                 // if (constraint.category === 'geo' && view.id === 'GeoMap') console.log(count, prop.path)
                                 propSet.push({
                                     ...prop,
-                                    score: count > 50 ? 0.1 : scoreProp(prop, constraint, rankPropFactors, dataset.propertyPreferences)
+                                    score: scoreProp(prop, constraint, rankPropFactors, dataset.propertyPreferences)
                                 })
-                                count ++
+                                count[constraint.category] ++
                             }
                         })
                     }
