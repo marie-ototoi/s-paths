@@ -208,7 +208,7 @@ export const defineConfigs = (views, stats, dataset) => {
                 let count = {}
                 constraintSet.forEach(constraint => {
                     if (!count[constraint.category]) count[constraint.category] = 0
-                    if(statsDict[constraint.category] && count[constraint.category] < 15) {
+                    if(statsDict[constraint.category] && count[constraint.category] < 40) {
                         statsDict[constraint.category].forEach(prop => {   
                             //if (view.id === 'GeoMap') console.log(prop.path)             
                             // generic conditions
