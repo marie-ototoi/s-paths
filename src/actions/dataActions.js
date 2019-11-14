@@ -568,15 +568,16 @@ export const displayConfig = (dispatch) => (viewIndex, props, configs, prevConfi
     const newQuery = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, maxDepth: (updatedConfig.id === 'ListAllProps' || updatedConfig.id === 'InfoCard') ? 1 : null })
     const queryTransition = makeTransitionQuery(updatedConfig, dataset, prevConfig, dataset, zone)
     const queryUnique = makeQuery(entrypoint, updatedConfig, zone, { ...dataset, unique: true })
-    // console.log(newQuery)
+    //console.log('newQuery', newQuery)
     return Promise.all([
         getData(endpoint, newQuery, prefixes),
         getData(endpoint, queryTransition, prefixes),
         getData(endpoint, queryUnique, prefixes)
     ])
         .then(([newData, newDelta, newUnique]) => {
-            // console.log('select resource, get data main', newData.results.bindings)
-            // console.log('select resource, get data delta', newDelta.results.bindings)             
+            //console.log('select resource, get data main', newData)
+            //console.log('select resource, get data delta', newDelta.results.bindings)  
+            //console.log('select resource, get unique', newUnique.results.bindings)             
             if (newData.results.bindings.length === 0 && updatedConfig.id !== 'ListAllProps' && updatedConfig.id !== 'InfoCard') throw 'No entities with this combination of paths'
             const action = {
                 type: types.SET_CONFIGS,

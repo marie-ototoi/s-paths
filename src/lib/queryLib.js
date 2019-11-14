@@ -112,7 +112,7 @@ export const defineGroup = (prop, options) => {
 }
 
 export const FSL2SPARQL = (FSLpath, options) => {
-    let { constraints, entrypointName, entrypointType, graphs, hierarchical, optional, propName, resourceGraph, sample, whichGraph } = options
+    let { aggregate, category, coeff, constraints, entrypointName, entrypointType, graphs, hierarchical, optional, propName, resourceGraph, sample, whichGraph } = options
     let pathParts = FSLpath.split('/')
     let query = ``
     if (entrypointType) {
@@ -128,7 +128,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
         let objectType = pathParts[index + 1]
         let level = Math.ceil(index / 2)
         let thisSubject = (level === 1) ? entrypointName : `${propName}inter${(level - 1)}`
-        let thisObject = (level === levels) ? propName : `${propName}inter${level}`
+        let thisObject = (level === levels) ? (aggregate ? `bind${propName}` : propName) : `${propName}inter${level}`
         query = whichGraph ? query.concat(`GRAPH ?g${level} { ?${thisSubject} ${predicate} ?${thisObject} . } `) : query.concat(`?${thisSubject} ${predicate} ?${thisObject} . `)
         // if (level === levels) query = query.concat(`${!optional ? 'OPTIONAL { ' : ''}?${thisObject} rdfs:label ?label${propName}${!optional ? ' } .' : ''} `)
         
@@ -144,6 +144,11 @@ export const FSL2SPARQL = (FSLpath, options) => {
             if (j !== 1) query = query.concat(` && `)
         }
         query = query.concat(`) . `)
+        if (aggregate && level === levels) {
+            if (category === 'number') {
+                query = query.concat(`BIND(FLOOR(?bind${propName}/${coeff})*${coeff} as ?${propName}) . `)
+            }
+        }
     }
     let queryHierarchical = ''
     if (hierarchical) {
@@ -159,7 +164,7 @@ export const FSL2SPARQL = (FSLpath, options) => {
 }
 
 export const getData = (endpoint, query, prefixes) => {
-    // console.log(query)
+    //console.log('ici getData', endpoint, prefixes ,query)
     const client = new SparqlClient(endpoint, {
         requestDefaults: {
             headers: {
@@ -743,7 +748,7 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
             }
         })
     }
-    console.log(`}}}}SELECT DISTINCT ${propList}${graph}
+    /*console.log(`}}}}SELECT DISTINCT ${propList}${graph}
     WHERE {
         ${constraints}
         ${(constraints !== newOptions.constraints) ? newOptions.constraints : ''}
@@ -752,7 +757,7 @@ export const makeTransitionQuery = (newConfig, newOptions, config, options, zone
             ${newdefList}
         }
     } 
-    GROUP BY ${groupList}`)
+    GROUP BY ${groupList}`)*/
     return `SELECT DISTINCT ${propList}${graph}
     WHERE {
         ${constraints}

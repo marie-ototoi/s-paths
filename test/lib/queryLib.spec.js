@@ -52,7 +52,16 @@ WHERE {
             entrypointName: 'entrypoint',
             entrypointType: true,
             graphs: []
-        })).to.equal('?entrypoint rdf:type nobel:LaureateAward . ')    
+        })).to.equal('?entrypoint rdf:type nobel:LaureateAward . ')
+        expect(queryLib.FSL2SPARQL('nobel:LaureateAward/nobel:year/*', {
+            propName: 'prop1',
+            entrypointName: 'entrypoint',
+            entrypointType: true,
+            aggregate: true,
+            category: 'number',
+            coeff: 100,
+            graphs: []
+        })).to.equal('?entrypoint rdf:type nobel:LaureateAward . ?entrypoint nobel:year ?bindprop1 . FILTER (?bindprop1 != ?entrypoint) . BIND(FLOOR(?bindprop1/100)*100 as ?prop1) . ')
     })
     it('should generate keyword search constraint', () => {
         expect(queryLib.makeKeywordConstraints(['einstein'], { maxLevel: 3 }))
