@@ -23,7 +23,8 @@ app.use(cors())
 app.use(bodyParser.json({limit: '50mb'}))
 
 app.use('/', router)
-app.use('/', express.static('dist'));
+app.use('/', express.static('public'))
+app.use('/', express.static('dist'))
 app.use('/', api)
 
 // Development configuration
