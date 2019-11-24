@@ -96,8 +96,7 @@ export const scoreProp = (prop, constraint, rankFactors, preferences) => {
     default:
         score.category = 0.1
         //
-    }
-    
+    }    
     score.customProps = preferences[prop.path] || 0.1
     //console.log(prop.path, score.customProps)
     score.definition = 1 - getCost(prop.unique, min, max, optimal, 1)

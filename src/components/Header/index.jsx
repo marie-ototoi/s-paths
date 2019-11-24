@@ -10,6 +10,7 @@ import { mergeSelections } from '../../lib/selectionLib'
 
 import { showSettings, showStats } from '../../actions/displayActions'
 import { checkPivots, displayConfig, selectResource } from '../../actions/dataActions'
+import CirclePack from './CirclePack'
 import Submit from './Submit'
 import Quantifier from './Quantifier'
 import ViewSelect from './ViewSelect'
@@ -104,10 +105,10 @@ class Header extends React.Component {
         // console.log(nextProps)
         let configChanged = nextProps.configs.past.length !== this.props.configs.past.length &&
             this.props.configs.present.status !== 'transition'
-
-        if (configChanged || this.props.step !== nextProps.step) {
+        //console.log('EACH', configChanged, this.props.step, nextProps.step)
+        if ((this.props.step !== nextProps.step && (nextProps.step === 'done' || nextProps.step === 'active'))) {
+            //console.log('UN UPDATE EN TROP ?', configChanged, this.props.step, nextProps.step)
             let newData = this.prepareData(nextProps)
-           
             this.preparePivot(nextProps.configs, newData.displayedView, nextProps.dataset)
             this.setState(newData)
         }
@@ -392,13 +393,18 @@ class Header extends React.Component {
             let configEnabled = (this.state.displayedView !== this.state.selectedView || !shallowEqual(this.state.displayedProps, this.state.selectedProps))
             return (
                 <div className='Header' ref = {(c) => { this.refHeader = c }} tabIndex = {1}>
+                    <CirclePack
+                        resources={this.state.resourceList}
+                        selectedResource={this.state.selectedResource}
+                        status={this.props.configs.present.status}
+                    />
                     <div className="Line">
                         <div className='logo' style={{width: `${this.props.display.viz.horizontal_padding}px`}}>
                             <img
-                                src='/images/logo.svg'
+                                src='/images/logocurved.svg'
                                 alt='S-Path Logo'
-                                style={{ height: '29px' }}
-                            />
+                                style={{ height: '55px', position: 'absolute', left: '23px', top: '1px' }}
+                            />&nbsp;
                         </div>
                         <div
                             className='field'
