@@ -29,7 +29,12 @@ class Slider extends React.Component {
 
     render () {
         return (
-            <div className='Slider'>
+            <div 
+                className='Slider' 
+                style={{
+                    right: this.props.display.viz.horizontal_padding + 'px'
+                }}
+            >
                 <img src = "/images/sliderone.png" alt = "single view" width="26"
                     onClick={() => this.drag(0)}   
                 />

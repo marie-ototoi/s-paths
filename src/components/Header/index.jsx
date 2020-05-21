@@ -30,6 +30,7 @@ class Header extends React.Component {
         this.displayResource = this.displayResource.bind(this)
         this.displaySelection = this.displaySelection.bind(this)
         this.displayPivot = this.displayPivot.bind(this)
+        this.hoverResource = this.hoverResource.bind(this);
         this.handleKeyDown = this.handleKeyDown.bind(this)
         this.prepareData = this.prepareData.bind(this)
         this.preparePivot = this.preparePivot.bind(this)
@@ -365,6 +366,9 @@ class Header extends React.Component {
                 errorSelection: 'Unable to display results: ' + e
             }))
     }
+    hoverResource (selectedResource) {
+        this.setState({ selectedResource })
+    }
     render () {
         if (this.state.configsLists) {
             // console.log(this.state.configsLists)
@@ -396,14 +400,17 @@ class Header extends React.Component {
                     <CirclePack
                         resources={this.state.resourceList}
                         selectedResource={this.state.selectedResource}
+                        displayedResource={this.state.displayedResource}
                         status={this.props.configs.present.status}
+                        displayResource= {this.displayResource}
+                        hoverResource= {this.hoverResource}
                     />
                     <div className="Line">
                         <div className='logo' style={{width: `${this.props.display.viz.horizontal_padding}px`}}>
                             <img
                                 src='/images/logocurved.svg'
                                 alt='S-Path Logo'
-                                style={{ height: '55px', position: 'absolute', left: '23px', top: '1px' }}
+                                style={{ height: '90px', position: 'absolute', left: '-10px', top: '-10px' }}
                             />&nbsp;
                         </div>
                         <div

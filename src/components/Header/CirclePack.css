@@ -2,3 +2,6 @@
     position: absolute;
     margin-top: -2px;
 }
+.CirclePack circle {
+    cursor: pointer;
+}

@@ -57,7 +57,7 @@ Go to Web Application Server > Virtual Domains and Directories, click on the fir
 Access Virtuoso 192.168.99.100:8890, login to the conductor (local access codes should be dba/dba) and use ISQL pop up in the left menu to create graphs
 ```
 > SPARQL CREATE GRAPH <http://nobel.ilda.fr>;
-> SPARQL CREATE GRAPH <http://nobeladdon.ilda.fr>;
+> SPARQL CREATE GRAPH <http://dbpedianobel.ilda.fr>;
 ```
 
 Then use the top menu `Linked Data > Quad Store Upload` to upload files (available in our data repo)

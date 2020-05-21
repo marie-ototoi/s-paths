@@ -1,5 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
+import { connect } from 'react-redux'
 import * as d3 from 'd3'
 
 import './CirclePack.css'
@@ -10,19 +11,19 @@ class CirclePack extends React.Component {
         this.state = {
             resources: this.pack(this.props.resources)
         }
-        console.log(this.state.resources)
-        console.log(this.props.selectedResource)
+        //console.log(this.state.resources)
+        //console.log(this.props.selectedResource)
     }
     render () {
         return (
             <svg
-                width = { 110 }
-                height = { 110 }
+                width = { 146 }
+                height = { 146 }
                 className = 'CirclePack'
                 
-                style={{marginLeft: `55px`}}
+                style={{marginLeft: (this.props.display.viz.horizontal_padding - 180) > 0 ? (this.props.display.viz.horizontal_padding - 180) : 0 + `px`, marginTop: `-10px`}}
             >
-                <circle r='54' cx='55' cy='55' stroke='#888' fill='#f0f0f0' />
+                <circle r='72' cx='73' cy='73' stroke='#666' fill='#f0f0f0' />
                 { this.state.resources.map((resource, i) => 
                     <circle
                         key={`circlepack${i}`}
@@ -30,7 +31,10 @@ class CirclePack extends React.Component {
                         cx={resource.x} 
                         cy={resource.y} 
                         stroke='#888' 
-                        fill={this.props.selectedResource.type === resource.data.type ? '#888' : '#fff'} 
+                        onMouseOver={e => this.props.hoverResource(resource.data)}
+                        onMouseOut={e => this.props.hoverResource(this.props.displayedResource)}
+                        onClick={e => this.props.displayResource(false)}
+                        fill={this.props.selectedResource.type === resource.data.type ? '#666' : '#fff'} 
                     />
                 )}
             </svg>
@@ -51,14 +55,27 @@ class CirclePack extends React.Component {
         let data =  d3.hierarchy(mapresources)
             .sum(function(d) { return d.total })
         return d3.pack()
-            .size([109, 109])
+            .size([145, 145])
             .padding(1)(data).children
     }
     static propTypes = {
+        display: PropTypes.object,
+        displayResource:  PropTypes.func,
+        hoverResource:  PropTypes.func,
         resources:  PropTypes.array,
         selectedResource: PropTypes.object,
+        displayedResource: PropTypes.object,
         status:  PropTypes.string
     }
 }
 
-export default CirclePack
+const CirclePackConnect = connect(
+    (state) => ({
+        display: state.display
+    }),
+    (dispatch) => ({
+      
+    })
+)(CirclePack)
+
+export default CirclePackConnect
