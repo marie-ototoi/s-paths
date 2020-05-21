@@ -285,7 +285,7 @@ class App extends React.PureComponent {
             }
             { display.graphsOpen &&
                 <Graphs
-                    dimensions = { getDimensions('graphs', display.viz, { x: 2, y: -30, width: 0, height: 0 }) }
+                    dimensions = { getDimensions('graphs', display.viz, { x: 2, y: -60, width: 0, height: 0 }) }
                     zone = "main"
                 />
             }
