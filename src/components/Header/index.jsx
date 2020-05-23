@@ -407,11 +407,14 @@ class Header extends React.Component {
                     />
                     <div className="Line">
                         <div className='logo' style={{width: `${this.props.display.viz.horizontal_padding}px`}}>
-                            <img
+                            <a
+                                href="http://s-paths.lri.fr"
+                                className='icon'
+                            ><img
                                 src='/images/logocurved.svg'
                                 alt='S-Path Logo'
                                 style={{ height: '90px', position: 'absolute', left: '-10px', top: '-10px' }}
-                            />&nbsp;
+                            /></a>&nbsp;
                         </div>
                         <div
                             className='field'
