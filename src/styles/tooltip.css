@@ -1,4 +1,4 @@
-span[title]:not([title=""]), strong[title]:not([title=""]), a[title]:not([title=""]) {
+span[title]:not([title=""]), strong[title]:not([title=""]), a[title]:not([title=""],.icon) {
   background-color:#f0f0f0;
   padding: 0 2px;
   cursor: pointer;
@@ -6,7 +6,7 @@ span[title]:not([title=""]), strong[title]:not([title=""]), a[title]:not([title=
 a{
   color: #333;
 }
-a[href]:not([href=""]):hover::after{
+a[href]:not([href=""],.icon):hover::after{
   content: '⧉';
   position: absolute;
   font-weight: bold;
@@ -15,6 +15,6 @@ a[href]:not([href=""]):hover::after{
   color:#3273dc;
   z-index: 2;
 }
-a[href]:not([href=""]){
+a[href]:not([href=""],.icon){
   color:#3273dc;
 }

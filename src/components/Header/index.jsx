@@ -475,6 +475,13 @@ class Header extends React.Component {
                             max={options[0].total}
                         />
                         <span style={{position: 'absolute', right: '15px', cursor: 'pointer'}}>
+                            <a
+                                href="https://gitlab.inria.fr/mdestand/s-paths/-/wikis/S-Paths"
+                                target="_blank"
+                                className='icon'
+                            >
+                                <i className='fas fa-question' />
+                            </a>
                             {this.state.showConfig && (
                                 <span
                                     className='icon'
