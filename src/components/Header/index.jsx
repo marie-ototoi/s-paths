@@ -478,6 +478,7 @@ class Header extends React.Component {
                             <a
                                 href="https://gitlab.inria.fr/mdestand/s-paths/-/wikis/S-Paths"
                                 target="_blank"
+                                rel="noreferrer" 
                                 className='icon'
                             >
                                 <i className='fas fa-question' />
