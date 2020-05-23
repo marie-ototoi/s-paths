@@ -410,11 +410,13 @@ class Header extends React.Component {
                             <a
                                 href="http://s-paths.lri.fr"
                                 className='icon'
-                            ><img
-                                src='/images/logocurved.svg'
-                                alt='S-Path Logo'
-                                style={{ height: '90px', position: 'absolute', left: '-10px', top: '-10px' }}
-                            /></a>&nbsp;
+                            >
+                                <img
+                                    src='/images/logocurved.svg'
+                                    alt='S-Path Logo'
+                                    style={{ height: '90px', position: 'absolute', left: '-10px', top: '-10px' }}
+                                />
+                            </a>&nbsp;
                         </div>
                         <div
                             className='field'
