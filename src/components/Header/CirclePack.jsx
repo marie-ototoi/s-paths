@@ -24,7 +24,7 @@ class CirclePack extends React.Component {
                 style={{marginLeft: (this.props.display.viz.horizontal_padding - 180) > 0 ? (this.props.display.viz.horizontal_padding - 180) : 0 + `px`, marginTop: `-10px`}}
             >
                 <circle r='72' cx='73' cy='73' stroke='#666' fill='#f0f0f0' />
-                { this.state.resources.map((resource, i) => 
+                { this.state.resources && this.state.resources.map((resource, i) => 
                     <circle
                         key={`circlepack${i}`}
                         r={resource.r} 
