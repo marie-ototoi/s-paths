@@ -42,7 +42,7 @@ class Explain extends React.Component {
                     <strong>
                         {this.props.options.total} { pluralize('entity', this.props.options.total)}
                     </strong>
-                    &nbsp;belonging to the class of resources&nbsp;
+                    &nbsp;belonging to the collection&nbsp;
                     <strong title = {displayedResource.comment}>
                         { usePrefix(displayedResource.label, dataset.prefixes) }
                     </strong>

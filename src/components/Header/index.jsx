@@ -424,7 +424,7 @@ class Header extends React.Component {
                                 width: `${this.props.display.viz.useful_width * 4 / 5}px`
                             }}
                         >
-                            <label className='label'>TYPE OF ENTITIES</label>
+                            <label className='label'>COLLECTION</label>
                             <ResourceSelect
                                 options={this.state.resourceList}
                                 selectedResource={this.state.selectedResource}
