@@ -1,7 +1,7 @@
 version: "3.5"
 services:
   virtuoso:
-    image: openlink/virtuoso_opensource
+    image: openlink/virtuoso-opensource-7
     restart: always
     volumes:
       - db-virtuoso:/opt/virtuoso-opensource/database
@@ -16,7 +16,6 @@ services:
     volumes:
       - db-mongo:/data/db
   s-paths:
-    image: registry.gitlab.inria.fr/mdestand/semantic-paths:latest
     build:
       context: ./
     restart: always

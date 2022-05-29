@@ -4,7 +4,7 @@ module.exports = {
     root: true,
     env: {
         es6: true,
-        mocha: true
+        mocha: true,
     },
     parser: "babel-eslint",
     parserOptions: {
@@ -12,20 +12,16 @@ module.exports = {
             arrowFunctions: true,
             blockBindings: true,
             modules: true,
-            jsx: true
+            jsx: true,
         },
-        ecmaVersion: 6
+        ecmaVersion: 6,
     },
-    extends: [
-        "standard",
-        "eslint:recommended",
-        "plugin:react/recommended"
-    ],
+    extends: ["standard", "eslint:recommended", "plugin:react/recommended"],
     rules: {
         "react/jsx-uses-vars": 1,
         "react/react-in-jsx-scope": 1,
         "no-unused-vars": 1,
-        "no-console": process.env.NODE_ENV === 'production' ? 1 : 0,
-        indent: ["error", 4]
-    }
-}
+        "no-console": 0,
+        "standard/computed-property-even-spacing": 0,
+    },
+};

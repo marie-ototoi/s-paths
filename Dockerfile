@@ -1,4 +1,4 @@
-FROM node
+FROM node:16
 
 WORKDIR ./
 
@@ -15,6 +15,6 @@ ENV PATH /node_modules/.bin:$PATH
 
 EXPOSE 80
 
-RUN npm run build --production 
+RUN npm run build --omit=dev
 
 CMD npm start
